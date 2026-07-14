@@ -1,0 +1,1414 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "close": "Close",
+    "loading": "Loading…",
+    "saving": "Saving…",
+    "processing": "Processing…",
+    "continue": "Continue",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "edit": "Edit",
+    "create": "Create",
+    "add": "Add",
+    "remove": "Delete",
+    "accept": "Accept",
+    "reject": "Reject",
+    "refresh": "Refresh",
+    "search": "Search",
+    "user": "User",
+    "emDash": "—",
+    "download": "Download",
+    "today": "Today",
+    "avatar": "Avatar",
+    "channel": "channel",
+    "contact": "Contact",
+    "preview": "Preview",
+    "image": "Image",
+    "attachment": "Attachment",
+    "optional": "optional",
+    "results": "Results",
+    "total": "Total",
+    "active": "Active",
+    "disabled": "Disabled",
+    "acknowledged": "Acknowledged",
+    "unread": "Unread",
+    "owner": "owner",
+    "private": "Private",
+    "public": "Public",
+    "permanent": "Permanent",
+    "expired": "Expired",
+    "until": "Until {{date}}",
+    "loadingResults": "Loading results…",
+    "loadingList": "Loading list…",
+    "uploading": "Sending…",
+    "sending": "Sending…",
+    "leaving": "Leaving…",
+    "removing": "Removing…",
+    "loggingOut": "Logging out…",
+    "disconnecting": "Disabling…",
+    "connecting": "Connecting…",
+    "checking": "Checking…",
+    "verifying": "Verifying…",
+    "preparing": "Preparing…",
+    "assigning": "Assigning…",
+    "noResults": "No results",
+    "yes": "Yes",
+    "no": "No",
+    "and": "and",
+    "id": "ID",
+    "date": "Date",
+    "reason": "Reason",
+    "name": "Name",
+    "description": "Description",
+    "icon": "Icon",
+    "color": "Color",
+    "password": "Password",
+    "username": "Username",
+    "displayName": "Display name",
+    "bio": "Description",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "closePanel": "Close panel",
+    "closeSettings": "Close settings",
+    "accountSettings": "Account settings",
+    "adminPanel": "Admin panel",
+    "checkingPermissions": "Checking permissions…",
+    "goToLogin": "Go to login",
+    "logout": "Log out",
+    "logoutTitle": "Log out",
+    "language": {
+      "pl": "Polish",
+      "en": "English",
+      "label": "Language",
+      "panelTitle": "Interface language",
+      "panelHint": "Choose the app display language."
+    }
+  },
+  "errors": {
+    "network": {
+      "offline": "No connection to the server."
+    },
+    "auth": {
+      "csrfMissing": "Missing CSRF token. Log out and sign in again."
+    },
+    "api": {
+      "loadFailed": "Could not load data.",
+      "operationFailed": "Operation failed.",
+      "saveFailed": "Could not save."
+    },
+    "ws": {
+      "backendUnavailable": "[ws] Backend unavailable — reconnecting…",
+      "reconnecting": "Connection lost — reconnecting…"
+    },
+    "boundary": {
+      "title": "Something went wrong",
+      "message": "An unexpected error occurred. Reload the page to continue.",
+      "reload": "Reload page"
+    }
+  },
+  "validation": {
+    "password": {
+      "minLength": "Password must be at least 8 characters.",
+      "lowercase": "Password must contain a lowercase letter.",
+      "uppercase": "Password must contain an uppercase letter.",
+      "digit": "Password must contain a digit.",
+      "special": "Password must contain a special character (@$!%*?&).",
+      "breach": "This password appeared in a data breach. Choose a different, more secure password.",
+      "mismatch": "New passwords do not match.",
+      "sameAsCurrent": "New password must differ from the current one.",
+      "required": "Enter your password.",
+      "currentRequired": "Enter your current password."
+    },
+    "username": {
+      "required": "Username is required.",
+      "invalid": "Username: 3–32 characters, lowercase letters, digits and _ only.",
+      "sameAsCurrent": "This is already your current username.",
+      "inviteRequired": "Enter a username after @."
+    },
+    "displayName": {
+      "required": "Display name is required."
+    },
+    "badge": {
+      "nameIconRequired": "Name and icon are required.",
+      "invalidIcon": "Invalid icon (Lucide icon name, e.g. Star).",
+      "invalidColor": "Invalid color (format #RRGGBB)."
+    },
+    "warn": {
+      "reasonRequired": "Warning reason is required."
+    },
+    "announcement": {
+      "required": "Announcement title and content are required."
+    },
+    "captcha": {
+      "login": "Complete captcha before logging in.",
+      "signup": "Complete captcha before signing up.",
+      "twoFactor": "Complete captcha before 2FA verification."
+    },
+    "terms": {
+      "required": "You must accept the terms of service and privacy policy."
+    },
+    "twoFactor": {
+      "codeRequired": "Enter the authentication code (2FA).",
+      "passwordAndCode": "Enter your password and authentication code.",
+      "backupRequired": "Enter a backup code.",
+      "appCodeRequired": "Enter the 6-digit code from your app.",
+      "invalidCode": "Invalid authentication code.",
+      "passwordRequired": "Enter your password to start 2FA setup.",
+      "enablePasswordRequired": "Enter your password to enable 2FA.",
+      "setupCodeRequired": "Enter the code from your authenticator app."
+    }
+  },
+  "format": {
+    "userLabel": "User",
+    "warningSeverity": {
+      "low": "Minor violation",
+      "medium": "Terms violation",
+      "high": "Serious violation"
+    },
+    "availability": {
+      "online": "Available",
+      "away": "Unavailable",
+      "brb": "Be right back",
+      "dnd": "Do not disturb",
+      "offline": "Unavailable"
+    },
+    "joined": "Joined",
+    "created": "Created",
+    "assigned": "Assigned {{date}}"
+  },
+  "session": {
+    "justNow": "Just now",
+    "minutesAgo_one": "1 minute ago",
+    "minutesAgo_few": "{{count}} minutes ago",
+    "minutesAgo_many": "{{count}} minutes ago",
+    "minutesAgo_other": "{{count}} minutes ago",
+    "hoursAgo_one": "1 hour ago",
+    "hoursAgo_few": "{{count}} hours ago",
+    "hoursAgo_many": "{{count}} hours ago",
+    "hoursAgo_other": "{{count}} hours ago",
+    "daysAgo_one": "1 day ago",
+    "daysAgo_few": "{{count}} days ago",
+    "daysAgo_many": "{{count}} days ago",
+    "daysAgo_other": "{{count}} days ago",
+    "monthsAgo_one": "1 month ago",
+    "monthsAgo_few": "{{count}} months ago",
+    "monthsAgo_many": "{{count}} months ago",
+    "monthsAgo_other": "{{count}} months ago",
+    "yearsAgo_one": "1 year ago",
+    "yearsAgo_few": "{{count}} years ago",
+    "yearsAgo_many": "{{count}} years ago",
+    "yearsAgo_other": "{{count}} years ago",
+    "createdAt": "Created {{time}}",
+    "loadingSessions": "Loading sessions…",
+    "noSessions": "No active sessions to display.",
+    "revokeOthers": "Log out of all sessions except this one",
+    "revokeOthersHint": "This will log you out of all devices except this one.",
+    "securityHint": "If you see unknown sessions, log them out and change your password. Also enable two-factor authentication in My account."
+  },
+  "presence": {
+    "memberCount_one": "{{count}} participant",
+    "memberCount_few": "{{count}} participants",
+    "memberCount_many": "{{count}} participants",
+    "memberCount_other": "{{count}} participants",
+    "channelMember_one": "1 member",
+    "channelMember_few": "{{count}} members",
+    "channelMember_many": "{{count}} members",
+    "channelMember_other": "{{count}} members",
+    "badge_one": "badge",
+    "badge_few": "badges",
+    "badge_many": "badges",
+    "badge_other": "badges",
+    "warning_one": "Warning",
+    "warning_few": "Warnings total",
+    "warning_many": "Warnings total",
+    "warning_other": "Warnings total"
+  },
+  "voice": {
+    "insecure": "Microphone access works only over HTTPS or on 127.0.0.1. Open the app on a secure address.",
+    "unsupported": "Your browser does not support microphone access.",
+    "blocked": "Microphone access is blocked in this browser or system.",
+    "unavailable": "Microphone is unavailable.",
+    "notAllowed": "Microphone access was denied.",
+    "notFound": "No microphone found. Connect a device and try again.",
+    "notReadable": "The microphone is in use by another app or blocked by the system.",
+    "securityError": "The browser blocked microphone access on this address. Use HTTPS or 127.0.0.1.",
+    "overconstrained": "The selected audio device is unavailable. Choose another microphone.",
+    "aborted": "Microphone access request was aborted. Try again.",
+    "accessFailed": "Could not access the microphone.",
+    "recorder": {
+      "unsupported": "Your browser does not support audio recording.",
+      "insecure": "No microphone access. Use HTTPS or 127.0.0.1.",
+      "failed": "Recording failed."
+    },
+    "settings": {
+      "title": "Voice settings",
+      "subtitle": "Choose microphone and speakers for calls and recordings.",
+      "infoBanner": "Settings apply to voice messages and audio/video calls.",
+      "microphone": "Microphone",
+      "speaker": "Speaker",
+      "speakers": "Speakers",
+      "headphones": "headphones",
+      "noDevices": "No devices",
+      "outputUnsupported": "Your browser cannot select an output device.",
+      "grantPermissions": "Grant permissions",
+      "permissionsBlocked": "Microphone access was blocked. Click the lock icon in the address bar and allow the microphone.",
+      "permissionsRequired": "You must grant permissions to access audio settings.",
+      "permissionsGranted": "Audio permissions were granted.",
+      "codecInfo": "Audio codec: Opus — used in calls and voice messages."
+    },
+    "player": {
+      "unavailable": "Audio file unavailable",
+      "pause": "Pause",
+      "play": "Play"
+    },
+    "recording": "Recording",
+    "sendVoice": "Send voice message",
+    "recordMessage": "Record voice message",
+    "tooShort": "Recording is too short (min. 0.5 s).",
+    "tooLarge": "Recording is too large. Maximum size is {{limit}}.",
+    "sendFailed": "Could not send voice message."
+  },
+  "media": {
+    "invalidUrl": "Invalid file address.",
+    "downloadFailed": "Could not download the file.",
+    "lightbox": {
+      "title": "Image preview",
+      "zoom": "Zoom",
+      "zoomOut": "Zoom out",
+      "downloadFile": "Download file",
+      "previous": "Previous image",
+      "next": "Next image",
+      "cannotDisplay": "Cannot display this image."
+    }
+  },
+  "upload": {
+    "invalidType": "File type not allowed. Allowed: {{extensions}}.",
+    "mimeMismatch": "File MIME type does not match the extension.",
+    "attachmentTooLarge": "File is too large. Maximum size is {{limit}}.",
+    "avatarTooLarge": "Image is too large. Maximum size is {{limit}}.",
+    "failed": "Could not upload file. Try again.",
+    "attachFile": "Attach file",
+    "removeFile": "Remove file"
+  },
+  "messages": {
+    "deleted": "Message deleted",
+    "sticker": "Sticker",
+    "image": "Image",
+    "video": "Video",
+    "audio": "Voice message",
+    "file": "File: {{name}}",
+    "attachment": "Attachment",
+    "default": "Message",
+    "thisMessage": "This message",
+    "quote": {
+      "jumpTo": "Jump to message"
+    },
+    "receipt": {
+      "read": "Read",
+      "delivered": "Delivered"
+    },
+    "delete": {
+      "title": "Delete message?",
+      "subtitle": "This action cannot be undone.",
+      "confirm": "Are you sure you want to delete this message?",
+      "previewLabel": "Preview",
+      "previewTruncated": "(preview truncated — full content is longer)"
+    },
+    "actions": {
+      "reply": "Reply",
+      "edit": "Edit",
+      "delete": "Delete",
+      "pin": "Pin",
+      "unpin": "Unpin",
+      "addReaction": "Add reaction",
+      "openPreview": "Open preview: {{name}}"
+    },
+    "errors": {
+      "tooLong": "Message is too long. Maximum {{max}} characters.",
+      "cannotSendFile": "Cannot send file right now.",
+      "cannotSendVoice": "Cannot send voice message right now."
+    }
+  },
+  "moderation": {
+    "permanent": "Permanent",
+    "expired": "Expired",
+    "until": "Until {{date}}",
+    "duration": {
+      "min5": "5 minutes",
+      "min15": "15 minutes",
+      "min30": "30 minutes",
+      "hour1": "1 hour",
+      "hours6": "6 hours",
+      "hours24": "24 hours",
+      "days7": "7 days",
+      "disabled": "Disabled",
+      "oneMinute": "1 minute",
+      "fiveMinutes": "5 minutes",
+      "fifteenMinutes": "15 minutes",
+      "seconds": "{{count}} sec."
+    },
+    "actions": {
+      "kick": "Kick",
+      "ban": "Ban",
+      "mute": "Mute",
+      "unban": "Unban",
+      "unmute": "Unmute",
+      "banUser": "Ban user",
+      "muteUser": "Mute user",
+      "durationLabel": "Duration",
+      "chooseDuration": "Choose how long to apply this action."
+    },
+    "lists": {
+      "banned": "Banned",
+      "muted": "Muted",
+      "noBanned": "No banned users.",
+      "noMuted": "No muted users."
+    },
+    "slowmode": {
+      "title": "Slow mode",
+      "lockedChat": "Locked chat",
+      "unlock": "Unlock chat",
+      "lock": "Lock chat"
+    },
+    "report": {
+      "reasons": {
+        "spam": "Spam or ads",
+        "offensive": "Offensive content",
+        "harassment": "Harassment or bullying",
+        "illegal": "Illegal content",
+        "impersonation": "Impersonation",
+        "other": "Other"
+      },
+      "action": "Report channel",
+      "title": "Report channel",
+      "sent": "Report was submitted",
+      "sentHint": "Thank you. An administrator will review the report.",
+      "reason": "Reason",
+      "details": "Details (optional)",
+      "send": "Submit report",
+      "sendFailed": "Could not submit report."
+    }
+  },
+  "auth": {
+    "password": {
+      "minLength": "Password must be at least 8 characters.",
+      "lowercase": "Password must contain a lowercase letter.",
+      "uppercase": "Password must contain an uppercase letter.",
+      "digit": "Password must contain a digit.",
+      "special": "Password must contain a special character (@$!%*?&).",
+      "breach": "This password appeared in a data breach. Choose a different, more secure password.",
+      "mismatch": "New passwords do not match.",
+      "sameAsCurrent": "New password must differ from the current one.",
+      "required": "Enter your password.",
+      "currentRequired": "Enter your current password."
+    },
+    "username": {
+      "required": "Username is required.",
+      "invalid": "Username: 3–32 characters, lowercase letters, digits and _ only.",
+      "emailNotAllowed": "Sign up with a username, not an email address.",
+      "sameAsCurrent": "This is already your current username.",
+      "inviteRequired": "Enter a username after @."
+    },
+    "errors": {
+      "invalidLogin": "Invalid username or password.",
+      "invalidAdminLogin": "Invalid login, password, or authentication code.",
+      "loginFailed": "Login error",
+      "signupFailed": "Registration error",
+      "twoFactorStartFailed": "Could not start 2FA verification."
+    },
+    "fields": {
+      "username": "Username",
+      "usernamePlaceholder": "e.g. john_doe",
+      "usernameHint": "This is your login, not an email. 3–32 chars: lowercase letters, digits and _.",
+      "password": "Password",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "backupCode": "Backup code",
+      "authCode": "Authentication code",
+      "currentPassword": "Current password",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm new password",
+      "twoFactorCode": "2FA code"
+    },
+    "login": {
+      "title": "Sign in",
+      "submit": "Sign in",
+      "submitting": "Signing in…",
+      "noAccount": "Don't have an account?",
+      "signupLink": "Sign up"
+    },
+    "signup": {
+      "title": "Create account",
+      "submit": "Sign up",
+      "submitting": "Creating account…",
+      "passwordPlaceholder": "Create a strong password",
+      "passwordHint": "Min. 8 characters, upper and lowercase letter, digit and special character (@$!%*?&).",
+      "termsPrefix": "I confirm that I have read the",
+      "termsLink": "Terms of Service",
+      "privacyLink": "Privacy Policy",
+      "termsSuffix": "and accept them.",
+      "hasAccount": "Already have an account?",
+      "loginLink": "Sign in",
+      "success": "Account created. You can sign in."
+    },
+    "setup": {
+      "title": "Complete your profile",
+      "submit": "Continue",
+      "saveFailed": "Could not save profile"
+    },
+    "pending": {
+      "title": "Waiting for approval",
+      "body": "Your account @{{username}} was created, but an administrator must approve it before you can use Klovy Chat.",
+      "hint": "You will get access automatically once approved. This page refreshes the status every few seconds.",
+      "logout": "Log out"
+    },
+    "invite": {
+      "title": "Channel invite",
+      "invalidLink": "Invalid invite link",
+      "expired": "Invite does not exist or has expired",
+      "channelFallback": "channel",
+      "inviterMessage": "{{name}} invited you to this channel",
+      "loginRequired": "Sign in to join the channel.",
+      "joinButton": "Join channel",
+      "joining": "Joining…",
+      "joined": "Joined! Redirecting…",
+      "joinedToast": "Joined channel",
+      "joinFailed": "Could not join",
+      "backToChat": "Back to chat",
+      "dismiss": "Not now",
+      "copied": "Invite link copied",
+      "copyManual": "Copy link manually: {{url}}",
+      "createFailed": "Could not create invite",
+      "inviteToChannel": "Invite to channel",
+      "shareLink": "Share a link to invite others to the channel."
+    },
+    "twoFactor": {
+      "title": "2FA verification",
+      "hint": "Enter the code from the authenticator app linked to @{{username}}.",
+      "useAppCode": "Use app code",
+      "useBackupCode": "Use backup code",
+      "submit": "Confirm and sign in",
+      "submitting": "Verifying…",
+      "backToLogin": "Back to login"
+    },
+    "twoFactorSetup": {
+      "title": "Enable two-factor authentication",
+      "intro": "Once enabled, sign-in will require a code from your authenticator app.",
+      "preparing": "Preparing…",
+      "scanTitle": "Add account to app",
+      "scanBody": "On your computer, scan the QR code in your authenticator app.",
+      "openApp": "Open in authenticator app",
+      "manualSecret": "Manual secret",
+      "copySecret": "Copy secret",
+      "confirmCode": "Confirmation code",
+      "enable": "Enable 2FA",
+      "verifying": "Verifying…",
+      "backupTitle": "Save backup codes",
+      "backupBody": "These codes let you sign in when you cannot access your authenticator app.",
+      "backupDone": "I saved the codes — close",
+      "startFailed": "Could not start 2FA setup.",
+      "copyFailed": "Could not copy secret.",
+      "enabled": "Two-factor authentication was enabled.",
+      "disabled": "Two-factor authentication was disabled.",
+      "disableFailed": "Could not disable 2FA.",
+      "disableHint": "Disabling 2FA requires your password and app code.",
+      "disable": "Disable 2FA",
+      "active": "Active",
+      "inactive": "Disabled",
+      "sectionTitle": "Two-step verification",
+      "sectionDesc": "Stronger account security with 2FA."
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "nav": {
+      "account": "Account",
+      "myAccount": "My account",
+      "profile": "Profile",
+      "sessions": "Sessions",
+      "voice": "Voice settings",
+      "bots": "Bots",
+      "integrations": "Integrations",
+      "warnings": "Warnings",
+      "app": "App",
+      "logout": "Log out",
+      "sectionsAria": "Settings sections"
+    },
+    "profile": {
+      "subtitle": "Manage your profile and information visible to other users.",
+      "personalData": "Personal data",
+      "editProfile": "Edit profile",
+      "saveChanges": "Save changes",
+      "changeBanner": "Change banner",
+      "removeBanner": "Remove banner",
+      "changePhoto": "Change photo",
+      "changeBannerAria": "Change profile banner",
+      "changePhotoAria": "Change profile photo",
+      "saved": "Profile saved",
+      "saveFailed": "Could not save profile",
+      "avatarUpdated": "Profile photo updated.",
+      "avatarUploadFailed": "Could not upload photo",
+      "avatarRemoved": "Profile photo removed.",
+      "avatarRemoveFailed": "Could not remove photo",
+      "bannerUploadFailed": "Could not upload banner",
+      "bannerRemoved": "Profile banner removed.",
+      "bannerRemoveFailed": "Could not remove banner",
+      "form": {
+        "displayName": "Display name",
+        "displayNamePlaceholder": "e.g. John Smith",
+        "bio": "Short bio",
+        "bioLabel": "Description",
+        "avatarColor": "Avatar color",
+        "avatarColorHint": "Visible to others when you have no profile photo. Max {{max}} characters"
+      }
+    },
+    "account": {
+      "subtitle": "Manage login credentials and security.",
+      "usernameHint": "Your login (@{{username}}) is used to sign in and be found.",
+      "newUsername": "New username",
+      "changeUsername": "Change username",
+      "usernameChanged": "Username changed. Sign in with your new username from now on.",
+      "usernameChangeFailed": "Could not change username.",
+      "changePassword": "Change password",
+      "changePasswordHint": "Minimum 8 characters, upper and lowercase letter, digit",
+      "changePasswordSubmit": "Change password",
+      "passwordChanged": "Password changed. The session on this device stays active.",
+      "passwordChangeFailed": "Could not change password.",
+      "deletionScheduled": "Account marked for deletion.",
+      "deletionScheduledBody": "You can still use your account until {{date}}. It will then be permanently deleted. You can cancel below.",
+      "managementLead": "Disabling your account immediately blocks sign-in. Marking for deletion gives you 7 days to cancel — during that time you can use the account normally.",
+      "disableTitle": "Disable account",
+      "disableDesc": "We immediately block sign-in. Profile, messages and contacts remain — an administrator can restore the account in the moderation panel.",
+      "deleteTitle": "Mark account for deletion",
+      "deleteDesc": "The account will be permanently deleted after 7 days. Until then you can sign in normally and cancel the request in settings.",
+      "confirmDisable": "Confirm account disable",
+      "confirmDelete": "Confirm marking account for deletion",
+      "confirmPasswordHint": "Enter your password{{twoFactor}} to continue.",
+      "confirmPasswordHintTwoFactor": " and 2FA code",
+      "disableNoDelete": "No data will be deleted. After disabling you cannot sign in again until an administrator restores the account.",
+      "cancelDeletion": "Cancel account deletion",
+      "cancelDeletionSubmit": "Cancel account deletion",
+      "cancelDeletionPassword": "Enter your password to cancel deletion.",
+      "cancelDeletionFailed": "Could not cancel deletion.",
+      "operationFailed": "Could not complete the operation.",
+      "disableAccount": "Disable account",
+      "markForDeletion": "Mark for deletion",
+      "sessionsTitle": "Sessions",
+      "activeSessions": "Active sessions",
+      "sessionsLoadFailed": "Could not load sessions.",
+      "sessionRevokeFailed": "Could not log out session.",
+      "revokeOthersFailed": "Could not log out other sessions."
+    },
+    "warnings": {
+      "title": "Warnings",
+      "violations": "Your terms violations",
+      "intro": "Warnings address minor or first-time violations. Repeated or more serious violations may result in temporary suspension; severe ones — permanent account removal.",
+      "history": "Warning history",
+      "empty": "You have no warnings. Keep it up!",
+      "unread": "Unread"
+    },
+    "language": {
+      "title": "Language"
+    },
+    "accountExtra": {
+      "authGroup": "Authentication",
+      "managementGroup": "Account management",
+      "usernamePasswordRequired": "Enter your current password to confirm the change.",
+      "cancelDeletionHint": "Enter your password{{twoFactor}} to cancel deletion marking.",
+      "bannerUpdated": "Profile banner updated."
+    }
+  },
+  "chat": {
+    "empty": {
+      "selectChat": "Select a chat to start a conversation."
+    },
+    "list": {
+      "title": "Chats",
+      "tabs": {
+        "dm": "Chats",
+        "channels": "Channels"
+      },
+      "searchPlaceholder": "Search chats",
+      "newChannel": "New channel",
+      "muted": "Muted",
+      "mention": "Mention",
+      "searchEmpty": "No results.\nEnter an exact @username.",
+      "emptyDm": "No direct messages.",
+      "emptyChannels": "No channels."
+    },
+    "input": {
+      "defaultPlaceholder": "Write a message…",
+      "editPlaceholder": "Edit message…",
+      "replyPlaceholder": "Write a reply…",
+      "checkingPermissions": "Checking permissions…",
+      "channelPlaceholder": "Write in #{{channel}}…",
+      "dmPlaceholder": "Write to {{name}}…",
+      "editingBanner": "Editing message",
+      "replyBanner": "Reply to {{author}}",
+      "blockedByYou": "You blocked this person. Unblock them in their profile to message again.",
+      "blockedByThem": "This person blocked you. You cannot send messages.",
+      "notFriends": "You cannot message this person. Send a friend invite to chat.",
+      "formatting": {
+        "bold": "Bold (Ctrl+B)",
+        "italic": "Italic (Ctrl+I)",
+        "strikethrough": "Strikethrough (Ctrl+Shift+X)",
+        "inlineCode": "Inline code (Ctrl+Shift+C)",
+        "codeBlock": "Code block (Ctrl+Shift+K)"
+      },
+      "actions": {
+        "attachGif": "Add GIF",
+        "attachSticker": "Add sticker",
+        "attachEmoji": "Add emoji"
+      },
+      "mentionsHeader": "Mentions"
+    },
+    "mentions": {
+      "everyone": {
+        "label": "@everyone",
+        "desc": "Notify all members"
+      },
+      "here": {
+        "label": "@here",
+        "desc": "Notify active members"
+      }
+    },
+    "tools": {
+      "pinned": "Pinned messages",
+      "pinnedShort": "Pinned",
+      "search": "Search in chat",
+      "searchTab": "Search",
+      "searchPlaceholder": "Search...",
+      "searchHint": "Type to start searching",
+      "minChars": "Enter at least 2 characters",
+      "searching": "Searching…",
+      "searchFailed": "Could not search messages.",
+      "noResults": "No results",
+      "noPinned": "No pinned messages",
+      "unpin": "Unpin message"
+    },
+    "pickers": {
+      "gif": {
+        "searchPlaceholder": "Search GIFs...",
+        "loadFailed": "Could not load GIFs. Try again.",
+        "noResults": "No results for \"{{term}}\""
+      },
+      "sticker": {
+        "searchPlaceholder": "Search stickers...",
+        "loadFailed": "Could not load stickers. Try again.",
+        "noResults": "No results for \"{{term}}\""
+      },
+      "emoji": {
+        "searchPlaceholder": "Search emoji...",
+        "loadFailed": "Could not load emoji.",
+        "noResults": "No results for \"{{term}}\""
+      },
+      "reaction": {
+        "loadFailed": "Could not load reactions.",
+        "ariaLabel": "Choose reaction"
+      }
+    },
+    "window": {
+      "call": "Call",
+      "videoCall": "Video call",
+      "channelSettings": "Channel settings",
+      "closeChat": "Close chat",
+      "contactProfile": "Contact profile",
+      "channelLocked": "Chat on this channel is locked by an administrator.",
+      "mutedOnChannel": "You are muted on this channel and cannot send messages."
+    },
+    "bubble": {
+      "edited": "edited",
+      "file": "File",
+      "options": "Options"
+    },
+    "typing": "Typing…",
+    "loadOlder": "Load older messages",
+    "loadingOlder": "Loading…",
+    "notifications": {
+      "mute": "Mute notifications",
+      "unmute": "Unmute"
+    },
+    "mentionToast": {
+      "inChannel": " · # {{name}}",
+      "mentionedYou": " mentioned you"
+    }
+  },
+  "nav": {
+    "brand": {
+      "title": "Klovy Chat"
+    },
+    "groups": {
+      "workspace": "Workspace",
+      "account": "Account"
+    },
+    "items": {
+      "chats": "Chats",
+      "contacts": "Contacts",
+      "settings": "Settings",
+      "admin": "Administration"
+    },
+    "mobile": {
+      "menu": "Menu",
+      "sections": "Sections"
+    }
+  },
+  "sidebar": {
+    "toast": {
+      "contactRemoveFailed": "Could not remove contact.",
+      "channelCreated": "Created channel \"{{name}}\"",
+      "channelCreateFailed": "Could not create channel",
+      "channelRenameFailed": "Could not rename channel",
+      "channelAvatarFailed": "Could not upload channel avatar",
+      "channelDeleteFailed": "Could not delete channel",
+      "muteFailed": "Could not change mute setting",
+      "spotifyFailed": "Spotify login failed."
+    },
+    "context": {
+      "viewProfile": "View profile",
+      "removeContact": "Remove from contacts",
+      "channelSettings": "Channel settings",
+      "deleteChannel": "Delete channel"
+    },
+    "modals": {
+      "newChannel": {
+        "title": "New channel",
+        "hint": "Enter a name for the new channel.",
+        "nameLabel": "Channel name",
+        "namePlaceholder": "e.g. xyz",
+        "submit": "Create channel"
+      },
+      "renameChannel": {
+        "title": "Rename channel",
+        "placeholder": "New channel name",
+        "currentLabel": "Current: {{name}}",
+        "newNameLabel": "New name",
+        "submit": "Rename"
+      },
+      "removeContact": {
+        "title": "Remove contact",
+        "subtitle": "This person will be removed from your friends list.",
+        "confirm": "Are you sure you want to remove this contact from your list?",
+        "confirmWithName": "Are you sure you want to remove {{name}} from contacts?",
+        "historyDeleted": "Message history will be permanently deleted.",
+        "submit": "Remove contact"
+      },
+      "deleteChannel": {
+        "title": "Delete channel",
+        "subtitle": "This action cannot be undone.",
+        "confirm": "Are you sure you want to permanently delete channel #{{name}}?",
+        "confirmWithName": "Are you sure you want to delete channel \"{{name}}\"?",
+        "messagesDeleted": "All messages will be permanently deleted.",
+        "submit": "Delete channel"
+      }
+    }
+  },
+  "modals": {
+    "channelSettings": {
+      "title": "Channel settings",
+      "subtitle": "Manage the channel, members and moderation.",
+      "generalSubtitle": "Manage the channel, invite members and report violations.",
+      "tabs": {
+        "general": "General",
+        "members": "Members",
+        "moderation": "Moderation",
+        "bots": "Bots"
+      },
+      "avatarClick": "Click to add/change channel avatar",
+      "removeAvatar": "Remove avatar",
+      "edit": "EDIT",
+      "invite": "INVITE",
+      "delete": "DELETE",
+      "membersTitle": "Members",
+      "membersSubtitle": "People on this channel.",
+      "membersActionsHint": "List of people on the channel. Administrators can kick, ban and mute.",
+      "membersAdminTitle": "Administrator",
+      "adminNote": "Only the channel creator is an administrator.",
+      "moderationTitle": "Moderation",
+      "moderationSubtitle": "Control conversation pace and block writing on the channel.",
+      "slowmodeTitle": "Slow mode",
+      "slowmodeHint": "Limits how often members can send messages.",
+      "chatLockTitle": "Locked chat",
+      "chatLockHint": "When locked, only you can write on the channel. Other members see the chat but cannot send messages.",
+      "chatLockStatusLocked": "Locked",
+      "chatLockStatusActive": "Active",
+      "botsTitle": "Bots",
+      "botsHint": "Bots can send messages on this channel via API.",
+      "botsExtendedHint": "Bots send messages to the channel via API. You can only add your own bots from Account Settings.",
+      "botsInChannel": "In channel",
+      "botsAvailable": "Available to add",
+      "botsEmpty": "No bots on this channel.",
+      "botsNoAvailable": "No bots available. Create a bot in Account Settings.",
+      "addBot": "Add",
+      "footerClose": "CLOSE",
+      "footerLeave": "LEAVE",
+      "reportSentAdmin": "Report was sent to the admin panel.",
+      "reportDetailsPlaceholder": "Describe the issue…",
+      "inviteModal": {
+        "title": "Invite to channel",
+        "hint": "Share the link — any signed-in user can join.",
+        "generating": "Generating link…",
+        "copyLink": "Copy link"
+      },
+      "toast": {
+        "addBotFailed": "Could not add bot",
+        "removeBotFailed": "Could not remove bot",
+        "leaveFailed": "Could not leave channel",
+        "avatarUploadFailed": "Could not upload channel avatar",
+        "avatarRemoveFailed": "Could not remove channel avatar",
+        "operationFailed": "Operation failed.",
+        "inviteCreateFailed": "Could not create invite.",
+        "inviteCopied": "Invite link copied",
+        "inviteCopyManual": "Copy the link manually: {{url}}",
+        "reportSent": "Report was submitted"
+      }
+    },
+    "contacts": {
+      "title": "Contacts",
+      "subtitle": "Manage invites and your contact list.",
+      "tabs": {
+        "invites": "Invites",
+        "friends": "My contacts",
+        "sent": "Sent",
+        "blocked": "Blocked"
+      },
+      "invite": {
+        "label": "USERNAME AFTER @",
+        "placeholder": "username",
+        "hint": "Enter the exact login name (no spaces, lowercase).",
+        "send": "Send invite",
+        "sent": "Invite to {{handle}} sent",
+        "sendFailed": "Could not send invite.",
+        "acceptFailed": "Could not accept invite.",
+        "rejectFailed": "Could not reject invite.",
+        "cancelFailed": "Could not cancel invite.",
+        "emptyTitle": "No pending invites",
+        "emptySub": "When someone sends you a contact invite, it will appear here.",
+        "sentEmptyTitle": "No sent invites",
+        "sentEmptySub": "Invites you send will appear here until accepted.",
+        "pending": " · awaiting response",
+        "newInvite": " · new invite",
+        "write": "Message",
+        "blockedStatus": " · blocked",
+        "hintExtended": "Enter the exact login name (e.g. @xyz), not the profile display name."
+      },
+      "friends": {
+        "searchPlaceholder": "Search contacts…",
+        "emptyTitle": "You have no contacts yet",
+        "emptySub": "Add someone by username to start chatting.",
+        "noResultsTitle": "No results",
+        "noResultsSub": "Try a different search phrase."
+      },
+      "blocked": {
+        "emptyTitle": "No one blocked",
+        "emptySub": "Blocked people will not be able to message you.",
+        "unblock": "Unblock"
+      }
+    },
+    "integrations": {
+      "title": "Integrations",
+      "spotify": {
+        "title": "Spotify",
+        "intro": "Connect Spotify so friends can see what you are listening to on your profile.",
+        "syncHint": "Sync requires active playback in the Spotify app or open.spotify.com.",
+        "privacyHint": "You can hide listening activity from friends at any time.",
+        "apiPrivacyNote": "Klovy fetches playback info only via the official Spotify API. The app does not monitor browser tabs or access local files or playback history.",
+        "reconnectNote": "If status is still not visible after connecting, disconnect Klovy in Spotify connected apps settings, then authorize again.",
+        "notConfigured": "Spotify integration is not configured on the server (missing SPOTIFY_* variables).",
+        "connected": "Connected",
+        "notConnected": "Not connected",
+        "connectedHint": "Klovy syncs the track from your Spotify account.",
+        "notConnectedHint": "Connect your account to enable \"Currently listening\".",
+        "connect": "Connect Spotify",
+        "disconnect": "Disconnect",
+        "shareListening": "Show friends what I'm listening to",
+        "syncNow": "Check what I'm listening to now",
+        "toastConnected": "Connected to Spotify.",
+        "toastDisconnected": "Spotify account disconnected.",
+        "authIncomplete": "Spotify authorization finished but the connection was not saved. Click \"Connect Spotify\" again.",
+        "loadFailed": "Could not load status.",
+        "loginFailed": "Could not start Spotify login.",
+        "disconnectFailed": "Could not disconnect Spotify.",
+        "syncDetected": "Playback detected: {{track}}{{artist}}. Open your profile to see the \"Currently listening\" section.",
+        "shareRequired": "Enable \"Show friends what I'm listening to\" to share the track on your profile.",
+        "noPlayback": "Spotify reports no active playback. Play music in the Spotify app or open.spotify.com (a tab alone is not enough), then click \"Check now\" again.",
+        "syncFailed": "Spotify sync failed.",
+        "shareOn": "Friends will see what you are listening to.",
+        "shareOff": "Listening activity hidden from friends.",
+        "saveFailed": "Could not save settings."
+      }
+    },
+    "bots": {
+      "title": "Bots",
+      "create": {
+        "title": "Create bot",
+        "hint": "Bots are API-controlled accounts. After creation copy the token — it is shown only once.",
+        "apiHint": "Send messages via POST {{endpoint}} with body { \"content\": \"…\" }.",
+        "username": "Bot username",
+        "usernamePlaceholder": "e.g. my_bot",
+        "displayName": "Display name (optional)",
+        "displayNamePlaceholder": "e.g. My Bot",
+        "submit": "Create bot",
+        "tokenHint": "Copy the token now — it is shown only once and cannot be viewed again.",
+        "tokenRevealHint": "Copy the token now — you will only see it once. Store it securely; anyone with it can send messages as this bot.",
+        "botBadge": "Bot",
+        "usernameHint": "3–32 characters, lowercase letters, digits and underscore only.",
+        "creating": "Creating…"
+      },
+      "list": {
+        "title": "Your bots",
+        "empty": "You do not have any bots yet.",
+        "lastUsed": " · last used {{date}}",
+        "tokenUnused": " · token unused",
+        "editUsername": "Username (@)",
+        "editDisplayName": "Display name",
+        "newToken": "New token"
+      },
+      "deleteConfirm": "Delete bot @{{username}}? The token will stop working and the bot will be removed from channels.",
+      "errors": {
+        "createFailed": "Could not create bot.",
+        "tokenFailed": "Could not generate token.",
+        "saveFailed": "Could not save changes.",
+        "deleteFailed": "Could not delete bot."
+      }
+    },
+    "otherUserProfile": {
+      "ariaLabel": "User profile",
+      "botBadge": "Bot",
+      "addFriend": "Add this person as a friend to chat.",
+      "about": "About me",
+      "joined": "Joined",
+      "unblock": "Unblock user",
+      "block": "Block user",
+      "removeContact": "Remove from contacts"
+    },
+    "userProfile": {
+      "ariaLabel": "User profile",
+      "about": "About me",
+      "joined": "Joined",
+      "editProfile": "Edit profile"
+    },
+    "accountSettings": {
+      "title": "Settings",
+      "nav": {
+        "account": "Account",
+        "myAccount": "My account",
+        "profile": "Profile",
+        "sessions": "Sessions",
+        "voice": "Voice settings",
+        "bots": "Bots",
+        "integrations": "Integrations",
+        "warnings": "Warnings",
+        "app": "App",
+        "logout": "Log out",
+        "sectionsAria": "Settings sections"
+      },
+      "profile": {
+        "subtitle": "Manage your profile and information visible to other users.",
+        "personalData": "Personal data",
+        "editProfile": "Edit profile",
+        "saveChanges": "Save changes",
+        "changeBanner": "Change banner",
+        "removeBanner": "Remove banner",
+        "changePhoto": "Change photo",
+        "changeBannerAria": "Change profile banner",
+        "changePhotoAria": "Change profile photo",
+        "saved": "Profile saved",
+        "saveFailed": "Could not save profile",
+        "avatarUpdated": "Profile photo updated.",
+        "avatarUploadFailed": "Could not upload photo",
+        "avatarRemoved": "Profile photo removed.",
+        "avatarRemoveFailed": "Could not remove photo",
+        "bannerUploadFailed": "Could not upload banner",
+        "bannerRemoved": "Profile banner removed.",
+        "bannerRemoveFailed": "Could not remove banner",
+        "form": {
+          "displayName": "Display name",
+          "displayNamePlaceholder": "e.g. John Smith",
+          "bio": "Short bio",
+          "bioLabel": "Description",
+          "avatarColor": "Avatar color",
+          "avatarColorHint": "Visible to others when you have no profile photo. Max {{max}} characters"
+        }
+      },
+      "account": {
+        "subtitle": "Manage login credentials and security.",
+        "usernameHint": "Your login (@{{username}}) is used to sign in and be found.",
+        "newUsername": "New username",
+        "changeUsername": "Change username",
+        "usernameChanged": "Username changed. Sign in with your new username from now on.",
+        "usernameChangeFailed": "Could not change username.",
+        "changePassword": "Change password",
+        "changePasswordHint": "Minimum 8 characters, upper and lowercase letter, digit",
+        "changePasswordSubmit": "Change password",
+        "passwordChanged": "Password changed. The session on this device stays active.",
+        "passwordChangeFailed": "Could not change password.",
+        "deletionScheduled": "Account marked for deletion.",
+        "deletionScheduledBody": "You can still use your account until {{date}}. It will then be permanently deleted. You can cancel below.",
+        "managementLead": "Disabling your account immediately blocks sign-in. Marking for deletion gives you 7 days to cancel — during that time you can use the account normally.",
+        "disableTitle": "Disable account",
+        "disableDesc": "We immediately block sign-in. Profile, messages and contacts remain — an administrator can restore the account in the moderation panel.",
+        "deleteTitle": "Mark account for deletion",
+        "deleteDesc": "The account will be permanently deleted after 7 days. Until then you can sign in normally and cancel the request in settings.",
+        "confirmDisable": "Confirm account disable",
+        "confirmDelete": "Confirm marking account for deletion",
+        "confirmPasswordHint": "Enter your password{{twoFactor}} to continue.",
+        "confirmPasswordHintTwoFactor": " and 2FA code",
+        "disableNoDelete": "No data will be deleted. After disabling you cannot sign in again until an administrator restores the account.",
+        "cancelDeletion": "Cancel account deletion",
+        "cancelDeletionSubmit": "Cancel account deletion",
+        "cancelDeletionPassword": "Enter your password to cancel deletion.",
+        "cancelDeletionFailed": "Could not cancel deletion.",
+        "operationFailed": "Could not complete the operation.",
+        "disableAccount": "Disable account",
+        "markForDeletion": "Mark for deletion",
+        "sessionsTitle": "Sessions",
+        "activeSessions": "Active sessions",
+        "sessionsLoadFailed": "Could not load sessions.",
+        "sessionRevokeFailed": "Could not log out session.",
+        "revokeOthersFailed": "Could not log out other sessions."
+      },
+      "warnings": {
+        "title": "Warnings",
+        "violations": "Your terms violations",
+        "intro": "Warnings address minor or first-time violations. Repeated or more serious violations may result in temporary suspension; severe ones — permanent account removal.",
+        "history": "Warning history",
+        "empty": "You have no warnings. Keep it up!",
+        "unread": "Unread"
+      }
+    }
+  },
+  "profile": {
+    "listening": {
+      "title": "Currently listening"
+    },
+    "form": {
+      "displayName": "Display name",
+      "displayNameRequired": "Display name *",
+      "displayNamePlaceholder": "e.g. John Smith",
+      "displayNameHint": "Visible to others in chat. Max {{max}} characters.",
+      "bio": "Short bio",
+      "bioPlaceholderOptional": "Short bio (optional)",
+      "bioLabel": "Description",
+      "avatarColor": "Avatar color",
+      "avatarColorOption": "Color {{index}}",
+      "avatarColorHint": "Visible to others when you have no profile photo. Max {{max}} characters"
+    }
+  },
+  "channel": {
+    "settings": {
+      "title": "Channel settings"
+    },
+    "create": {
+      "title": "New channel",
+      "hint": "Enter a name for the new channel.",
+      "nameLabel": "Channel name",
+      "submit": "Create channel"
+    },
+    "rename": {
+      "title": "Rename channel",
+      "placeholder": "New channel name",
+      "submit": "Rename"
+    },
+    "delete": {
+      "title": "Delete channel",
+      "subtitle": "This action cannot be undone.",
+      "confirm": "Are you sure you want to permanently delete channel #{{name}}?",
+      "submit": "Delete channel"
+    },
+    "actions": {
+      "create": "New channel",
+      "delete": "Delete channel",
+      "invite": "Invite"
+    },
+    "members": {
+      "ownerBadge": "owner",
+      "admin": "Administrator"
+    },
+    "toast": {
+      "addBotFailed": "Could not add bot",
+      "removeBotFailed": "Could not remove bot",
+      "leaveFailed": "Could not leave channel",
+      "avatarUploadFailed": "Could not upload channel avatar",
+      "avatarRemoveFailed": "Could not remove channel avatar"
+    }
+  },
+  "admin": {
+    "brand": {
+      "title": "Moderation panel"
+    },
+    "gate": {
+      "notConfigured": "Panel is not configured",
+      "forbidden": "Access denied",
+      "loginRequired": "Sign-in required",
+      "notConfiguredMsg": "The administrator has not set ADMIN_USER_IDS in the server configuration.",
+      "forbiddenMsg": "Account @{{username}} does not have access to the admin panel.",
+      "forbiddenGeneric": "This account does not have administrator permissions.",
+      "loginMsg": "Sign in to your Klovy Chat account. Only users listed in the server configuration can access the panel."
+    },
+    "modal": {
+      "ariaLabel": "Admin panel",
+      "checkingPermissions": "Checking permissions…"
+    },
+    "tabs": {
+      "users": "Users",
+      "channels": "Channels",
+      "badges": "Badges",
+      "announcements": "Announcements",
+      "reports": "Reports",
+      "usersSubtitleWhitelist": "Approve new accounts to the whitelist, ban and delete users.",
+      "usersSubtitle": "Ban, unban and delete user accounts.",
+      "channelsSubtitle": "Browse, moderate and delete channels created by users.",
+      "badgesSubtitle": "Create and assign badges highlighting active and trusted members.",
+      "announcementsSubtitle": "Publish global changelogs and important updates visible to all users.",
+      "reportsSubtitle": "Review reports about content and behavior that violate the terms."
+    },
+    "status": {
+      "banned": "BANNED",
+      "pendingDeletion": "PENDING DELETION",
+      "disabled": "DISABLED",
+      "warned": "WARNED",
+      "inactive": "INACTIVE",
+      "active": "ACTIVE",
+      "pending": "PENDING",
+      "reviewed": "REVIEWED",
+      "dismissed": "DISMISSED",
+      "approved": "APPROVED"
+    },
+    "severity": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "stats": {
+      "total": "Total",
+      "active": "Active",
+      "banned": "Banned",
+      "pendingWhitelist": "Pending"
+    },
+    "whitelist": {
+      "enabledTitle": "Whitelist enabled",
+      "enabledBody": "New accounts require approval. Pending: {{count}}.",
+      "disabledTitle": "Whitelist disabled",
+      "disabledBody": "New accounts are approved automatically. To enable the whitelist, set WHITELIST_ENABLED=true in the server config and restart the backend."
+    },
+    "toolbar": {
+      "searchUser": "your_username",
+      "searchChannel": "channel_name",
+      "searchUserAria": "Search user",
+      "searchChannelAria": "Search channel",
+      "whitelistFilter": "Whitelist filter",
+      "whitelistAll": "All users",
+      "whitelistPending": "Pending approval",
+      "whitelistApproved": "Approved",
+      "results": "Results",
+      "createBadge": "Create new badge",
+      "createAnnouncement": "New announcement",
+      "refresh": "Refresh"
+    },
+    "empty": {
+      "noUsers": "No users",
+      "noUsersSub": "Change filters or search for another username.",
+      "noChannels": "No channels",
+      "noChannelsSub": "No channels matched your search.",
+      "noBadges": "No badges",
+      "noBadgesSub": "Create a new badge to assign it to users.",
+      "noReports": "No reports",
+      "noReportsSub": "There are no pending reports to review.",
+      "noAnnouncements": "No announcements",
+      "noAnnouncementsSub": "Create a new announcement to notify all users about updates or changes.",
+      "noWarnings": "No warnings."
+    },
+    "users": {
+      "joined": "Joined",
+      "warnings": "Warnings",
+      "deletionScheduled": "Deletion scheduled: {{date}}",
+      "disabledByUser": "Account disabled by user",
+      "approve": "Approve",
+      "revokeWhitelist": "Revoke whitelist",
+      "assignBadge": "Assign badge",
+      "warn": "Warn",
+      "warningsCount": "Warnings ({{count}})",
+      "unban": "Unban",
+      "ban": "Ban",
+      "restore": "Restore account",
+      "defaultBanReason": "Messenger terms of service violation.",
+      "owner": "Owner",
+      "members": "Members",
+      "messages": "Messages",
+      "created": "Created",
+      "reporter": "Reporter",
+      "review": "Review",
+      "dismiss": "Reject",
+      "deleteChannel": "Delete channel",
+      "edit": "Edit"
+    },
+    "announcements": {
+      "active": "ACTIVE",
+      "inactive": "DISABLED",
+      "activate": "Activate",
+      "deactivate": "Deactivate"
+    },
+    "modals": {
+      "ban": {
+        "title": "Ban user",
+        "body": "Ban @{{username}}. The user cannot sign in until unbanned.",
+        "reason": "Reason (optional)",
+        "reasonPlaceholder": "E.g. terms violation, spam…",
+        "submit": "Apply ban"
+      },
+      "delete": {
+        "title": "Confirm deletion",
+        "body": "Are you sure you want to permanently delete {{label}}? This cannot be undone."
+      },
+      "badge": {
+        "createTitle": "Create new badge",
+        "editTitle": "Edit badge",
+        "name": "Name",
+        "namePlaceholder": "e.g. Early supporter",
+        "icon": "Lucide icon",
+        "iconPlaceholder": "e.g. Star, Shield, Heart, Award",
+        "iconHint": "Icon names from the Lucide React library",
+        "color": "Color (hex)",
+        "colorPlaceholder": "#8b5cf6",
+        "description": "Description (optional)",
+        "descriptionPlaceholder": "Short badge description"
+      },
+      "assignBadge": {
+        "title": "User badges",
+        "hint": "@{{username}} · click a badge below to assign it. Each badge type can be granted only once.",
+        "assigned": "Assigned badges",
+        "loading": "Loading user badges…",
+        "empty": "This user has no badges yet.",
+        "add": "Add badge",
+        "noBadges": "No badges available. Create them first in the Badges tab.",
+        "alreadyAssigned": "Already assigned",
+        "clickToAssign": "Click to assign",
+        "assignedAt": "Assigned {{date}}"
+      },
+      "warn": {
+        "title": "Warn user",
+        "body": "Issue a warning to @{{username}}. They will see it in the app and must acknowledge it. Warnings address minor or first-time terms violations.",
+        "severity": "Violation severity",
+        "severityLow": "Low — minor violation",
+        "severityMedium": "Medium — repeated behavior",
+        "severityHigh": "High — serious violation",
+        "reasonPlaceholder": "Describe the violation, e.g. spam, offensive content, inappropriate name…",
+        "submit": "Issue warning"
+      },
+      "warnings": {
+        "title": "Warnings for @{{username}}",
+        "delete": "Delete warning",
+        "loadFailed": "Could not load warnings."
+      },
+      "announcement": {
+        "createTitle": "New announcement",
+        "editTitle": "Edit announcement",
+        "title": "Title",
+        "titlePlaceholder": "e.g. Update v2.1 — new features",
+        "body": "Content",
+        "bodyPlaceholder": "Describe changes, new features or important information…",
+        "active": "Publish as active (visible to users)",
+        "publish": "Publish"
+      }
+    },
+    "errors": {
+      "loadFailed": "Could not load data.",
+      "operationFailed": "Operation failed."
+    }
+  },
+  "call": {
+    "invalidServerUrl": "Invalid call server address.",
+    "connectFailed": "Could not connect. Try again.",
+    "rejected": "Call was rejected.",
+    "peerOffline": "User is unavailable.",
+    "peerBusy": "User is already on another call.",
+    "unavailable": "Could not place the call.",
+    "status": {
+      "calling": "Calling…",
+      "connecting": "Connecting…",
+      "ringing": "{{mode}} • ringing…"
+    },
+    "mode": {
+      "video": "Video call",
+      "audio": "Voice call"
+    },
+    "controls": {
+      "unmuteMic": "Unmute microphone",
+      "muteMic": "Mute microphone",
+      "enableCamera": "Turn on camera",
+      "disableCamera": "Turn off camera",
+      "end": "End",
+      "reject": "Reject",
+      "accept": "Answer"
+    },
+    "incoming": {
+      "ariaLabel": "Incoming call"
+    }
+  },
+  "warnings": {
+    "acknowledgeFailed": "Could not confirm. Try again.",
+    "title_one": "You received a warning",
+    "title_few": "You received {{count}} warnings",
+    "title_many": "You received {{count}} warnings",
+    "title_other": "You received {{count}} warnings",
+    "lead": "An administrator issued a warning for violating the terms of service. Read it carefully. Further or more serious violations may result in temporary suspension or permanent account removal.",
+    "accept": "I understand and accept"
+  },
+  "announcements": {
+    "title": "Announcement",
+    "lead": "An administrator published an important update or changelog. Once dismissed, it will not be shown again.",
+    "gotIt": "Got it",
+    "dismissAll": "Dismiss all",
+    "dismissOne": "Dismiss announcement",
+    "dismissFailed": "Could not dismiss announcement. Try again."
+  },
+  "api": {
+    "networkError": "No connection to the server.",
+    "csrfMissing": "Missing CSRF token. Log out and sign in again."
+  },
+  "user": {
+    "defaultLabel": "User",
+    "warningSeverity": {
+      "low": "Minor violation",
+      "medium": "Terms violation",
+      "high": "Serious violation"
+    },
+    "availability": {
+      "online": "Available",
+      "away": "Unavailable",
+      "brb": "Be right back",
+      "dnd": "Do not disturb",
+      "offline": "Unavailable"
+    },
+    "sessionRelative": {
+      "justNow": "Just now",
+      "minutes_one": "1 minute ago",
+      "minutes_few": "{{count}} minutes ago",
+      "minutes_many": "{{count}} minutes ago",
+      "minutes_other": "{{count}} minutes ago",
+      "hours_one": "1 hour ago",
+      "hours_few": "{{count}} hours ago",
+      "hours_many": "{{count}} hours ago",
+      "hours_other": "{{count}} hours ago",
+      "days_one": "1 day ago",
+      "days_few": "{{count}} days ago",
+      "days_many": "{{count}} days ago",
+      "days_other": "{{count}} days ago",
+      "months_one": "1 month ago",
+      "months_few": "{{count}} months ago",
+      "months_many": "{{count}} months ago",
+      "months_other": "{{count}} months ago",
+      "years_one": "1 year ago",
+      "years_few": "{{count}} years ago",
+      "years_many": "{{count}} years ago",
+      "years_other": "{{count}} years ago"
+    },
+    "memberCount_one": "{{count}} participant",
+    "memberCount_few": "{{count}} participants",
+    "memberCount_many": "{{count}} participants",
+    "memberCount_other": "{{count}} participants"
+  }
+}

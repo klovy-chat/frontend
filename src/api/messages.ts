@@ -1,0 +1,69 @@
+import { apiRequest } from "./client";
+import { assertAttachmentSize, assertAttachmentType } from "../constants/upload";
+import type { Message } from "../types";
+
+export type UploadContext =
+  | { type: "dm"; contactId: string }
+  | { type: "channel"; channelId: string };
+
+export interface MessagePage {
+  messages: Message[];
+  hasMore?: boolean;
+}
+
+export function getMessages(
+  contactId: string,
+  opts?: { before?: string; limit?: number },
+) {
+  return apiRequest<MessagePage>("/api/messages/get-messages", {
+    method: "POST",
+    body: JSON.stringify({
+      id: contactId,
+      ...(opts?.before ? { before: opts.before } : {}),
+      ...(opts?.limit ? { limit: opts.limit } : {}),
+    }),
+  });
+}
+
+export function uploadFile(file: File, context: UploadContext) {
+  assertAttachmentSize(file);
+  assertAttachmentType(file);
+  const form = new FormData();
+  form.append("file", file);
+  form.append("contextType", context.type);
+  form.append("contextId", context.type === "dm" ? context.contactId : context.channelId);
+  return apiRequest<{ filePath: string }>("/api/messages/upload-file", {
+    method: "POST",
+    body: form,
+  });
+}
+
+export function getPinnedMessages(params: { contactId?: string; channelId?: string }) {
+  return apiRequest<{ messages: Message[] }>("/api/messages/pinned", {
+    method: "POST",
+    body: JSON.stringify(params),
+  });
+}
+
+export function searchMessages(params: {
+  query: string;
+  contactId?: string;
+  channelId?: string;
+}) {
+  return apiRequest<{ messages: Message[] }>("/api/messages/search", {
+    method: "POST",
+    body: JSON.stringify(params),
+  });
+}
+
+export function pinMessageHttp(messageId: string) {
+  return apiRequest<{ message: Message }>(`/api/messages/${messageId}/pin`, {
+    method: "POST",
+  });
+}
+
+export function unpinMessageHttp(messageId: string) {
+  return apiRequest<{ message: Message }>(`/api/messages/${messageId}/pin`, {
+    method: "DELETE",
+  });
+}

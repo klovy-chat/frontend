@@ -1,0 +1,147 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.badge-icon {
+  transition: transform 0.2s ease;
+}
+
+.badge:hover .badge-icon {
+  transform: scale(1.1);
+}
+
+.badge-sm {
+  width: 24px;
+  height: 24px;
+}
+
+.badge-md {
+  width: 28px;
+  height: 28px;
+}
+
+.badge-lg {
+  width: 32px;
+  height: 32px;
+}
+
+.badge-tooltip {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #2a2a3e;
+  color: #ffffff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  animation: tooltipFadeIn 0.2s ease-out;
+  pointer-events: none;
+}
+
+.badge--tooltip-top .badge-tooltip {
+  bottom: 100%;
+  margin-bottom: 8px;
+}
+
+.badge--tooltip-top .badge-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: #2a2a3e;
+}
+
+.badge--tooltip-bottom .badge-tooltip {
+  top: 100%;
+  margin-top: 8px;
+}
+
+.badge--tooltip-bottom .badge-tooltip::after {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-bottom-color: #2a2a3e;
+}
+
+.badge-tooltip-name {
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: var(--badge-color, #8b5cf6);
+}
+
+.badge-tooltip-description {
+  font-size: 11px;
+  color: #a0aec0;
+  max-width: 200px;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Profile modal badges */
+.up-badges-section {
+  margin: 6px 0 14px;
+  overflow: visible;
+}
+
+.up-badges-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 0;
+  margin: 0;
+  overflow: visible;
+}
+
+.up-badges-list .badge {
+  justify-content: flex-start;
+}
+
+.up-badges-list .badge-md {
+  width: auto;
+  min-width: 0;
+}
+
+.up-badges-list .badge--tooltip-bottom .badge-tooltip {
+  left: 0;
+  transform: none;
+  animation: badgeTooltipFadeIn 0.2s ease-out;
+}
+
+.up-badges-list .badge--tooltip-bottom .badge-tooltip::after {
+  left: 10px;
+  transform: none;
+}
+
+@keyframes badgeTooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

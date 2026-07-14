@@ -1,0 +1,389 @@
+/* User profile modal — Klovy theme, login-page aesthetic */
+
+.up-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 950;
+  background: rgba(5, 5, 8, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: backdropIn 0.2s ease forwards;
+}
+
+.up-backdrop.closing {
+  pointer-events: none;
+  animation: backdropOut 0.22s ease forwards;
+}
+
+@keyframes backdropIn  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes backdropOut { from { opacity: 1; } to { opacity: 0; } }
+
+/* CARD */
+.up-card {
+  position: relative;
+  width: min(440px, 92vw);
+  border-radius: 16px;
+  overflow: visible;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  animation: cardIn 0.25s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.up-card.closing {
+  animation: cardOut 0.2s ease forwards;
+}
+
+@keyframes cardIn  { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes cardOut { from { opacity: 1; transform: translateY(0);    } to { opacity: 0; transform: translateY(6px); } }
+
+/* BANNER */
+.up-banner {
+  height: 80px;
+  width: 100%;
+  background-size: cover;
+  background-position: center;
+  border-radius: 16px 16px 0 0;
+  overflow: hidden;
+}
+
+/* notch to make avatar sit into the banner (discord-like) */
+
+/* CLOSE */
+.up-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.up-close:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* BODY */
+.up-body {
+  padding: 0 24px 24px;
+  display: grid;
+  gap: 0;
+}
+
+/* PROFILE HEADER */
+.up-profile-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-top: -32px;
+  margin-bottom: 16px;
+}
+
+.up-avatar-wrap {
+  width: 64px;
+  height: 64px;
+  border-radius: 14px;
+  border: 3px solid var(--bg-panel);
+  overflow: visible;
+  background: var(--bg-card);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 3;
+}
+
+.up-avatar-wrap .presence-dot {
+  position: absolute;
+  /* position at the outer corner of the avatar border */
+  right: -6px;
+  bottom: -6px;
+  z-index: 6;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  border: 3px solid var(--bg-panel);
+  box-sizing: border-box;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45);
+}
+
+.up-avatar-wrap .avatar,
+.up-avatar-wrap .avatar-img {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 11px;
+  font-size: 1.4rem !important;
+}
+
+/* NAME + HANDLE */
+.up-identity {
+  margin-bottom: 20px;
+}
+
+.up-display-name {
+  margin: 0 0 2px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.up-profile-handle {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.up-identity-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.up-not-friend-hint {
+  margin: 0 0 16px;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+  padding: 10px 12px;
+  background: rgba(255, 59, 48, 0.06);
+  border: 1px solid rgba(255, 59, 48, 0.18);
+  border-radius: 8px;
+}
+
+.up-remove-contact-btn {
+  width: 100%;
+  margin-top: 4px;
+  padding: 11px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 59, 48, 0.28);
+  background: rgba(255, 59, 48, 0.08);
+  color: var(--danger);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.up-remove-contact-btn:hover {
+  background: rgba(255, 59, 48, 0.14);
+  border-color: rgba(255, 59, 48, 0.45);
+  color: var(--danger);
+}
+
+/* DIVIDER */
+.up-section {
+  padding-top: 0;
+  margin-top: 0;
+  border-top: none;
+}
+
+.up-section + .up-section {
+  margin-top: 10px;
+}
+
+/* FIELD LABEL */
+.up-section-label {
+  display: block;
+  margin: 0 0 5px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* FIELD BOX — same look as login inputs */
+.up-joined-value {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: var(--text);
+}
+
+/* Wrap section content in input-style box */
+
+/* Joined row — icon + text */
+.up-joined-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.up-joined-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+/* Bio */
+.up-bio-section {
+  margin: 6px 0 22px;
+}
+
+.up-section--joined {
+  margin-top: 2px;
+}
+
+.up-edit-profile-btn {
+  width: 100%;
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+}
+
+.up-edit-profile-btn:hover {
+  background: var(--accent-hover);
+}
+
+.up-bio-text {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Shared profile form hints (setup + settings) */
+.profile-field-hint {
+  margin: 6px 0 0;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.profile-bio-field {
+  margin-top: 0.75rem;
+}
+
+.profile-bio-field textarea {
+  width: 100%;
+  min-height: 88px;
+  resize: vertical;
+  background: var(--bg-shell);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 13px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.profile-bio-counter {
+  text-align: right;
+}
+
+/* Divider between header and sections */
+.up-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.06);
+  margin: 0 0 20px;
+}
+
+.up-listening-section {
+  margin-bottom: 18px;
+}
+
+.up-listening-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 10px;
+  transition: background 0.15s ease;
+}
+
+.up-listening-link:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.up-listening-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 6px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(29, 185, 84, 0.08);
+  border: 1px solid rgba(29, 185, 84, 0.18);
+}
+
+.up-listening-art {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.up-listening-art-fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.up-listening-meta {
+  min-width: 0;
+  flex: 1;
+}
+
+.up-listening-track {
+  margin: 0 0 2px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.up-listening-artist {
+  margin: 0 0 6px;
+  font-size: 0.82rem;
+  color: rgba(240, 237, 248, 0.72);
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.up-listening-platform {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.74rem;
+  color: #1db954;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.up-listening-platform-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.95;
+}

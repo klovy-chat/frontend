@@ -1,0 +1,76 @@
+/**
+ * Protokół WebSocket Klovy Chat — ramki JSON: { type, payload }.
+ * Typy wiadomości zgodne z backend/src/ws/handlers.rs (dispatch_message).
+ */
+
+export const WsType = {
+  // Klient → serwer
+  SEND_MESSAGE: "sendMessage",
+  SEND_CHANNEL_MESSAGE: "send-channel-message",
+  EDIT_MESSAGE: "editMessage",
+  DELETE_MESSAGE: "deleteMessage",
+  MESSAGE_REACTION: "message-reaction",
+  TYPING: "typing",
+  MARK_MESSAGE_READ: "mark-message-read",
+  MARK_CONVERSATION_READ: "mark-conversation-read",
+  MARK_CHANNEL_READ: "mark-channel-read",
+  SET_ONLINE: "set-online",
+  SET_OFFLINE: "set-offline",
+  SET_STATUS: "set-status",
+  CALL_INVITE: "call:invite",
+  CALL_ACCEPT: "call:accept",
+  CALL_REJECT: "call:reject",
+  CALL_CANCEL: "call:cancel",
+  CALL_END: "call:end",
+
+  // Serwer → klient
+  RECEIVE_MESSAGE: "receiveMessage",
+  RECEIVE_CHANNEL_MESSAGE: "receive-channel-message",
+  MESSAGE_EDITED: "message-edited",
+  MESSAGE_DELETED: "message-deleted",
+  MESSAGE_READ: "message-read",
+  MESSAGES_READ: "messages-read",
+  DM_ERROR: "dm-error",
+  UNREAD_UPDATED: "unread-updated",
+  USER_STATUS_CHANGED: "user-status-changed",
+  USER_LISTENING_CHANGED: "user-listening-changed",
+  MESSAGE_MENTION: "message-mention",
+  PROFILE_UPDATED: "profile-updated",
+  CONTACT_PROFILE_UPDATED: "contact-profile-updated",
+  PROFILE_IMAGE_UPDATED: "profile-image-updated",
+  CONTACT_AVATAR_UPDATED: "contact-avatar-updated",
+  PROFILE_BANNER_UPDATED: "profile-banner-updated",
+  CONTACT_BANNER_UPDATED: "contact-banner-updated",
+  CHANNEL_ADDED: "channel-added",
+  CHANNEL_LEFT: "channel-left",
+  CHANNEL_NAME_UPDATED: "channel-name-updated",
+  CHANNEL_SLOWMODE_UPDATED: "channel-slowmode-updated",
+  CHANNEL_CHAT_LOCKED_UPDATED: "channel-chat-locked-updated",
+  CHANNEL_MODERATION_UPDATED: "channel-moderation-updated",
+  CHANNEL_AVATAR_UPDATED: "channel-avatar-updated",
+  CHANNEL_DELETED: "channel-deleted",
+  BADGE_ASSIGNED: "badge:assigned",
+  BADGE_REMOVED: "badge:removed",
+  BADGE_UPDATED: "badge:updated",
+  USER_WARNED: "user:warned",
+  USER_WARNING_REVOKED: "user:warning-revoked",
+  CALL_INCOMING: "call:incoming",
+  CALL_ACCEPTED: "call:accepted",
+  CALL_REJECTED: "call:rejected",
+  CALL_CANCELLED: "call:cancelled",
+  CALL_ENDED: "call:ended",
+  CALL_UNAVAILABLE: "call:unavailable",
+  SESSION_REVOKED: "session:revoked",
+  WHITELIST_APPROVED: "whitelist:approved",
+  ANNOUNCEMENT_PUBLISHED: "announcement:published",
+  ERROR: "error",
+
+  // Keepalive
+  PING: "ping",
+  PONG: "pong",
+} as const;
+
+export interface WsFrame {
+  type: string;
+  payload?: unknown;
+}

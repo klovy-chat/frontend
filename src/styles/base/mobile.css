@@ -1,0 +1,288 @@
+/* ============================================================
+   MOBILE & TABLET — globalne reguły responsywne
+   ============================================================ */
+
+button,
+a,
+[role="button"] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── Wyśrodkowane dialogi (czat, kanały, narzędzia) ── */
+@media (max-width: 960px) {
+  .klovy-backdrop--center,
+  .klovy-backdrop:has(.cs-modal) {
+    align-items: center;
+    justify-content: center;
+    padding: max(16px, var(--safe-top)) 16px max(16px, var(--safe-bottom));
+  }
+
+  .klovy-backdrop--center > .klovy-shell,
+  .klovy-backdrop:has(.cs-modal) > .cs-modal,
+  .klovy-backdrop--center > .contacts-modal {
+    width: min(520px, calc(100vw - 32px)) !important;
+    max-width: calc(100vw - 32px) !important;
+    max-height: min(88dvh, 640px);
+    border-radius: 16px !important;
+    margin: 0;
+    animation: klovy-slide-in 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .klovy-backdrop--center > .contacts-modal {
+    width: min(560px, calc(100vw - 32px)) !important;
+    max-width: calc(100vw - 32px) !important;
+    max-height: min(90dvh, 720px);
+  }
+
+  .klovy-backdrop--center.closing > .klovy-shell,
+  .klovy-backdrop.closing:has(.cs-modal) > .cs-modal,
+  .klovy-backdrop--center.closing > .contacts-modal {
+    animation: klovy-slide-out 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+
+/* ── Mobile shell + chat chrome ── */
+@media (max-width: 960px) {
+  .app-shell__main .chat-window,
+  .app-shell__main .mobile-shell-bar {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .mobile-shell-bar--chat {
+    border-bottom: none;
+    padding-bottom: 6px;
+  }
+
+  .mobile-shell-bar {
+    width: 100%;
+    gap: 6px;
+  }
+
+  .mobile-shell-bar__btn {
+    flex-shrink: 0;
+  }
+
+  .mobile-shell-bar__title {
+    flex: 1;
+    text-align: left;
+    padding: 0 2px;
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .chat-window {
+    width: 100%;
+    max-width: 100%;
+    min-height: 0;
+    flex: 1;
+  }
+
+  .chat-main {
+    width: 100%;
+    min-height: 0;
+    flex: 1;
+  }
+
+  /* Jedna zwarta sekcja nagłówka zamiast dwóch „ramek” */
+  .chat-header {
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    padding: 0 8px 8px;
+    padding-left: calc(8px + var(--safe-left));
+    padding-right: calc(8px + var(--safe-right));
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-panel);
+  }
+
+  .chat-header > :not(.chat-header__actions) {
+    display: none;
+  }
+
+  .chat-header__actions {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .chat-header__toolbar {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 4px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .chat-header__toolbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .chat-header__toolbar-sep {
+    display: none;
+  }
+
+  .chat-header__toolbar-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 11px;
+    flex-shrink: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+  }
+
+  .chat-header__toolbar-btn:hover {
+    background: var(--bg-hover);
+  }
+
+  .chat-header__toolbar-btn--active {
+    background: var(--accent-dim);
+    border-color: var(--accent-border);
+  }
+
+  .chat-header__toolbar-btn--danger {
+    margin-left: auto;
+    background: transparent;
+    border-color: transparent;
+  }
+
+  .chat-header__toolbar-btn--danger:hover {
+    background: var(--danger-dim);
+    border-color: var(--danger-border);
+    color: var(--danger);
+  }
+}
+
+@media (max-width: 480px) {
+  .mobile-shell-bar__btn {
+    height: 36px;
+    padding: 0 10px;
+    font-size: 12px;
+  }
+
+  .mobile-shell-bar__title {
+    font-size: 14px;
+  }
+
+  .chat-header__toolbar-btn {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* ── Pickery: pełna szerokość nad klawiaturą ── */
+@media (max-width: 640px) {
+  .emoji-picker,
+  .gif-picker,
+  .sticker-picker {
+    left: 8px !important;
+    right: 8px !important;
+    width: auto !important;
+    max-width: none;
+    transform: none !important;
+    bottom: calc(64px + var(--safe-bottom));
+    max-height: min(48dvh, 380px);
+    border-radius: 14px;
+    animation: picker-sheet-in 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .emoji-picker-grid {
+    grid-template-columns: repeat(7, 1fr);
+  }
+}
+
+@keyframes picker-sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ── Lista czatów ── */
+@media (max-width: 640px) {
+  .chat-list-pane__header {
+    padding: 16px 14px 10px;
+  }
+
+  .chat-list-pane__title {
+    font-size: 18px;
+  }
+
+  .chat-list-pane__search,
+  .chat-list-pane__tabs {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .chat-list-item {
+    padding: 12px 14px;
+    min-height: 56px;
+  }
+}
+
+/* ── Bąbelki wiadomości ── */
+@media (max-width: 640px) {
+  .message-list {
+    padding: 8px 10px 12px;
+  }
+
+  .message-row {
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+}
+
+/* ── Profil użytkownika ── */
+@media (max-width: 480px) {
+  .up-card {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 16px 16px 0 0;
+    max-height: 94dvh;
+    overflow-y: auto;
+  }
+}
+
+/* ── Inline ustawienia (mobile shell) ── */
+@media (max-width: 640px) {
+  .as-content--inline {
+    min-height: 0;
+  }
+
+  .as-content-topbar {
+    top: 12px;
+    right: calc(12px + var(--safe-right));
+  }
+
+  .as-close-hint {
+    display: none;
+  }
+}
+
+/* Zagnieżdżone modale w ustawieniach kanału */
+@media (max-width: 960px) {
+  .klovy-backdrop--stacked {
+    align-items: center;
+    justify-content: center;
+    padding: max(16px, var(--safe-top)) 16px max(16px, var(--safe-bottom));
+  }
+
+  .klovy-backdrop--stacked > .klovy-shell {
+    width: min(420px, calc(100vw - 32px)) !important;
+    max-width: calc(100vw - 32px) !important;
+    border-radius: 16px !important;
+    padding: 20px 16px !important;
+  }
+}

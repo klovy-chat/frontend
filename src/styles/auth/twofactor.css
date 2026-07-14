@@ -1,0 +1,246 @@
+.tf-overlay {
+  padding: 1rem;
+}
+
+.tf-modal {
+  position: relative;
+  width: min(100%, 32rem);
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 1.75rem;
+}
+
+.tf-modal--scan {
+  width: min(100%, 44rem);
+  max-height: 85vh;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.tf-modal-scroll--scan {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 2rem 2.25rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.tf-modal-scroll--scan::-webkit-scrollbar {
+  width: 8px;
+}
+
+.tf-modal-scroll--scan::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tf-modal-scroll--scan::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--border) 80%, transparent);
+}
+
+.tf-modal-scroll--scan::-webkit-scrollbar-thumb:hover {
+  background: var(--border);
+}
+
+.tf-modal--scan .tf-close {
+  top: 1rem;
+  right: 1rem;
+  z-index: 1;
+}
+
+.tf-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: var(--bg-hover);
+  color: var(--text-muted);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+.tf-close:hover {
+  background: var(--bg-card);
+  color: var(--text);
+}
+
+.tf-title {
+  margin: 0 0 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.tf-text {
+  margin: 0 0 1rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  font-size: 0.92rem;
+}
+
+.tf-text--warn {
+  color: var(--warning);
+}
+
+.tf-error {
+  margin: 0 0 1rem;
+  color: var(--danger);
+  font-size: 0.875rem;
+}
+
+.tf-qr-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin: 1.25rem 0 1.5rem;
+  padding: 1.5rem 2.5rem;
+  border-radius: var(--radius);
+  background: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tf-open-app {
+  display: block;
+  width: 100%;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  background: var(--accent-dim);
+  border: 1px solid var(--accent-border);
+  color: var(--accent);
+  text-align: center;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background 0.15s;
+}
+
+.tf-open-app:hover {
+  background: rgba(124, 92, 255, 0.18);
+}
+
+.tf-copy-btn {
+  align-self: flex-start;
+  margin-top: 0.35rem;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.82rem;
+  transition: background 0.15s;
+}
+
+.tf-copy-btn:hover {
+  background: var(--bg-hover);
+}
+
+.tf-secret {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.tf-secret-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tf-secret code,
+.tf-backup-list code {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  word-break: break-all;
+}
+
+.tf-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.tf-field label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.tf-field input {
+  padding: 0.75rem 0.85rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-deep);
+  color: var(--text);
+  transition: border-color 0.15s;
+}
+
+.tf-field input:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.tf-backup-list {
+  list-style: none;
+  margin: 0 0 1.25rem;
+  padding: 0.85rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+}
+
+.tf-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.65rem;
+}
+
+.tf-btn {
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    opacity 0.15s;
+}
+
+.tf-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.tf-btn--primary {
+  background: var(--accent);
+  color: #fff;
+}
+
+.tf-btn--primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.tf-btn--ghost {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+.tf-btn--ghost:hover:not(:disabled) {
+  background: var(--bg-card);
+}

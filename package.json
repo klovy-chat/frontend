@@ -1,0 +1,33 @@
+{
+  "name": "klovy-chat-frontend",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:backend": "cargo run --manifest-path ../backend/Cargo.toml",
+    "dev:all": "concurrently -k -n backend,frontend -c blue,green \"npm run dev:backend\" \"wait-on http-get://127.0.0.1:6700/api -t 120000 && vite\"",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@marsidev/react-turnstile": "^1.1.0",
+    "i18next": "^26.3.6",
+    "livekit-client": "^2.19.2",
+    "lucide-react": "^1.17.0",
+    "qrcode.react": "^4.2.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-i18next": "^17.0.9",
+    "react-router-dom": "^6.28.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.3",
+    "concurrently": "^9.1.2",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11",
+    "wait-on": "^8.0.1"
+  }
+}
