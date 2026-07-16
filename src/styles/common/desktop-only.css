@@ -1,4 +1,5 @@
 .desktop-only {
+  position: relative;
   min-height: 100vh;
   min-height: 100dvh;
   display: flex;
@@ -13,18 +14,37 @@
   font-family: var(--font-sans, "Space Grotesk", system-ui, sans-serif);
 }
 
+.desktop-only__lang {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  z-index: 10;
+}
+
+.desktop-only__lang .al-lang-switch-select {
+  appearance: none;
+  background: var(--bg-panel, #171a22);
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.12));
+  border-radius: 8px;
+  color: var(--text, #f2f3f7);
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+  line-height: 1.2;
+  padding: 0.45rem 2rem 0.45rem 0.75rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.65rem center;
+}
+
+.desktop-only__lang .al-lang-switch-select:focus {
+  border-color: var(--accent, #5b8cff);
+  outline: none;
+}
+
 .desktop-only__card {
   width: min(420px, 100%);
   text-align: center;
-}
-
-.desktop-only__brand {
-  margin: 0 0 20px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--text-muted, #9aa0b0);
 }
 
 .desktop-only__title {

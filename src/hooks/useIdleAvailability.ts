@@ -5,11 +5,40 @@ import { useWebSocket } from "../context/WebSocketContext";
 import { WsType } from "../api/wsProtocol";
 
 const IDLE_MS = 5 * 60 * 1000;
+const AUTO_IDLE_BRB_KEY = "klovy:autoIdleBrb";
+
+/** Cleared on manual status picks so auto-idle BRB does not stick across sessions. */
+export function clearAutoIdleBrbFlag(): void {
+  try {
+    sessionStorage.removeItem(AUTO_IDLE_BRB_KEY);
+  } catch {
+    /* private mode / blocked storage */
+  }
+}
+
+function markAutoIdleBrb(userId: string): void {
+  try {
+    sessionStorage.setItem(AUTO_IDLE_BRB_KEY, userId);
+  } catch {
+    /* ignore */
+  }
+}
+
+function isMarkedAutoIdleBrb(userId: string): boolean {
+  try {
+    return sessionStorage.getItem(AUTO_IDLE_BRB_KEY) === userId;
+  } catch {
+    return false;
+  }
+}
 
 /**
  * While status is "online", 5 minutes without input → auto "brb".
  * Moving the cursor / typing / focusing the tab restores "online".
  * Manual away / dnd / brb are left alone.
+ *
+ * Auto BRB is tagged in sessionStorage so a later login/refresh does not keep
+ * "zaraz wracam" as if the user had chosen it.
  */
 export function useIdleAvailability(): void {
   const { user, updateUser } = useAuth();
@@ -20,9 +49,11 @@ export function useIdleAvailability(): void {
   const autoIdleBrbRef = useRef(false);
   const idleTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const switchingRef = useRef(false);
+  const restoredStaleBrbRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!user?.id) return;
+    const userId = user.id;
 
     const applyStatus = async (status: "online" | "brb") => {
       if (switchingRef.current) return;
@@ -38,6 +69,19 @@ export function useIdleAvailability(): void {
       }
     };
 
+    // Stale auto-idle from a previous tab session / logout — restore online once.
+    // Skip when this tab just applied auto BRB (autoIdleBrbRef is already true).
+    if (
+      restoredStaleBrbRef.current !== userId &&
+      !autoIdleBrbRef.current &&
+      statusRef.current === "brb" &&
+      isMarkedAutoIdleBrb(userId)
+    ) {
+      restoredStaleBrbRef.current = userId;
+      clearAutoIdleBrbFlag();
+      void applyStatus("online");
+    }
+
     const clearIdleTimer = () => {
       if (idleTimerRef.current) {
         clearTimeout(idleTimerRef.current);
@@ -52,6 +96,7 @@ export function useIdleAvailability(): void {
       idleTimerRef.current = setTimeout(() => {
         if (statusRef.current !== "online") return;
         autoIdleBrbRef.current = true;
+        markAutoIdleBrb(userId);
         void applyStatus("brb");
       }, IDLE_MS);
     };
@@ -59,12 +104,13 @@ export function useIdleAvailability(): void {
     const onActivity = () => {
       if (autoIdleBrbRef.current && statusRef.current === "brb") {
         autoIdleBrbRef.current = false;
+        clearAutoIdleBrbFlag();
         void applyStatus("online");
       }
       armIdleTimer();
     };
 
-    // If the user manually picks another status, forget the idle auto-flag.
+    // Manual status (or restore) left auto-idle — drop the in-memory flag.
     if (statusRef.current !== "brb") {
       autoIdleBrbRef.current = false;
     }

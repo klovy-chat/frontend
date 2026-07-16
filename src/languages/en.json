@@ -1,8 +1,7 @@
 {
   "desktopOnly": {
-    "brand": "Klovy Chat",
     "title": "Desktop only for now",
-    "body": "The app is not available on phones or tablets yet. Open Klovy Chat on a computer to use chat."
+    "body": "The app is not available on phones or tablets yet. Open it on a computer to use chat."
   },
   "common": {
     "save": "Save",

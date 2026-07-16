@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { updateAvailabilityStatus } from "../../api/auth";
+import { clearAutoIdleBrbFlag } from "../../hooks/useIdleAvailability";
 import { useAuth } from "../../context/AuthContext";
 import { useWebSocket } from "../../context/WebSocketContext";
 import { WsType } from "../../api/wsProtocol";
@@ -49,6 +50,7 @@ export function AppNavRail({
   const handleStatusChange = async (status: "online" | "away" | "brb" | "dnd") => {
     if (!user) return;
     try {
+      clearAutoIdleBrbFlag();
       const updated = await updateAvailabilityStatus(status);
       updateUser(updated);
       ws?.send(WsType.SET_STATUS, { availabilityStatus: status });

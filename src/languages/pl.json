@@ -1,8 +1,7 @@
 {
   "desktopOnly": {
-    "brand": "Klovy Chat",
     "title": "Dostępne tylko na komputerze",
-    "body": "Aplikacja nie jest obecnie dostępna na telefonach ani tabletach. Otwórz Klovy Chat na komputerze, aby korzystać z czatu."
+    "body": "Aplikacja nie jest obecnie dostępna na telefonach ani tabletach. Otwórz ją na komputerze, aby korzystać z czatu."
   },
   "common": {
     "save": "Zapisz",
