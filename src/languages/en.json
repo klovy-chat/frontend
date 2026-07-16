@@ -291,7 +291,18 @@
     "avatarTooLarge": "Image is too large. Maximum size is {{limit}}.",
     "failed": "Could not upload file. Try again.",
     "attachFile": "Attach file",
-    "removeFile": "Remove file"
+    "removeFile": "Remove file",
+    "maxSizeHint": "Max {{size}} · JPG, PNG or WebP",
+    "maxAttachmentHint": "Max {{size}} per file"
+  },
+  "imageCrop": {
+    "avatarTitle": "Adjust your photo",
+    "bannerTitle": "Adjust your banner",
+    "channelAvatarTitle": "Adjust channel photo",
+    "hint": "Drag to reposition, scroll or use the slider to zoom.",
+    "maxSize": "max {{size}}",
+    "zoom": "Zoom",
+    "apply": "Apply"
   },
   "messages": {
     "deleted": "Message deleted",
@@ -299,6 +310,7 @@
     "image": "Image",
     "video": "Video",
     "audio": "Voice message",
+    "call": "Voice call",
     "file": "File: {{name}}",
     "attachment": "Attachment",
     "default": "Message",
@@ -469,6 +481,8 @@
       "title": "Channel invite",
       "invalidLink": "Invalid invite link",
       "expired": "Invite does not exist or has expired",
+      "revoked": "This invite link has been disabled by the channel owner",
+      "limitReached": "This invite link has reached its join limit",
       "channelFallback": "channel",
       "inviterMessage": "{{name}} invited you to this channel",
       "loginRequired": "Sign in to join the channel.",
@@ -725,6 +739,8 @@
       "options": "Options"
     },
     "typing": "Typing…",
+    "callLog": "Voice call · {{duration}}",
+    "missedCall": "Missed call",
     "loadOlder": "Load older messages",
     "loadingOlder": "Loading…",
     "notifications": {
@@ -848,9 +864,19 @@
       "reportDetailsPlaceholder": "Describe the issue…",
       "inviteModal": {
         "title": "Invite to channel",
-        "hint": "Share the link — any signed-in user can join.",
+        "hint": "Create invite links. Anyone signed in can join until you revoke the link or reach its join limit.",
         "generating": "Generating link…",
-        "copyLink": "Copy link"
+        "copyLink": "Copy link",
+        "create": "Create link",
+        "revoke": "Revoke",
+        "empty": "No active invite links yet. Create one below.",
+        "limitToggle": "Limit number of joins",
+        "limitPlaceholder": "e.g. 50",
+        "limitHint": "Once this many people join, the link stops working.",
+        "unlimitedHint": "Unlimited joins until you revoke the link.",
+        "invalidLimit": "Enter a join limit of at least 1.",
+        "usesUnlimited": "{{count}} joined · unlimited",
+        "usesLimited": "{{count}} / {{max}} joined"
       },
       "toast": {
         "addBotFailed": "Could not add bot",
@@ -862,6 +888,8 @@
         "inviteCreateFailed": "Could not create invite.",
         "inviteCopied": "Invite link copied",
         "inviteCopyManual": "Copy the link manually: {{url}}",
+        "inviteRevoked": "Invite link revoked",
+        "inviteRevokeFailed": "Could not revoke invite.",
         "reportSent": "Report was submitted"
       }
     },
@@ -942,10 +970,21 @@
     },
     "bots": {
       "title": "Bots",
+      "guide": {
+        "title": "How to build a bot",
+        "intro": "Bots work like Discord bots: create one here, copy the token once, then call the HTTP API from any language that can send requests. You do not need the browser custom client header — that header is only for the official web app (DDoS filter).",
+        "step1": "1. Create a bot below and copy the token (shown only once).",
+        "step2": "2. In Channel settings → Bots, add the bot to the channel you want it to post in.",
+        "step3": "3. Send requests with Authorization: Bearer <token> to https://api.klovy.chat",
+        "endpointsTitle": "Useful endpoints",
+        "me": "GET /api/bot/me — who am I",
+        "send": "POST /api/bot/channels/{channelId}/messages — body { \"content\": \"Hello\" }",
+        "examplesTitle": "Quick examples"
+      },
       "create": {
         "title": "Create bot",
-        "hint": "Bots are API-controlled accounts. After creation copy the token — it is shown only once.",
-        "apiHint": "Send messages via POST {{endpoint}} with body { \"content\": \"…\" }.",
+        "hint": "After creation copy the token — it is shown only once. Keep it secret like a password.",
+        "apiHint": "Send messages via POST {{endpoint}} with Authorization: Bearer <token>.",
         "username": "Bot username",
         "usernamePlaceholder": "e.g. my_bot",
         "displayName": "Display name (optional)",
@@ -1326,6 +1365,7 @@
     "peerOffline": "User is unavailable.",
     "peerBusy": "User is already on another call.",
     "unavailable": "Could not place the call.",
+    "cameraFailed": "Could not access the camera. Check browser permissions.",
     "status": {
       "calling": "Calling…",
       "connecting": "Connecting…",
@@ -1340,6 +1380,8 @@
       "muteMic": "Mute microphone",
       "enableCamera": "Turn on camera",
       "disableCamera": "Turn off camera",
+      "micLevel": "Mic",
+      "speakerLevel": "Volume",
       "end": "End",
       "reject": "Reject",
       "accept": "Answer"

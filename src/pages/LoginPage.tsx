@@ -1,10 +1,13 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
 import { ApiError } from "../api/client";
 import { normalizeAuthError } from "../utils/auth/authErrors";
-import { TurnstileWidget } from "../components/auth/TurnstileWidget";
+import {
+  TurnstileWidget,
+  type TurnstileWidgetHandle,
+} from "../components/auth/TurnstileWidget";
 import { AuthPageLayout } from "../components/auth/AuthPageLayout";
 import { normalizeUsernameInput, sanitizeUsernameInput } from "../utils/auth/username";
 import "../styles/auth/auth.css";
@@ -25,6 +28,8 @@ export function LoginPage() {
   const [twoFactorCode, setTwoFactorCode] = useState("");
   const [twoFactorTurnstileToken, setTwoFactorTurnstileToken] = useState("");
   const [useBackupCode, setUseBackupCode] = useState(false);
+  const turnstileRef = useRef<TurnstileWidgetHandle>(null);
+  const twoFactorTurnstileRef = useRef<TurnstileWidgetHandle>(null);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -50,6 +55,9 @@ export function LoginPage() {
       }
       navigate("/");
     } catch (err) {
+      // Turnstile tokens are single-use; force a fresh challenge before retry.
+      setTurnstileToken("");
+      turnstileRef.current?.reset();
       setError(
         normalizeAuthError(
           err instanceof ApiError ? err.message : t("auth.errors.loginFailed"),
@@ -82,6 +90,8 @@ export function LoginPage() {
       await completeTwoFactorLogin(twoFactorToken, code, twoFactorTurnstileToken);
       navigate("/");
     } catch (err) {
+      setTwoFactorTurnstileToken("");
+      twoFactorTurnstileRef.current?.reset();
       setError(
         err instanceof ApiError
           ? err.message
@@ -172,8 +182,10 @@ export function LoginPage() {
                 </div>
 
                 <TurnstileWidget
+                  ref={turnstileRef}
                   onToken={setTurnstileToken}
                   onExpire={() => setTurnstileToken("")}
+                  onError={() => setTurnstileToken("")}
                 />
 
                 {error && (
@@ -242,8 +254,10 @@ export function LoginPage() {
                 </button>
 
                 <TurnstileWidget
+                  ref={twoFactorTurnstileRef}
                   onToken={setTwoFactorTurnstileToken}
                   onExpire={() => setTwoFactorTurnstileToken("")}
+                  onError={() => setTwoFactorTurnstileToken("")}
                 />
 
                 {error && (

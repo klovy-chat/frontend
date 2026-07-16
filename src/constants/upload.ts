@@ -4,7 +4,17 @@ import i18n from "../i18n/config";
 export const MAX_ATTACHMENT_SIZE_BYTES = 10 * 1024 * 1024;
 
 /** Maximum avatar/banner size (5 MB) — must match backend `MAX_AVATAR_BYTES`. */
-const MAX_AVATAR_SIZE_BYTES = 5 * 1024 * 1024;
+export const MAX_AVATAR_SIZE_BYTES = 5 * 1024 * 1024;
+
+/** Human-readable max attachment size, e.g. "10 MB". */
+export const MAX_ATTACHMENT_SIZE_LABEL = `${Math.round(
+  MAX_ATTACHMENT_SIZE_BYTES / (1024 * 1024),
+)} MB`;
+
+/** Human-readable max avatar/banner size, e.g. "5 MB". */
+export const MAX_AVATAR_SIZE_LABEL = `${Math.round(
+  MAX_AVATAR_SIZE_BYTES / (1024 * 1024),
+)} MB`;
 
 export const ALLOWED_ATTACHMENT_EXTENSIONS = [
   "pdf",
@@ -18,6 +28,7 @@ export const ALLOWED_ATTACHMENT_EXTENSIONS = [
   "webm",
   "ogg",
   "wav",
+  "mp4",
 ] as const;
 
 const ALLOWED_ATTACHMENT_MIME_TYPES: Record<
@@ -40,6 +51,7 @@ const ALLOWED_ATTACHMENT_MIME_TYPES: Record<
   webm: ["audio/webm", "video/webm"],
   ogg: ["audio/ogg", "video/ogg", "application/ogg"],
   wav: ["audio/wav", "audio/x-wav", "audio/wave", "audio/vnd.wave"],
+  mp4: ["audio/mp4", "audio/aac", "audio/x-m4a", "video/mp4"],
 };
 
 export function formatUploadLimitMb(bytes: number): string {

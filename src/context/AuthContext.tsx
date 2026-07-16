@@ -157,7 +157,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     document.addEventListener("visibilitychange", onVisibilityChange);
     const intervalId = globalThis.setInterval(() => {
       void verifySession();
-    }, 45_000);
+    }, 5 * 60_000);
 
     return () => {
       cancelled = true;

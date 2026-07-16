@@ -58,7 +58,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: background 0.18s, color 0.18s, border-color 0.18s;
   flex-shrink: 0;
 }
@@ -106,7 +106,7 @@
   color: var(--text-muted);
   background: transparent;
   border: none;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -304,7 +304,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   color: var(--text-muted);
   transition: background 0.16s, color 0.16s, border-color 0.16s, transform 0.16s;
   padding: 0;
@@ -335,7 +335,7 @@
   border: 1px solid var(--border);
   background: var(--bg-elevated);
   color: var(--text-muted);
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: color 0.16s, border-color 0.16s, background 0.16s;
 }
 
@@ -441,7 +441,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   color: #fff;
   box-shadow: 0 6px 18px -4px rgba(124, 92, 255, 0.45);
   transition: transform 0.16s, box-shadow 0.16s, background 0.16s;

@@ -22,6 +22,7 @@ export const WsType = {
   CALL_REJECT: "call:reject",
   CALL_CANCEL: "call:cancel",
   CALL_END: "call:end",
+  CALL_TIMEOUT: "call:timeout",
 
   // Serwer → klient
   RECEIVE_MESSAGE: "receiveMessage",

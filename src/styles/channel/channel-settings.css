@@ -30,7 +30,7 @@
   font-family: var(--font-sans);
   font-size: 0.82rem;
   font-weight: 500;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   text-align: left;
   transition: background 0.15s, color 0.15s;
 }
@@ -181,7 +181,7 @@
   font-family: var(--font-sans);
   font-size: 0.88rem;
   font-weight: 500;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
 }
 
 .cs-select:disabled {
@@ -200,7 +200,7 @@
   font-family: var(--font-sans);
   font-size: 0.84rem;
   font-weight: 600;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 
@@ -242,7 +242,7 @@
   font-family: var(--font-sans);
   font-size: 0.85rem;
   font-weight: 500;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   text-align: left;
   transition: background 0.15s, color 0.15s;
 }

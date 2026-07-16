@@ -9,6 +9,7 @@ import { useWebSocket } from "../context/WebSocketContext";
 import { WsType } from "../api/wsProtocol";
 import { useProfileSync } from "../hooks/useProfileSync";
 import { useListeningSync } from "../hooks/useListeningSync";
+import { useIdleAvailability } from "../hooks/useIdleAvailability";
 import type { ChatTarget, Contact } from "../types";
 import "../styles/chat/chat.css";
 
@@ -24,6 +25,8 @@ export function ChatPage() {
   const [active, setActive] = useState<ChatTarget | null>(null);
   const location = useLocation();
   const ws = useWebSocket();
+
+  useIdleAvailability();
 
   useProfileSync(ws, {
     onInfo: ({ userId, username, displayName, bio, color }) =>

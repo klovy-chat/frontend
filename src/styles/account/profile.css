@@ -67,7 +67,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: background 0.15s, color 0.15s;
 }
 
@@ -168,19 +168,29 @@
   margin-top: 4px;
   padding: 11px 16px;
   border-radius: 8px;
-  border: 1px solid rgba(255, 59, 48, 0.28);
-  background: rgba(255, 59, 48, 0.08);
-  color: var(--danger);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
   font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: var(--cursor-pointer);
+  transition: color 0.15s, background 0.15s;
 }
 
 .up-remove-contact-btn:hover {
-  background: rgba(255, 59, 48, 0.14);
-  border-color: rgba(255, 59, 48, 0.45);
+  background: transparent;
+  border-color: transparent;
   color: var(--danger);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  text-decoration-color: color-mix(in srgb, var(--danger) 45%, transparent);
+}
+
+.up-remove-contact-btn--muted:hover {
+  color: var(--text);
+  text-decoration-color: color-mix(in srgb, var(--text-muted) 50%, transparent);
 }
 
 /* DIVIDER */
@@ -249,7 +259,7 @@
   color: #fff;
   font-size: 0.85rem;
   font-weight: 600;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: background 0.15s, opacity 0.15s;
 }
 
@@ -286,7 +296,7 @@
   border-radius: 8px;
   padding: 10px 13px;
   color: var(--text);
-  font-family: inherit;
+  font-family: var(--font-sans);
   font-size: 0.9rem;
   line-height: 1.45;
 }

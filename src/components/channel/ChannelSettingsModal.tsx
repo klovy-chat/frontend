@@ -16,7 +16,17 @@ import {
   leaveChannel,
   type ChannelModerationResponse,
 } from "../../api/channels";
-import { createChannelInvite } from "../../api/invites";
+import {
+  createChannelInvite,
+  deleteChannelInvite,
+  listChannelInvites,
+  type ChannelInvite,
+} from "../../api/invites";
+import { ImageCropModal } from "../common/ImageCropModal";
+import {
+  MAX_AVATAR_SIZE_BYTES,
+  MAX_AVATAR_SIZE_LABEL,
+} from "../../constants/upload";
 import {
   getInstallableBots,
   addBotToChannel,
@@ -166,9 +176,14 @@ export function ChannelSettingsModal({
   const [tab, setTab] = useState<SettingsTab>("general");
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteClosing, setInviteClosing] = useState(false);
-  const [inviteUrl, setInviteUrl] = useState("");
   const [inviteLoading, setInviteLoading] = useState(false);
-  const [inviteCopied, setInviteCopied] = useState(false);
+  const [invites, setInvites] = useState<ChannelInvite[]>([]);
+  const [inviteCreating, setInviteCreating] = useState(false);
+  const [inviteCopiedId, setInviteCopiedId] = useState<string | null>(null);
+  const [inviteLimitEnabled, setInviteLimitEnabled] = useState(false);
+  const [inviteLimitValue, setInviteLimitValue] = useState("50");
+  const [inviteRevokingId, setInviteRevokingId] = useState<string | null>(null);
+  const [channelCropFile, setChannelCropFile] = useState<File | null>(null);
   const [reportOpen, setReportOpen] = useState(false);
   const [reportClosing, setReportClosing] = useState(false);
   const [reportReason, setReportReason] = useState(reportReasonApiValue("spam"));
@@ -414,27 +429,62 @@ export function ChannelSettingsModal({
     if (!isAdmin) return;
     setInviteOpen(true);
     setInviteLoading(true);
-    setInviteCopied(false);
+    setInviteCopiedId(null);
     try {
-      const res = await createChannelInvite(initialChannel._id);
-      setInviteUrl(res.url);
+      const res = await listChannelInvites(initialChannel._id);
+      setInvites(res.invites.filter((i) => !i.revoked));
     } catch (err) {
-      setInviteUrl("");
       toast.error(err instanceof Error ? err.message : t("modals.channelSettings.toast.inviteCreateFailed"));
-      setInviteOpen(false);
     } finally {
       setInviteLoading(false);
     }
   };
 
-  const copyInvite = async () => {
-    if (!inviteUrl) return;
+  const handleCreateInvite = async () => {
+    if (!isAdmin || inviteCreating) return;
+    let maxUses: number | null = null;
+    if (inviteLimitEnabled) {
+      const parsed = Math.floor(Number(inviteLimitValue));
+      if (!Number.isFinite(parsed) || parsed < 1) {
+        toast.error(t("modals.channelSettings.inviteModal.invalidLimit"));
+        return;
+      }
+      maxUses = parsed;
+    }
+    setInviteCreating(true);
     try {
-      await navigator.clipboard.writeText(inviteUrl);
-      setInviteCopied(true);
+      const invite = await createChannelInvite(initialChannel._id, maxUses);
+      setInvites((prev) => [invite, ...prev]);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t("modals.channelSettings.toast.inviteCreateFailed"));
+    } finally {
+      setInviteCreating(false);
+    }
+  };
+
+  const copyInvite = async (url: string, inviteId: string) => {
+    if (!url) return;
+    try {
+      await navigator.clipboard.writeText(url);
+      setInviteCopiedId(inviteId);
+      window.setTimeout(() => setInviteCopiedId((cur) => (cur === inviteId ? null : cur)), 2000);
       toast.success(t("modals.channelSettings.toast.inviteCopied"));
     } catch {
-      toast.warning(t("modals.channelSettings.toast.inviteCopyManual", { url: inviteUrl }));
+      toast.warning(t("modals.channelSettings.toast.inviteCopyManual", { url }));
+    }
+  };
+
+  const handleRevokeInvite = async (inviteId: string) => {
+    if (!isAdmin || inviteRevokingId) return;
+    setInviteRevokingId(inviteId);
+    try {
+      await deleteChannelInvite(initialChannel._id, inviteId);
+      setInvites((prev) => prev.filter((i) => i.inviteId !== inviteId));
+      toast.success(t("modals.channelSettings.toast.inviteRevoked"));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t("modals.channelSettings.toast.inviteRevokeFailed"));
+    } finally {
+      setInviteRevokingId(null);
     }
   };
 
@@ -511,8 +561,18 @@ export function ChannelSettingsModal({
   const onAvatarInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    void handleAvatarUpload(file);
+    if (file.size > MAX_AVATAR_SIZE_BYTES) {
+      toast.error(t("upload.avatarTooLarge", { limit: MAX_AVATAR_SIZE_LABEL }));
+      e.target.value = "";
+      return;
+    }
+    setChannelCropFile(file);
     e.target.value = "";
+  };
+
+  const handleChannelCropConfirm = async (file: File) => {
+    await handleAvatarUpload(file);
+    setChannelCropFile(null);
   };
 
   const triggerAvatarUpload = () => {
@@ -1129,36 +1189,117 @@ export function ChannelSettingsModal({
           className={`klovy-backdrop klovy-backdrop--stacked${inviteClosing ? " closing" : ""}`}
           onClick={(e) => { if (e.target === e.currentTarget) closeInvite(); }}
         >
-          <div className="klovy-shell" style={{ ...modalCard, width: 400, padding: 24 }} onClick={(e) => e.stopPropagation()}>
+          <div className="klovy-shell" style={{ ...modalCard, width: 460, maxWidth: "94vw", padding: 24, maxHeight: "88vh", display: "flex", flexDirection: "column" }} onClick={(e) => e.stopPropagation()}>
             <h3 style={{ margin: "0 0 8px", color: C.text }}>{t("modals.channelSettings.inviteModal.title")}</h3>
             <p style={{ margin: "0 0 16px", fontSize: "0.85rem", color: C.textMuted }}>
               {t("modals.channelSettings.inviteModal.hint")}
             </p>
-            {inviteLoading ? (
-              <p style={{ color: C.textMuted }}>{t("modals.channelSettings.inviteModal.generating")}</p>
-            ) : (
-              <>
+
+            <div style={{ border: `1px solid ${C.border}`, borderRadius: 10, padding: 14, marginBottom: 16 }}>
+              <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", color: C.text, fontSize: "0.85rem", fontWeight: 600 }}>
                 <input
-                  readOnly
-                  value={inviteUrl}
-                  style={{
-                    width: "100%", boxSizing: "border-box",
-                    background: C.bgDeep, border: `1px solid ${C.border}`,
-                    borderRadius: 8, padding: "10px 12px",
-                    color: C.text, fontSize: "0.8rem",
-                  }}
+                  type="checkbox"
+                  checked={inviteLimitEnabled}
+                  onChange={(e) => setInviteLimitEnabled(e.target.checked)}
                 />
-                <div style={{ display: "flex", gap: 8, marginTop: 14, justifyContent: "flex-end" }}>
-                  <HoverBtn type="button" style={btnSecondary} onClick={closeInvite}>{t("common.close")}</HoverBtn>
-                  <HoverBtn type="button" style={btnPrimary} onClick={() => void copyInvite()}>
-                    {inviteCopied ? t("common.copied") : t("modals.channelSettings.inviteModal.copyLink")}
-                  </HoverBtn>
+                {t("modals.channelSettings.inviteModal.limitToggle")}
+              </label>
+              {inviteLimitEnabled ? (
+                <div style={{ marginTop: 10 }}>
+                  <input
+                    type="number"
+                    min={1}
+                    value={inviteLimitValue}
+                    onChange={(e) => setInviteLimitValue(e.target.value)}
+                    placeholder={t("modals.channelSettings.inviteModal.limitPlaceholder")}
+                    style={{
+                      width: "100%", boxSizing: "border-box",
+                      background: C.bgDeep, border: `1px solid ${C.border}`,
+                      borderRadius: 8, padding: "8px 12px", color: C.text, fontSize: "0.85rem",
+                    }}
+                  />
+                  <p style={{ margin: "6px 0 0", fontSize: "0.72rem", color: C.textMuted }}>
+                    {t("modals.channelSettings.inviteModal.limitHint")}
+                  </p>
                 </div>
-              </>
-            )}
+              ) : (
+                <p style={{ margin: "6px 0 0", fontSize: "0.72rem", color: C.textMuted }}>
+                  {t("modals.channelSettings.inviteModal.unlimitedHint")}
+                </p>
+              )}
+              <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 12 }}>
+                <HoverBtn type="button" style={btnPrimary} disabled={inviteCreating} onClick={() => void handleCreateInvite()}>
+                  {inviteCreating ? t("modals.channelSettings.inviteModal.generating") : t("modals.channelSettings.inviteModal.create")}
+                </HoverBtn>
+              </div>
+            </div>
+
+            <div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
+              {inviteLoading ? (
+                <p style={{ color: C.textMuted, fontSize: "0.85rem" }}>{t("modals.channelSettings.inviteModal.generating")}</p>
+              ) : invites.length === 0 ? (
+                <p style={{ color: C.textMuted, fontSize: "0.85rem" }}>{t("modals.channelSettings.inviteModal.empty")}</p>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {invites.map((inv) => (
+                    <div key={inv.inviteId} style={{ border: `1px solid ${C.border}`, borderRadius: 10, padding: 12 }}>
+                      <input
+                        readOnly
+                        value={inv.url}
+                        onFocus={(e) => e.currentTarget.select()}
+                        style={{
+                          width: "100%", boxSizing: "border-box",
+                          background: C.bgDeep, border: `1px solid ${C.border}`,
+                          borderRadius: 8, padding: "8px 10px", color: C.text, fontSize: "0.78rem",
+                        }}
+                      />
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 10, gap: 8, flexWrap: "wrap" }}>
+                        <span style={{ fontSize: "0.75rem", color: C.textMuted }}>
+                          {inv.maxUses == null
+                            ? t("modals.channelSettings.inviteModal.usesUnlimited", { count: inv.useCount })
+                            : t("modals.channelSettings.inviteModal.usesLimited", { count: inv.useCount, max: inv.maxUses })}
+                        </span>
+                        <div style={{ display: "flex", gap: 8 }}>
+                          <HoverBtn type="button" style={btnSecondary} onClick={() => void copyInvite(inv.url, inv.inviteId)}>
+                            {inviteCopiedId === inv.inviteId ? t("common.copied") : t("modals.channelSettings.inviteModal.copyLink")}
+                          </HoverBtn>
+                          <HoverBtn
+                            type="button"
+                            style={{ ...btnSecondary, color: "#f87171", borderColor: "rgba(248,113,113,0.4)" }}
+                            disabled={inviteRevokingId === inv.inviteId}
+                            onClick={() => void handleRevokeInvite(inv.inviteId)}
+                          >
+                            {t("modals.channelSettings.inviteModal.revoke")}
+                          </HoverBtn>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div style={{ display: "flex", gap: 8, marginTop: 16, justifyContent: "flex-end" }}>
+              <HoverBtn type="button" style={btnSecondary} onClick={closeInvite}>{t("common.close")}</HoverBtn>
+            </div>
           </div>
         </div>
       )}
+
+      {channelCropFile ? (
+        <ImageCropModal
+          file={channelCropFile}
+          aspect={1}
+          outputWidth={512}
+          outputHeight={512}
+          round
+          title={t("imageCrop.channelAvatarTitle")}
+          maxSizeLabel={MAX_AVATAR_SIZE_LABEL}
+          busy={avatarLoading}
+          onCancel={() => setChannelCropFile(null)}
+          onConfirm={handleChannelCropConfirm}
+        />
+      ) : null}
 
       {(reportOpen || reportClosing) && (
         <div

@@ -5,14 +5,18 @@ interface MediaImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, "src
   fileUrl: string;
 }
 
+/** Remember which URL worked for a given file key so remounts don't re-hit the API. */
+const resolvedSrcCache = new Map<string, string>();
+
 export function MediaImage({ fileUrl, onError, ...props }: MediaImageProps) {
   const primary = useMemo(() => resolveMediaUrl(fileUrl), [fileUrl]);
   const fallback = useMemo(() => legacyAttachmentFallbackUrl(fileUrl), [fileUrl]);
-  const [src, setSrc] = useState(primary);
+  const cached = resolvedSrcCache.get(fileUrl);
+  const [src, setSrc] = useState(cached ?? primary);
 
   useEffect(() => {
-    setSrc(primary);
-  }, [primary]);
+    setSrc(resolvedSrcCache.get(fileUrl) ?? primary);
+  }, [fileUrl, primary]);
 
   if (!src) return null;
 
@@ -20,6 +24,9 @@ export function MediaImage({ fileUrl, onError, ...props }: MediaImageProps) {
     <img
       {...props}
       src={src}
+      onLoad={() => {
+        resolvedSrcCache.set(fileUrl, src);
+      }}
       onError={(event) => {
         if (fallback && src !== fallback) {
           setSrc(fallback);

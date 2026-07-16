@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Avatar } from "../common/Avatar";
 import { userLabel } from "../../utils/user/format";
@@ -20,12 +20,14 @@ function CtrlButton({
   title,
   active = false,
   danger = false,
+  disabled = false,
   children,
 }: {
   onClick?: () => void;
   title: string;
   active?: boolean;
   danger?: boolean;
+  disabled?: boolean;
   children: React.ReactNode;
 }) {
   const className = [
@@ -37,7 +39,13 @@ function CtrlButton({
     .join(" ");
 
   return (
-    <button type="button" title={title} onClick={onClick} className={className}>
+    <button
+      type="button"
+      title={title}
+      onClick={onClick}
+      className={className}
+      disabled={disabled}
+    >
       {children}
     </button>
   );
@@ -51,18 +59,29 @@ export function CallView() {
     peer,
     isMuted,
     isCameraOn,
+    speakerVolume,
+    micVolume,
     startedAt,
     localVideoTrack,
     remoteVideoTrack,
     toggleMute,
     toggleCamera,
+    setSpeakerVolume,
+    setMicVolume,
     endCall,
     cancelCall,
   } = useCall();
 
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const [elapsed, setElapsed] = useState(0);
+  const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
+  const dragRef = useRef<{
+    pointerId: number;
+    offsetX: number;
+    offsetY: number;
+  } | null>(null);
 
   useEffect(() => {
     const el = localVideoRef.current;
@@ -96,6 +115,46 @@ export function CallView() {
     return () => window.clearInterval(id);
   }, [state, startedAt]);
 
+  useEffect(() => {
+    if (state === "idle") setPos(null);
+  }, [state]);
+
+  const onDragStart = (e: ReactPointerEvent<HTMLDivElement>) => {
+    if (window.matchMedia("(max-width: 640px)").matches) return;
+    if ((e.target as HTMLElement).closest("button, input, label")) return;
+    const panel = panelRef.current;
+    if (!panel) return;
+    const rect = panel.getBoundingClientRect();
+    const next = pos ?? { x: rect.left, y: rect.top };
+    if (!pos) setPos(next);
+    dragRef.current = {
+      pointerId: e.pointerId,
+      offsetX: e.clientX - next.x,
+      offsetY: e.clientY - next.y,
+    };
+    panel.setPointerCapture(e.pointerId);
+  };
+
+  const onDragMove = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== e.pointerId) return;
+    const panel = panelRef.current;
+    const w = panel?.offsetWidth ?? 300;
+    const h = panel?.offsetHeight ?? 280;
+    const maxX = Math.max(8, window.innerWidth - w - 8);
+    const maxY = Math.max(8, window.innerHeight - h - 8);
+    setPos({
+      x: Math.min(maxX, Math.max(8, e.clientX - drag.offsetX)),
+      y: Math.min(maxY, Math.max(8, e.clientY - drag.offsetY)),
+    });
+  };
+
+  const onDragEnd = (e: ReactPointerEvent<HTMLDivElement>) => {
+    if (dragRef.current?.pointerId === e.pointerId) {
+      dragRef.current = null;
+    }
+  };
+
   if (state !== "outgoing" && state !== "connecting" && state !== "active") {
     return null;
   }
@@ -112,9 +171,27 @@ export function CallView() {
   const showRemoteVideo = state === "active" && Boolean(remoteVideoTrack);
   const showLocalVideo = isCameraOn && Boolean(localVideoTrack);
   const isVideoCall = mode === "video";
+  const controlsLive = state === "active";
+
+  const style =
+    pos != null
+      ? ({ left: pos.x, top: pos.y, right: "auto", bottom: "auto" } as const)
+      : undefined;
 
   return (
-    <div className={`call-view${isVideoCall ? " call-view--video" : ""}`}>
+    <div
+      ref={panelRef}
+      className={`call-view${isVideoCall ? " call-view--video" : ""}${pos ? " call-view--dragged" : ""}`}
+      style={style}
+      onPointerDown={onDragStart}
+      onPointerMove={onDragMove}
+      onPointerUp={onDragEnd}
+      onPointerCancel={onDragEnd}
+    >
+      <div className="call-view__drag-handle" aria-hidden>
+        <span />
+      </div>
+
       <div className="call-view__stage">
         {showRemoteVideo ? (
           <video
@@ -151,10 +228,37 @@ export function CallView() {
         <div className="call-view__status">{statusText}</div>
       </div>
 
+      {controlsLive && (
+        <div className="call-view__levels">
+          <label className="call-view__level">
+            <span>{t("call.controls.micLevel")}</span>
+            <input
+              type="range"
+              min={0}
+              max={100}
+              value={Math.round(micVolume * 100)}
+              disabled={isMuted}
+              onChange={(e) => setMicVolume(Number(e.target.value) / 100)}
+            />
+          </label>
+          <label className="call-view__level">
+            <span>{t("call.controls.speakerLevel")}</span>
+            <input
+              type="range"
+              min={0}
+              max={100}
+              value={Math.round(speakerVolume * 100)}
+              onChange={(e) => setSpeakerVolume(Number(e.target.value) / 100)}
+            />
+          </label>
+        </div>
+      )}
+
       <div className="call-view__controls">
         <CtrlButton
           title={isMuted ? t("call.controls.unmuteMic") : t("call.controls.muteMic")}
           active={isMuted}
+          disabled={!controlsLive}
           onClick={toggleMute}
         >
           {isMuted ? (
@@ -173,25 +277,24 @@ export function CallView() {
           )}
         </CtrlButton>
 
-        {isVideoCall && (
-          <CtrlButton
-            title={isCameraOn ? t("call.controls.disableCamera") : t("call.controls.enableCamera")}
-            active={!isCameraOn}
-            onClick={toggleCamera}
-          >
-            {isCameraOn ? (
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polygon points="23 7 16 12 23 17 23 7" />
-                <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
-              </svg>
-            ) : (
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2m5.66 0H14a2 2 0 0 1 2 2v3.34l1 1L23 7v10" />
-                <line x1="1" y1="1" x2="23" y2="23" />
-              </svg>
-            )}
-          </CtrlButton>
-        )}
+        <CtrlButton
+          title={isCameraOn ? t("call.controls.disableCamera") : t("call.controls.enableCamera")}
+          active={!isCameraOn}
+          disabled={!controlsLive}
+          onClick={() => void toggleCamera()}
+        >
+          {isCameraOn ? (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="23 7 16 12 23 17 23 7" />
+              <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+            </svg>
+          ) : (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2m5.66 0H14a2 2 0 0 1 2 2v3.34l1 1L23 7v10" />
+              <line x1="1" y1="1" x2="23" y2="23" />
+            </svg>
+          )}
+        </CtrlButton>
 
         <CtrlButton
           title={t("call.controls.end")}

@@ -170,7 +170,7 @@
   font-family: inherit;
   font-size: 0.875rem;
   font-weight: 500;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   text-align: left;
   transition: background 0.15s, color 0.15s;
 }
@@ -249,7 +249,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: background 0.15s, color 0.15s, border-color 0.15s;
   z-index: 10;
 }
@@ -295,6 +295,20 @@
   line-height: 1.6;
 }
 
+.bots-guide-code {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-deep);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  line-height: 1.5;
+  overflow-x: auto;
+  white-space: pre;
+}
+
 /* Profile card with banner */
 
 .as-avatar-lg {
@@ -314,7 +328,7 @@
   flex-shrink: 0;
   border: 5px solid var(--bg-deep);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   padding: 0;
   transition: transform 0.12s, box-shadow 0.15s;
 }
@@ -412,7 +426,7 @@
 }
 
 .as-select {
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   background-image:
     linear-gradient(45deg, transparent 50%, var(--text-muted) 50%),
     linear-gradient(135deg, var(--text-muted) 50%, transparent 50%);
@@ -457,7 +471,7 @@
   font-family: inherit;
   font-size: 0.875rem;
   font-weight: 600;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: filter 0.15s, transform 0.12s, opacity 0.15s;
 }
 
@@ -483,7 +497,7 @@
   font-family: inherit;
   font-size: 0.875rem;
   font-weight: 500;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 
@@ -510,7 +524,7 @@
   font-family: inherit;
   font-size: 0.875rem;
   font-weight: 600;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: background 0.15s, border-color 0.15s;
 }
 
@@ -998,7 +1012,7 @@
   background: var(--bg-card);
   color: var(--text);
   text-align: left;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: background 0.15s, border-color 0.15s;
 }
 
@@ -1090,7 +1104,7 @@
   border-radius: 12px;
   border: 1px solid var(--border);
   overflow: hidden;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   padding: 0;
   background-size: cover;
   background-position: center;
@@ -1137,6 +1151,14 @@
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+  align-items: center;
+}
+
+.as-upload-hint {
+  margin: 0;
+  width: 100%;
+  font-size: 0.72rem;
+  color: var(--text-muted, #9a9aa5);
 }
 
 .as-btn-secondary {
@@ -1163,7 +1185,7 @@
   color: var(--danger);
   font-size: 13px;
   font-weight: 600;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
 }
 
 .as-deletion-pending-banner {
@@ -1219,7 +1241,7 @@
   background: var(--bg-card);
   color: var(--text);
   text-align: left;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: background 0.15s, border-color 0.15s;
 }
 
@@ -1306,7 +1328,7 @@
   color: var(--text-muted);
   font-size: 13px;
   font-weight: 600;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
 }
 
 .as-btn-ghost:hover:not(:disabled) {
@@ -1413,7 +1435,7 @@
   font-size: 11px;
   font-weight: 700;
   border: none;
-  cursor: default;
+  cursor: var(--cursor-auto);
   flex-shrink: 0;
 }
 
@@ -1427,7 +1449,7 @@
   background: rgba(255, 149, 0, 0.12);
   color: var(--warning);
   border: 1px solid rgba(255, 149, 0, 0.25);
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: opacity 0.15s;
 }
 

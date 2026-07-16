@@ -4,7 +4,7 @@
   z-index: 20;
   background: transparent;
   border: none;
-  cursor: default;
+  cursor: var(--cursor-auto);
 }
 
 .chat-tools-panel {
@@ -147,7 +147,7 @@
   padding: 10px 6px;
   background: none;
   border: none;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   text-align: left;
   min-width: 0;
 }
@@ -199,7 +199,7 @@
   border: none;
   border-radius: 6px;
   color: var(--text-muted);
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: background 0.15s, color 0.15s;
 }
 

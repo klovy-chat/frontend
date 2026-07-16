@@ -44,6 +44,16 @@ export function InvitePage() {
         setChannelName(res.invite.channelId?.name ?? t("auth.invite.channelFallback"));
         setChannelImage(res.invite.channelId?.image ?? null);
         setInviter(res.invite.inviter ?? null);
+        if (!res.invite.joinable) {
+          const message = res.invite.expired
+            ? t("auth.invite.expired")
+            : res.invite.limitReached
+              ? t("auth.invite.limitReached")
+              : t("auth.invite.revoked");
+          setError(message);
+          setStatus("error");
+          return;
+        }
         setStatus("ready");
       })
       .catch(() => {

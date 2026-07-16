@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { useEffect } from "react";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { WebSocketProvider } from "./context/WebSocketContext";
+import { PresenceProvider } from "./context/PresenceContext";
 import { CallProvider } from "./context/CallContext";
 import { CallOverlay } from "./components/call/CallOverlay";
 import { LoginPage } from "./pages/LoginPage";
@@ -129,10 +130,12 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <WebSocketProvider>
-              <CallProvider>
-                <ChatPage />
-                <CallOverlay />
-              </CallProvider>
+              <PresenceProvider>
+                <CallProvider>
+                  <ChatPage />
+                  <CallOverlay />
+                </CallProvider>
+              </PresenceProvider>
             </WebSocketProvider>
           </ProtectedRoute>
         }

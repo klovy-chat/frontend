@@ -10,6 +10,11 @@ const MIME_TYPES = [
   "audio/webm",
   "audio/ogg;codecs=opus",
   "audio/ogg",
+  // Safari / iOS only support MP4 (AAC) for MediaRecorder — without these,
+  // recording silently "did nothing" on those browsers in production.
+  "audio/mp4;codecs=mp4a.40.2",
+  "audio/mp4",
+  "audio/aac",
 ];
 
 const MAX_VOICE_DURATION_MS = 5 * 60 * 1000;
@@ -22,6 +27,8 @@ function pickMimeType(): string {
 function extensionForMime(mime: string): string {
   if (mime.includes("ogg")) return "ogg";
   if (mime.includes("wav")) return "wav";
+  if (mime.includes("mp4") || mime.includes("aac") || mime.includes("m4a"))
+    return "mp4";
   return "webm";
 }
 

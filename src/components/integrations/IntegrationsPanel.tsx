@@ -45,8 +45,12 @@ export function IntegrationsPanel({
         setConnected(status.connected);
         setEnabled(status.enabled);
         setShareListening(status.shareListening);
-        if (user && status.shareListening !== user.shareListening) {
-          updateUser({ ...user, shareListening: status.shareListening });
+        if (user) {
+          updateUser({
+            ...user,
+            shareListening: status.shareListening,
+            spotifyConnected: status.connected,
+          });
         }
         if (status.connected) {
           notifySpotifyConnectionChanged();

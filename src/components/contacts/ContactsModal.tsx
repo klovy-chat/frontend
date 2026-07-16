@@ -12,6 +12,10 @@ import {
 import { getBlockedContacts, toggleContactBlock } from "../../api/contacts";
 import { Avatar } from "../common/Avatar";
 import { useToast } from "../../context/ToastContext";
+import {
+  usePresenceStore,
+  useResolvePresence,
+} from "../../context/PresenceContext";
 import { userLabel, availabilityStatusLabel } from "../../utils/user/format";
 import type { Contact, FriendRequestItem } from "../../types";
 import "../../styles/contacts/contacts-modal.css";
@@ -100,6 +104,8 @@ export function ContactsModal({
   const [sentRequests, setSentRequests] = useState<FriendRequestItem[]>([]);
   const [friendsList, setFriendsList] = useState<Contact[]>([]);
   const [blockedList, setBlockedList] = useState<Contact[]>([]);
+  const resolvePresence = useResolvePresence();
+  const { seed: seedPresence } = usePresenceStore();
 
   const tabsRef = useRef<HTMLDivElement>(null);
   const indicatorRef = useRef<HTMLDivElement>(null);
@@ -137,12 +143,14 @@ export function ContactsModal({
       setSentRequests(sent.requests);
       setFriendsList(friends.friends);
       setBlockedList(blocked.contacts);
+      seedPresence(friends.friends);
+      seedPresence(blocked.contacts);
     } catch {
       /**/
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [seedPresence]);
 
   useEffect(() => {
     if (isOpen && !isClosing) {
@@ -339,7 +347,7 @@ export function ContactsModal({
           ) : (
             <div className="contacts-modal__list">
               {filteredFriends.map((f, i) => {
-                const status = contactStatus(f);
+                const status = contactStatus(resolvePresence(f));
                 return (
                   <div key={f._id} className="contacts-modal__row" style={{ animationDelay: `${i * 35}ms` }}>
                     <div className="contacts-modal__avatar-wrap">

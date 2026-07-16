@@ -53,7 +53,7 @@ export function UserProfileModal({
   }, [isOpen, closing]);
 
   useEffect(() => {
-    if (!isOpen || !user || user.isBot) return;
+    if (!isOpen || !user || user.isBot || !user.spotifyConnected) return;
 
     let cancelled = false;
     void (async () => {
@@ -69,6 +69,7 @@ export function UserProfileModal({
           ...user,
           shareListening: result.shareListening,
           listeningActivity: result.listeningActivity,
+          spotifyConnected: true,
         });
       } catch {
         // Profil może się otworzyć bez świeżej synchronizacji Spotify
@@ -78,7 +79,7 @@ export function UserProfileModal({
     return () => {
       cancelled = true;
     };
-  }, [isOpen, user?.id, user?.isBot, updateUser]);
+  }, [isOpen, user?.id, user?.isBot, user?.spotifyConnected, updateUser]);
 
   const bannerStyle = useProfileBannerStyle(user?.banner, user?.color, user?.username ?? "");
 

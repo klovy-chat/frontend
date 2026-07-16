@@ -5,8 +5,32 @@ import { getClientInstanceId } from "../utils/env/clientInstanceId";
 import { SPOTIFY_CONNECTION_CHANGED } from "../utils/sync/spotifyConnectionSync";
 import type { ListeningActivity, User } from "../types";
 
-const SYNC_INTERVAL_MS = 8000;
+const SYNC_INTERVAL_MS = 45_000;
+const STATUS_STORAGE_KEY = "klovy.spotify.connected";
 
+function readKnownConnected(userId: string): boolean {
+  try {
+    return sessionStorage.getItem(`${STATUS_STORAGE_KEY}.${userId}`) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function writeKnownConnected(userId: string, connected: boolean): void {
+  try {
+    const key = `${STATUS_STORAGE_KEY}.${userId}`;
+    if (connected) sessionStorage.setItem(key, "1");
+    else sessionStorage.removeItem(key);
+  } catch {
+    /* ignore */
+  }
+}
+
+/**
+ * Syncs Spotify listening activity only after we know the account is linked
+ * (Integrations panel / OAuth return / previous session flag). Avoids hitting
+ * Spotify APIs on every app refresh for users who never connected.
+ */
 export function useSpotifyListeningSync(): void {
   const { user, updateUser } = useAuth();
   const userRef = useRef<User | null>(user);
@@ -15,11 +39,13 @@ export function useSpotifyListeningSync(): void {
   const connectedRef = useRef(false);
   const shareRef = useRef(true);
   const enabledRef = useRef(false);
+  const armedRef = useRef(false);
 
   useEffect(() => {
     if (!user || user.isBot) return;
 
     let cancelled = false;
+    const userId = user.id;
 
     const refreshStatus = async () => {
       try {
@@ -28,9 +54,18 @@ export function useSpotifyListeningSync(): void {
         connectedRef.current = status.connected;
         shareRef.current = status.shareListening;
         enabledRef.current = status.enabled;
+        writeKnownConnected(userId, status.connected);
+        armedRef.current = status.connected;
         const current = userRef.current;
-        if (current && status.shareListening !== current.shareListening) {
-          updateUser({ ...current, shareListening: status.shareListening });
+        if (current) {
+          updateUser({
+            ...current,
+            shareListening: status.shareListening,
+            spotifyConnected: status.connected,
+            listeningActivity: status.connected
+              ? current.listeningActivity
+              : null,
+          });
         }
       } catch {
         if (!cancelled) {
@@ -40,16 +75,23 @@ export function useSpotifyListeningSync(): void {
       }
     };
 
-    void refreshStatus();
+    // Only probe status if we already know (or just learned) Spotify is linked.
+    if (user.spotifyConnected || readKnownConnected(userId)) {
+      armedRef.current = true;
+      void refreshStatus();
+    }
 
-    const onConnectionChanged = () => void refreshStatus();
+    const onConnectionChanged = () => {
+      armedRef.current = true;
+      void refreshStatus();
+    };
     window.addEventListener(SPOTIFY_CONNECTION_CHANGED, onConnectionChanged);
 
     return () => {
       cancelled = true;
       window.removeEventListener(SPOTIFY_CONNECTION_CHANGED, onConnectionChanged);
     };
-  }, [user?.id, user?.isBot, updateUser]);
+  }, [user?.id, user?.isBot, user?.spotifyConnected, updateUser]);
 
   useEffect(() => {
     if (!user || user.isBot) return;
@@ -58,9 +100,9 @@ export function useSpotifyListeningSync(): void {
 
     const runSync = async () => {
       if (document.hidden) return;
+      if (!armedRef.current) return;
       const current = userRef.current;
       if (!current) return;
-
       if (!connectedRef.current || !shareRef.current || !enabledRef.current) return;
 
       try {
@@ -75,9 +117,10 @@ export function useSpotifyListeningSync(): void {
           ...latest,
           shareListening: result.shareListening,
           listeningActivity: result.listeningActivity,
+          spotifyConnected: true,
         });
       } catch {
-        // Ignoruj błędy sieciowe — kolejna próba za 8 s
+        // Network blip — next interval retries.
       }
     };
 

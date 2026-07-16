@@ -1,9 +1,12 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
 import { ApiError } from "../api/client";
-import { TurnstileWidget } from "../components/auth/TurnstileWidget";
+import {
+  TurnstileWidget,
+  type TurnstileWidgetHandle,
+} from "../components/auth/TurnstileWidget";
 import { AuthPageLayout } from "../components/auth/AuthPageLayout";
 import {
   normalizeUsernameInput,
@@ -11,7 +14,6 @@ import {
   validateUsernameInput,
 } from "../utils/auth/username";
 import { validatePasswordStrength } from "../utils/auth/password";
-import { checkPasswordBreach } from "../utils/auth/pwnedPassword";
 import { loadStoredLocale } from "../utils/locale/localeStorage";
 import "../styles/auth/auth.css";
 
@@ -28,6 +30,7 @@ export function SignupPage() {
   const [info, setInfo] = useState("");
   const [loading, setLoading] = useState(false);
   const [accepted, setAccepted] = useState(false);
+  const turnstileRef = useRef<TurnstileWidgetHandle>(null);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -50,12 +53,9 @@ export function SignupPage() {
       return;
     }
 
-    const breachCheck = await checkPasswordBreach(password);
-    if (breachCheck === "breached") {
-      setError(t("auth.password.breach"));
-      return;
-    }
-
+    // The breached-password check runs authoritatively on the backend during
+    // signup; we intentionally do not duplicate the external HIBP call here to
+    // keep signup fast and avoid the Turnstile token going stale before submit.
     const usernameError = validateUsernameInput(username);
     if (usernameError) {
       setError(usernameError);
@@ -73,6 +73,8 @@ export function SignupPage() {
       setInfo(message ?? t("auth.signup.success"));
       setTimeout(() => navigate("/login"), 2500);
     } catch (err) {
+      setTurnstileToken("");
+      turnstileRef.current?.reset();
       setError(err instanceof ApiError ? err.message : t("auth.errors.signupFailed"));
     } finally {
       setLoading(false);
@@ -149,8 +151,10 @@ export function SignupPage() {
             </div>
 
             <TurnstileWidget
+              ref={turnstileRef}
               onToken={setTurnstileToken}
               onExpire={() => setTurnstileToken("")}
+              onError={() => setTurnstileToken("")}
             />
 
             {error && (

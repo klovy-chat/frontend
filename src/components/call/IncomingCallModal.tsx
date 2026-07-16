@@ -1,7 +1,13 @@
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Avatar } from "../common/Avatar";
 import { userLabel } from "../../utils/user/format";
+import { useAuth } from "../../context/AuthContext";
 import { useCall } from "../../context/CallContext";
+import {
+  startIncomingCallSound,
+  stopIncomingCallSound,
+} from "../../utils/media/incomingCallSound";
 
 const C = {
   text: "var(--text)",
@@ -10,7 +16,17 @@ const C = {
 
 export function IncomingCallModal() {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const { state, mode, peer, acceptCall, rejectCall } = useCall();
+  const isDnd = user?.availabilityStatus === "dnd";
+
+  useEffect(() => {
+    if (state === "incoming" && !isDnd) {
+      startIncomingCallSound();
+      return () => stopIncomingCallSound();
+    }
+    stopIncomingCallSound();
+  }, [state, isDnd]);
 
   if (state !== "incoming" || !peer) return null;
 

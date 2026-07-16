@@ -81,7 +81,7 @@
     "logoutTitle": "Wyloguj",
     "language": {
       "pl": "Polski",
-      "en": "English",
+      "en": "Angielski",
       "label": "Język",
       "panelTitle": "Język interfejsu",
       "panelHint": "Wybierz język wyświetlania aplikacji."
@@ -291,7 +291,18 @@
     "avatarTooLarge": "Obraz jest za duży. Maksymalny rozmiar to {{limit}}.",
     "failed": "Nie udało się wysłać pliku. Spróbuj ponownie.",
     "attachFile": "Załącz plik",
-    "removeFile": "Usuń plik"
+    "removeFile": "Usuń plik",
+    "maxSizeHint": "Maks. {{size}} · JPG, PNG lub WebP",
+    "maxAttachmentHint": "Maks. {{size}} na plik"
+  },
+  "imageCrop": {
+    "avatarTitle": "Dopasuj zdjęcie",
+    "bannerTitle": "Dopasuj baner",
+    "channelAvatarTitle": "Dopasuj zdjęcie kanału",
+    "hint": "Przeciągnij, aby przesunąć; użyj kółka lub suwaka, aby przybliżyć.",
+    "maxSize": "maks. {{size}}",
+    "zoom": "Przybliżenie",
+    "apply": "Zastosuj"
   },
   "messages": {
     "deleted": "Wiadomość usunięta",
@@ -299,6 +310,7 @@
     "image": "Obraz",
     "video": "Wideo",
     "audio": "Wiadomość głosowa",
+    "call": "Rozmowa głosowa",
     "file": "Plik: {{name}}",
     "attachment": "Załącznik",
     "default": "Wiadomość",
@@ -469,6 +481,8 @@
       "title": "Zaproszenie do kanału",
       "invalidLink": "Nieprawidłowy link zaproszenia",
       "expired": "Zaproszenie nie istnieje lub wygasło",
+      "revoked": "Ten link zapraszający został wyłączony przez właściciela kanału",
+      "limitReached": "Ten link zapraszający osiągnął limit dołączeń",
       "channelFallback": "kanał",
       "inviterMessage": "{{name}} zaprosił Cię do tego kanału",
       "loginRequired": "Zaloguj się, aby dołączyć do kanału.",
@@ -725,6 +739,8 @@
       "options": "Opcje"
     },
     "typing": "Pisze…",
+    "callLog": "Rozmowa głosowa · {{duration}}",
+    "missedCall": "Nieodebrane połączenie",
     "loadOlder": "Załaduj starsze wiadomości",
     "loadingOlder": "Ładowanie…",
     "notifications": {
@@ -848,9 +864,19 @@
       "reportDetailsPlaceholder": "Opisz problem…",
       "inviteModal": {
         "title": "Zaproś na kanał",
-        "hint": "Udostępnij link — każdy zalogowany użytkownik może dołączyć.",
+        "hint": "Twórz linki zapraszające. Każdy zalogowany użytkownik może dołączyć, dopóki nie usuniesz linku lub nie zostanie osiągnięty limit dołączeń.",
         "generating": "Generowanie linku…",
-        "copyLink": "Kopiuj link"
+        "copyLink": "Kopiuj link",
+        "create": "Utwórz link",
+        "revoke": "Usuń",
+        "empty": "Brak aktywnych linków. Utwórz nowy poniżej.",
+        "limitToggle": "Ogranicz liczbę dołączeń",
+        "limitPlaceholder": "np. 50",
+        "limitHint": "Gdy tylu użytkowników dołączy, link przestanie działać.",
+        "unlimitedHint": "Nieograniczona liczba dołączeń, dopóki nie usuniesz linku.",
+        "invalidLimit": "Podaj limit dołączeń wynoszący co najmniej 1.",
+        "usesUnlimited": "{{count}} dołączyło · bez limitu",
+        "usesLimited": "{{count}} / {{max}} dołączyło"
       },
       "toast": {
         "addBotFailed": "Nie udało się dodać bota",
@@ -862,6 +888,8 @@
         "inviteCreateFailed": "Nie udało się utworzyć zaproszenia.",
         "inviteCopied": "Link zaproszenia skopiowany",
         "inviteCopyManual": "Skopiuj link ręcznie: {{url}}",
+        "inviteRevoked": "Link zapraszający został usunięty",
+        "inviteRevokeFailed": "Nie udało się usunąć zaproszenia.",
         "reportSent": "Zgłoszenie zostało wysłane"
       }
     },
@@ -942,10 +970,21 @@
     },
     "bots": {
       "title": "Boty",
+      "guide": {
+        "title": "Jak zrobić bota",
+        "intro": "Boty działają jak na Discordzie: tworzysz bota tutaj, kopiujesz token raz, a potem wołasz HTTP API z dowolnego języka, który umie wysyłać żądania. Nie potrzebujesz nagłówka custom client z przeglądarki — ten nagłówek jest tylko dla oficjalnej aplikacji web (filtr DDoS).",
+        "step1": "1. Utwórz bota poniżej i skopiuj token (pokazuje się tylko raz).",
+        "step2": "2. W ustawieniach kanału → Boty dodaj bota do kanału, na którym ma pisać.",
+        "step3": "3. Wysyłaj żądania z Authorization: Bearer <token> na https://api.klovy.chat",
+        "endpointsTitle": "Przydatne endpointy",
+        "me": "GET /api/bot/me — kim jestem",
+        "send": "POST /api/bot/channels/{channelId}/messages — body { \"content\": \"Cześć\" }",
+        "examplesTitle": "Szybkie przykłady"
+      },
       "create": {
         "title": "Utwórz bota",
-        "hint": "Boty to konta sterowane przez API. Po utworzeniu skopiuj token — wyświetli się tylko raz.",
-        "apiHint": "Wyślij wiadomości przez POST {{endpoint}} z ciałem { \"content\": \"…\" }.",
+        "hint": "Po utworzeniu skopiuj token — wyświetli się tylko raz. Traktuj go jak hasło.",
+        "apiHint": "Wyślij wiadomości przez POST {{endpoint}} z Authorization: Bearer <token>.",
         "username": "Nazwa użytkownika bota",
         "usernamePlaceholder": "np. moj_bot",
         "displayName": "Nazwa wyświetlana (opcjonalnie)",
@@ -1326,6 +1365,7 @@
     "peerOffline": "Użytkownik jest niedostępny.",
     "peerBusy": "Użytkownik prowadzi już inną rozmowę.",
     "unavailable": "Nie można nawiązać połączenia.",
+    "cameraFailed": "Nie udało się włączyć kamery. Sprawdź uprawnienia przeglądarki.",
     "status": {
       "calling": "Dzwonię…",
       "connecting": "Łączenie…",
@@ -1340,6 +1380,8 @@
       "muteMic": "Wycisz mikrofon",
       "enableCamera": "Włącz kamerę",
       "disableCamera": "Wyłącz kamerę",
+      "micLevel": "Mikrofon",
+      "speakerLevel": "Głośność",
       "end": "Zakończ",
       "reject": "Odrzuć",
       "accept": "Odbierz"

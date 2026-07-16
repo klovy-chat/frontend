@@ -21,6 +21,11 @@ import {
   type UserSessionRow,
 } from "../api/auth";
 import { ApiError } from "../api/client";
+import { ImageCropModal } from "../components/common/ImageCropModal";
+import {
+  MAX_AVATAR_SIZE_BYTES,
+  MAX_AVATAR_SIZE_LABEL,
+} from "../constants/upload";
 import { TwoFactorSetupModal } from "../components/auth/TwoFactorSetupModal";
 import { BotsPanel } from "../components/bots/BotsPanel";
 import { IntegrationsPanel } from "../components/integrations/IntegrationsPanel";
@@ -113,6 +118,10 @@ export function AccountSettingsModal({
   const [usernameBusy, setUsernameBusy] = useState(false);
   const [usernameError, setUsernameError] = useState("");
   const [avatarLoading, setAvatarLoading] = useState(false);
+  const [cropTarget, setCropTarget] = useState<{
+    file: File;
+    kind: "avatar" | "banner";
+  } | null>(null);
   const [closing, setClosing] = useState(false);
   const [twoFactorSetupOpen, setTwoFactorSetupOpen] = useState(false);
   const [disablePassword, setDisablePassword] = useState("");
@@ -360,7 +369,22 @@ export function AccountSettingsModal({
     }
   };
 
-  const handleAvatarChange = async (file: File) => {
+  const pickImageForCrop = (file: File, kind: "avatar" | "banner") => {
+    msg("error", "");
+    if (file.size > MAX_AVATAR_SIZE_BYTES) {
+      msg(
+        "error",
+        t("upload.avatarTooLarge", { limit: MAX_AVATAR_SIZE_LABEL }),
+      );
+      return;
+    }
+    setCropTarget({ file, kind });
+  };
+
+  const handleAvatarChange = (file: File) => pickImageForCrop(file, "avatar");
+  const handleBannerChange = (file: File) => pickImageForCrop(file, "banner");
+
+  const uploadAvatarFile = async (file: File) => {
     setAvatarLoading(true); msg("error", "");
     try {
       const { image } = await addProfileImage(file);
@@ -370,6 +394,7 @@ export function AccountSettingsModal({
       msg("success", t("settings.profile.avatarUpdated"));
     } catch (err) {
       msg("error", err instanceof ApiError ? err.message : t("settings.profile.avatarUploadFailed"));
+      throw err;
     } finally { setAvatarLoading(false); }
   };
 
@@ -387,7 +412,7 @@ export function AccountSettingsModal({
     } finally { setAvatarLoading(false); }
   };
 
-  const handleBannerChange = async (file: File) => {
+  const uploadBannerFile = async (file: File) => {
     setBannerLoading(true); msg("error", "");
     try {
       const { banner } = await addProfileBanner(file);
@@ -397,7 +422,23 @@ export function AccountSettingsModal({
       msg("success", t("settings.accountExtra.bannerUpdated"));
     } catch (err) {
       msg("error", err instanceof ApiError ? err.message : t("settings.profile.bannerUploadFailed"));
+      throw err;
     } finally { setBannerLoading(false); }
+  };
+
+  const handleCropConfirm = async (file: File) => {
+    if (!cropTarget) return;
+    const kind = cropTarget.kind;
+    try {
+      if (kind === "avatar") {
+        await uploadAvatarFile(file);
+      } else {
+        await uploadBannerFile(file);
+      }
+      setCropTarget(null);
+    } catch {
+      /* error already surfaced via msg(); keep crop modal open for retry */
+    }
   };
 
   const handleRemoveBanner = async () => {
@@ -823,8 +864,8 @@ export function AccountSettingsModal({
                     </div>
                   )}
                 </button>
-                {bannerPreview && (
-                  <div className="as-profile-header-actions">
+                <div className="as-profile-header-actions">
+                  {bannerPreview && (
                     <button
                       type="button"
                       className="as-btn-danger-text"
@@ -833,8 +874,11 @@ export function AccountSettingsModal({
                     >
                       {t("settings.profile.removeBanner")}
                     </button>
-                  </div>
-                )}
+                  )}
+                  <p className="as-upload-hint">
+                    {t("upload.maxSizeHint", { size: MAX_AVATAR_SIZE_LABEL })}
+                  </p>
+                </div>
               </div>
 
               <div className="as-profile-header-row">
@@ -867,6 +911,9 @@ export function AccountSettingsModal({
                       {t("common.remove")}
                     </button>
                   )}
+                  <p className="as-upload-hint">
+                    {t("upload.maxSizeHint", { size: MAX_AVATAR_SIZE_LABEL })}
+                  </p>
                 </div>
               </div>
 
@@ -1490,6 +1537,24 @@ export function AccountSettingsModal({
         onClose={() => setTwoFactorSetupOpen(false)}
         onEnabled={handleTwoFactorEnabled}
       />
+      {cropTarget ? (
+        <ImageCropModal
+          file={cropTarget.file}
+          aspect={cropTarget.kind === "avatar" ? 1 : 1024 / 384}
+          outputWidth={cropTarget.kind === "avatar" ? 512 : 1024}
+          outputHeight={cropTarget.kind === "avatar" ? 512 : 384}
+          round={cropTarget.kind === "avatar"}
+          title={
+            cropTarget.kind === "avatar"
+              ? t("imageCrop.avatarTitle")
+              : t("imageCrop.bannerTitle")
+          }
+          maxSizeLabel={MAX_AVATAR_SIZE_LABEL}
+          busy={cropTarget.kind === "avatar" ? avatarLoading : bannerLoading}
+          onCancel={() => setCropTarget(null)}
+          onConfirm={handleCropConfirm}
+        />
+      ) : null}
     </>
   );
 }

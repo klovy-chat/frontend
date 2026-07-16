@@ -43,8 +43,11 @@
   --bp-mobile-sm: 480px;
   --shadow: 0 32px 80px rgba(0, 0, 0, 0.6);
   --shadow-sm: 0 8px 24px rgba(0, 0, 0, 0.4);
-  --font-sans: 'Space Grotesk', system-ui, sans-serif;
-  --font-mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  --font-sans: "Space Grotesk", system-ui, sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --cursor-auto: url("/assets/cursor.png"), auto;
+  --cursor-pointer: url("/assets/cursor.png"), pointer;
+  --cursor-text: url("/assets/cursor.png"), text;
   font-family: var(--font-sans);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -68,6 +71,7 @@ body,
 
 html {
   -webkit-text-size-adjust: 100%;
+  font-family: var(--font-sans);
 }
 
 body {
@@ -76,17 +80,29 @@ body {
   line-height: 1.45;
   font-family: var(--font-sans);
   letter-spacing: -0.01em;
-  cursor: url('/assets/cursor.png'), auto;
+  cursor: var(--cursor-auto);
 }
 
 button,
 input,
-textarea {
+textarea,
+select {
   font: inherit;
+  font-family: var(--font-sans);
+}
+
+button,
+a,
+label,
+summary,
+[role="button"],
+[type="button"],
+[type="submit"],
+[type="reset"] {
+  cursor: var(--cursor-pointer);
 }
 
 button {
-  cursor: url('/assets/cursor.png'), pointer;
   border: none;
   background: none;
   color: inherit;
@@ -102,7 +118,10 @@ a:hover {
 }
 
 input,
-textarea {
+textarea,
+select,
+[contenteditable="true"] {
+  cursor: var(--cursor-text);
   background: var(--bg-deep);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);

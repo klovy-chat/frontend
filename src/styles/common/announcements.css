@@ -131,7 +131,7 @@
   border-radius: 8px;
   background: transparent;
   color: var(--text-muted);
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: background 0.15s, color 0.15s;
 }
 
@@ -142,7 +142,7 @@
 
 .ann-item-close:disabled {
   opacity: 0.5;
-  cursor: default;
+  cursor: var(--cursor-auto);
 }
 
 .ann-item-date {
@@ -189,13 +189,13 @@
   font-size: 0.9rem;
   font-weight: 700;
   font-family: inherit;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.08s;
 }
 
 .ann-btn:disabled {
   opacity: 0.6;
-  cursor: default;
+  cursor: var(--cursor-auto);
 }
 
 .ann-btn--primary {

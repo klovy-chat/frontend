@@ -213,6 +213,106 @@ export function BotsPanel() {
       <h2 className="as-section-title">{t("modals.bots.title")}</h2>
 
       <div className="as-card">
+        <p className="as-card-label">{t("modals.bots.guide.title")}</p>
+        <p className="as-hint" style={{ marginBottom: "0.85rem" }}>
+          {t("modals.bots.guide.intro")}
+        </p>
+        <ol className="as-hint" style={{ margin: "0 0 1rem", paddingLeft: "1.2rem", lineHeight: 1.55 }}>
+          <li>{t("modals.bots.guide.step1")}</li>
+          <li>{t("modals.bots.guide.step2")}</li>
+          <li>{t("modals.bots.guide.step3")}</li>
+        </ol>
+        <p className="as-card-label" style={{ marginBottom: 6 }}>
+          {t("modals.bots.guide.endpointsTitle")}
+        </p>
+        <ul className="as-hint" style={{ margin: "0 0 1rem", paddingLeft: "1.2rem", lineHeight: 1.55 }}>
+          <li>
+            <code>GET /api/bot/me</code> — {t("modals.bots.guide.me").replace(/^GET \/api\/bot\/me — /, "")}
+          </li>
+          <li>
+            <code>POST /api/bot/channels/{"{channelId}"}/messages</code>
+          </li>
+        </ul>
+        <p className="as-card-label" style={{ marginBottom: 8 }}>
+          {t("modals.bots.guide.examplesTitle")}
+        </p>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <pre className="bots-guide-code">{`import requests
+
+TOKEN = "BOT_TOKEN"
+CHANNEL = "CHANNEL_ID"
+
+r = requests.post(
+    f"https://api.klovy.chat/api/bot/channels/{CHANNEL}/messages",
+    headers={"Authorization": f"Bearer {TOKEN}"},
+    json={"content": "Hello!"},
+)
+print(r.status_code, r.text)`}</pre>
+          <pre className="bots-guide-code">{[
+            'const TOKEN = "BOT_TOKEN";',
+            'const CHANNEL = "CHANNEL_ID";',
+            "",
+            "await fetch(",
+            '  `https://api.klovy.chat/api/bot/channels/${CHANNEL}/messages`,',
+            "  {",
+            '    method: "POST",',
+            "    headers: {",
+            "      Authorization: `Bearer ${TOKEN}`,",
+            '      "Content-Type": "application/json",',
+            "    },",
+            '    body: JSON.stringify({ content: "Hello!" }),',
+            "  },",
+            ");",
+          ].join("\n")}</pre>
+          <pre className="bots-guide-code">{`<?php
+$token = "BOT_TOKEN";
+$channel = "CHANNEL_ID";
+
+$context = stream_context_create([
+  "http" => [
+    "method" => "POST",
+    "header" =>
+      "Authorization: Bearer $token\r\n" .
+      "Content-Type: application/json\r\n",
+    "content" => json_encode(["content" => "Hello!"]),
+  ],
+]);
+
+echo file_get_contents(
+  "https://api.klovy.chat/api/bot/channels/$channel/messages",
+  false,
+  $context
+);`}</pre>
+          <pre className="bots-guide-code">{`use reqwest::Client;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let token = "BOT_TOKEN";
+    let channel = "CHANNEL_ID";
+    let res = Client::new()
+        .post(format!(
+            "https://api.klovy.chat/api/bot/channels/{channel}/messages"
+        ))
+        .bearer_auth(token)
+        .json(&serde_json::json!({ "content": "Hello!" }))
+        .send()
+        .await?;
+    println!("{}", res.text().await?);
+    Ok(())
+}`}</pre>
+          <pre className="bots-guide-code">{`$token = "BOT_TOKEN"
+$channel = "CHANNEL_ID"
+
+Invoke-RestMethod `
+  -Method Post `
+  -Uri "https://api.klovy.chat/api/bot/channels/$channel/messages" `
+  -Headers @{ Authorization = "Bearer $token" } `
+  -ContentType "application/json" `
+  -Body (@{ content = "Hello!" } | ConvertTo-Json)`}</pre>
+        </div>
+      </div>
+
+      <div className="as-card">
         <p className="as-card-label">{t("modals.bots.create.title")}</p>
         <p className="as-hint" style={{ marginBottom: "1rem" }}>
           {t("modals.bots.create.hint")}{" "}

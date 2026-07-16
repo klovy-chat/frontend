@@ -15,7 +15,7 @@
   border-left: 3px solid #facc15;
   border-radius: 14px;
   box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   backdrop-filter: blur(10px);
   animation: mention-toast-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
@@ -83,7 +83,7 @@
   color: var(--text-dim);
   font-size: 18px;
   line-height: 1;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: background 0.12s, color 0.12s;
 }
 
@@ -199,7 +199,7 @@
   border: none;
   border-radius: 5px;
   color: var(--text-muted);
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   flex-shrink: 0;
   transition:
     background 0.15s,
@@ -364,7 +364,7 @@
   font-weight: 600;
   padding: 6px 14px;
   border-radius: 999px;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: background 0.15s ease, color 0.15s ease;
 }
 
@@ -375,7 +375,7 @@
 
 .message-list-load-older-btn:disabled {
   opacity: 0.6;
-  cursor: default;
+  cursor: var(--cursor-auto);
 }
 
 .chat-window > .mi-bar {
@@ -439,7 +439,7 @@
   color: var(--text-muted);
   font-size: 1.3rem;
   line-height: 1;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: background 0.15s, color 0.15s;
 }
 
@@ -535,7 +535,7 @@
   border-radius: 8px;
   font-size: 0.85rem;
   font-weight: 600;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 

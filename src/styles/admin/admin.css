@@ -5,6 +5,7 @@
 .adm-backdrop,
 .adm-backdrop * {
   box-sizing: border-box;
+  font-family: var(--font-sans);
 }
 
 .adm-backdrop {
@@ -59,7 +60,7 @@
   justify-content: center;
   transition: 0.18s;
   flex-shrink: 0;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
 }
 
 .adm-view-close:hover,
@@ -204,7 +205,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
 }
 
 .adm-submit-btn:hover:not(:disabled) {
@@ -282,7 +283,7 @@
   transition: 0.15s;
   font-family: var(--font-sans);
   position: relative;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
 }
 
 .adm-nav-item svg {
@@ -597,7 +598,7 @@
   font-weight: 600;
   font-family: var(--font-sans);
   transition: 0.16s;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
 }
 
 .adm-tb-btn:hover {
@@ -775,7 +776,7 @@
   font-weight: 600;
   font-family: var(--font-sans);
   transition: 0.15s;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
 }
 
 .adm-act-btn:disabled {
@@ -1055,7 +1056,7 @@
   border: 1px solid var(--border);
   border-radius: 14px;
   background: var(--bg-elevated);
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: border-color 0.15s, background 0.15s, transform 0.15s;
   text-align: center;
 }

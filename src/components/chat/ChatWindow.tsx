@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   getMessages,
@@ -18,6 +18,10 @@ import { stripFormatting } from "../../utils/chat/messageFormat";
 import { isAllowedGifMediaUrl } from "../../utils/media/mediaAllowlist";
 import { useProfileSync } from "../../hooks/useProfileSync";
 import { presenceColor } from "../../utils/user/presence";
+import {
+  usePresenceStore,
+  useResolvePresence,
+} from "../../context/PresenceContext";
 import {
   normalizeMessage,
 } from "../../utils/chat/messages";
@@ -121,11 +125,14 @@ export function ChatWindow({
   const ws = useWebSocket();
   const wsConnected = useWebSocketConnected();
   const { startCall, state: callState } = useCall();
+  const resolvePresence = useResolvePresence();
+  const { seed: seedPresence } = usePresenceStore();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [loadingOlder, setLoadingOlder] = useState(false);
   const [typingUserId, setTypingUserId] = useState<string | null>(null);
+  const typingClearTimeout = useRef<ReturnType<typeof setTimeout>>();
   const [editingMessage, setEditingMessage] = useState<Message | null>(null);
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{
@@ -269,7 +276,12 @@ export function ChatWindow({
     setHasMore(false);
     setLoadingOlder(false);
     setTypingUserId(null);
+    if (typingClearTimeout.current) {
+      clearTimeout(typingClearTimeout.current);
+      typingClearTimeout.current = undefined;
+    }
     setDmError(null);
+    if (target?.type === "dm") seedPresence([target.contact]);
     setToolsPanel(null);
     setHighlightMessageId(null);
     setEditingMessage(null);
@@ -439,15 +451,33 @@ export function ChatWindow({
       );
     };
 
+    const applyTyping = (userId: string | null, isTyping: boolean) => {
+      if (typingClearTimeout.current) {
+        clearTimeout(typingClearTimeout.current);
+        typingClearTimeout.current = undefined;
+      }
+      if (isTyping && userId) {
+        setTypingUserId(userId);
+        // Fallback: if the peer's "stopped" event is ever dropped, clear the
+        // indicator automatically so it can never get stuck on-screen.
+        typingClearTimeout.current = setTimeout(
+          () => setTypingUserId(null),
+          6000,
+        );
+      } else {
+        setTypingUserId(null);
+      }
+    };
+
     const onTyping = (data: { chatId: string; userId: string; isTyping: boolean }) => {
       if (target.type === "dm") {
         if (data.userId === target.contact._id)
-          setTypingUserId(data.isTyping ? data.userId : null);
+          applyTyping(data.userId, data.isTyping);
       } else if (
         data.chatId === `channel_${target.channel._id}` &&
         data.userId !== currentUserId
       ) {
-        setTypingUserId(data.isTyping ? data.userId : null);
+        applyTyping(data.userId, data.isTyping);
       }
     };
 
@@ -766,6 +796,8 @@ export function ChatWindow({
   }
 
   /* ── Active chat ─────────────────────────────────────────────────────── */
+  const dmContact =
+    target.type === "dm" ? resolvePresence(target.contact) : null;
   const title =
     target.type === "dm"
       ? userLabel(target.contact)
@@ -791,12 +823,12 @@ export function ChatWindow({
             <span
               className="presence-dot"
               title={
-                target.contact.isOnline
-                  ? availabilityStatusLabel(target.contact.availabilityStatus ?? "online")
+                dmContact?.isOnline
+                  ? availabilityStatusLabel(dmContact.availabilityStatus ?? "online")
                   : availabilityStatusLabel("offline")
               }
               style={{
-                background: presenceColor(target.contact),
+                background: presenceColor(dmContact ?? target.contact),
               }}
             />
           </div>

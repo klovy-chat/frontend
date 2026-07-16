@@ -65,7 +65,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   padding: 0;
   transition: background 0.15s, color 0.15s;
 }
@@ -158,7 +158,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.12s;
   padding: 0;
 }
@@ -238,7 +238,7 @@
   border: none;
   border-radius: 8px;
   background: transparent;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   text-align: left;
   transition: background 0.12s;
 }
@@ -340,7 +340,7 @@
   border: none;
   background: transparent;
   color: #c4c4ce;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   padding: 0;
   font-family: inherit;
   font-size: 14px;
@@ -420,7 +420,7 @@
   background: transparent;
   border: none;
   color: var(--accent);
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   font-size: 12px;
   padding: 4px 8px;
   border-radius: 6px;
@@ -472,7 +472,7 @@
   background: transparent;
   border: none;
   color: #60a5fa;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   font-size: 12px;
   padding: 4px 8px;
   border-radius: 6px;
@@ -543,7 +543,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: background 0.15s, color 0.15s;
 }
 

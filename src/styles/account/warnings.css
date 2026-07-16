@@ -150,10 +150,10 @@
   font-size: 0.9rem;
   font-weight: 700;
   font-family: inherit;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: background 0.15s, transform 0.08s;
 }
 
 .warn-btn:hover:not(:disabled) { background: #d98a09; }
 .warn-btn:active:not(:disabled) { transform: translateY(1px); }
-.warn-btn:disabled { opacity: 0.6; cursor: default; }
+.warn-btn:disabled { opacity: 0.6; cursor: var(--cursor-auto); }

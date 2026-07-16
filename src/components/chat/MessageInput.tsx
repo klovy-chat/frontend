@@ -105,6 +105,8 @@ export function MessageInput({
   const formRef = useRef<HTMLFormElement>(null);
   const typingTimeout = useRef<ReturnType<typeof setTimeout>>();
   const blurTimeout = useRef<ReturnType<typeof setTimeout>>();
+  const typingActive = useRef(false);
+  const lastTypingSent = useRef(0);
   const {
     isRecording,
     durationMs: recordingDurationMs,
@@ -201,12 +203,33 @@ export function MessageInput({
     }, 0);
   };
 
-  const notifyTyping = (isTyping: boolean) => {
-    onTyping?.(isTyping);
-    if (typingTimeout.current) clearTimeout(typingTimeout.current);
-    if (isTyping) {
-      typingTimeout.current = setTimeout(() => onTyping?.(false), 2000);
+  const stopTyping = () => {
+    if (typingTimeout.current) {
+      clearTimeout(typingTimeout.current);
+      typingTimeout.current = undefined;
     }
+    if (typingActive.current) {
+      typingActive.current = false;
+      onTyping?.(false);
+    }
+  };
+
+  const notifyTyping = (isTyping: boolean) => {
+    if (!isTyping) {
+      stopTyping();
+      return;
+    }
+    const now = Date.now();
+    // Send a `true` heartbeat at most every 2.5s so the peer keeps showing the
+    // indicator while typing, without flooding the socket on every keystroke.
+    if (!typingActive.current || now - lastTypingSent.current > 2500) {
+      typingActive.current = true;
+      lastTypingSent.current = now;
+      onTyping?.(true);
+    }
+    // Reliable stop: if no keystroke arrives within 2s, tell the peer we stopped.
+    if (typingTimeout.current) clearTimeout(typingTimeout.current);
+    typingTimeout.current = setTimeout(() => stopTyping(), 2000);
   };
 
   useEffect(() => {

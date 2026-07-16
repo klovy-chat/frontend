@@ -27,7 +27,7 @@ export function resolveQuotedMessage(
 }
 
 export function getMessagePreview(
-  message: Pick<Message, "content" | "messageType" | "fileName" | "deleted">,
+  message: Pick<Message, "content" | "messageType" | "fileName" | "deleted" | "durationMs">,
 ): string {
   if (message.deleted) return i18n.t("messages.deleted");
 
@@ -36,6 +36,11 @@ export function getMessagePreview(
     if (message.messageType === "IMAGE") return i18n.t("messages.image");
     if (message.messageType === "VIDEO") return i18n.t("messages.video");
     if (message.messageType === "AUDIO") return i18n.t("messages.audio");
+    if (message.messageType === "CALL") {
+      return (message.durationMs ?? 0) > 0
+        ? i18n.t("messages.call")
+        : i18n.t("chat.missedCall");
+    }
     return message.fileName
       ? i18n.t("messages.file", { name: message.fileName })
       : i18n.t("messages.attachment");

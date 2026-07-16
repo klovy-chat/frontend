@@ -7,7 +7,7 @@
 .al-page *,
 .al-page *::before,
 .al-page *::after {
-  font-family: inherit;
+  font-family: var(--font-sans);
   box-sizing: border-box;
 }
 
@@ -36,7 +36,7 @@
   border: 1px solid var(--border);
   border-radius: 8px;
   color: var(--text);
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   font-size: 0.8rem;
   font-weight: 500;
   line-height: 1.2;
@@ -239,7 +239,7 @@
   transform: translateY(-50%);
   background: none;
   border: none;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   color: var(--text-dim);
   display: flex;
   align-items: center;
@@ -259,7 +259,7 @@
   font-size: 0.9rem;
   font-weight: 600;
   color: #fff;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition:
     background 0.15s,
     transform 0.15s,
@@ -280,7 +280,7 @@
   background: transparent;
   color: inherit;
   font-weight: 600;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: background 0.15s;
 }
 
@@ -300,7 +300,7 @@
   padding: 0;
   border: none;
   background: none;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   font-size: 0.875rem;
   color: var(--accent);
 }
@@ -501,7 +501,7 @@
   border-radius: 50%;
   background: var(--border);
   border: none;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: background 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   padding: 0;
 }
@@ -541,7 +541,7 @@
   display: flex;
   align-items: flex-start;
   gap: 0.65rem;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   user-select: none;
 }
 
@@ -800,7 +800,7 @@
   color: var(--text-muted);
   font-size: 0.84rem;
   font-weight: 500;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: color 0.15s;
 }
 

@@ -199,6 +199,10 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
   channelsRef.current = channels;
   const currentUserIdRef = useRef(user?.id);
   currentUserIdRef.current = user?.id;
+  // Keep the logged-in user's availability status fresh for the WS handlers so
+  // notification sounds can be suppressed while "Do Not Disturb" is active.
+  const availabilityRef = useRef(user?.availabilityStatus);
+  availabilityRef.current = user?.availabilityStatus;
 
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<Contact[]>([]);
@@ -444,6 +448,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
       if (!senderId || senderId === currentUserIdRef.current) return;
       const contact = contactsRef.current.find((c) => c._id === senderId);
       if (contact?.isMuted) return;
+      if (availabilityRef.current === "dnd") return;
       playNotificationSound();
     };
 
@@ -455,6 +460,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
       const channelId = msg?.channelId ?? msg?.channel;
       const channel = channelsRef.current.find((ch) => ch._id === channelId);
       if (channel?.isMuted) return;
+      if (availabilityRef.current === "dnd") return;
       playNotificationSound();
     };
     const onUserStatusChanged = (payload: {
