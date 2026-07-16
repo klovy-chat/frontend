@@ -16,6 +16,89 @@ import type { Bot } from "../../types";
 
 const SEND_ENDPOINT = "/api/bot/channels/{channelId}/messages";
 
+const BOT_GUIDE_EXAMPLES = [
+  [
+    "import requests",
+    "",
+    'TOKEN = "BOT_TOKEN"',
+    'CHANNEL = "CHANNEL_ID"',
+    "",
+    "r = requests.post(",
+    '    f"https://api.klovy.chat/api/bot/channels/{CHANNEL}/messages",',
+    '    headers={"Authorization": f"Bearer {TOKEN}"},',
+    '    json={"content": "Hello!"},',
+    ")",
+    "print(r.status_code, r.text)",
+  ].join("\n"),
+  [
+    'const TOKEN = "BOT_TOKEN";',
+    'const CHANNEL = "CHANNEL_ID";',
+    "",
+    "await fetch(",
+    "  `https://api.klovy.chat/api/bot/channels/${CHANNEL}/messages`,",
+    "  {",
+    '    method: "POST",',
+    "    headers: {",
+    "      Authorization: `Bearer ${TOKEN}`,",
+    '      "Content-Type": "application/json",',
+    "    },",
+    '    body: JSON.stringify({ content: "Hello!" }),',
+    "  },",
+    ");",
+  ].join("\n"),
+  [
+    "<?php",
+    '$token = "BOT_TOKEN";',
+    '$channel = "CHANNEL_ID";',
+    "",
+    "$context = stream_context_create([",
+    '  "http" => [',
+    '    "method" => "POST",',
+    '    "header" =>',
+    '      "Authorization: Bearer $token\\r\\n" .',
+    '      "Content-Type: application/json\\r\\n",',
+    '    "content" => json_encode(["content" => "Hello!"]),',
+    "  ],",
+    "]);",
+    "",
+    "echo file_get_contents(",
+    '  "https://api.klovy.chat/api/bot/channels/$channel/messages",',
+    "  false,",
+    "  $context",
+    ");",
+  ].join("\n"),
+  [
+    "use reqwest::Client;",
+    "",
+    "#[tokio::main]",
+    "async fn main() -> Result<(), Box<dyn std::error::Error>> {",
+    '    let token = "BOT_TOKEN";',
+    '    let channel = "CHANNEL_ID";',
+    "    let res = Client::new()",
+    "        .post(format!(",
+    '            "https://api.klovy.chat/api/bot/channels/{channel}/messages"',
+    "        ))",
+    "        .bearer_auth(token)",
+    '        .json(&serde_json::json!({ "content": "Hello!" }))',
+    "        .send()",
+    "        .await?;",
+    '    println!("{}", res.text().await?);',
+    "    Ok(())",
+    "}",
+  ].join("\n"),
+  [
+    '$token = "BOT_TOKEN"',
+    '$channel = "CHANNEL_ID"',
+    "",
+    "Invoke-RestMethod `",
+    "  -Method Post `",
+    '  -Uri "https://api.klovy.chat/api/bot/channels/$channel/messages" `',
+    '  -Headers @{ Authorization = "Bearer $token" } `',
+    '  -ContentType "application/json" `',
+    '  -Body (@{ content = "Hello!" } | ConvertTo-Json)',
+  ].join("\n"),
+];
+
 function TokenReveal({ token }: { token: string }) {
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
@@ -237,78 +320,11 @@ export function BotsPanel() {
           {t("modals.bots.guide.examplesTitle")}
         </p>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          <pre className="bots-guide-code">{`import requests
-
-TOKEN = "BOT_TOKEN"
-CHANNEL = "CHANNEL_ID"
-
-r = requests.post(
-    f"https://api.klovy.chat/api/bot/channels/{CHANNEL}/messages",
-    headers={"Authorization": f"Bearer {TOKEN}"},
-    json={"content": "Hello!"},
-)
-print(r.status_code, r.text)`}</pre>
-          <pre className="bots-guide-code">{[
-            'const TOKEN = "BOT_TOKEN";',
-            'const CHANNEL = "CHANNEL_ID";',
-            "",
-            "await fetch(",
-            '  `https://api.klovy.chat/api/bot/channels/${CHANNEL}/messages`,',
-            "  {",
-            '    method: "POST",',
-            "    headers: {",
-            "      Authorization: `Bearer ${TOKEN}`,",
-            '      "Content-Type": "application/json",',
-            "    },",
-            '    body: JSON.stringify({ content: "Hello!" }),',
-            "  },",
-            ");",
-          ].join("\n")}</pre>
-          <pre className="bots-guide-code">{`<?php
-$token = "BOT_TOKEN";
-$channel = "CHANNEL_ID";
-
-$context = stream_context_create([
-  "http" => [
-    "method" => "POST",
-    "header" =>
-      "Authorization: Bearer $token\r\n" .
-      "Content-Type: application/json\r\n",
-    "content" => json_encode(["content" => "Hello!"]),
-  ],
-]);
-
-echo file_get_contents(
-  "https://api.klovy.chat/api/bot/channels/$channel/messages",
-  false,
-  $context
-);`}</pre>
-          <pre className="bots-guide-code">{`use reqwest::Client;
-
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let token = "BOT_TOKEN";
-    let channel = "CHANNEL_ID";
-    let res = Client::new()
-        .post(format!(
-            "https://api.klovy.chat/api/bot/channels/{channel}/messages"
-        ))
-        .bearer_auth(token)
-        .json(&serde_json::json!({ "content": "Hello!" }))
-        .send()
-        .await?;
-    println!("{}", res.text().await?);
-    Ok(())
-}`}</pre>
-          <pre className="bots-guide-code">{`$token = "BOT_TOKEN"
-$channel = "CHANNEL_ID"
-
-Invoke-RestMethod `
-  -Method Post `
-  -Uri "https://api.klovy.chat/api/bot/channels/$channel/messages" `
-  -Headers @{ Authorization = "Bearer $token" } `
-  -ContentType "application/json" `
-  -Body (@{ content = "Hello!" } | ConvertTo-Json)`}</pre>
+          {BOT_GUIDE_EXAMPLES.map((code) => (
+            <pre key={code.slice(0, 24)} className="bots-guide-code">
+              {code}
+            </pre>
+          ))}
         </div>
       </div>
 
