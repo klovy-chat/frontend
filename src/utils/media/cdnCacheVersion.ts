@@ -17,11 +17,29 @@ export function bumpPublicMediaCache(key: string | null | undefined): void {
 
 export function bumpPublicMediaCacheForUser(userId: string, kind: "avatar" | "banner"): void {
   const prefix = kind === "avatar" ? "avatars/users" : "banners/users";
+  // Legacy stable key + versioned prefix (new uploads use …/{userId}/{uuid}.webp).
   bumpPublicMediaCache(`${prefix}/${userId}.webp`);
+  bumpMatchingPublicMediaCache(`${prefix}/${userId}/`);
 }
 
 export function bumpPublicMediaCacheForChannel(channelId: string): void {
   bumpPublicMediaCache(`avatars/channels/${channelId}.webp`);
+  bumpMatchingPublicMediaCache(`avatars/channels/${channelId}/`);
+}
+
+function bumpMatchingPublicMediaCache(prefix: string): void {
+  const normalizedPrefix = normalizeKey(prefix);
+  let changed = false;
+  for (const key of versions.keys()) {
+    if (key.startsWith(normalizedPrefix)) {
+      versions.set(key, Date.now());
+      changed = true;
+    }
+  }
+  if (changed) {
+    revision += 1;
+    listeners.forEach((listener) => listener());
+  }
 }
 
 export function getPublicMediaCacheVersion(key: string): number | undefined {
