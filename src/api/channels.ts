@@ -1,4 +1,4 @@
-import { apiRequest } from "./client";
+import { apiRequest, withTransientRetry } from "./client";
 import { assertAvatarSize } from "../constants/upload";
 import type { Channel, ChannelDetails, Message } from "../types";
 
@@ -51,12 +51,14 @@ export function uploadChannelAvatar(channelId: string, file: File) {
   assertAvatarSize(file);
   const form = new FormData();
   form.append("avatar", file);
-  return apiRequest<{ message: string; image: string }>(
-    `/api/channel/${channelId}/avatar`,
-    {
-      method: "POST",
-      body: form,
-    },
+  return withTransientRetry(() =>
+    apiRequest<{ message: string; image: string }>(
+      `/api/channel/${channelId}/avatar`,
+      {
+        method: "POST",
+        body: form,
+      },
+    ),
   );
 }
 

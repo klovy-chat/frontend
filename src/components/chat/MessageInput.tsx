@@ -10,9 +10,12 @@ import { userLabel } from "../../utils/user/format";
 import type { Message, MentionCandidate } from "../../types";
 import {
   ALLOWED_ATTACHMENT_EXTENSIONS,
+  assertAttachmentSize,
   assertAttachmentType,
   formatUploadLimitMb,
+  isImageAttachmentFile,
   MAX_ATTACHMENT_SIZE_BYTES,
+  MAX_IMAGE_ATTACHMENT_SIZE_BYTES,
 } from "../../constants/upload";
 import { MAX_MESSAGE_LENGTH } from "../../constants/messages";
 import { isAllowedGifMediaUrl } from "../../utils/media/mediaAllowlist";
@@ -107,6 +110,8 @@ export function MessageInput({
   const blurTimeout = useRef<ReturnType<typeof setTimeout>>();
   const typingActive = useRef(false);
   const lastTypingSent = useRef(0);
+  const pickerOpenRef = useRef(false);
+  pickerOpenRef.current = showEmojiPicker || showGifPicker || showStickerPicker;
   const {
     isRecording,
     durationMs: recordingDurationMs,
@@ -220,17 +225,23 @@ export function MessageInput({
       return;
     }
     const now = Date.now();
-    // Send a `true` heartbeat at most every 2.5s so the peer keeps showing the
-    // indicator while typing, without flooding the socket on every keystroke.
-    if (!typingActive.current || now - lastTypingSent.current > 2500) {
+    // Heartbeat at most every 5s — keeps under per-chat rate limits even with multi-tab.
+    if (!typingActive.current || now - lastTypingSent.current > 5000) {
       typingActive.current = true;
       lastTypingSent.current = now;
       onTyping?.(true);
     }
-    // Reliable stop: if no keystroke arrives within 2s, tell the peer we stopped.
+    // Reliable stop: if no keystroke arrives within 3s, tell the peer we stopped.
     if (typingTimeout.current) clearTimeout(typingTimeout.current);
-    typingTimeout.current = setTimeout(() => stopTyping(), 2000);
+    typingTimeout.current = setTimeout(() => stopTyping(), 3000);
   };
+
+  useEffect(() => {
+    return () => {
+      stopTyping();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- unmount cleanup only
+  }, []);
 
   useEffect(() => {
     const ta = textareaRef.current;
@@ -431,32 +442,18 @@ export function MessageInput({
   const handleFile = (file: File) => {
     try {
       assertAttachmentType(file);
+      assertAttachmentSize(file);
     } catch (error) {
       setUploadError(
         error instanceof Error
           ? error.message
-          : t("upload.invalidType", { extensions: "" }),
-      );
-      setAttachedFile(null);
-      return;
-    }
-    const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
-    if (
-      !ALLOWED_ATTACHMENT_EXTENSIONS.includes(
-        ext as (typeof ALLOWED_ATTACHMENT_EXTENSIONS)[number],
-      )
-    ) {
-      setUploadError(
-        t("upload.invalidType", { extensions: ALLOWED_FILE_EXTENSIONS.join(", ") }),
-      );
-      setAttachedFile(null);
-      return;
-    }
-    if (file.size > MAX_ATTACHMENT_SIZE_BYTES) {
-      setUploadError(
-        t("upload.attachmentTooLarge", {
-          limit: formatUploadLimitMb(MAX_ATTACHMENT_SIZE_BYTES),
-        }),
+          : t("upload.attachmentTooLarge", {
+              limit: formatUploadLimitMb(
+                isImageAttachmentFile(file)
+                  ? MAX_IMAGE_ATTACHMENT_SIZE_BYTES
+                  : MAX_ATTACHMENT_SIZE_BYTES,
+              ),
+            }),
       );
       setAttachedFile(null);
       return;
@@ -851,7 +848,11 @@ export function MessageInput({
             blurTimeout.current = setTimeout(() => {
               setFormatBar(null);
               closeMention();
-            }, 150);
+              // Don't clear typing while interacting with emoji/gif/sticker pickers.
+              if (!pickerOpenRef.current) {
+                stopTyping();
+              }
+            }, 180);
           }}
           placeholder={resolvedPlaceholder}
           disabled={disabled || isRecording}

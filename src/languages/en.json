@@ -1,4 +1,9 @@
 {
+  "desktopOnly": {
+    "brand": "Klovy Chat",
+    "title": "Desktop only for now",
+    "body": "The app is not available on phones or tablets yet. Open Klovy Chat on a computer to use chat."
+  },
   "common": {
     "save": "Save",
     "cancel": "Cancel",
@@ -1273,6 +1278,7 @@
       "unban": "Unban",
       "ban": "Ban",
       "restore": "Restore account",
+      "resetPassword": "Reset password",
       "defaultBanReason": "Messenger terms of service violation.",
       "owner": "Owner",
       "members": "Members",
@@ -1297,6 +1303,16 @@
         "reason": "Reason (optional)",
         "reasonPlaceholder": "E.g. terms violation, spam…",
         "submit": "Apply ban"
+      },
+      "resetPassword": {
+        "title": "Reset password",
+        "body": "Set a new password for @{{username}}. All of their active sessions will be signed out.",
+        "password": "New password",
+        "passwordPlaceholder": "Min. 8 chars, upper/lower, digit, special character",
+        "confirm": "Confirm password",
+        "mismatch": "Passwords do not match.",
+        "submit": "Set password",
+        "success": "Password was reset. The user must sign in again."
       },
       "delete": {
         "title": "Confirm deletion",

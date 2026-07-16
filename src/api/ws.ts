@@ -15,6 +15,14 @@ export interface WebSocketClientOptions {
   reconnectionDelayMax?: number;
 }
 
+/**
+ * Client app-level ping interval. Browsers auto-answer protocol pings but never
+ * surface them to JS, so we need a tiny JSON ping to detect a dead server.
+ */
+const CLIENT_PING_INTERVAL_MS = 45_000;
+/** Force reconnect if no server traffic (incl. pong) arrives. */
+const IDLE_TIMEOUT_MS = 90_000;
+
 function getWsUrl(): string {
   const clientQuery = `${CLIENT_QUERY_PARAM}=${encodeURIComponent(
     CLIENT_QUERY_VALUE,
@@ -40,6 +48,8 @@ export class WebSocketClient {
   private closed = false;
   private reconnectAttempts = 0;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+  private idleTimer: ReturnType<typeof setTimeout> | null = null;
+  private pingTimer: ReturnType<typeof setInterval> | null = null;
   private readonly options: Required<WebSocketClientOptions>;
 
   constructor(options: WebSocketClientOptions = {}) {
@@ -76,6 +86,42 @@ export class WebSocketClient {
     };
   }
 
+  private clearIdleTimer() {
+    if (this.idleTimer) {
+      clearTimeout(this.idleTimer);
+      this.idleTimer = null;
+    }
+  }
+
+  private clearPingTimer() {
+    if (this.pingTimer) {
+      clearInterval(this.pingTimer);
+      this.pingTimer = null;
+    }
+  }
+
+  private bumpIdleTimer() {
+    this.clearIdleTimer();
+    if (this.closed) return;
+    this.idleTimer = setTimeout(() => {
+      this.idleTimer = null;
+      try {
+        this.ws?.close();
+      } catch {
+        // ignore
+      }
+    }, IDLE_TIMEOUT_MS);
+  }
+
+  private startPingLoop() {
+    this.clearPingTimer();
+    this.pingTimer = setInterval(() => {
+      if (this.ws?.readyState === WebSocket.OPEN) {
+        this.sendFrame({ type: WsType.PING, payload: {} });
+      }
+    }, CLIENT_PING_INTERVAL_MS);
+  }
+
   private connect() {
     if (this.closed) return;
 
@@ -85,18 +131,20 @@ export class WebSocketClient {
     this.ws.onopen = () => {
       this.reconnectAttempts = 0;
       this.setStatus("open");
+      this.bumpIdleTimer();
+      this.startPingLoop();
     };
 
     this.ws.onmessage = (ev) => {
+      this.bumpIdleTimer();
       if (typeof ev.data !== "string") return;
       try {
         const frame = JSON.parse(ev.data) as WsFrame;
         if (!frame.type) return;
-        if (frame.type === WsType.PING) {
-          this.sendFrame({ type: WsType.PONG, payload: {} });
+        // Keepalive — do not dispatch to app handlers.
+        if (frame.type === WsType.PING || frame.type === WsType.PONG) {
           return;
         }
-        if (frame.type === WsType.PONG) return;
         const safePayload = sanitizeWsPayload(frame.type, frame.payload);
         if (safePayload == null) return;
         this.dispatch(frame.type, safePayload);
@@ -106,6 +154,8 @@ export class WebSocketClient {
     };
 
     this.ws.onclose = () => {
+      this.clearIdleTimer();
+      this.clearPingTimer();
       this.ws = null;
       if (!this.closed) {
         this.setStatus("connecting");
@@ -180,6 +230,8 @@ export class WebSocketClient {
 
   close() {
     this.closed = true;
+    this.clearIdleTimer();
+    this.clearPingTimer();
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer);
       this.reconnectTimer = null;

@@ -1,4 +1,4 @@
-import { apiRequest } from "./client";
+import { apiRequest, withTransientRetry } from "./client";
 import { assertAvatarSize } from "../constants/upload";
 import type { User } from "../types";
 
@@ -216,10 +216,12 @@ export function addProfileImage(file: File) {
   assertAvatarSize(file);
   const form = new FormData();
   form.append("profile-image", file);
-  return apiRequest<{ image: string }>("/api/auth/add-profile-image", {
-    method: "POST",
-    body: form,
-  });
+  return withTransientRetry(() =>
+    apiRequest<{ image: string }>("/api/auth/add-profile-image", {
+      method: "POST",
+      body: form,
+    }),
+  );
 }
 
 export function removeProfileImage() {
@@ -232,10 +234,12 @@ export function addProfileBanner(file: File) {
   assertAvatarSize(file);
   const form = new FormData();
   form.append("profile-banner", file);
-  return apiRequest<{ banner: string }>("/api/auth/add-profile-banner", {
-    method: "POST",
-    body: form,
-  });
+  return withTransientRetry(() =>
+    apiRequest<{ banner: string }>("/api/auth/add-profile-banner", {
+      method: "POST",
+      body: form,
+    }),
+  );
 }
 
 export function removeProfileBanner() {

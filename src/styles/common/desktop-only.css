@@ -1,0 +1,44 @@
+.desktop-only {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+  box-sizing: border-box;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(80, 120, 200, 0.18), transparent),
+    var(--bg-shell, #0f1117);
+  color: var(--text, #f2f3f7);
+  font-family: var(--font-sans, "Space Grotesk", system-ui, sans-serif);
+}
+
+.desktop-only__card {
+  width: min(420px, 100%);
+  text-align: center;
+}
+
+.desktop-only__brand {
+  margin: 0 0 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted, #9aa0b0);
+}
+
+.desktop-only__title {
+  margin: 0 0 12px;
+  font-size: clamp(1.35rem, 4vw, 1.75rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: var(--text, #f2f3f7);
+}
+
+.desktop-only__body {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--text-muted, #9aa0b0);
+}

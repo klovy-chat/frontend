@@ -248,6 +248,7 @@ export function ImageLightbox({
           alt={item.fileName}
           className={`image-lightbox__image${imageLoaded ? " image-lightbox__image--loaded" : ""}`}
           style={{ transform: `scale(${zoom / 100})` }}
+          deferUntilVisible={false}
           draggable={false}
           onLoad={() => setImageLoaded(true)}
           onClick={(event) => event.stopPropagation()}

@@ -201,32 +201,34 @@ export function OtherUserProfileModal({
             </section>
           ) : null}
 
-          {isFriend && onToggleBlock ? (
+          {isFriend && (onToggleBlock || onRemove) ? (
             <>
               <div className="up-divider" />
-              <button
-                type="button"
-                className={`up-remove-contact-btn${isBlockedByMe ? " up-remove-contact-btn--muted" : ""}`}
-                onClick={() => void onToggleBlock()}
-              >
-                {isBlockedByMe ? t("modals.otherUserProfile.unblock") : t("modals.otherUserProfile.block")}
-              </button>
-            </>
-          ) : null}
-
-          {isFriend && onRemove ? (
-            <>
-              <div className="up-divider" />
-              <button
-                type="button"
-                className="up-remove-contact-btn"
-                onClick={() => {
-                  requestClose();
-                  window.setTimeout(() => onRemove(), 240);
-                }}
-              >
-                {t("modals.otherUserProfile.removeContact")}
-              </button>
+              <div className="up-danger-actions">
+                {onToggleBlock ? (
+                  <button
+                    type="button"
+                    className={`up-danger-btn${isBlockedByMe ? " up-danger-btn--neutral" : ""}`}
+                    onClick={() => void onToggleBlock()}
+                  >
+                    {isBlockedByMe
+                      ? t("modals.otherUserProfile.unblock")
+                      : t("modals.otherUserProfile.block")}
+                  </button>
+                ) : null}
+                {onRemove ? (
+                  <button
+                    type="button"
+                    className="up-danger-btn"
+                    onClick={() => {
+                      requestClose();
+                      window.setTimeout(() => onRemove(), 240);
+                    }}
+                  >
+                    {t("modals.otherUserProfile.removeContact")}
+                  </button>
+                ) : null}
+              </div>
             </>
           ) : null}
         </div>

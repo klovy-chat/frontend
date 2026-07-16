@@ -93,6 +93,16 @@ export function setAdminUserWhitelist(userId: string, approved: boolean) {
   });
 }
 
+export function setAdminUserPassword(userId: string, newPassword: string) {
+  return apiRequest<{ message: string; user: { id: string; username: string } }>(
+    `/api/admin/users/${userId}/password`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ newPassword }),
+    },
+  );
+}
+
 export function banAdminUser(
   userId: string,
   options?: { reason?: string },

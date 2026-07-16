@@ -8,7 +8,7 @@ import { formatTime, getUserId, userLabel } from "../../utils/user/format";
 import { renderFormattedText } from "../../utils/chat/messageFormat";
 import { getReactionEntries, hasUserReacted } from "../../utils/chat/reactions";
 import { MediaImage } from "../common/MediaImage";
-import { resolveMediaUrl } from "../../utils/media/media";
+import { resolveChatImagePreviewUrl, resolveMediaUrl } from "../../utils/media/media";
 import { VoiceMessagePlayer } from "./VoiceMessagePlayer";
 import type { Message, MessageUser } from "../../types";
 import "../../styles/chat/messagebubble.css";
@@ -410,10 +410,10 @@ export function MessageBubble({
                         aria-label={t("messages.actions.openPreview", { name: message.fileName ?? t("messages.image") })}
                       >
                         <MediaImage
-                          fileUrl={message.fileUrl}
+                          fileUrl={resolveChatImagePreviewUrl(message.fileUrl)}
+                          fallbackFileUrl={message.fileUrl}
                           alt={message.fileName ?? t("messages.image")}
                           className="message-image"
-                          loading="lazy"
                           decoding="async"
                         />
                       </button>

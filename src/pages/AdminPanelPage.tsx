@@ -11,6 +11,7 @@ import {
   listAdminChannelReports,
   listAdminUsers,
   getAdminSession,
+  setAdminUserPassword,
   setAdminUserWhitelist,
   listAdminAnnouncements,
   createAdminAnnouncement,
@@ -189,6 +190,11 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
   const [banModal, setBanModal] = useState<AdminUserRow | null>(null);
   const [banReason, setBanReason] = useState("");
 
+  const [passwordModal, setPasswordModal] = useState<AdminUserRow | null>(null);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordFormError, setPasswordFormError] = useState("");
+
   const [confirmDelete, setConfirmDelete] = useState<{
     type: "user" | "channel" | "badge" | "announcement";
     id: string;
@@ -342,6 +348,29 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
     );
     setBanModal(null);
     setBanReason("");
+  };
+
+  const submitPasswordReset = async () => {
+    if (!passwordModal) return;
+    setPasswordFormError("");
+    if (newPassword !== confirmPassword) {
+      setPasswordFormError(t("admin.modals.resetPassword.mismatch"));
+      return;
+    }
+    try {
+      setActionLoading(`password-${passwordModal.id}`);
+      setError("");
+      await setAdminUserPassword(passwordModal.id, newPassword);
+      setPasswordModal(null);
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (err) {
+      setPasswordFormError(
+        err instanceof ApiError ? err.message : t("admin.errors.operationFailed"),
+      );
+    } finally {
+      setActionLoading(null);
+    }
   };
 
   const submitDelete = async () => {
@@ -658,6 +687,19 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
                   }}
                 >
                   {t("admin.users.assignBadge")}
+                </button>
+                <button
+                  type="button"
+                  className="adm-act-btn adm-act-btn--ghost"
+                  disabled={actionLoading === `password-${u.id}`}
+                  onClick={() => {
+                    setPasswordModal(u);
+                    setNewPassword("");
+                    setConfirmPassword("");
+                    setPasswordFormError("");
+                  }}
+                >
+                  {t("admin.users.resetPassword")}
                 </button>
                 <button
                   type="button"
@@ -1339,6 +1381,79 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
                 onClick={submitBan}
               >
                 {t("admin.modals.ban.submit")}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {passwordModal ? (
+        <div
+          className="adm-overlay"
+          onClick={() => {
+            setPasswordModal(null);
+            setPasswordFormError("");
+          }}
+        >
+          <div className="adm-dialog" onClick={(e) => e.stopPropagation()}>
+            <h2>{t("admin.modals.resetPassword.title")}</h2>
+            <p>
+              {t("admin.modals.resetPassword.body", {
+                username: passwordModal.username,
+              })}
+            </p>
+            <div className="adm-field">
+              <label htmlFor="admin-new-password">
+                {t("admin.modals.resetPassword.password")}
+              </label>
+              <input
+                id="admin-new-password"
+                type="password"
+                autoComplete="new-password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder={t("admin.modals.resetPassword.passwordPlaceholder")}
+              />
+            </div>
+            <div className="adm-field">
+              <label htmlFor="admin-confirm-password">
+                {t("admin.modals.resetPassword.confirm")}
+              </label>
+              <input
+                id="admin-confirm-password"
+                type="password"
+                autoComplete="new-password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+            </div>
+            {passwordFormError ? (
+              <p className="adm-form-error" role="alert">
+                {passwordFormError}
+              </p>
+            ) : null}
+            <div className="adm-dialog-footer">
+              <button
+                type="button"
+                className="adm-act-btn adm-act-btn--ghost"
+                onClick={() => {
+                  setPasswordModal(null);
+                  setPasswordFormError("");
+                }}
+              >
+                {t("common.cancel")}
+              </button>
+              <button
+                type="button"
+                className="adm-act-btn adm-act-btn--danger"
+                disabled={
+                  actionLoading === `password-${passwordModal.id}` ||
+                  !newPassword.trim() ||
+                  !confirmPassword.trim()
+                }
+                onClick={() => void submitPasswordReset()}
+              >
+                {t("admin.modals.resetPassword.submit")}
               </button>
             </div>
           </div>

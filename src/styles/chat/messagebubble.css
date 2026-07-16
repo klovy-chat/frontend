@@ -626,8 +626,21 @@
   max-height: 400px;
   width: auto;
   height: auto;
+  min-width: 120px;
+  min-height: 80px;
   border-radius: 12px;
   object-fit: cover;
+  background: var(--bg-hover, rgba(127, 127, 127, 0.15));
+}
+
+.message-image[data-pending="true"] {
+  background: linear-gradient(
+    90deg,
+    rgba(127, 127, 127, 0.12),
+    rgba(127, 127, 127, 0.22),
+    rgba(127, 127, 127, 0.12)
+  );
+  background-size: 200% 100%;
 }
 
 /* ── Sticker messages (bare, no bubble chrome) ── */

@@ -56,6 +56,24 @@ export function resolveMediaUrl(fileUrl: string): string | null {
   return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
 }
 
+/**
+ * Derive thumbnail storage key from a full attachment WebP key.
+ * `…/{uuid}.webp` → `…/{uuid}.thumb.webp`. Returns null for non-webp / already-thumb.
+ */
+export function attachmentThumbKey(fileUrl: string): string | null {
+  const trimmed = fileUrl.trim().replace(/^\/+/, "");
+  if (!trimmed || /^https?:\/\//i.test(trimmed)) return null;
+  if (!isAttachmentKey(trimmed) || !isSafeMessageUploadPath(trimmed)) return null;
+  if (trimmed.endsWith(".thumb.webp")) return null;
+  if (!trimmed.endsWith(".webp")) return null;
+  return `${trimmed.slice(0, -".webp".length)}.thumb.webp`;
+}
+
+/** Prefer thumbnail URL for chat bubbles; falls back to full key when no thumb convention. */
+export function resolveChatImagePreviewUrl(fileUrl: string): string {
+  return attachmentThumbKey(fileUrl) ?? fileUrl.trim();
+}
+
 /** Fallback przez uwierzytelniony proxy backendu, gdyby bezpośredni CDN zawiódł. */
 export function legacyAttachmentFallbackUrl(fileUrl: string): string | null {
   const trimmed = fileUrl.trim();

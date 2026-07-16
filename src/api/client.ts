@@ -45,6 +45,28 @@ export function isTransientApiError(error: unknown): boolean {
   return isFetchNetworkError(error);
 }
 
+/** Retry transient upload/proxy failures (502/503/504/network) with short backoff. */
+export async function withTransientRetry<T>(
+  fn: () => Promise<T>,
+  attempts = 3,
+): Promise<T> {
+  let lastError: unknown;
+  for (let i = 0; i < attempts; i += 1) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
+      if (i === attempts - 1 || !isTransientApiError(error)) {
+        throw error;
+      }
+      await new Promise((resolve) => {
+        window.setTimeout(resolve, 300 * (i + 1));
+      });
+    }
+  }
+  throw lastError;
+}
+
 function isMutatingMethod(method: string): boolean {
   return ["POST", "PUT", "PATCH", "DELETE"].includes(method.toUpperCase());
 }

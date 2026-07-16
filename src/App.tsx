@@ -111,9 +111,8 @@ function AppRoutes() {
         path="/pending"
         element={
           <WhitelistRoute>
-            <WebSocketProvider>
-              <PendingApprovalPage />
-            </WebSocketProvider>
+            {/* No WebSocket — pending users are blocked from /ws; approval is polled. */}
+            <PendingApprovalPage />
           </WhitelistRoute>
         }
       />

@@ -1,4 +1,9 @@
 {
+  "desktopOnly": {
+    "brand": "Klovy Chat",
+    "title": "Dostępne tylko na komputerze",
+    "body": "Aplikacja nie jest obecnie dostępna na telefonach ani tabletach. Otwórz Klovy Chat na komputerze, aby korzystać z czatu."
+  },
   "common": {
     "save": "Zapisz",
     "cancel": "Anuluj",
@@ -1273,6 +1278,7 @@
       "unban": "Odbanuj",
       "ban": "Ban",
       "restore": "Przywróć konto",
+      "resetPassword": "Zmień hasło",
       "defaultBanReason": "Naruszenie regulaminu komunikatora.",
       "owner": "Właściciel",
       "members": "Członków",
@@ -1297,6 +1303,16 @@
         "reason": "Powód (opcjonalnie)",
         "reasonPlaceholder": "Np. naruszenie regulaminu, spam…",
         "submit": "Nałóż ban"
+      },
+      "resetPassword": {
+        "title": "Reset hasła",
+        "body": "Ustaw nowe hasło dla @{{username}}. Wszystkie aktywne sesje użytkownika zostaną wylogowane.",
+        "password": "Nowe hasło",
+        "passwordPlaceholder": "Min. 8 znaków, wielka/mała litera, cyfra, znak specjalny",
+        "confirm": "Potwierdź hasło",
+        "mismatch": "Hasła nie są takie same.",
+        "submit": "Ustaw hasło",
+        "success": "Hasło zostało zresetowane. Użytkownik musi zalogować się ponownie."
       },
       "delete": {
         "title": "Potwierdź usunięcie",

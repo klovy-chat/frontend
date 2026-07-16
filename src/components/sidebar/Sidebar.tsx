@@ -33,6 +33,15 @@ import type { Channel, ChatTarget, Contact, Message } from "../../types";
 import { ChannelSettingsModal } from "../channel/ChannelSettingsModal";
 import { ContactsModal } from "../contacts/ContactsModal";
 import { AdminPanelModal } from "../admin/AdminPanelModal";
+import { ImageCropModal } from "../common/ImageCropModal";
+import {
+  MAX_AVATAR_SIZE_BYTES,
+  MAX_AVATAR_SIZE_LABEL,
+} from "../../constants/upload";
+import {
+  bumpPublicMediaCache,
+  bumpPublicMediaCacheForChannel,
+} from "../../utils/media/cdnCacheVersion";
 import "../../styles/chat/chat-context-menu.css";
 
 /* ─── design tokens (mirror global.css vars) ─── */
@@ -231,6 +240,8 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
   const [deleteChannelClosing, setDeleteChannelClosing] = useState(false);
 
   const [uploadAvatarChannel, setUploadAvatarChannel] = useState<{ channelId: string; channelName: string } | null>(null);
+  const [channelCropFile, setChannelCropFile] = useState<File | null>(null);
+  const [channelAvatarUploading, setChannelAvatarUploading] = useState(false);
 
   const [channelSettingsInfo, setChannelSettingsInfo] = useState<{
     channelId: string; channelName: string; channel: Channel;
@@ -706,14 +717,24 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
 
   const handleChannelAvatarChange = async (file: File) => {
     if (!uploadAvatarChannel) return;
+    const target = uploadAvatarChannel;
+    setChannelAvatarUploading(true);
     try {
-      const { image } = await uploadChannelAvatar(uploadAvatarChannel.channelId, file);
+      const { image } = await uploadChannelAvatar(target.channelId, file);
+      bumpPublicMediaCache(image);
+      bumpPublicMediaCacheForChannel(target.channelId);
       setUploadAvatarChannel(null);
+      setChannelCropFile(null);
       setTimeout(() => { if (channelAvatarInputRef.current) channelAvatarInputRef.current.value = ""; }, 0);
       await refresh();
-      if (active?.type === "channel" && active.channel._id === uploadAvatarChannel.channelId)
+      if (active?.type === "channel" && active.channel._id === target.channelId)
         onSelect({ type: "channel", channel: { ...active.channel, image } });
-    } catch (err) { toast.error(err instanceof Error ? err.message : t("sidebar.toast.channelAvatarFailed")); }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t("sidebar.toast.channelAvatarFailed"));
+      throw err;
+    } finally {
+      setChannelAvatarUploading(false);
+    }
   };
 
   const handleDeleteChannel = async () => {
@@ -820,8 +841,21 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
 
   const handleChannelAvatarFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !uploadAvatarChannel) { setUploadAvatarChannel(null); return; }
-    handleChannelAvatarChange(file);
+    e.target.value = "";
+    if (!file || !uploadAvatarChannel) {
+      setUploadAvatarChannel(null);
+      return;
+    }
+    if (file.size > MAX_AVATAR_SIZE_BYTES) {
+      toast.error(t("upload.avatarTooLarge", { limit: MAX_AVATAR_SIZE_LABEL }));
+      setUploadAvatarChannel(null);
+      return;
+    }
+    setChannelCropFile(file);
+  };
+
+  const handleChannelCropConfirm = async (file: File) => {
+    await handleChannelAvatarChange(file);
   };
 
   /* sync total unread across tabs */
@@ -1416,6 +1450,24 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
 
       {/* Hidden avatar input */}
       <input ref={channelAvatarInputRef} type="file" accept="image/jpeg,image/png,image/webp" style={{ display: "none" }} onChange={handleChannelAvatarFileChange} />
+
+      {channelCropFile ? (
+        <ImageCropModal
+          file={channelCropFile}
+          aspect={1}
+          outputWidth={512}
+          outputHeight={512}
+          round
+          title={t("imageCrop.channelAvatarTitle")}
+          maxSizeLabel={MAX_AVATAR_SIZE_LABEL}
+          busy={channelAvatarUploading}
+          onCancel={() => {
+            setChannelCropFile(null);
+            setUploadAvatarChannel(null);
+          }}
+          onConfirm={handleChannelCropConfirm}
+        />
+      ) : null}
     </>
   );
 }

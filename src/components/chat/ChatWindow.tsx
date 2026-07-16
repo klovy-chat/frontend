@@ -25,6 +25,7 @@ import {
 import {
   normalizeMessage,
 } from "../../utils/chat/messages";
+import { MESSAGE_PAGE_SIZE } from "../../constants/messages";
 import {
   normalizeReactions,
   toggleReactionLocal,
@@ -230,7 +231,10 @@ export function ChatWindow({
     try {
       if (target.type === "dm") {
         try {
-          const { messages: list, hasMore: more } = await getMessages(target.contact._id);
+          const { messages: list, hasMore: more } = await getMessages(
+            target.contact._id,
+            { limit: MESSAGE_PAGE_SIZE },
+          );
           setMessages(list.map(normalizeMessage));
           setHasMore(Boolean(more));
         } catch {
@@ -238,7 +242,10 @@ export function ChatWindow({
           setHasMore(false);
         }
       } else {
-        const { messages: list, hasMore: more } = await getChannelMessages(target.channel._id);
+        const { messages: list, hasMore: more } = await getChannelMessages(
+          target.channel._id,
+          { limit: MESSAGE_PAGE_SIZE },
+        );
         setMessages(list.map(normalizeMessage));
         setHasMore(Boolean(more));
       }
@@ -255,8 +262,14 @@ export function ChatWindow({
     try {
       const page =
         target.type === "dm"
-          ? await getMessages(target.contact._id, { before: oldest })
-          : await getChannelMessages(target.channel._id, { before: oldest });
+          ? await getMessages(target.contact._id, {
+              before: oldest,
+              limit: MESSAGE_PAGE_SIZE,
+            })
+          : await getChannelMessages(target.channel._id, {
+              before: oldest,
+              limit: MESSAGE_PAGE_SIZE,
+            });
       const older = page.messages.map(normalizeMessage);
       setMessages((prev) => {
         const existing = new Set(prev.map((m) => m._id));
@@ -1042,6 +1055,11 @@ export function ChatWindow({
         </div>
       ) : (
         <MessageInput
+          key={
+            target.type === "dm"
+              ? target.contact._id
+              : `channel_${target.channel._id}`
+          }
           onSend={sendMessage}
           onTyping={handleTyping}
           onFile={handleFile}

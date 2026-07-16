@@ -1,7 +1,10 @@
 import i18n from "../i18n/config";
 
-/** Maximum chat attachment size (10 MB) — must match backend `MAX_ATTACHMENT_BYTES`. */
+/** Maximum non-image chat attachment size (10 MB) — must match backend `MAX_ATTACHMENT_BYTES`. */
 export const MAX_ATTACHMENT_SIZE_BYTES = 10 * 1024 * 1024;
+
+/** Maximum chat image upload size (3 MB) — must match backend `MAX_IMAGE_ATTACHMENT_BYTES`. */
+export const MAX_IMAGE_ATTACHMENT_SIZE_BYTES = 3 * 1024 * 1024;
 
 /** Maximum avatar/banner size (5 MB) — must match backend `MAX_AVATAR_BYTES`. */
 export const MAX_AVATAR_SIZE_BYTES = 5 * 1024 * 1024;
@@ -9,6 +12,11 @@ export const MAX_AVATAR_SIZE_BYTES = 5 * 1024 * 1024;
 /** Human-readable max attachment size, e.g. "10 MB". */
 export const MAX_ATTACHMENT_SIZE_LABEL = `${Math.round(
   MAX_ATTACHMENT_SIZE_BYTES / (1024 * 1024),
+)} MB`;
+
+/** Human-readable max image attachment size, e.g. "3 MB". */
+export const MAX_IMAGE_ATTACHMENT_SIZE_LABEL = `${Math.round(
+  MAX_IMAGE_ATTACHMENT_SIZE_BYTES / (1024 * 1024),
 )} MB`;
 
 /** Human-readable max avatar/banner size, e.g. "5 MB". */
@@ -30,6 +38,8 @@ export const ALLOWED_ATTACHMENT_EXTENSIONS = [
   "wav",
   "mp4",
 ] as const;
+
+const IMAGE_ATTACHMENT_EXTENSIONS = new Set(["jpg", "jpeg", "png", "webp"]);
 
 const ALLOWED_ATTACHMENT_MIME_TYPES: Record<
   (typeof ALLOWED_ATTACHMENT_EXTENSIONS)[number],
@@ -56,6 +66,11 @@ const ALLOWED_ATTACHMENT_MIME_TYPES: Record<
 
 export function formatUploadLimitMb(bytes: number): string {
   return `${Math.round(bytes / (1024 * 1024))} MB`;
+}
+
+export function isImageAttachmentFile(file: File): boolean {
+  const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
+  return IMAGE_ATTACHMENT_EXTENSIONS.has(ext);
 }
 
 export function assertAttachmentType(file: File): void {
@@ -87,10 +102,13 @@ export function assertAttachmentType(file: File): void {
 }
 
 export function assertAttachmentSize(file: File): void {
-  if (file.size > MAX_ATTACHMENT_SIZE_BYTES) {
+  const max = isImageAttachmentFile(file)
+    ? MAX_IMAGE_ATTACHMENT_SIZE_BYTES
+    : MAX_ATTACHMENT_SIZE_BYTES;
+  if (file.size > max) {
     throw new Error(
       i18n.t("upload.attachmentTooLarge", {
-        limit: formatUploadLimitMb(MAX_ATTACHMENT_SIZE_BYTES),
+        limit: formatUploadLimitMb(max),
       }),
     );
   }
