@@ -8,7 +8,8 @@
     "dev:backend": "cargo run --manifest-path ../backend/Cargo.toml",
     "dev:all": "concurrently -k -n backend,frontend -c blue,green \"npm run dev:backend\" \"wait-on http-get://127.0.0.1:6700/api -t 120000 && vite\"",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "bun run build && wrangler dev",
+    "deploy": "bun run build && wrangler deploy"
   },
   "dependencies": {
     "@marsidev/react-turnstile": "^1.1.0",
@@ -22,12 +23,14 @@
     "react-router-dom": "^6.28.0"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.45.1",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.3",
     "concurrently": "^9.1.2",
     "typescript": "^5.6.3",
     "vite": "^8.1.4",
-    "wait-on": "^8.0.1"
+    "wait-on": "^8.0.1",
+    "wrangler": "^4.112.0"
   }
 }
