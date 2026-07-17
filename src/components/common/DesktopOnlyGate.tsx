@@ -1,6 +1,6 @@
-import { useMemo, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { isMobileOrTabletDevice } from "../../utils/device/isMobileOrTablet";
+import { useMobileOrTabletBlock } from "../../hooks/useMobileOrTabletBlock";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import "../../styles/common/desktop-only.css";
 
@@ -10,7 +10,7 @@ interface DesktopOnlyGateProps {
 
 export function DesktopOnlyGate({ children }: DesktopOnlyGateProps) {
   const { t } = useTranslation();
-  const blocked = useMemo(() => isMobileOrTabletDevice(), []);
+  const blocked = useMobileOrTabletBlock();
 
   if (!blocked) {
     return <>{children}</>;

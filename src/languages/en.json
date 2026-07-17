@@ -1,7 +1,7 @@
 {
   "desktopOnly": {
     "title": "Desktop only for now",
-    "body": "The app is not available on phones or tablets yet. Open it on a computer to use chat."
+    "body": "The app is not available on phones or tablets — including when your browser's \"Request desktop site\" mode is on. Open it on a computer to use chat."
   },
   "common": {
     "save": "Save",

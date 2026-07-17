@@ -324,7 +324,7 @@ export function MessageBubble({
                           {t("messages.actions.reply")}
                         </button>
                       )}
-                      {onEdit && !isVoice && (
+                      {isOwn && onEdit && !isVoice && (
                         <button
                           type="button"
                           className="message-dropdown-item"
@@ -337,7 +337,7 @@ export function MessageBubble({
                           {t("messages.actions.edit")}
                         </button>
                       )}
-                      {onDelete && (
+                      {isOwn && onDelete && (
                         <button
                           type="button"
                           className="message-dropdown-item message-dropdown-item--danger"

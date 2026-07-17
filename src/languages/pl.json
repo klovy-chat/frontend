@@ -1,7 +1,7 @@
 {
   "desktopOnly": {
     "title": "Dostępne tylko na komputerze",
-    "body": "Aplikacja nie jest obecnie dostępna na telefonach ani tabletach. Otwórz ją na komputerze, aby korzystać z czatu."
+    "body": "Aplikacja nie jest dostępna na telefonach ani tabletach — także po włączeniu w przeglądarce opcji „Wyświetlaj jak na komputerze”. Otwórz ją na komputerze, aby korzystać z czatu."
   },
   "common": {
     "save": "Zapisz",
