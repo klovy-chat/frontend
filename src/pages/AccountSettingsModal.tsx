@@ -1,4 +1,4 @@
-import { CSSProperties, FormEvent, useCallback, useMemo, useRef, useState, useEffect } from "react";
+import { CSSProperties, FormEvent, useCallback, useRef, useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import {
   acknowledgeMyWarnings,
