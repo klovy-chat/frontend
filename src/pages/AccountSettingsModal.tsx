@@ -41,7 +41,6 @@ import {
 } from "../components/profile/ProfileFormFields";
 import {
   avatarColor,
-  profileImageUrl,
 } from "../utils/media/avatar";
 import {
   bumpPublicMediaCache,
@@ -281,7 +280,6 @@ export function AccountSettingsModal({
     activeColorIndex,
     user?.username ?? "",
   );
-  const hasCustomAvatar = Boolean(profileImageUrl(avatarPreview));
   const bannerStyle = useProfileBannerStyle(
     bannerPreview,
     activeColorIndex,
@@ -657,11 +655,6 @@ export function AccountSettingsModal({
 
   const renderAvatarContent = (size: "sm" | "lg") => (
     <>
-      {!hasCustomAvatar ? (
-        <span className="as-avatar-initial" aria-hidden>
-          {(navName.trim().charAt(0) || "?").toUpperCase()}
-        </span>
-      ) : null}
       {(avatarLoading && size === "lg") && (
         <div className="as-avatar-overlay"><div className="as-spinner" /></div>
       )}

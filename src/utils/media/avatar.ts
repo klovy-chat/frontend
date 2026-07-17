@@ -150,12 +150,10 @@ export function profileAvatarStyle(
   backgroundPosition?: string;
 } {
   const url = profileImageUrl(image, cacheVersion);
-  if (url) {
-    return {
-      backgroundImage: `url(${url})`,
-      backgroundSize: "cover",
-      backgroundPosition: "center",
-    };
-  }
-  return { background: avatarColor(colorIndex, seed) };
+  const resolved = url ?? getDefaultAvatarImage(colorIndex, seed);
+  return {
+    backgroundImage: `url(${resolved})`,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+  };
 }

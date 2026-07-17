@@ -1,6 +1,12 @@
 import { useMemo } from "react";
-import { profileImageUrl } from "../../utils/media/avatar";
-import { useProfileAvatarStyle, usePublicMediaCacheRevision } from "../../hooks/usePublicMediaCacheRevision";
+import {
+  avatarColor,
+  profileImageUrl,
+} from "../../utils/media/avatar";
+import {
+  useProfileAvatarStyle,
+  usePublicMediaCacheRevision,
+} from "../../hooks/usePublicMediaCacheRevision";
 import { userLabel } from "../../utils/user/format";
 
 interface AvatarProps {
@@ -28,8 +34,6 @@ export function Avatar({
     [image, cacheRevision],
   );
   const name = userLabel({ displayName, username });
-  const fontSize = Math.max(12, Math.round(size * 0.42));
-  const initial = (name.trim().charAt(0) || "?").toUpperCase();
 
   if (placeholder != null && !hasPhoto) {
     return (
@@ -37,7 +41,7 @@ export function Avatar({
         className="avatar avatar-text"
         title={name}
         style={{
-          ...avatarStyle,
+          background: avatarColor(color, seed),
           width: size,
           height: size,
           fontSize: Math.max(12, Math.round(size * 0.55)),
@@ -50,7 +54,7 @@ export function Avatar({
 
   return (
     <div
-      className={`avatar avatar-img${hasPhoto ? "" : " avatar-text"}`}
+      className="avatar avatar-img"
       role="img"
       aria-label={name}
       title={name}
@@ -58,10 +62,7 @@ export function Avatar({
         ...avatarStyle,
         width: size,
         height: size,
-        fontSize: hasPhoto ? undefined : fontSize,
       }}
-    >
-      {hasPhoto ? null : initial}
-    </div>
+    />
   );
 }
