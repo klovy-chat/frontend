@@ -306,7 +306,8 @@
     "hint": "Przeciągnij, aby przesunąć; użyj kółka lub suwaka, aby przybliżyć.",
     "maxSize": "maks. {{size}}",
     "zoom": "Przybliżenie",
-    "apply": "Zastosuj"
+    "apply": "Zastosuj",
+    "exportFailed": "Nie udało się przygotować obrazu. Spróbuj ponownie lub wybierz inny plik."
   },
   "messages": {
     "deleted": "Wiadomość usunięta",

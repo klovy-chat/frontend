@@ -1476,6 +1476,26 @@ export function AccountSettingsModal({
     </div>
   );
 
+  const cropModal = cropTarget ? (
+    <ImageCropModal
+      file={cropTarget.file}
+      aspect={cropTarget.kind === "avatar" ? 1 : 1024 / 384}
+      outputWidth={cropTarget.kind === "avatar" ? 512 : 1024}
+      outputHeight={cropTarget.kind === "avatar" ? 512 : 384}
+      round={cropTarget.kind === "avatar"}
+      title={
+        cropTarget.kind === "avatar"
+          ? t("imageCrop.avatarTitle")
+          : t("imageCrop.bannerTitle")
+      }
+      maxSizeLabel={MAX_AVATAR_SIZE_LABEL}
+      busy={cropTarget.kind === "avatar" ? avatarLoading : bannerLoading}
+      onCancel={() => setCropTarget(null)}
+      onConfirm={handleCropConfirm}
+      onExportError={(text) => msg("error", text)}
+    />
+  ) : null;
+
   if (inline) {
     return (
       <>
@@ -1506,6 +1526,7 @@ export function AccountSettingsModal({
           onClose={() => setTwoFactorSetupOpen(false)}
           onEnabled={handleTwoFactorEnabled}
         />
+        {cropModal}
       </>
     );
   }
@@ -1537,24 +1558,7 @@ export function AccountSettingsModal({
         onClose={() => setTwoFactorSetupOpen(false)}
         onEnabled={handleTwoFactorEnabled}
       />
-      {cropTarget ? (
-        <ImageCropModal
-          file={cropTarget.file}
-          aspect={cropTarget.kind === "avatar" ? 1 : 1024 / 384}
-          outputWidth={cropTarget.kind === "avatar" ? 512 : 1024}
-          outputHeight={cropTarget.kind === "avatar" ? 512 : 384}
-          round={cropTarget.kind === "avatar"}
-          title={
-            cropTarget.kind === "avatar"
-              ? t("imageCrop.avatarTitle")
-              : t("imageCrop.bannerTitle")
-          }
-          maxSizeLabel={MAX_AVATAR_SIZE_LABEL}
-          busy={cropTarget.kind === "avatar" ? avatarLoading : bannerLoading}
-          onCancel={() => setCropTarget(null)}
-          onConfirm={handleCropConfirm}
-        />
-      ) : null}
+      {cropModal}
     </>
   );
 }

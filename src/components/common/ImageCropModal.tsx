@@ -22,6 +22,7 @@ interface ImageCropModalProps {
   busy?: boolean;
   onCancel: () => void;
   onConfirm: (file: File) => void | Promise<void>;
+  onExportError?: (message: string) => void;
 }
 
 const MIN_ZOOM = 1;
@@ -44,6 +45,7 @@ export function ImageCropModal({
   busy = false,
   onCancel,
   onConfirm,
+  onExportError,
 }: ImageCropModalProps) {
   const { t } = useTranslation();
   const [imageSrc, setImageSrc] = useState<string>("");
@@ -51,6 +53,7 @@ export function ImageCropModal({
   const [zoom, setZoom] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [processing, setProcessing] = useState(false);
+  const [exportError, setExportError] = useState("");
   const imgRef = useRef<HTMLImageElement | null>(null);
   const dragRef = useRef<{
     startX: number;
@@ -163,10 +166,11 @@ export function ImageCropModal({
     const imgLeft = (viewport.w - dispW) / 2 + offset.x;
     const imgTop = (viewport.h - dispH) / 2 + offset.y;
     // Source rectangle in natural image pixels that maps to the viewport.
-    const sx = -imgLeft / scale;
-    const sy = -imgTop / scale;
-    const sWidth = viewport.w / scale;
-    const sHeight = viewport.h / scale;
+    const sx = Math.max(0, -imgLeft / scale);
+    const sy = Math.max(0, -imgTop / scale);
+    const sWidth = Math.min(natural.w - sx, viewport.w / scale);
+    const sHeight = Math.min(natural.h - sy, viewport.h / scale);
+    if (sWidth <= 0 || sHeight <= 0) return null;
 
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
@@ -202,10 +206,15 @@ export function ImageCropModal({
   const handleConfirm = async () => {
     if (busy || processing) return;
     setProcessing(true);
+    setExportError("");
     try {
       const result = await exportBlob();
       if (result) {
         await onConfirm(result);
+      } else {
+        const message = t("imageCrop.exportFailed");
+        setExportError(message);
+        onExportError?.(message);
       }
     } finally {
       setProcessing(false);
@@ -287,6 +296,19 @@ export function ImageCropModal({
             />
           ) : null}
         </div>
+
+        {exportError ? (
+          <p
+            role="alert"
+            style={{
+              margin: "12px 0 0",
+              fontSize: "0.78rem",
+              color: "#f87171",
+            }}
+          >
+            {exportError}
+          </p>
+        ) : null}
 
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 16 }}>
           <span style={{ fontSize: "0.72rem", color: "var(--text-muted, #9a9aa5)" }}>
