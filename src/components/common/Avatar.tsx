@@ -1,8 +1,5 @@
 import { useMemo } from "react";
-import {
-  avatarColor,
-  profileImageUrl,
-} from "../../utils/media/avatar";
+import { profileImageUrl } from "../../utils/media/avatar";
 import {
   useProfileAvatarStyle,
   usePublicMediaCacheRevision,
@@ -41,7 +38,6 @@ export function Avatar({
         className="avatar avatar-text"
         title={name}
         style={{
-          background: avatarColor(color, seed),
           width: size,
           height: size,
           fontSize: Math.max(12, Math.round(size * 0.55)),
