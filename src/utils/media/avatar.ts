@@ -55,6 +55,7 @@ function profileBannerGradient(
 import {
   isAvatarKey,
   isBannerKey,
+  normalizeMediaKey,
   publicCdnUrl,
 } from "./cdn";
 import { getPublicMediaCacheVersion } from "./cdnCacheVersion";
@@ -78,7 +79,7 @@ function resolveAvatarUrl(
     return isAllowedExternalMediaUrl(trimmed) ? trimmed : null;
   }
 
-  const path = trimmed.replace(/^\/+/, "");
+  const path = normalizeMediaKey(trimmed);
   if (!isSafeProfileUploadPath(path) || !isAvatarKey(path)) {
     return null;
   }
@@ -96,7 +97,7 @@ function resolveBannerUrl(
     return isAllowedExternalMediaUrl(trimmed) ? trimmed : null;
   }
 
-  const path = trimmed.replace(/^\/+/, "");
+  const path = normalizeMediaKey(trimmed);
   if (!isSafeProfileUploadPath(path) || !isBannerKey(path)) {
     return null;
   }
@@ -135,4 +136,26 @@ export function profileBannerStyle(
     };
   }
   return { background: profileBannerGradient(colorIndex, seed) };
+}
+
+export function profileAvatarStyle(
+  image: string | null | undefined,
+  colorIndex?: number | null,
+  seed = "",
+  cacheVersion?: string | number,
+): {
+  background?: string;
+  backgroundImage?: string;
+  backgroundSize?: string;
+  backgroundPosition?: string;
+} {
+  const url = profileImageUrl(image, cacheVersion);
+  if (url) {
+    return {
+      backgroundImage: `url(${url})`,
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+    };
+  }
+  return { background: avatarColor(colorIndex, seed) };
 }

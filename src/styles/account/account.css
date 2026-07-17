@@ -107,6 +107,22 @@
   flex-shrink: 0;
 }
 
+.as-nav-avatar,
+.as-avatar-lg,
+.as-account-hero-avatar {
+  background-size: cover;
+  background-position: center;
+}
+
+.as-avatar-initial {
+  position: relative;
+  z-index: 0;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+  user-select: none;
+}
+
 .as-nav-avatar img {
   width: 100%;
   height: 100%;

@@ -41,16 +41,14 @@ import {
 } from "../components/profile/ProfileFormFields";
 import {
   avatarColor,
-  getDefaultAvatarImage,
   profileImageUrl,
-  resolveAvatarColorIndex,
 } from "../utils/media/avatar";
 import {
   bumpPublicMediaCache,
   bumpPublicMediaCacheForUser,
 } from "../utils/media/cdnCacheVersion";
 import {
-  usePublicMediaCacheRevision,
+  useProfileAvatarStyle,
   useProfileBannerStyle,
 } from "../hooks/usePublicMediaCacheRevision";
 import { userLabel, WARNING_SEVERITY_LABELS } from "../utils/user/format";
@@ -278,11 +276,12 @@ export function AccountSettingsModal({
   }, [visible, section, warnings, warningsLoading]);
 
   const activeColorIndex = profileValues.color ?? user?.color ?? null;
-  const cacheRevision = usePublicMediaCacheRevision();
-  const avatarSrc = useMemo(
-    () => profileImageUrl(avatarPreview),
-    [avatarPreview, cacheRevision],
+  const avatarStyle = useProfileAvatarStyle(
+    avatarPreview,
+    activeColorIndex,
+    user?.username ?? "",
   );
+  const hasCustomAvatar = Boolean(profileImageUrl(avatarPreview));
   const bannerStyle = useProfileBannerStyle(
     bannerPreview,
     activeColorIndex,
@@ -652,14 +651,17 @@ export function AccountSettingsModal({
   };
 
 
-  const defaultAvatarSrc = getDefaultAvatarImage(resolveAvatarColorIndex(activeColorIndex));
   const navName = userLabel(user);
   const warningCount = warnings.length;
   const unacknowledgedCount = warnings.filter((w) => !w.acknowledged).length;
 
   const renderAvatarContent = (size: "sm" | "lg") => (
     <>
-      <img src={avatarSrc || defaultAvatarSrc} alt={t("common.avatar")} />
+      {!hasCustomAvatar ? (
+        <span className="as-avatar-initial" aria-hidden>
+          {(navName.trim().charAt(0) || "?").toUpperCase()}
+        </span>
+      ) : null}
       {(avatarLoading && size === "lg") && (
         <div className="as-avatar-overlay"><div className="as-spinner" /></div>
       )}
@@ -681,7 +683,7 @@ export function AccountSettingsModal({
           <div className="as-nav-identity">
             <div
               className="as-nav-avatar"
-              style={{ background: avatarSrc ? undefined : accentColor }}
+              style={avatarStyle}
             >
               {renderAvatarContent("sm")}
             </div>
@@ -885,7 +887,7 @@ export function AccountSettingsModal({
                 <button
                   type="button"
                   className="as-avatar-lg"
-                  style={{ background: avatarSrc ? undefined : accentColor }}
+                  style={avatarStyle}
                   disabled={avatarLoading}
                   onClick={() => avatarFileRef.current?.click()}
                   aria-label={t("settings.profile.changePhotoAria")}
@@ -960,7 +962,7 @@ export function AccountSettingsModal({
               <div className="as-account-hero">
                 <div
                   className="as-account-hero-avatar"
-                  style={{ background: avatarSrc ? undefined : accentColor }}
+                  style={avatarStyle}
                 >
                   {renderAvatarContent("sm")}
                 </div>

@@ -1,10 +1,22 @@
+function configuredCdnHost(): string | null {
+  const raw = import.meta.env.VITE_CDN_BASE_URL?.trim();
+  if (!raw) return null;
+  try {
+    return new URL(raw).hostname.toLowerCase();
+  } catch {
+    return null;
+  }
+}
+
 function hostAllowed(hostname: string): boolean {
   const host = hostname.toLowerCase();
+  const envCdn = configuredCdnHost();
   return (
     host === "media.giphy.com" ||
     host === "i.giphy.com" ||
     host.endsWith(".giphy.com") ||
-    host === "cdn.klovy.chat"
+    host === "cdn.klovy.chat" ||
+    (envCdn != null && host === envCdn)
   );
 }
 

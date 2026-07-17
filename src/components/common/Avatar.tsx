@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
-import { getDefaultAvatarImage, profileImageUrl, resolveAvatarColorIndex } from "../../utils/media/avatar";
-import { usePublicMediaCacheRevision } from "../../hooks/usePublicMediaCacheRevision";
+import { useMemo } from "react";
+import { profileImageUrl } from "../../utils/media/avatar";
+import { useProfileAvatarStyle, usePublicMediaCacheRevision } from "../../hooks/usePublicMediaCacheRevision";
 import { userLabel } from "../../utils/user/format";
 
 interface AvatarProps {
@@ -21,37 +21,27 @@ export function Avatar({
   placeholder,
 }: AvatarProps) {
   const cacheRevision = usePublicMediaCacheRevision();
-  const src = useMemo(
-    () => profileImageUrl(image),
+  const seed = username ?? displayName ?? "";
+  const avatarStyle = useProfileAvatarStyle(image, color, seed);
+  const hasPhoto = useMemo(
+    () => Boolean(profileImageUrl(image)),
     [image, cacheRevision],
   );
-  const [imageFailed, setImageFailed] = useState(false);
-  useEffect(() => {
-    setImageFailed(false);
-  }, [src]);
   const name = userLabel({ displayName, username });
-  const defaultAvatarSrc = getDefaultAvatarImage(resolveAvatarColorIndex(color));
+  const fontSize = Math.max(12, Math.round(size * 0.42));
+  const initial = (name.trim().charAt(0) || "?").toUpperCase();
 
-  if (src && !imageFailed) {
-    return (
-      <img
-        className="avatar avatar-img"
-        src={src}
-        alt={name}
-        width={size}
-        height={size}
-        style={{ width: size, height: size }}
-        onError={() => setImageFailed(true)}
-      />
-    );
-  }
-
-  if (placeholder != null) {
+  if (placeholder != null && !hasPhoto) {
     return (
       <div
         className="avatar avatar-text"
         title={name}
-        style={{ width: size, height: size, fontSize: Math.max(12, Math.round(size * 0.55)) }}
+        style={{
+          ...avatarStyle,
+          width: size,
+          height: size,
+          fontSize: Math.max(12, Math.round(size * 0.55)),
+        }}
       >
         {placeholder}
       </div>
@@ -59,13 +49,19 @@ export function Avatar({
   }
 
   return (
-    <img
-      className="avatar avatar-img"
-      src={defaultAvatarSrc}
-      alt={name}
-      width={size}
-      height={size}
-      style={{ width: size, height: size }}
-    />
+    <div
+      className={`avatar avatar-img${hasPhoto ? "" : " avatar-text"}`}
+      role="img"
+      aria-label={name}
+      title={name}
+      style={{
+        ...avatarStyle,
+        width: size,
+        height: size,
+        fontSize: hasPhoto ? undefined : fontSize,
+      }}
+    >
+      {hasPhoto ? null : initial}
+    </div>
   );
 }

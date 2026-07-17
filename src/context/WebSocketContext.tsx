@@ -91,6 +91,10 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
           (data: { userId: string; image: string | null }) => {
             bumpPublicMediaCache(data.image);
             bumpPublicMediaCacheForUser(data.userId, "avatar");
+            const current = userRef.current;
+            if (data.userId === userId && current) {
+              updateUserRef.current({ ...current, image: data.image });
+            }
           },
         ),
       );
@@ -100,6 +104,10 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
           (data: { userId: string; image: string | null }) => {
             bumpPublicMediaCache(data.image);
             bumpPublicMediaCacheForUser(data.userId, "avatar");
+            const current = userRef.current;
+            if (data.userId === userId && current) {
+              updateUserRef.current({ ...current, image: data.image });
+            }
           },
         ),
       );
@@ -109,6 +117,10 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
           (data: { userId: string; banner: string | null }) => {
             bumpPublicMediaCache(data.banner);
             bumpPublicMediaCacheForUser(data.userId, "banner");
+            const current = userRef.current;
+            if (data.userId === userId && current) {
+              updateUserRef.current({ ...current, banner: data.banner });
+            }
           },
         ),
       );
@@ -118,6 +130,10 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
           (data: { userId: string; banner: string | null }) => {
             bumpPublicMediaCache(data.banner);
             bumpPublicMediaCacheForUser(data.userId, "banner");
+            const current = userRef.current;
+            if (data.userId === userId && current) {
+              updateUserRef.current({ ...current, banner: data.banner });
+            }
           },
         ),
       );

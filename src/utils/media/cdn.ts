@@ -8,17 +8,16 @@ export function publicCdnUrl(key: string, version?: string | number): string {
   return version != null ? `${base}?v=${encodeURIComponent(String(version))}` : base;
 }
 
+export function normalizeMediaKey(path: string): string {
+  return path.trim().replace(/^\/+/, "").replace(/\\/g, "/");
+}
+
 export function isBannerKey(path: string): boolean {
-  const normalized = path.trim().replace(/^\/+/, "");
-  return normalized.startsWith("banners/");
+  return normalizeMediaKey(path).startsWith("banners/");
 }
 
 export function isAvatarKey(path: string): boolean {
-  const normalized = path.trim().replace(/^\/+/, "");
-  return (
-    normalized.startsWith("avatars/users/") ||
-    normalized.startsWith("avatars/channels/")
-  );
+  return normalizeMediaKey(path).startsWith("avatars/");
 }
 
 export function isAttachmentKey(path: string): boolean {
