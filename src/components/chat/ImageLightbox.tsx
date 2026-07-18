@@ -46,6 +46,7 @@ export function ImageLightbox({
   const [closing, setClosing] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const viewportRef = useRef<HTMLDivElement>(null);
 
   const item = items[index];
@@ -67,6 +68,7 @@ export function ImageLightbox({
     setIndex((value) => value - 1);
     setZoom(100);
     setImageLoaded(false);
+    setImageError(false);
   }, [canGoPrev]);
 
   const goNext = useCallback(() => {
@@ -74,6 +76,7 @@ export function ImageLightbox({
     setIndex((value) => value + 1);
     setZoom(100);
     setImageLoaded(false);
+    setImageError(false);
   }, [canGoNext]);
 
   const adjustZoom = useCallback((delta: number) => {
@@ -96,6 +99,7 @@ export function ImageLightbox({
     setIndex(initialIndex);
     setZoom(100);
     setImageLoaded(false);
+    setImageError(false);
     setClosing(false);
   }, [initialIndex, items]);
 
@@ -235,13 +239,16 @@ export function ImageLightbox({
       )}
 
       <div ref={viewportRef} className="image-lightbox__viewport">
-        {!imageLoaded && (
+        {!imageLoaded && !imageError && (
           <div className="image-lightbox__loader" aria-hidden>
             <div className="spinner" />
           </div>
         )}
 
         {item.url ? (
+        imageError ? (
+          <p className="image-lightbox__error">{t("media.lightbox.cannotDisplay")}</p>
+        ) : (
         <MediaImage
           key={item.messageId}
           fileUrl={item.url}
@@ -251,8 +258,10 @@ export function ImageLightbox({
           deferUntilVisible={false}
           draggable={false}
           onLoad={() => setImageLoaded(true)}
+          onError={() => setImageError(true)}
           onClick={(event) => event.stopPropagation()}
         />
+        )
         ) : (
           <p className="image-lightbox__error">{t("media.lightbox.cannotDisplay")}</p>
         )}

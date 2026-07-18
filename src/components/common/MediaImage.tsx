@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -76,6 +77,7 @@ export function MediaImage({
   fileUrl,
   fallbackFileUrl,
   onError,
+  onLoad,
   deferUntilVisible = true,
   className,
   ...props
@@ -164,6 +166,36 @@ export function MediaImage({
     setSrc(candidates[candidateIndex] ?? null);
   }, [candidateIndex, candidates, slotReady, cached]);
 
+  const onLoadRef = useRef(onLoad);
+  onLoadRef.current = onLoad;
+  const loadedSrcRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    loadedSrcRef.current = null;
+  }, [src, cacheKey]);
+
+  const notifyLoaded = useCallback((event: React.SyntheticEvent<HTMLImageElement>) => {
+    const key = src ?? cacheKey;
+    if (loadedSrcRef.current === key) return;
+    loadedSrcRef.current = key;
+    if (src) {
+      resolvedSrcCache.set(cacheKey, src);
+    }
+    if (slotHeld.current) {
+      releaseLoadSlot();
+      slotHeld.current = false;
+    }
+    onLoadRef.current?.(event);
+  }, [src, cacheKey]);
+
+  useEffect(() => {
+    const img = imgRef.current;
+    if (!img || !src || !slotReady) return;
+    if (img.complete && img.naturalWidth > 0) {
+      notifyLoaded({ currentTarget: img } as React.SyntheticEvent<HTMLImageElement>);
+    }
+  }, [src, slotReady, notifyLoaded]);
+
   return (
     <img
       {...props}
@@ -171,15 +203,7 @@ export function MediaImage({
       className={className}
       src={slotReady && src ? src : undefined}
       data-pending={!slotReady || !src ? "true" : undefined}
-      onLoad={() => {
-        if (src) {
-          resolvedSrcCache.set(cacheKey, src);
-        }
-        if (slotHeld.current) {
-          releaseLoadSlot();
-          slotHeld.current = false;
-        }
-      }}
+      onLoad={notifyLoaded}
       onError={(event) => {
         const next = candidateIndex + 1;
         if (next < candidates.length) {
