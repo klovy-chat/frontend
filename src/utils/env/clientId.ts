@@ -7,6 +7,7 @@
  *
  * To warstwa filtrująca, nie uwierzytelnianie — wartość jest jawna.
  */
+/** Nagłówki HTTP — trzymaj zsynchronizowane z backendem (`utils/security/cors.rs`). */
 export const CLIENT_HEADER_NAME = "X-Klovy-Client";
 
 /** Jawny user-agent z przeglądarki — proxy często nie przekazuje nagłówka User-Agent do API. */
