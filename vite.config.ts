@@ -4,6 +4,8 @@ import type { Socket } from "node:net";
 import react from "@vitejs/plugin-react";
 import { normalizeBackendUrl } from "./src/utils/env/backendUrl";
 
+import { cloudflare } from "@cloudflare/vite-plugin";
+
 let lastBackendDownLogAt = 0;
 
 function attachBackendProxyGuard(
@@ -88,7 +90,7 @@ export default defineConfig(({ mode }) => {
   }
 
   return {
-    plugins: [react()],
+    plugins: [react(), cloudflare()],
     server: {
       host: "127.0.0.1",
       port: 5173,
