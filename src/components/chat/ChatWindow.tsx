@@ -20,6 +20,10 @@ import {
   resolveUploadMessageType,
   uploadUsesFileNameAsContent,
 } from "../../utils/media/attachments";
+import {
+  extractExternalMediaLinks,
+  resolveSingleExternalMediaSend,
+} from "../../utils/media/externalMediaLinks";
 import { isAllowedGifMediaUrl } from "../../utils/media/mediaAllowlist";
 import { useProfileSync } from "../../hooks/useProfileSync";
 import { presenceColor } from "../../utils/user/presence";
@@ -155,17 +159,31 @@ export function ChatWindow({
   const [highlightMessageId, setHighlightMessageId] = useState<string | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
-  const imageLightboxItems = useMemo<LightboxItem[]>(
-    () =>
-      messages
-        .filter((message) => message.messageType === "IMAGE" && message.fileUrl)
-        .map((message) => ({
-          url: message.fileUrl!,
+  const imageLightboxItems = useMemo<LightboxItem[]>(() => {
+    const items: LightboxItem[] = [];
+
+    for (const message of messages) {
+      if (message.messageType === "IMAGE" && message.fileUrl) {
+        items.push({
+          url: message.fileUrl,
           fileName: message.fileName ?? t("messages.image"),
           messageId: message._id,
-        })),
-    [messages, t],
-  );
+        });
+        continue;
+      }
+
+      if (!message.content) continue;
+      for (const media of extractExternalMediaLinks(message.content)) {
+        items.push({
+          url: media.url,
+          fileName: media.fileName,
+          messageId: `${message._id}:${media.url}`,
+        });
+      }
+    }
+
+    return items;
+  }, [messages, t]);
 
   const currentUserId = user?.id ?? "";
   const isDmBlocked = isBlockedByMe || isBlockedByOther;
@@ -561,22 +579,34 @@ export function ChatWindow({
 
     const quotedMessage = replyingTo?._id;
     const quotePayload = quotedMessage ? { quotedMessage } : {};
+    const externalMedia = resolveSingleExternalMediaSend(content);
+
+    const payload = externalMedia
+      ? {
+          sender: user.id,
+          content: externalMedia.fileName,
+          messageType: "IMAGE" as const,
+          fileUrl: externalMedia.url,
+          fileName: externalMedia.fileName,
+          fileType: externalMedia.fileType,
+          ...quotePayload,
+        }
+      : {
+          sender: user.id,
+          content,
+          messageType: "TEXT" as const,
+          ...quotePayload,
+        };
 
     if (target.type === "dm") {
       ws.send(WsType.SEND_MESSAGE, {
-        sender: user.id,
+        ...payload,
         recipient: target.contact._id,
-        content,
-        messageType: "TEXT",
-        ...quotePayload,
       });
     } else {
       ws.send(WsType.SEND_CHANNEL_MESSAGE, {
+        ...payload,
         channelId: target.channel._id,
-        sender: user.id,
-        content,
-        messageType: "TEXT",
-        ...quotePayload,
       });
     }
 
@@ -749,7 +779,9 @@ export function ChatWindow({
   const handleImageClick = useCallback(
     (message: Message) => {
       const index = imageLightboxItems.findIndex(
-        (item) => item.messageId === message._id,
+        (item) =>
+          item.messageId === message._id ||
+          (message.fileUrl != null && item.url === message.fileUrl),
       );
       if (index >= 0) {
         setLightboxIndex(index);

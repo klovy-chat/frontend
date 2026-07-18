@@ -250,7 +250,7 @@
     "settings": {
       "title": "Ustawienia głosu",
       "subtitle": "Wybierz mikrofon i głośniki do rozmów oraz nagrań.",
-      "infoBanner": "Ustawienia dotyczą nagrywania wiadomości głosowych i rozmów audio/wideo.",
+      "infoBanner": "Ustawienia dotyczą rozmów, wiadomości głosowych i udostępniania ekranu.",
       "microphone": "Mikrofon",
       "speaker": "Głośnik",
       "speakers": "Głośniki",
@@ -261,6 +261,19 @@
       "permissionsBlocked": "Dostęp do mikrofonu został zablokowany. Kliknij ikonę kłódki przy adresie strony i zezwól na mikrofon.",
       "permissionsRequired": "Musisz przydzielić uprawnienia, aby mieć dostęp do ustawień audio.",
       "permissionsGranted": "Uprawnienia audio zostały przyznane.",
+      "screenShareQuality": "Jakość udostępniania ekranu",
+      "screenShareQualityOptions": {
+        "balanced": "Zbalansowana — 720p, 30 fps (zalecana)",
+        "light": "Lekka — 480p, 30 fps",
+        "smooth": "Płynna — 720p, 60 fps",
+        "sharp": "Ostra — 1080p, 30 fps"
+      },
+      "screenShareQualityHints": {
+        "balanced": "Dobry domyślny wybór dla większości treści. Odbiorcy ze słabszym łączem dostaną niższą jakość automatycznie.",
+        "light": "Mniejsze zużycie transferu, gdy Ty lub rozmówca macie słabe łącze.",
+        "smooth": "Najlepsza do gier, wideo i szybkiego ruchu na ekranie.",
+        "sharp": "Najlepsza do kodu, dokumentów i drobnego tekstu."
+      },
       "codecInfo": "Kodek audio: Opus — używany w rozmowach i wiadomościach głosowych."
     },
     "player": {
@@ -924,9 +937,9 @@
         "sentEmptySub": "Zaproszenia, które wyślesz, będą tu widoczne aż do momentu ich akceptacji.",
         "pending": " · oczekuje na odpowiedź",
         "newInvite": " · nowe zaproszenie",
-        "write": "Napisz",
+        "write": "Wyślij wiadomość",
         "blockedStatus": " · zablokowany",
-        "hintExtended": "Wpisz dokładną nazwę logowania (np. @xyz), nie wyświetlaną nazwę profilu."
+        "hintExtended": "Podaj nazwę użytkownika (np. @janek)."
       },
       "friends": {
         "searchPlaceholder": "Szukaj kontaktu…",
@@ -1383,6 +1396,7 @@
     "peerBusy": "Użytkownik prowadzi już inną rozmowę.",
     "unavailable": "Nie można nawiązać połączenia.",
     "cameraFailed": "Nie udało się włączyć kamery. Sprawdź uprawnienia przeglądarki.",
+    "screenShareFailed": "Nie udało się udostępnić ekranu. Sprawdź uprawnienia przeglądarki.",
     "status": {
       "calling": "Dzwonię…",
       "connecting": "Łączenie…",
@@ -1397,11 +1411,20 @@
       "muteMic": "Wycisz mikrofon",
       "enableCamera": "Włącz kamerę",
       "disableCamera": "Wyłącz kamerę",
-      "micLevel": "Mikrofon",
+      "shareScreen": "Udostępnij ekran",
+      "stopShareScreen": "Zatrzymaj udostępnianie",
+      "pushToTalk": "Naciśnij i mów",
+      "pushToTalkShort": "Mów",
       "speakerLevel": "Głośność",
       "end": "Zakończ",
       "reject": "Odrzuć",
-      "accept": "Odbierz"
+      "accept": "Odbierz",
+      "minimize": "Minimalizuj",
+      "fullscreen": "Pełny ekran",
+      "restore": "Przywróć do czatu"
+    },
+    "layout": {
+      "openFullscreen": "Powiększ rozmowę z {{name}}"
     },
     "incoming": {
       "ariaLabel": "Połączenie przychodzące"

@@ -11,17 +11,21 @@ import { presenceColor } from "../../utils/user/presence";
 import "../../styles/nav/nav.css";
 
 interface AppNavRailProps {
+  onOpenChats: () => void;
   onOpenSettings: () => void;
   onOpenContacts: () => void;
   onOpenAdmin: () => void;
   totalUnread: number;
+  settingsActive?: boolean;
 }
 
 export function AppNavRail({
+  onOpenChats,
   onOpenSettings,
   onOpenContacts,
   onOpenAdmin,
   totalUnread,
+  settingsActive = false,
 }: AppNavRailProps) {
   const { t } = useTranslation();
   const { user, logout, updateUser } = useAuth();
@@ -76,7 +80,8 @@ export function AppNavRail({
           <div className="nav-rail__group-label">{t("nav.groups.workspace")}</div>
           <button
             type="button"
-            className="nav-rail__item active"
+            className={`nav-rail__item${settingsActive ? "" : " active"}`}
+            onClick={onOpenChats}
           >
             <span className="nav-rail__icon">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -101,7 +106,11 @@ export function AppNavRail({
 
         <div>
           <div className="nav-rail__group-label">{t("nav.groups.account")}</div>
-          <button type="button" className="nav-rail__item" onClick={onOpenSettings}>
+          <button
+            type="button"
+            className={`nav-rail__item${settingsActive ? " active" : ""}`}
+            onClick={onOpenSettings}
+          >
             <span className="nav-rail__icon">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="3" />

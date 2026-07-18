@@ -9,6 +9,9 @@ import i18n from "./i18n/config";
 import "./styles/base/global.css";
 import "./styles/base/layout.css";
 import "./styles/common/toast.css";
+import { preloadClientEnvironment } from "./utils/device/clientEnvironment";
+
+void preloadClientEnvironment();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

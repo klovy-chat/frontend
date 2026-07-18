@@ -42,7 +42,7 @@
 }
 
 .chat-list-pane__search {
-  padding: 0 18px 12px;
+  padding: 0 18px 8px;
   flex-shrink: 0;
 }
 
@@ -84,13 +84,13 @@
 .chat-list-pane__tabs {
   display: flex;
   gap: 4px;
-  padding: 0 18px 12px;
+  padding: 0 18px 8px;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
 
 .chat-list-pane__tab {
-  padding: 8px 12px;
+  padding: 5px 10px;
   border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
@@ -110,9 +110,9 @@
 .chat-list-pane__tab.active::after {
   content: '';
   position: absolute;
-  bottom: -13px;
-  left: 12px;
-  right: 12px;
+  bottom: -9px;
+  left: 10px;
+  right: 10px;
   height: 2px;
   background: var(--accent);
   border-radius: 1px;

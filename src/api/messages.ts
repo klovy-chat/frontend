@@ -1,5 +1,6 @@
 import { apiRequest } from "./client";
 import { assertAttachmentSize, assertAttachmentType } from "../constants/upload";
+import type { LinkPreviewCard } from "../utils/chat/linkEmbeds";
 import type { Message } from "../types";
 
 export type UploadContext =
@@ -22,6 +23,13 @@ export function getMessages(
       ...(opts?.before ? { before: opts.before } : {}),
       ...(opts?.limit ? { limit: opts.limit } : {}),
     }),
+  });
+}
+
+export function fetchLinkPreview(url: string) {
+  return apiRequest<LinkPreviewCard>("/api/messages/link-preview", {
+    method: "POST",
+    body: JSON.stringify({ url }),
   });
 }
 

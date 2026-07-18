@@ -4,7 +4,10 @@ import { stripFormatting } from "./messageFormat";
 import { resolveMediaUrl } from "../media/media";
 import { MAX_MESSAGE_LENGTH } from "../../constants/messages";
 import i18n from "../../i18n/config";
-import { isVideoAttachment, isVoiceAttachment } from "../media/attachments";
+import {
+  extractExternalMediaLinks,
+  isOnlyExternalMediaContent,
+} from "../media/externalMediaLinks";
 import type { Message, MessageUser } from "../../types";
 
 function capContent(content: unknown): string {
@@ -34,6 +37,16 @@ export function getMessagePreview(
   >,
 ): string {
   if (message.deleted) return i18n.t("messages.deleted");
+
+  if (isOnlyExternalMediaContent(message.content)) {
+    const media = extractExternalMediaLinks(message.content);
+    if (media.length === 1 && media[0].kind === "gif") {
+      return i18n.t("messages.image");
+    }
+    if (media.length === 1) {
+      return i18n.t("messages.image");
+    }
+  }
 
   if (message.messageType && message.messageType !== "TEXT") {
     if (message.messageType === "STICKER") return i18n.t("messages.sticker");

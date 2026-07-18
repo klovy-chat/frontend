@@ -12,6 +12,11 @@ import {
   requestMicrophoneAccess,
   saveVoiceSettings,
 } from "../../utils/media/voiceSettings";
+import {
+  DEFAULT_SCREEN_SHARE_QUALITY,
+  SCREEN_SHARE_QUALITY_PRESETS,
+  type ScreenShareQualityId,
+} from "../../utils/call/screenShareQuality";
 
 interface AudioDeviceOption {
   deviceId: string;
@@ -30,6 +35,8 @@ export function VoiceSettingsPanel() {
   const [outputDevices, setOutputDevices] = useState<AudioDeviceOption[]>([]);
   const [inputDeviceId, setInputDeviceId] = useState("");
   const [outputDeviceId, setOutputDeviceId] = useState("");
+  const [screenShareQuality, setScreenShareQuality] =
+    useState<ScreenShareQualityId>(DEFAULT_SCREEN_SHARE_QUALITY);
 
   const deviceLabel = useCallback(
     (device: MediaDeviceInfo, index: number): string => {
@@ -84,9 +91,11 @@ export function VoiceSettingsPanel() {
 
     setInputDeviceId(nextInput);
     setOutputDeviceId(nextOutput);
+    setScreenShareQuality(saved.screenShareQuality);
     saveVoiceSettings({
       inputDeviceId: nextInput,
       outputDeviceId: nextOutput,
+      screenShareQuality: saved.screenShareQuality,
     });
   }, [deviceLabel]);
 
@@ -136,20 +145,34 @@ export function VoiceSettingsPanel() {
     }
   };
 
+  const persistSettings = useCallback(
+    (next: {
+      inputDeviceId?: string;
+      outputDeviceId?: string;
+      screenShareQuality?: ScreenShareQualityId;
+    }) => {
+      saveVoiceSettings({
+        inputDeviceId: next.inputDeviceId ?? inputDeviceId,
+        outputDeviceId: next.outputDeviceId ?? outputDeviceId,
+        screenShareQuality: next.screenShareQuality ?? screenShareQuality,
+      });
+    },
+    [inputDeviceId, outputDeviceId, screenShareQuality],
+  );
+
   const handleInputChange = (value: string) => {
     setInputDeviceId(value);
-    saveVoiceSettings({
-      inputDeviceId: value,
-      outputDeviceId,
-    });
+    persistSettings({ inputDeviceId: value });
   };
 
   const handleOutputChange = (value: string) => {
     setOutputDeviceId(value);
-    saveVoiceSettings({
-      inputDeviceId,
-      outputDeviceId: value,
-    });
+    persistSettings({ outputDeviceId: value });
+  };
+
+  const handleScreenShareQualityChange = (value: ScreenShareQualityId) => {
+    setScreenShareQuality(value);
+    persistSettings({ screenShareQuality: value });
   };
 
   const outputSupported =
@@ -255,6 +278,32 @@ export function VoiceSettingsPanel() {
           {!outputSupported ? (
             <p className="as-voice-hint">{t("voice.settings.outputUnsupported")}</p>
           ) : null}
+        </div>
+
+        <div className="as-field as-voice-field-spaced">
+          <label htmlFor="voice-screen-share-quality">
+            {t("voice.settings.screenShareQuality")}
+          </label>
+          <select
+            id="voice-screen-share-quality"
+            className="as-select"
+            value={screenShareQuality}
+            disabled={loading}
+            onChange={(e) =>
+              handleScreenShareQualityChange(e.target.value as ScreenShareQualityId)
+            }
+          >
+            {(Object.keys(SCREEN_SHARE_QUALITY_PRESETS) as ScreenShareQualityId[]).map(
+              (id) => (
+                <option key={id} value={id}>
+                  {t(`voice.settings.screenShareQualityOptions.${id}`)}
+                </option>
+              ),
+            )}
+          </select>
+          <p className="as-voice-hint">
+            {t(`voice.settings.screenShareQualityHints.${screenShareQuality}`)}
+          </p>
         </div>
 
         {needsPermission && !supportIssue ? (

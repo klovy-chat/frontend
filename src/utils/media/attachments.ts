@@ -47,6 +47,21 @@ export function isVoiceAttachment(
   return message.messageType === "AUDIO" && !isVideoAttachment(message);
 }
 
+export function resolveVideoMimeType(
+  fileType?: string,
+  fileName?: string,
+  fileUrl?: string,
+): string | undefined {
+  const mime = fileType?.trim().toLowerCase() ?? "";
+  if (mime.startsWith("video/")) return mime;
+
+  const ext = fileExtension(fileName ?? fileUrl ?? "");
+  if (ext === "mp4") return "video/mp4";
+  if (ext === "webm") return "video/webm";
+  if (ext === "ogg") return "video/ogg";
+  return undefined;
+}
+
 export function resolveUploadMessageType(file: File): "IMAGE" | "VIDEO" | "AUDIO" | "FILE" {
   const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
   const mime = file.type.trim().toLowerCase();
@@ -56,7 +71,8 @@ export function resolveUploadMessageType(file: File): "IMAGE" | "VIDEO" | "AUDIO
   if (mime.startsWith("audio/")) return "AUDIO";
 
   if (ext === "wav") return "AUDIO";
-  if (["webm", "ogg", "mp4"].includes(ext)) return "FILE";
+  if (ext === "mp4") return "VIDEO";
+  if (["webm", "ogg"].includes(ext)) return "FILE";
 
   return "FILE";
 }

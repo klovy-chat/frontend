@@ -11,6 +11,11 @@ import { MediaImage } from "../common/MediaImage";
 import { resolveChatImagePreviewUrl, resolveMediaUrl } from "../../utils/media/media";
 import { VoiceMessagePlayer } from "./VoiceMessagePlayer";
 import { VideoMessagePlayer } from "./VideoMessagePlayer";
+import { MessageLinkEmbeds } from "./MessageLinkEmbeds";
+import {
+  MessageExternalMedia,
+  shouldHideTextForExternalMedia,
+} from "./MessageExternalMedia";
 import { isVideoAttachment, isVoiceAttachment } from "../../utils/media/attachments";
 import type { Message, MessageUser } from "../../types";
 import "../../styles/chat/messagebubble.css";
@@ -426,6 +431,7 @@ export function MessageBubble({
                   <VideoMessagePlayer
                     src={message.fileUrl}
                     fileName={message.fileName}
+                    fileType={message.fileType}
                   />
                 ) : isVoice ? (
                   <VoiceMessagePlayer
@@ -454,13 +460,29 @@ export function MessageBubble({
                 )}
               </>
             ) : (
-              <p className="message-text">
-                {renderFormattedText(message.content, {
-                  mentions: message.mentions,
-                  currentUserId,
-                  allowEveryone: isChannel,
-                })}
-              </p>
+              <>
+                {!shouldHideTextForExternalMedia(message.content) && (
+                  <p className="message-text">
+                    {renderFormattedText(message.content, {
+                      mentions: message.mentions,
+                      currentUserId,
+                      allowEveryone: isChannel,
+                    })}
+                  </p>
+                )}
+                <MessageExternalMedia
+                  content={message.content}
+                  onImageClick={(url, fileName) =>
+                    onImageClick?.({
+                      ...message,
+                      messageType: "IMAGE",
+                      fileUrl: url,
+                      fileName,
+                    })
+                  }
+                />
+                <MessageLinkEmbeds content={message.content} />
+              </>
             )}
 
             <div className="message-meta">

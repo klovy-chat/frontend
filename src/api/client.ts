@@ -2,6 +2,11 @@ import { getBackendBaseUrl } from "../utils/env/backendUrl";
 import { usesDirectBackendUrl } from "../utils/env/appEnv";
 import { CLIENT_HEADER_NAME, CLIENT_IDENTIFIER, CLIENT_USER_AGENT_HEADER } from "../utils/env/clientId";
 import {
+  applyClientEnvironmentHeaders,
+  ensureClientEnvironment,
+  preloadClientEnvironment,
+} from "../utils/device/clientEnvironment";
+import {
   absorbCsrfToken,
   clearCsrfToken,
   getCsrfToken,
@@ -109,15 +114,19 @@ async function tryRefreshSession(): Promise<boolean> {
     }
 
     try {
+      await ensureClientEnvironment();
+      const refreshHeaders = new Headers({
+        [CLIENT_HEADER_NAME]: CLIENT_IDENTIFIER,
+      });
+      if (typeof navigator !== "undefined" && navigator.userAgent) {
+        refreshHeaders.set(CLIENT_USER_AGENT_HEADER, navigator.userAgent);
+      }
+      applyClientEnvironmentHeaders(refreshHeaders);
+
       const response = await fetch(url, {
         method: "POST",
         credentials: "include",
-        headers: {
-          [CLIENT_HEADER_NAME]: CLIENT_IDENTIFIER,
-          ...(typeof navigator !== "undefined" && navigator.userAgent
-            ? { [CLIENT_USER_AGENT_HEADER]: navigator.userAgent }
-            : {}),
-        },
+        headers: refreshHeaders,
       });
       if (!response.ok) return false;
 
@@ -142,6 +151,8 @@ export async function apiRequest<T>(
   path: string,
   options: ApiRequestOptions = {},
 ): Promise<T> {
+  await ensureClientEnvironment();
+
   const headers = new Headers(options.headers);
   const method = (options.method ?? "GET").toUpperCase();
 
@@ -149,6 +160,7 @@ export async function apiRequest<T>(
   if (typeof navigator !== "undefined" && navigator.userAgent) {
     headers.set(CLIENT_USER_AGENT_HEADER, navigator.userAgent);
   }
+  applyClientEnvironmentHeaders(headers);
 
   if (
     options.body &&

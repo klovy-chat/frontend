@@ -50,6 +50,7 @@
   flex-direction: column;
   min-width: 0;
   z-index: 1;
+  position: relative;
 }
 
 .app-shell__settings-nav {

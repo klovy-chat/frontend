@@ -13,6 +13,7 @@ import {
   Room,
   RoomEvent,
   Track,
+  type LocalTrackPublication,
   type RemoteTrack,
   type RemoteTrackPublication,
   type RemoteParticipant,
@@ -22,7 +23,21 @@ import { WsType } from "../api/wsProtocol";
 import { useAuth } from "./AuthContext";
 import { isAllowedLiveKitUrl } from "../utils/env/livekitAllowlist";
 import { applyAudioOutputDevice, loadVoiceSettings } from "../utils/media/voiceSettings";
-import { requestVoiceToken } from "../api/voice";
+import { requestVoiceToken, fetchActiveCall } from "../api/voice";
+import { getFriends } from "../api/friends";
+import {
+  clearPersistedCall,
+  loadPersistedCall,
+  savePersistedCall,
+} from "../utils/call/callPersistence";
+import { buildScreenShareCaptureOptions } from "../utils/call/screenShareQuality";
+import { loadVoiceSettings } from "../utils/media/voiceSettings";
+import {
+  readLocalCameraTrack,
+  readLocalScreenShareTrack,
+  readRemoteCameraTrack,
+  readRemoteScreenShareTrack,
+} from "../utils/call/callMediaTracks";
 
 export type CallMode = "audio" | "video";
 
@@ -47,12 +62,15 @@ interface CallContextValue {
   peer: CallPeer | null;
   isMuted: boolean;
   isCameraOn: boolean;
+  isScreenSharing: boolean;
+  isPushToTalkActive: boolean;
   speakerVolume: number;
-  micVolume: number;
   error: string | null;
   startedAt: number | null;
   localVideoTrack: Track | null;
+  localScreenShareTrack: Track | null;
   remoteVideoTrack: Track | null;
+  remoteScreenShareTrack: Track | null;
   /** Rozpoczyna połączenie wychodzące do kontaktu. */
   startCall: (peer: CallPeer, mode: CallMode) => void;
   /** Odbiera połączenie przychodzące. */
@@ -65,8 +83,10 @@ interface CallContextValue {
   endCall: () => void;
   toggleMute: () => void;
   toggleCamera: () => void;
+  toggleScreenShare: () => Promise<void>;
+  startPushToTalk: () => void;
+  stopPushToTalk: () => void;
   setSpeakerVolume: (value: number) => void;
-  setMicVolume: (value: number) => void;
   clearError: () => void;
 }
 
@@ -83,12 +103,15 @@ export function CallProvider({ children }: { children: ReactNode }) {
   const [peer, setPeer] = useState<CallPeer | null>(null);
   const [isMuted, setIsMuted] = useState(false);
   const [isCameraOn, setIsCameraOn] = useState(false);
+  const [isScreenSharing, setIsScreenSharing] = useState(false);
+  const [isPushToTalkActive, setIsPushToTalkActive] = useState(false);
   const [speakerVolume, setSpeakerVolumeState] = useState(1);
-  const [micVolume, setMicVolumeState] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [localVideoTrack, setLocalVideoTrack] = useState<Track | null>(null);
+  const [localScreenShareTrack, setLocalScreenShareTrack] = useState<Track | null>(null);
   const [remoteVideoTrack, setRemoteVideoTrack] = useState<Track | null>(null);
+  const [remoteScreenShareTrack, setRemoteScreenShareTrack] = useState<Track | null>(null);
 
   const roomRef = useRef<Room | null>(null);
   const stateRef = useRef<CallState>(state);
@@ -97,6 +120,8 @@ export function CallProvider({ children }: { children: ReactNode }) {
   peerRef.current = peer;
   const speakerVolumeRef = useRef(1);
   const micVolumeRef = useRef(1);
+  const pushToTalkActiveRef = useRef(false);
+  const pushToTalkMutedBeforeRef = useRef(true);
   const ringTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
   // Ukryte elementy <audio> dla zdalnych ścieżek dźwięku.
   const audioElsRef = useRef<HTMLAudioElement[]>([]);
@@ -141,29 +166,64 @@ export function CallProvider({ children }: { children: ReactNode }) {
     });
     audioElsRef.current = [];
     setLocalVideoTrack(null);
+    setLocalScreenShareTrack(null);
     setRemoteVideoTrack(null);
+    setRemoteScreenShareTrack(null);
   }, []);
 
   const resetCall = useCallback(() => {
     clearRingTimeout();
     cleanupRoom();
+    clearPersistedCall();
     setState("idle");
     setPeer(null);
     setMode("audio");
     setIsMuted(false);
     setIsCameraOn(false);
+    setIsScreenSharing(false);
+    setIsPushToTalkActive(false);
+    pushToTalkActiveRef.current = false;
     setSpeakerVolumeState(1);
-    setMicVolumeState(1);
     speakerVolumeRef.current = 1;
     micVolumeRef.current = 1;
     setStartedAt(null);
   }, [cleanupRoom, clearRingTimeout]);
 
+  const refreshLocalMediaTracks = useCallback(() => {
+    const room = roomRef.current;
+    if (!room) return;
+    setLocalVideoTrack(readLocalCameraTrack(room.localParticipant));
+    setLocalScreenShareTrack(readLocalScreenShareTrack(room.localParticipant));
+    setIsScreenSharing(Boolean(readLocalScreenShareTrack(room.localParticipant)));
+  }, []);
+
+  const refreshRemoteMediaTracks = useCallback(() => {
+    const room = roomRef.current;
+    if (!room) return;
+    let camera: Track | null = null;
+    let screen: Track | null = null;
+    room.remoteParticipants.forEach((participant) => {
+      if (!camera) camera = readRemoteCameraTrack(participant);
+      if (!screen) screen = readRemoteScreenShareTrack(participant);
+    });
+    setRemoteVideoTrack(camera);
+    setRemoteScreenShareTrack(screen);
+  }, []);
+
   const attachRemoteTrack = useCallback(
-    (track: RemoteTrack) => {
+    (
+      track: RemoteTrack,
+      publication: RemoteTrackPublication,
+    ) => {
       if (track.kind === Track.Kind.Video) {
-        setRemoteVideoTrack(track);
-      } else if (track.kind === Track.Kind.Audio) {
+        if (publication.source === Track.Source.ScreenShare) {
+          setRemoteScreenShareTrack(track);
+        } else {
+          setRemoteVideoTrack(track);
+        }
+        return;
+      }
+      if (track.kind === Track.Kind.Audio) {
         const el = track.attach() as HTMLAudioElement;
         el.style.display = "none";
         el.autoplay = true;
@@ -176,31 +236,39 @@ export function CallProvider({ children }: { children: ReactNode }) {
     [],
   );
 
-  const detachRemoteTrack = useCallback((track: RemoteTrack) => {
-    if (track.kind === Track.Kind.Video) {
-      setRemoteVideoTrack(null);
-    } else if (track.kind === Track.Kind.Audio) {
-      track.detach().forEach((el) => {
-        (el as HTMLMediaElement).srcObject = null;
-        el.remove();
-      });
-      audioElsRef.current = audioElsRef.current.filter(
-        (el) => el.isConnected,
-      );
-    }
-  }, []);
-
-  const refreshLocalVideoTrack = useCallback(() => {
-    const room = roomRef.current;
-    if (!room) return;
-    const pub = room.localParticipant.getTrackPublication(
-      Track.Source.Camera,
-    );
-    setLocalVideoTrack(pub?.track ?? null);
-  }, []);
+  const detachRemoteTrack = useCallback(
+    (track: RemoteTrack, publication: RemoteTrackPublication) => {
+      if (track.kind === Track.Kind.Video) {
+        if (publication.source === Track.Source.ScreenShare) {
+          setRemoteScreenShareTrack(null);
+        } else {
+          setRemoteVideoTrack(null);
+        }
+        track.detach().forEach((el) => {
+          (el as HTMLMediaElement).srcObject = null;
+          el.remove();
+        });
+        return;
+      }
+      if (track.kind === Track.Kind.Audio) {
+        track.detach().forEach((el) => {
+          (el as HTMLMediaElement).srcObject = null;
+          el.remove();
+        });
+        audioElsRef.current = audioElsRef.current.filter(
+          (el) => el.isConnected,
+        );
+      }
+    },
+    [],
+  );
 
   const connectToRoom = useCallback(
-    async (peerId: string, callMode: CallMode) => {
+    async (
+      peerId: string,
+      callMode: CallMode,
+      options?: { startedAt?: number; isRestore?: boolean },
+    ) => {
       try {
         setState("connecting");
         const { token, url } = await requestVoiceToken(peerId);
@@ -215,20 +283,27 @@ export function CallProvider({ children }: { children: ReactNode }) {
           RoomEvent.TrackSubscribed,
           (
             track: RemoteTrack,
-            _pub: RemoteTrackPublication,
+            publication: RemoteTrackPublication,
             _participant: RemoteParticipant,
-          ) => attachRemoteTrack(track),
+          ) => attachRemoteTrack(track, publication),
         );
         room.on(
           RoomEvent.TrackUnsubscribed,
-          (track: RemoteTrack) => detachRemoteTrack(track),
+          (track: RemoteTrack, publication: RemoteTrackPublication) =>
+            detachRemoteTrack(track, publication),
         );
         room.on(RoomEvent.LocalTrackPublished, () => {
-          refreshLocalVideoTrack();
+          refreshLocalMediaTracks();
         });
-        room.on(RoomEvent.LocalTrackUnpublished, () => {
-          refreshLocalVideoTrack();
-        });
+        room.on(
+          RoomEvent.LocalTrackUnpublished,
+          (publication: LocalTrackPublication) => {
+            if (publication.source === Track.Source.ScreenShare) {
+              setIsScreenSharing(false);
+            }
+            refreshLocalMediaTracks();
+          },
+        );
         room.on(RoomEvent.Disconnected, () => {
           // Rozłączenie zainicjowane lokalnie obsługujemy w endCall;
           // tutaj reagujemy tylko na nieoczekiwane rozłączenie.
@@ -263,20 +338,21 @@ export function CallProvider({ children }: { children: ReactNode }) {
           setError(t("call.cameraFailed"));
         }
         // Track may publish slightly after setCameraEnabled resolves.
-        refreshLocalVideoTrack();
-        window.setTimeout(() => refreshLocalVideoTrack(), 250);
-        window.setTimeout(() => refreshLocalVideoTrack(), 800);
+        refreshLocalMediaTracks();
+        window.setTimeout(() => refreshLocalMediaTracks(), 250);
+        window.setTimeout(() => refreshLocalMediaTracks(), 800);
 
-        // Podłącz już istniejące zdalne ścieżki (gdyby druga strona
-        // dołączyła wcześniej).
         room.remoteParticipants.forEach((participant) => {
           participant.trackPublications.forEach((pub) => {
-            if (pub.track) attachRemoteTrack(pub.track as RemoteTrack);
+            if (pub.track) {
+              attachRemoteTrack(pub.track as RemoteTrack, pub);
+            }
           });
         });
+        refreshRemoteMediaTracks();
 
         setIsMuted(false);
-        setStartedAt(Date.now());
+        setStartedAt(options?.startedAt ?? Date.now());
         setState("active");
       } catch (err) {
         if (import.meta.env.DEV) {
@@ -284,7 +360,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
         }
         setError(t("call.connectFailed"));
         const other = peerRef.current?._id;
-        if (ws && other && myId) {
+        if (!options?.isRestore && ws && other && myId) {
           ws.send(WsType.CALL_END, { from: myId, to: other });
         }
         resetCall();
@@ -293,7 +369,8 @@ export function CallProvider({ children }: { children: ReactNode }) {
     [
       attachRemoteTrack,
       detachRemoteTrack,
-      refreshLocalVideoTrack,
+      refreshLocalMediaTracks,
+      refreshRemoteMediaTracks,
       applyMicVolume,
       resetCall,
       ws,
@@ -377,15 +454,59 @@ export function CallProvider({ children }: { children: ReactNode }) {
     try {
       await room.localParticipant.setCameraEnabled(next);
       setIsCameraOn(next);
-      refreshLocalVideoTrack();
-      window.setTimeout(() => refreshLocalVideoTrack(), 300);
+      refreshLocalMediaTracks();
+      window.setTimeout(() => refreshLocalMediaTracks(), 300);
     } catch (err) {
       if (import.meta.env.DEV) {
         console.error("toggleCamera failed:", err);
       }
       setError(t("call.cameraFailed"));
     }
-  }, [isCameraOn, refreshLocalVideoTrack, t]);
+  }, [isCameraOn, refreshLocalMediaTracks, t]);
+
+  const toggleScreenShare = useCallback(async () => {
+    const room = roomRef.current;
+    if (!room) return;
+    const next = !isScreenSharing;
+    try {
+      await room.localParticipant.setScreenShareEnabled(
+        next,
+        next
+          ? buildScreenShareCaptureOptions(loadVoiceSettings().screenShareQuality)
+          : undefined,
+      );
+      setIsScreenSharing(next);
+      refreshLocalMediaTracks();
+      window.setTimeout(() => refreshLocalMediaTracks(), 300);
+    } catch (err) {
+      if (import.meta.env.DEV) {
+        console.error("toggleScreenShare failed:", err);
+      }
+      setError(t("call.screenShareFailed"));
+    }
+  }, [isScreenSharing, refreshLocalMediaTracks, t]);
+
+  const startPushToTalk = useCallback(() => {
+    const room = roomRef.current;
+    if (!room || pushToTalkActiveRef.current) return;
+    pushToTalkActiveRef.current = true;
+    pushToTalkMutedBeforeRef.current = isMuted;
+    setIsPushToTalkActive(true);
+    void room.localParticipant.setMicrophoneEnabled(true).then(() => {
+      setIsMuted(false);
+    });
+  }, [isMuted]);
+
+  const stopPushToTalk = useCallback(() => {
+    const room = roomRef.current;
+    if (!room || !pushToTalkActiveRef.current) return;
+    pushToTalkActiveRef.current = false;
+    setIsPushToTalkActive(false);
+    const restoreMuted = pushToTalkMutedBeforeRef.current;
+    void room.localParticipant.setMicrophoneEnabled(!restoreMuted).then(() => {
+      setIsMuted(restoreMuted);
+    });
+  }, []);
 
   const setSpeakerVolume = useCallback(
     (value: number) => {
@@ -396,16 +517,94 @@ export function CallProvider({ children }: { children: ReactNode }) {
     [applySpeakerVolume],
   );
 
-  const setMicVolume = useCallback(
-    (value: number) => {
-      const clamped = Math.min(1, Math.max(0, value));
-      setMicVolumeState(clamped);
-      applyMicVolume(clamped);
-    },
-    [applyMicVolume],
-  );
+  useEffect(() => {
+    if (!isPushToTalkActive) return;
+    const stop = () => stopPushToTalk();
+    window.addEventListener("pointerup", stop);
+    window.addEventListener("pointercancel", stop);
+    window.addEventListener("blur", stop);
+    return () => {
+      window.removeEventListener("pointerup", stop);
+      window.removeEventListener("pointercancel", stop);
+      window.removeEventListener("blur", stop);
+    };
+  }, [isPushToTalkActive, stopPushToTalk]);
 
   const clearError = useCallback(() => setError(null), []);
+
+  /* ── Trwałość aktywnej rozmowy (odświeżenie strony) ─────────────── */
+
+  const prevStateRef = useRef<CallState | null>(null);
+
+  useEffect(() => {
+    if (state === "active" && peer && myId && startedAt) {
+      savePersistedCall({ userId: myId, peer, mode, startedAt });
+    } else if (
+      state === "idle" &&
+      prevStateRef.current !== null &&
+      prevStateRef.current !== "idle"
+    ) {
+      clearPersistedCall();
+    }
+    prevStateRef.current = state;
+  }, [state, peer, mode, startedAt, myId]);
+
+  const restoreAttemptedRef = useRef(false);
+
+  useEffect(() => {
+    if (!ws || !myId || restoreAttemptedRef.current) return;
+    if (stateRef.current !== "idle") return;
+
+    restoreAttemptedRef.current = true;
+
+    void (async () => {
+      const saved = loadPersistedCall();
+      let peerId: string | null = null;
+      let callMode: CallMode = "audio";
+      let restoreStartedAt: number | undefined;
+      let restorePeer: CallPeer | null = null;
+
+      if (saved && saved.userId === myId) {
+        peerId = saved.peer._id;
+        callMode = saved.mode;
+        restoreStartedAt = saved.startedAt;
+        restorePeer = saved.peer;
+      } else {
+        if (saved) clearPersistedCall();
+        try {
+          const active = await fetchActiveCall();
+          if (!active.active || !active.peerId) return;
+          peerId = active.peerId;
+          callMode = active.mode === "video" ? "video" : "audio";
+          restorePeer = { _id: peerId };
+          try {
+            const { friends } = await getFriends();
+            const friend = friends.find((f) => f._id === peerId);
+            if (friend) {
+              restorePeer = {
+                _id: friend._id,
+                username: friend.username,
+                displayName: friend.displayName,
+                image: friend.image,
+                color: friend.color ?? null,
+              };
+            }
+          } catch {
+            // Profil peera opcjonalny — wystarczy samo ID.
+          }
+        } catch {
+          return;
+        }
+      }
+
+      setPeer(restorePeer);
+      setMode(callMode);
+      await connectToRoom(peerId, callMode, {
+        startedAt: restoreStartedAt,
+        isRestore: true,
+      });
+    })();
+  }, [ws, myId, connectToRoom]);
 
   /* ── Nasłuch sygnalizacji WebSocket ──────────────────────────────── */
 
@@ -509,12 +708,15 @@ export function CallProvider({ children }: { children: ReactNode }) {
       peer,
       isMuted,
       isCameraOn,
+      isScreenSharing,
+      isPushToTalkActive,
       speakerVolume,
-      micVolume,
       error,
       startedAt,
       localVideoTrack,
+      localScreenShareTrack,
       remoteVideoTrack,
+      remoteScreenShareTrack,
       startCall,
       acceptCall,
       rejectCall,
@@ -522,8 +724,10 @@ export function CallProvider({ children }: { children: ReactNode }) {
       endCall,
       toggleMute,
       toggleCamera,
+      toggleScreenShare,
+      startPushToTalk,
+      stopPushToTalk,
       setSpeakerVolume,
-      setMicVolume,
       clearError,
     }),
     [
@@ -532,12 +736,15 @@ export function CallProvider({ children }: { children: ReactNode }) {
       peer,
       isMuted,
       isCameraOn,
+      isScreenSharing,
+      isPushToTalkActive,
       speakerVolume,
-      micVolume,
       error,
       startedAt,
       localVideoTrack,
+      localScreenShareTrack,
       remoteVideoTrack,
+      remoteScreenShareTrack,
       startCall,
       acceptCall,
       rejectCall,
@@ -545,8 +752,10 @@ export function CallProvider({ children }: { children: ReactNode }) {
       endCall,
       toggleMute,
       toggleCamera,
+      toggleScreenShare,
+      startPushToTalk,
+      stopPushToTalk,
       setSpeakerVolume,
-      setMicVolume,
       clearError,
     ],
   );

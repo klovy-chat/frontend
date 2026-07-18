@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Avatar } from "../common/Avatar";
 import { userLabel, formatJoinedDate, availabilityStatusLabel } from "../../utils/user/format";
 import { presenceColor } from "../../utils/user/presence";
 import { useProfileBannerStyle } from "../../hooks/usePublicMediaCacheRevision";
+import { useAnimatedModal } from "../../hooks/useAnimatedModal";
 import { ListeningActivitySection } from "./ListeningActivitySection";
 import { ProfileBadgesSection } from "./ProfileBadgesSection";
 import type { Contact } from "../../types";
@@ -18,6 +19,8 @@ interface OtherUserProfileModalProps {
   isBlockedByMe?: boolean;
   onRemove?: () => void;
   onToggleBlock?: () => void | Promise<void>;
+  /** Inkrementowany przy każdym otwarciu — anuluje opóźnione zamykanie. */
+  openKey?: number;
 }
 
 export function OtherUserProfileModal({
@@ -28,44 +31,42 @@ export function OtherUserProfileModal({
   isBlockedByMe = false,
   onRemove,
   onToggleBlock,
+  openKey = 0,
 }: OtherUserProfileModalProps) {
   const { t } = useTranslation();
-  const [closing, setClosing] = useState(false);
+  const displayedUserRef = useRef<Contact | null>(null);
 
-  const requestClose = () => {
-    if (closing) return;
-    setClosing(true);
-    document.body.style.overflow = "";
-    window.setTimeout(() => onClose(), 220);
-  };
+  if (user) {
+    displayedUserRef.current = user;
+  }
 
-  useEffect(() => {
-    if (isOpen) {
-      setClosing(false);
-      document.body.style.overflow = "hidden";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isOpen]);
+  const { closing, visible, requestClose } = useAnimatedModal(isOpen, onClose, {
+    resetKey: user ? `${user._id}:${openKey}` : openKey,
+  });
+
+  const displayedUser = user ?? displayedUserRef.current;
+  const bannerStyle = useProfileBannerStyle(
+    displayedUser?.banner,
+    displayedUser?.color,
+    displayedUser?.username,
+  );
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!visible) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") requestClose();
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [isOpen, closing]);
+  }, [visible, requestClose]);
 
-  const bannerStyle = useProfileBannerStyle(user?.banner, user?.color, user?.username);
+  if (!visible || !displayedUser) return null;
 
-  if (!isOpen && !closing) return null;
-  if (!user) return null;
-
-  const name = userLabel(user);
-  const bioText = user.bio?.trim();
-  const joinedLabel = user.createdAt ? formatJoinedDate(user.createdAt) : null;
+  const name = userLabel(displayedUser);
+  const bioText = displayedUser.bio?.trim();
+  const joinedLabel = displayedUser.createdAt
+    ? formatJoinedDate(displayedUser.createdAt)
+    : null;
 
   return (
     <div
@@ -73,13 +74,16 @@ export function OtherUserProfileModal({
       role="dialog"
       aria-modal="true"
       aria-label={t("modals.otherUserProfile.ariaLabel")}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) requestClose();
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) {
+          e.preventDefault();
+          requestClose();
+        }
       }}
     >
       <div
         className={`up-card${closing ? " closing" : ""}`}
-        onClick={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
       >
         <div className="up-banner" style={bannerStyle} aria-hidden />
 
@@ -107,21 +111,21 @@ export function OtherUserProfileModal({
           <div className="up-profile-header">
             <div className="up-avatar-wrap" style={{ position: "relative", display: "inline-flex" }}>
               <Avatar
-                displayName={user.displayName}
-                username={user.username}
-                image={user.image}
-                color={user.color}
+                displayName={displayedUser.displayName}
+                username={displayedUser.username}
+                image={displayedUser.image}
+                color={displayedUser.color}
                 size={64}
               />
               <span
                 className="presence-dot"
                 title={
-                  user.isOnline
-                    ? availabilityStatusLabel(user.availabilityStatus ?? "online")
+                  displayedUser.isOnline
+                    ? availabilityStatusLabel(displayedUser.availabilityStatus ?? "online")
                     : availabilityStatusLabel("offline")
                 }
                 style={{
-                  background: presenceColor(user),
+                  background: presenceColor(displayedUser),
                 }}
               />
             </div>
@@ -131,7 +135,7 @@ export function OtherUserProfileModal({
             <div className="up-identity-text">
               <h2 className="up-display-name">
                 {name}
-                {user.isBot && (
+                {displayedUser.isBot && (
                   <span
                     style={{
                       marginLeft: 8,
@@ -150,13 +154,13 @@ export function OtherUserProfileModal({
                   </span>
                 )}
               </h2>
-              {user.username && (
-                <p className="up-profile-handle">@{user.username}</p>
+              {displayedUser.username && (
+                <p className="up-profile-handle">@{displayedUser.username}</p>
               )}
             </div>
           </div>
 
-          <ListeningActivitySection activity={user.listeningActivity} />
+          <ListeningActivitySection activity={displayedUser.listeningActivity} />
 
           {!isFriend ? (
             <p className="up-not-friend-hint">
@@ -164,7 +168,7 @@ export function OtherUserProfileModal({
             </p>
           ) : null}
 
-          <ProfileBadgesSection badges={user.badges} />
+          <ProfileBadgesSection badges={displayedUser.badges} />
 
           {bioText ? (
             <section className="up-bio-section">

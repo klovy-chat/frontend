@@ -61,7 +61,15 @@ const ALLOWED_ATTACHMENT_MIME_TYPES: Record<
   webm: ["audio/webm", "video/webm"],
   ogg: ["audio/ogg", "video/ogg", "application/ogg"],
   wav: ["audio/wav", "audio/x-wav", "audio/wave", "audio/vnd.wave"],
-  mp4: ["audio/mp4", "audio/aac", "audio/x-m4a", "video/mp4"],
+  mp4: [
+    "audio/mp4",
+    "audio/aac",
+    "audio/x-m4a",
+    "video/mp4",
+    "video/quicktime",
+    "application/mp4",
+    "application/octet-stream",
+  ],
 };
 
 export function formatUploadLimitMb(bytes: number): string {

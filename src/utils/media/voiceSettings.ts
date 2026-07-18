@@ -1,10 +1,14 @@
 import i18n from "../../i18n/config";
 
+import type { ScreenShareQualityId } from "../call/screenShareQuality";
+import { DEFAULT_SCREEN_SHARE_QUALITY, isScreenShareQualityId } from "../call/screenShareQuality";
+
 const STORAGE_KEY = "klovy.voiceSettings";
 
 export interface VoiceSettings {
   inputDeviceId: string;
   outputDeviceId: string;
+  screenShareQuality: ScreenShareQualityId;
 }
 
 export type MicrophoneSupportIssue =
@@ -15,6 +19,7 @@ export type MicrophoneSupportIssue =
 const DEFAULT_SETTINGS: VoiceSettings = {
   inputDeviceId: "",
   outputDeviceId: "",
+  screenShareQuality: DEFAULT_SCREEN_SHARE_QUALITY,
 };
 
 export function getMicrophoneSupportIssue(): MicrophoneSupportIssue | null {
@@ -114,6 +119,9 @@ export function loadVoiceSettings(): VoiceSettings {
         typeof parsed.inputDeviceId === "string" ? parsed.inputDeviceId : "",
       outputDeviceId:
         typeof parsed.outputDeviceId === "string" ? parsed.outputDeviceId : "",
+      screenShareQuality: isScreenShareQualityId(parsed.screenShareQuality)
+        ? parsed.screenShareQuality
+        : DEFAULT_SCREEN_SHARE_QUALITY,
     };
   } catch {
     return { ...DEFAULT_SETTINGS };

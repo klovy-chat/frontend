@@ -2,8 +2,23 @@ import i18n from "../../i18n/config";
 
 export function normalizeSessionBrowser(browser: string): string {
   const normalized = browser.trim().toLowerCase();
-  if (normalized === "opera gx" || normalized === "opera neon" || normalized.startsWith("opera ")) {
-    return "Opera";
+  if (normalized.includes("opera")) return "Opera";
+  if (normalized.includes("brave")) return "Brave";
+  if (normalized.includes("vivaldi")) return "Vivaldi";
+  if (normalized.includes("firefox") || normalized.includes("fxios")) return "Firefox";
+  if (normalized.includes("edg")) return "Edge";
+  if (
+    normalized.includes("chrome")
+    || normalized.includes("chromium")
+    || normalized.includes("crios")
+  ) {
+    return "Chrome";
+  }
+  if (normalized.includes("safari")) return "Safari";
+  if (normalized.includes("stoat")) {
+    if (normalized.includes("android")) return "Stoat For Android";
+    if (normalized.includes("ios")) return "Stoat IOS";
+    return "Stoat For Web";
   }
   return browser.trim();
 }

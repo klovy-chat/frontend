@@ -174,9 +174,9 @@
   width: 100%;
   padding: 11px 16px;
   border-radius: 8px;
-  border: 1px solid var(--danger-border);
-  background: var(--danger-dim);
-  color: #fca5a5;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
   font-size: 0.85rem;
   font-weight: 500;
   cursor: var(--cursor-pointer);
@@ -194,12 +194,6 @@
   box-shadow:
     0 0 0 1px color-mix(in srgb, var(--danger) 22%, transparent),
     0 0 14px color-mix(in srgb, var(--danger) 18%, transparent);
-}
-
-.up-danger-btn--neutral {
-  border-color: var(--border);
-  background: transparent;
-  color: var(--text-muted);
 }
 
 .up-danger-btn--neutral:hover {

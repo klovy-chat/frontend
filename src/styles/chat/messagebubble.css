@@ -755,8 +755,16 @@
   color: var(--text-muted);
 }
 
-.voice-msg--own .voice-msg__time {
-  color: rgba(240, 240, 242, 0.72);
+.message-external-media {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+  max-width: min(100%, 420px);
+}
+
+.message-image--gif {
+  image-rendering: auto;
 }
 
 /* ── Video attachment player ── */

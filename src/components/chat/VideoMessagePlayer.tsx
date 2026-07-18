@@ -1,21 +1,25 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { legacyAttachmentFallbackUrl, resolveMediaUrl } from "../../utils/media/media";
+import { resolveVideoMimeType } from "../../utils/media/attachments";
 
 interface VideoMessagePlayerProps {
   src: string;
   fileName?: string;
+  fileType?: string;
 }
 
 export function VideoMessagePlayer({
   src,
   fileName,
+  fileType,
 }: VideoMessagePlayerProps) {
   const { t } = useTranslation();
   const videoRef = useRef<HTMLVideoElement>(null);
   const primaryUrl = resolveMediaUrl(src);
   const fallbackUrl = legacyAttachmentFallbackUrl(src);
   const [url, setUrl] = useState(primaryUrl);
+  const mimeType = resolveVideoMimeType(fileType, fileName, src);
 
   useEffect(() => {
     setUrl(primaryUrl);
@@ -34,7 +38,7 @@ export function VideoMessagePlayer({
       <video
         ref={videoRef}
         className="video-msg__player"
-        src={url}
+        src={mimeType ? undefined : url}
         controls
         playsInline
         preload="metadata"
@@ -42,7 +46,9 @@ export function VideoMessagePlayer({
         onError={() => {
           if (fallbackUrl && url !== fallbackUrl) setUrl(fallbackUrl);
         }}
-      />
+      >
+        {mimeType ? <source src={url} type={mimeType} /> : null}
+      </video>
     </div>
   );
 }

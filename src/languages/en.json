@@ -250,7 +250,7 @@
     "settings": {
       "title": "Voice settings",
       "subtitle": "Choose microphone and speakers for calls and recordings.",
-      "infoBanner": "Settings apply to voice messages and audio/video calls.",
+      "infoBanner": "Settings apply to voice messages, calls, and screen sharing.",
       "microphone": "Microphone",
       "speaker": "Speaker",
       "speakers": "Speakers",
@@ -261,6 +261,19 @@
       "permissionsBlocked": "Microphone access was blocked. Click the lock icon in the address bar and allow the microphone.",
       "permissionsRequired": "You must grant permissions to access audio settings.",
       "permissionsGranted": "Audio permissions were granted.",
+      "screenShareQuality": "Screen share quality",
+      "screenShareQualityOptions": {
+        "balanced": "Balanced — 720p, 30 fps (recommended)",
+        "light": "Light — 480p, 30 fps",
+        "smooth": "Smooth — 720p, 60 fps",
+        "sharp": "Sharp — 1080p, 30 fps"
+      },
+      "screenShareQualityHints": {
+        "balanced": "Good default for most content. Viewers on slower connections receive a lower stream automatically.",
+        "light": "Lower bandwidth when you or viewers have a weak connection.",
+        "smooth": "Best for games, video, and fast motion.",
+        "sharp": "Best for code, documents, and small text."
+      },
       "codecInfo": "Audio codec: Opus — used in calls and voice messages."
     },
     "player": {
@@ -924,9 +937,9 @@
         "sentEmptySub": "Invites you send will appear here until accepted.",
         "pending": " · awaiting response",
         "newInvite": " · new invite",
-        "write": "Message",
+        "write": "Send message",
         "blockedStatus": " · blocked",
-        "hintExtended": "Enter the exact login name (e.g. @xyz), not the profile display name."
+        "hintExtended": "Enter their username (e.g. @janek)."
       },
       "friends": {
         "searchPlaceholder": "Search contacts…",
@@ -1383,6 +1396,7 @@
     "peerBusy": "User is already on another call.",
     "unavailable": "Could not place the call.",
     "cameraFailed": "Could not access the camera. Check browser permissions.",
+    "screenShareFailed": "Could not share your screen. Check browser permissions.",
     "status": {
       "calling": "Calling…",
       "connecting": "Connecting…",
@@ -1397,11 +1411,20 @@
       "muteMic": "Mute microphone",
       "enableCamera": "Turn on camera",
       "disableCamera": "Turn off camera",
-      "micLevel": "Mic",
+      "shareScreen": "Share screen",
+      "stopShareScreen": "Stop sharing",
+      "pushToTalk": "Hold to talk",
+      "pushToTalkShort": "Hold",
       "speakerLevel": "Volume",
       "end": "End",
       "reject": "Reject",
-      "accept": "Answer"
+      "accept": "Answer",
+      "minimize": "Minimize",
+      "fullscreen": "Full screen",
+      "restore": "Restore to chat"
+    },
+    "layout": {
+      "openFullscreen": "Expand call with {{name}}"
     },
     "incoming": {
       "ariaLabel": "Incoming call"

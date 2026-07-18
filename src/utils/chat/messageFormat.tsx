@@ -100,7 +100,7 @@ function escapeRegExp(value: string): string {
  * `https:` i odrzuca osadzone dane logowania (`https://user:pass@host`),
  * które bywają wykorzystywane do phishingu/mylenia hosta.
  */
-function safeHttpsHref(raw: string): string | null {
+export function safeHttpsHref(raw: string): string | null {
   try {
     const parsed = new URL(raw);
     if (parsed.protocol !== "https:") return null;

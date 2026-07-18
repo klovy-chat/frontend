@@ -1,13 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Avatar } from "../common/Avatar";
 import { ListeningActivitySection } from "./ListeningActivitySection";
 import { ProfileBadgesSection } from "./ProfileBadgesSection";
 import { useAuth } from "../../context/AuthContext";
-import { getSpotifyStatus, syncSpotifyListening } from "../../api/integrations";
-import { getClientInstanceId } from "../../utils/env/clientInstanceId";
 import { userLabel, formatJoinedDate, availabilityStatusLabel } from "../../utils/user/format";
 import { useProfileBannerStyle } from "../../hooks/usePublicMediaCacheRevision";
+import { useAnimatedModal } from "../../hooks/useAnimatedModal";
 import "../../styles/account/profile.css";
 import "../common/badge.css";
 
@@ -23,68 +22,23 @@ export function UserProfileModal({
   onOpenSettings,
 }: UserProfileModalProps) {
   const { t } = useTranslation();
-  const { user, updateUser } = useAuth();
-  const [closing, setClosing] = useState(false);
-
-  const requestClose = () => {
-    if (closing) return;
-    setClosing(true);
-    document.body.style.overflow = "";
-    window.setTimeout(() => onClose(), 220);
-  };
+  const { user } = useAuth();
+  const { closing, visible, requestClose } = useAnimatedModal(isOpen, onClose, {
+    resetKey: user?.id ?? null,
+  });
 
   useEffect(() => {
-    if (isOpen) {
-      setClosing(false);
-      document.body.style.overflow = "hidden";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (!isOpen) return;
+    if (!visible) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") requestClose();
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [isOpen, closing]);
-
-  useEffect(() => {
-    if (!isOpen || !user || user.isBot || !user.spotifyConnected) return;
-
-    let cancelled = false;
-    void (async () => {
-      try {
-        const status = await getSpotifyStatus();
-        if (cancelled || !status.connected || !status.shareListening) return;
-        const result = await syncSpotifyListening({
-          clientType: "web",
-          clientInstanceId: getClientInstanceId(),
-        });
-        if (cancelled) return;
-        updateUser({
-          ...user,
-          shareListening: result.shareListening,
-          listeningActivity: result.listeningActivity,
-          spotifyConnected: true,
-        });
-      } catch {
-        // Profil może się otworzyć bez świeżej synchronizacji Spotify
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [isOpen, user?.id, user?.isBot, user?.spotifyConnected, updateUser]);
+  }, [visible, requestClose]);
 
   const bannerStyle = useProfileBannerStyle(user?.banner, user?.color, user?.username ?? "");
 
-  if (!isOpen && !closing) return null;
-  if (!user) return null;
+  if (!visible || !user) return null;
 
   const name = userLabel(user);
   const joinedLabel = user.createdAt ? formatJoinedDate(user.createdAt) : t("common.emDash");

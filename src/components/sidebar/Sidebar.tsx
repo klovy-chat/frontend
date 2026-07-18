@@ -259,6 +259,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
   const [profileOpen, setProfileOpen] = useState(false);
   const [contactProfileOpen, setContactProfileOpen] = useState(false);
   const [contactProfile, setContactProfile] = useState<Contact | null>(null);
+  const [contactProfileOpenKey, setContactProfileOpenKey] = useState(0);
   const [contactsModalOpen, setContactsModalOpen] = useState(false);
   const [contactsModalClosing, setContactsModalClosing] = useState(false);
   const [adminModalOpen, setAdminModalOpen] = useState(false);
@@ -669,10 +670,24 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
 
   useEffect(() => {
     if (!contextMenu) return;
-    const handleClick = (e: MouseEvent) => { if (!menuRef.current?.contains(e.target as Node)) setContextMenu(null); };
-    const handleKey = (e: KeyboardEvent) => { if (e.key === "Escape") setContextMenu(null); };
-    document.addEventListener("mousedown", handleClick); document.addEventListener("keydown", handleKey);
-    return () => { document.removeEventListener("mousedown", handleClick); document.removeEventListener("keydown", handleKey); };
+    const handlePointer = (e: MouseEvent) => {
+      if (!menuRef.current?.contains(e.target as Node)) {
+        setContextMenu(null);
+      }
+    };
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setContextMenu(null);
+    };
+    // Opóźnienie zapobiega natychmiastowemu zamknięciu menu po prawym kliknięciu.
+    const attachTimer = window.setTimeout(() => {
+      document.addEventListener("mousedown", handlePointer);
+    }, 0);
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      window.clearTimeout(attachTimer);
+      document.removeEventListener("mousedown", handlePointer);
+      document.removeEventListener("keydown", handleKey);
+    };
   }, [contextMenu]);
 
   useEffect(() => {
@@ -877,6 +892,15 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
     setSpotifyOauthConnected(false);
   }, []);
 
+  const openChats = useCallback(() => {
+    closeSettings();
+    setContactsModalOpen(false);
+    setContactsModalClosing(false);
+    setAdminModalOpen(false);
+    setAdminModalClosing(false);
+    setShellOverlay(null);
+  }, [closeSettings]);
+
   useEffect(() => {
     if (!settingsOpen && !shellOverlay && !settingsShellOverlay) return;
     const onKey = (e: KeyboardEvent) => {
@@ -940,6 +964,8 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
         />
         <div className="app-shell__nav">
           <AppNavRail
+            onOpenChats={openChats}
+            settingsActive={settingsOpen}
             onOpenSettings={() => {
               setSettingsShellOverlay(null);
               setSettingsOpen(true);
@@ -1036,6 +1062,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
       />
       <OtherUserProfileModal
         isOpen={contactProfileOpen}
+        openKey={contactProfileOpenKey}
         onClose={() => {
           setContactProfileOpen(false);
           setContactProfile(null);
@@ -1138,10 +1165,15 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
               <button
                 type="button"
                 className="chat-ctx__item"
-                onClick={() => {
-                  setContactProfile(contextMenu.contact!);
-                  setContactProfileOpen(true);
+                onMouseDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const contact = contextMenu.contact;
+                  if (!contact) return;
                   setContextMenu(null);
+                  setContactProfile({ ...contact });
+                  setContactProfileOpenKey((key) => key + 1);
+                  setContactProfileOpen(true);
                 }}
               >
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

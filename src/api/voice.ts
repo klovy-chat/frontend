@@ -13,3 +13,14 @@ export function requestVoiceToken(peerId: string) {
     body: JSON.stringify({ peerId }),
   });
 }
+
+export interface ActiveCallResponse {
+  active: boolean;
+  peerId?: string;
+  mode?: "audio" | "video";
+}
+
+/** Sprawdza, czy użytkownik ma aktywną sesję rozmowy po stronie serwera. */
+export function fetchActiveCall() {
+  return apiRequest<ActiveCallResponse>("/api/voice/active");
+}

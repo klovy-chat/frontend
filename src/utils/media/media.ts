@@ -1,6 +1,6 @@
 import { getBackendBaseUrl } from "../env/backendUrl";
 import { usesDirectBackendUrl } from "../env/appEnv";
-import { isAttachmentKey, privateAttachmentApiUrl, publicCdnUrl } from "./cdn";
+import { isAttachmentKey, privateAttachmentApiUrl } from "./cdn";
 import { isAllowedExternalMediaUrl, isSafeMessageUploadPath } from "./mediaAllowlist";
 import { CLIENT_HEADER_NAME, CLIENT_IDENTIFIER } from "../env/clientId";
 import i18n from "../../i18n/config";
@@ -50,7 +50,7 @@ export function resolveMediaUrl(fileUrl: string): string | null {
   }
 
   if (isAttachmentKey(path)) {
-    return publicCdnUrl(path);
+    return attachmentApiUrl(path);
   }
 
   return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
@@ -74,13 +74,9 @@ export function resolveChatImagePreviewUrl(fileUrl: string): string {
   return attachmentThumbKey(fileUrl) ?? fileUrl.trim();
 }
 
-/** Fallback przez uwierzytelniony proxy backendu, gdyby bezpośredni CDN zawiódł. */
+/** @deprecated Use resolveMediaUrl — attachments always go through the auth proxy. */
 export function legacyAttachmentFallbackUrl(fileUrl: string): string | null {
-  const trimmed = fileUrl.trim();
-  if (!trimmed || /^https?:\/\//i.test(trimmed)) return null;
-  const path = trimmed.replace(/^\/+/, "");
-  if (!isSafeMessageUploadPath(path) || !isAttachmentKey(path)) return null;
-  return attachmentApiUrl(path);
+  return resolveMediaUrl(fileUrl);
 }
 
 function isLocalUpload(fileUrl: string): boolean {
