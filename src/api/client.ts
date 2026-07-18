@@ -4,7 +4,6 @@ import { CLIENT_HEADER_NAME, CLIENT_IDENTIFIER, CLIENT_USER_AGENT_HEADER } from 
 import {
   applyClientEnvironmentHeaders,
   ensureClientEnvironment,
-  preloadClientEnvironment,
 } from "../utils/device/clientEnvironment";
 import {
   absorbCsrfToken,

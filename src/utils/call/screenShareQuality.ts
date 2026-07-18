@@ -104,10 +104,8 @@ export function buildScreenShareCaptureOptions(
 
   return {
     audio: false,
-    video: {
-      resolution: { width, height },
-      frameRate: preset.frameRate,
-      contentHint: preset.contentHint,
-    },
+    video: true,
+    resolution: { width, height, frameRate: preset.frameRate },
+    contentHint: preset.contentHint,
   };
 }

@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { fetchLinkPreview } from "../../api/messages";
-import { safeHttpsHref } from "./messageFormat";
+import { safeHttpsHref } from "../../utils/chat/messageFormat";
 import {
   resolveMessageLinkEmbeds,
   type LinkPreviewCard,
   type ResolvedLinkEmbed,
-} from "./linkEmbeds";
+} from "../../utils/chat/linkEmbeds";
 import "../../styles/chat/link-embed.css";
 
 const previewCache = new Map<string, LinkPreviewCard>();

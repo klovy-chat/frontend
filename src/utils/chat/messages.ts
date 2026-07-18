@@ -8,6 +8,7 @@ import {
   extractExternalMediaLinks,
   isOnlyExternalMediaContent,
 } from "../media/externalMediaLinks";
+import { isVideoAttachment, isVoiceAttachment } from "../media/attachments";
 import type { Message, MessageUser } from "../../types";
 
 function capContent(content: unknown): string {

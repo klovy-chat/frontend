@@ -115,7 +115,9 @@ export function CallView() {
   const mainRemoteTrack = remoteScreenShareTrack ?? remoteVideoTrack;
 
   useEffect(() => {
-    setMainPortalTarget(document.querySelector(".app-shell__main"));
+    setMainPortalTarget(
+      document.querySelector(".app-shell__main") as HTMLElement | null,
+    );
   }, []);
 
   useEffect(() => {

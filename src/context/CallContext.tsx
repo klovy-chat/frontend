@@ -31,7 +31,6 @@ import {
   savePersistedCall,
 } from "../utils/call/callPersistence";
 import { buildScreenShareCaptureOptions } from "../utils/call/screenShareQuality";
-import { loadVoiceSettings } from "../utils/media/voiceSettings";
 import {
   readLocalCameraTrack,
   readLocalScreenShareTrack,
