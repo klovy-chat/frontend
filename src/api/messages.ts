@@ -30,6 +30,9 @@ export function uploadFile(file: File, context: UploadContext) {
   assertAttachmentType(file);
   const form = new FormData();
   form.append("file", file);
+  if (file.type.trim()) {
+    form.append("contentType", file.type.trim());
+  }
   form.append("contextType", context.type);
   form.append("contextId", context.type === "dm" ? context.contactId : context.channelId);
   return apiRequest<{ filePath: string }>("/api/messages/upload-file", {

@@ -758,3 +758,23 @@
 .voice-msg--own .voice-msg__time {
   color: rgba(240, 240, 242, 0.72);
 }
+
+/* ── Video attachment player ── */
+.video-msg {
+  display: flex;
+  max-width: min(100%, 420px);
+}
+
+.video-msg__player {
+  width: 100%;
+  max-height: 320px;
+  border-radius: 10px;
+  background: #000;
+  outline: none;
+}
+
+.video-msg--unavailable {
+  padding: 8px 10px;
+  font-size: 13px;
+  color: var(--text-muted);
+}

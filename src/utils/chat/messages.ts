@@ -3,7 +3,7 @@ import { userLabel } from "../user/format";
 import { stripFormatting } from "./messageFormat";
 import { resolveMediaUrl } from "../media/media";
 import { MAX_MESSAGE_LENGTH } from "../../constants/messages";
-import i18n from "../../i18n/config";
+import { isVideoAttachment, isVoiceAttachment } from "../media/attachments";
 import type { Message, MessageUser } from "../../types";
 
 function capContent(content: unknown): string {
@@ -27,15 +27,18 @@ export function resolveQuotedMessage(
 }
 
 export function getMessagePreview(
-  message: Pick<Message, "content" | "messageType" | "fileName" | "deleted" | "durationMs">,
+  message: Pick<
+    Message,
+    "content" | "messageType" | "fileName" | "fileUrl" | "fileType" | "deleted" | "durationMs"
+  >,
 ): string {
   if (message.deleted) return i18n.t("messages.deleted");
 
   if (message.messageType && message.messageType !== "TEXT") {
     if (message.messageType === "STICKER") return i18n.t("messages.sticker");
     if (message.messageType === "IMAGE") return i18n.t("messages.image");
-    if (message.messageType === "VIDEO") return i18n.t("messages.video");
-    if (message.messageType === "AUDIO") return i18n.t("messages.audio");
+    if (isVideoAttachment(message)) return i18n.t("messages.video");
+    if (isVoiceAttachment(message)) return i18n.t("messages.audio");
     if (message.messageType === "CALL") {
       return (message.durationMs ?? 0) > 0
         ? i18n.t("messages.call")

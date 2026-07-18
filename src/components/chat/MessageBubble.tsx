@@ -10,6 +10,8 @@ import { getReactionEntries, hasUserReacted } from "../../utils/chat/reactions";
 import { MediaImage } from "../common/MediaImage";
 import { resolveChatImagePreviewUrl, resolveMediaUrl } from "../../utils/media/media";
 import { VoiceMessagePlayer } from "./VoiceMessagePlayer";
+import { VideoMessagePlayer } from "./VideoMessagePlayer";
+import { isVideoAttachment, isVoiceAttachment } from "../../utils/media/attachments";
 import type { Message, MessageUser } from "../../types";
 import "../../styles/chat/messagebubble.css";
 
@@ -85,7 +87,8 @@ export function MessageBubble({
       (message.mentions ?? []).some(
         (u) => getUserId(u) === currentUserId,
       ));
-  const isVoice = message.messageType === "AUDIO";
+  const isVoice = isVoiceAttachment(message);
+  const isVideo = isVideoAttachment(message);
   const isSticker = message.messageType === "STICKER";
   const isFile = message.messageType && message.messageType !== "TEXT";
   const senderName = userLabel(sender);
@@ -419,6 +422,11 @@ export function MessageBubble({
                       </button>
                     );
                   })()
+                ) : isVideo ? (
+                  <VideoMessagePlayer
+                    src={message.fileUrl}
+                    fileName={message.fileName}
+                  />
                 ) : isVoice ? (
                   <VoiceMessagePlayer
                     src={message.fileUrl}

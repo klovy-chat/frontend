@@ -15,6 +15,11 @@ import { WsType } from "../../api/wsProtocol";
 import { useCall, type CallPeer } from "../../context/CallContext";
 import { userLabel, availabilityStatusLabel } from "../../utils/user/format";
 import { stripFormatting } from "../../utils/chat/messageFormat";
+import {
+  isVoiceAttachment,
+  resolveUploadMessageType,
+  uploadUsesFileNameAsContent,
+} from "../../utils/media/attachments";
 import { isAllowedGifMediaUrl } from "../../utils/media/mediaAllowlist";
 import { useProfileSync } from "../../hooks/useProfileSync";
 import { presenceColor } from "../../utils/user/presence";
@@ -593,15 +598,13 @@ export function ChatWindow({
         ? ({ type: "dm", contactId: target.contact._id } as const)
         : ({ type: "channel", channelId: target.channel._id } as const);
     const { filePath } = await uploadFile(file, uploadContext);
-    const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
-    const isImage = ["jpg", "jpeg", "png", "webp"].includes(ext);
-    const isAudio = ["webm", "ogg", "wav"].includes(ext);
+    const messageType = resolveUploadMessageType(file);
     const quotedMessage = replyingTo?._id;
     const quotePayload = quotedMessage ? { quotedMessage } : {};
     const payload = {
       sender: user.id,
-      content: isAudio ? "" : file.name,
-      messageType: isImage ? "IMAGE" : isAudio ? "AUDIO" : "FILE",
+      content: uploadUsesFileNameAsContent(messageType) ? file.name : "",
+      messageType,
       fileUrl: filePath,
       fileName: file.name,
       fileType: file.type,
@@ -713,8 +716,10 @@ export function ChatWindow({
   const handleDelete = (message: Message) => {
     const isFile = message.messageType && message.messageType !== "TEXT";
     const preview = isFile
-      ? message.messageType === "AUDIO"
+      ? isVoiceAttachment(message)
         ? t("messages.audio")
+        : message.messageType === "VIDEO" || message.fileType?.startsWith("video/")
+          ? t("messages.video")
         : (message.fileName ?? t("messages.attachment"))
       : stripFormatting(message.content);
     setDeleteConfirm({

@@ -314,6 +314,7 @@
     "sticker": "Naklejka",
     "image": "Obraz",
     "video": "Wideo",
+    "videoUnavailable": "Wideo niedostępne",
     "audio": "Wiadomość głosowa",
     "call": "Rozmowa głosowa",
     "file": "Plik: {{name}}",

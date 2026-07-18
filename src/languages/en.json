@@ -314,6 +314,7 @@
     "sticker": "Sticker",
     "image": "Image",
     "video": "Video",
+    "videoUnavailable": "Video unavailable",
     "audio": "Voice message",
     "call": "Voice call",
     "file": "File: {{name}}",
