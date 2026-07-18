@@ -3,6 +3,7 @@ import { userLabel } from "../user/format";
 import { stripFormatting } from "./messageFormat";
 import { resolveMediaUrl } from "../media/media";
 import { MAX_MESSAGE_LENGTH } from "../../constants/messages";
+import i18n from "../../i18n/config";
 import { isVideoAttachment, isVoiceAttachment } from "../media/attachments";
 import type { Message, MessageUser } from "../../types";
 
