@@ -128,6 +128,26 @@
   flex: 1;
   overflow-y: auto;
   padding: 8px 10px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(124, 92, 255, 0.45) transparent;
+}
+
+.chat-list-pane__scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-list-pane__scroll::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 4px 0;
+}
+
+.chat-list-pane__scroll::-webkit-scrollbar-thumb {
+  background: rgba(124, 92, 255, 0.35);
+  border-radius: 4px;
+}
+
+.chat-list-pane__scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(124, 92, 255, 0.55);
 }
 
 .chat-list-pane__empty {
