@@ -7,16 +7,11 @@
  *
  * To warstwa filtrująca, nie uwierzytelnianie — wartość jest jawna.
  */
-/** Nagłówki HTTP — trzymaj zsynchronizowane z backendem (`utils/security/cors.rs`). */
+/** Nagłówki HTTP — zsynchronizowane z backendem (`utils/security/cors.rs`). */
 export const CLIENT_HEADER_NAME = "X-Klovy-Client";
 
-/** Jawny user-agent z przeglądarki — proxy często nie przekazuje nagłówka User-Agent do API. */
+/** Jawny user-agent z przeglądarki (+ opcjonalnie browser/os po separatorze RS). */
 export const CLIENT_USER_AGENT_HEADER = "X-Klovy-User-Agent";
-
-/** Środowisko klienta wykryte w przeglądarce (Client Hints / navigator). */
-export const CLIENT_BROWSER_HEADER = "X-Klovy-Client-Browser";
-export const CLIENT_OS_HEADER = "X-Klovy-Client-OS";
-export const CLIENT_ENVIRONMENT_LABEL_HEADER = "X-Klovy-Client-Label";
 
 const CLIENT_NAME = "KlovyChatApp";
 const CLIENT_VERSION = "1.0";

@@ -1,7 +1,5 @@
 import {
-  CLIENT_BROWSER_HEADER,
-  CLIENT_ENVIRONMENT_LABEL_HEADER,
-  CLIENT_OS_HEADER,
+  CLIENT_USER_AGENT_HEADER,
 } from "../env/clientId";
 
 export interface ClientEnvironment {
@@ -9,6 +7,10 @@ export interface ClientEnvironment {
   os: string;
   label: string;
 }
+
+/** Markery osadzane w X-Klovy-User-Agent — widoczne ASCII, dozwolone w nagłówkach HTTP. */
+export const CLIENT_ENV_TRANSPORT_MARKER = "<<KLOVY_ENV>>";
+export const CLIENT_ENV_TRANSPORT_SEPARATOR = "<<KLOVY_SEP>>";
 
 type UaBrand = { brand: string; version: string };
 
@@ -230,11 +232,40 @@ export async function ensureClientEnvironment(): Promise<ClientEnvironment> {
   return { ...cache };
 }
 
+export function formatClientUserAgentHeader(
+  navigatorUserAgent: string,
+  environment?: Pick<ClientEnvironment, "browser" | "os">,
+): string {
+  const ua = navigatorUserAgent.trim();
+  if (!ua) return ua;
+
+  const browser = environment?.browser?.trim();
+  const os = environment?.os?.trim();
+  if (!browser || !os) return ua;
+
+  return `${ua}${CLIENT_ENV_TRANSPORT_MARKER}${browser}${CLIENT_ENV_TRANSPORT_SEPARATOR}${os}`;
+}
+
+/**
+ * Ustawia X-Klovy-User-Agent z osadzonym browser/os — jeden nagłówek zamiast trzech
+ * dodatkowych pól wymagających osobnej zgody CORS na produkcji.
+ */
+export function applyClientUserAgentHeader(headers: Headers): void {
+  if (typeof navigator === "undefined") return;
+
+  const navigatorUserAgent = navigator.userAgent ?? "";
+  if (!navigatorUserAgent) return;
+
+  const value = loaded
+    ? formatClientUserAgentHeader(navigatorUserAgent, cache)
+    : navigatorUserAgent;
+
+  headers.set(CLIENT_USER_AGENT_HEADER, value);
+}
+
+/** @deprecated Użyj applyClientUserAgentHeader — nie wysyłaj osobnych nagłówków env. */
 export function applyClientEnvironmentHeaders(headers: Headers): void {
-  if (!loaded) return;
-  if (cache.browser) headers.set(CLIENT_BROWSER_HEADER, cache.browser);
-  if (cache.os) headers.set(CLIENT_OS_HEADER, cache.os);
-  if (cache.label) headers.set(CLIENT_ENVIRONMENT_LABEL_HEADER, cache.label);
+  applyClientUserAgentHeader(headers);
 }
 
 export function isClientEnvironmentReady(): boolean {

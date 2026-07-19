@@ -1,8 +1,8 @@
 import { getBackendBaseUrl } from "../utils/env/backendUrl";
 import { usesDirectBackendUrl } from "../utils/env/appEnv";
-import { CLIENT_HEADER_NAME, CLIENT_IDENTIFIER, CLIENT_USER_AGENT_HEADER } from "../utils/env/clientId";
+import { CLIENT_HEADER_NAME, CLIENT_IDENTIFIER } from "../utils/env/clientId";
 import {
-  applyClientEnvironmentHeaders,
+  applyClientUserAgentHeader,
   ensureClientEnvironment,
 } from "../utils/device/clientEnvironment";
 import {
@@ -117,10 +117,7 @@ async function tryRefreshSession(): Promise<boolean> {
       const refreshHeaders = new Headers({
         [CLIENT_HEADER_NAME]: CLIENT_IDENTIFIER,
       });
-      if (typeof navigator !== "undefined" && navigator.userAgent) {
-        refreshHeaders.set(CLIENT_USER_AGENT_HEADER, navigator.userAgent);
-      }
-      applyClientEnvironmentHeaders(refreshHeaders);
+      applyClientUserAgentHeader(refreshHeaders);
 
       const response = await fetch(url, {
         method: "POST",
@@ -156,10 +153,7 @@ export async function apiRequest<T>(
   const method = (options.method ?? "GET").toUpperCase();
 
   headers.set(CLIENT_HEADER_NAME, CLIENT_IDENTIFIER);
-  if (typeof navigator !== "undefined" && navigator.userAgent) {
-    headers.set(CLIENT_USER_AGENT_HEADER, navigator.userAgent);
-  }
-  applyClientEnvironmentHeaders(headers);
+  applyClientUserAgentHeader(headers);
 
   if (
     options.body &&
