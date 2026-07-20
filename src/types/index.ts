@@ -27,7 +27,6 @@ export interface User {
   isWhitelisted?: boolean;
   isWhitelistEnabled?: boolean;
   twoFactorEnabled?: boolean;
-  isBot?: boolean;
   isPanelAdmin?: boolean;
   isDisabled?: boolean;
   deletionScheduledAt?: string | null;
@@ -68,7 +67,6 @@ export interface Contact {
   unreadCount?: number;
   isMuted?: boolean;
   isBlockedByMe?: boolean;
-  isBot?: boolean;
   badges?: Badge[];
   moderationExpiresAt?: string | null;
   moderationPermanent?: boolean;
@@ -116,33 +114,6 @@ export interface MessageUser {
   image?: string | null;
   banner?: string | null;
   color?: number;
-  isBot?: boolean;
-}
-
-/** Metadane bota widoczne w portalu deweloperskim właściciela. */
-export interface Bot {
-  id: string;
-  username: string;
-  displayName?: string | null;
-  color?: number | null;
-  image?: string | null;
-  isBot: true;
-  ownerId?: string | null;
-  createdAt?: string | null;
-  tokenPrefix?: string | null;
-  tokenLastUsedAt?: string | null;
-  /** Zwracany tylko jednorazowo — bezpośrednio po utworzeniu bota. */
-  token?: string;
-}
-
-/** Bot możliwy do zainstalowania w kanale (uproszczona reprezentacja). */
-export interface InstallableBot {
-  _id: string;
-  username?: string;
-  displayName?: string | null;
-  color?: number;
-  image?: string | null;
-  isBot?: boolean;
 }
 
 export interface Message {

@@ -206,6 +206,9 @@
     "yearsAgo_many": "{{count}} lat temu",
     "yearsAgo_other": "{{count}} lat temu",
     "createdAt": "Utworzono {{time}}",
+    "lastActivity": "Ostatnia aktywność: {{time}}",
+    "thisDevice": "(to urządzenie)",
+    "unknownOs": "Nieznany system",
     "loadingSessions": "Ładowanie sesji…",
     "noSessions": "Brak aktywnych sesji do wyświetlenia.",
     "revokeOthers": "Wyloguj się ze wszystkich sesji poza obecną",
@@ -561,7 +564,7 @@
       "account": "Konto",
       "myAccount": "Moje konto",
       "profile": "Profil",
-      "sessions": "Sesje",
+      "sessions": "Urządzenia",
       "voice": "Ustawienia głosu",
       "bots": "Boty",
       "integrations": "Integracje",
@@ -629,8 +632,8 @@
       "operationFailed": "Nie udało się wykonać operacji.",
       "disableAccount": "Wyłącz konto",
       "markForDeletion": "Oznacz do usunięcia",
-      "sessionsTitle": "Sesje",
-      "activeSessions": "Aktywne sesje",
+      "sessionsTitle": "Urządzenia",
+      "activeSessions": "Sesje zalogowane na Twoim koncie. Bieżące urządzenie jest oznaczone.",
       "sessionsLoadFailed": "Nie udało się pobrać sesji.",
       "sessionRevokeFailed": "Nie udało się wylogować sesji.",
       "revokeOthersFailed": "Nie udało się wylogować innych sesji."
@@ -657,6 +660,15 @@
   "chat": {
     "empty": {
       "selectChat": "Wybierz czat, aby rozpocząć rozmowę."
+    },
+    "inviteEmbed": {
+      "label": "Zaproszenie do kanału",
+      "established": "Zał. {{date}}",
+      "invitedBy": "Zaproszenie od {{name}}",
+      "joinButton": "Dołącz do kanału",
+      "openButton": "Przejdź do kanału",
+      "unavailable": "Zaproszenie niedostępne",
+      "loadFailed": "Nie udało się wczytać zaproszenia"
     },
     "list": {
       "title": "Czaty",
@@ -1054,7 +1066,7 @@
         "account": "Konto",
         "myAccount": "Moje konto",
         "profile": "Profil",
-        "sessions": "Sesje",
+        "sessions": "Urządzenia",
         "voice": "Ustawienia głosu",
         "bots": "Boty",
         "integrations": "Integracje",
@@ -1122,8 +1134,8 @@
         "operationFailed": "Nie udało się wykonać operacji.",
         "disableAccount": "Wyłącz konto",
         "markForDeletion": "Oznacz do usunięcia",
-        "sessionsTitle": "Sesje",
-        "activeSessions": "Aktywne sesje",
+        "sessionsTitle": "Urządzenia",
+        "activeSessions": "Sesje zalogowane na Twoim koncie. Bieżące urządzenie jest oznaczone.",
         "sessionsLoadFailed": "Nie udało się pobrać sesji.",
         "sessionRevokeFailed": "Nie udało się wylogować sesji.",
         "revokeOthersFailed": "Nie udało się wylogować innych sesji."

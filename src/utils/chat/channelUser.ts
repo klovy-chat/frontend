@@ -46,7 +46,6 @@ export function mapChannelUser(raw: unknown): Contact | null {
           : null,
     color: typeof r.color === "number" ? r.color : undefined,
     bio: typeof r.bio === "string" ? r.bio : r.bio === null ? null : undefined,
-    isBot: r.isBot === true,
   };
 }
 

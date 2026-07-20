@@ -6,7 +6,6 @@ import { ChatWindow } from "../components/chat/ChatWindow";
 import { WarningModal } from "../components/common/WarningModal";
 import { AnnouncementModal } from "../components/common/AnnouncementModal";
 import { useWebSocket } from "../context/WebSocketContext";
-import { WsType } from "../api/wsProtocol";
 import { useProfileSync } from "../hooks/useProfileSync";
 import { useListeningSync } from "../hooks/useListeningSync";
 import { useIdleAvailability } from "../hooks/useIdleAvailability";
@@ -65,40 +64,6 @@ export function ChatPage() {
           : prev,
       ),
   });
-
-  useEffect(() => {
-    if (!ws) return;
-
-    const onUserStatusChanged = (payload: {
-      userId: string;
-      status: {
-        isOnline: boolean;
-        lastSeen?: string | number | null;
-        availabilityStatus?: "online" | "away" | "brb" | "dnd";
-      };
-    }) => {
-      setActive((prev) => {
-        if (prev?.type !== "dm" || prev.contact._id !== payload.userId) return prev;
-        return {
-          ...prev,
-          contact: {
-            ...prev.contact,
-            isOnline: payload.status.isOnline,
-            lastSeen: payload.status.lastSeen
-              ? new Date(payload.status.lastSeen).toISOString()
-              : prev.contact.lastSeen ?? null,
-            availabilityStatus:
-              payload.status.availabilityStatus ??
-              prev.contact.availabilityStatus ??
-              "online",
-          },
-        };
-      });
-    };
-
-    const unsub = ws.subscribe(WsType.USER_STATUS_CHANGED, onUserStatusChanged);
-    return () => unsub();
-  }, [ws]);
 
   useEffect(() => {
     const openId = (location.state as { openChannelId?: string } | null)?.openChannelId;

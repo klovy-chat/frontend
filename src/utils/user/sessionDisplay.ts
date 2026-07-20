@@ -1,4 +1,32 @@
 import i18n from "../../i18n/config";
+import { primaryOsSegment, simplifyOsLabel } from "../device/osLabel";
+
+/** Zwraca nazwę OS zapisana w sesji — bez mapowania na sztywne etykiety. */
+export function displaySessionOs(os: string): string {
+  const simplified = simplifyOsLabel(primaryOsSegment(os));
+  return simplified || os.trim() || i18n.t("session.unknownOs");
+}
+
+export function formatSessionAbsoluteTime(value: string | null): string {
+  if (!value) return i18n.t("common.emDash");
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return i18n.t("common.emDash");
+
+  return new Intl.DateTimeFormat(i18n.language, {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  }).format(date);
+}
+
+export function formatSessionUserAgent(userAgent?: string | null): string | null {
+  const trimmed = userAgent?.trim();
+  if (!trimmed) return null;
+  return trimmed;
+}
 
 export function normalizeSessionBrowser(browser: string): string {
   const normalized = browser.trim().toLowerCase();

@@ -18,6 +18,13 @@ function effectivePresenceStatus(entity: {
   return entity.availabilityStatus ?? "online";
 }
 
+export function getEffectiveStatus(entity: {
+  isOnline?: boolean;
+  availabilityStatus?: "online" | "away" | "brb" | "dnd";
+}): AvailabilityStatus {
+  return effectivePresenceStatus(entity);
+}
+
 export function presenceColor(entity: {
   isOnline?: boolean;
   availabilityStatus?: "online" | "away" | "brb" | "dnd";

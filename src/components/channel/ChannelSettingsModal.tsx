@@ -27,11 +27,6 @@ import {
   MAX_AVATAR_SIZE_BYTES,
   MAX_AVATAR_SIZE_LABEL,
 } from "../../constants/upload";
-import {
-  getInstallableBots,
-  addBotToChannel,
-  removeBotFromChannel,
-} from "../../api/bots";
 import { Avatar } from "../common/Avatar";
 import {
   bumpPublicMediaCache,
@@ -43,7 +38,7 @@ import {
   CHANNEL_MOD_DURATION_OPTIONS,
   formatModerationExpiry,
 } from "../../utils/chat/channelModeration";
-import type { Channel, ChannelDetails, Contact, InstallableBot } from "../../types";
+import type { Channel, ChannelDetails, Contact } from "../../types";
 import { useToast } from "../../context/ToastContext";
 import "../../styles/channel/channel-settings.css";
 
@@ -135,20 +130,7 @@ function NavIconModeration() {
   );
 }
 
-function NavIconBots() {
-  return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 8V4H8" />
-      <rect x="4" y="8" width="16" height="12" rx="2" />
-      <path d="M2 14h2" />
-      <path d="M20 14h2" />
-      <path d="M9 13v2" />
-      <path d="M15 13v2" />
-    </svg>
-  );
-}
-
-type SettingsTab = "general" | "members" | "moderation" | "bots";
+type SettingsTab = "general" | "members" | "moderation";
 
 interface ChannelSettingsModalProps {
   channel: Channel;
@@ -201,9 +183,6 @@ export function ChannelSettingsModal({
     user: Contact;
   } | null>(null);
   const [moderationDuration, setModerationDuration] = useState(3600);
-  const [installableBots, setInstallableBots] = useState<InstallableBot[]>([]);
-  const [botsLoading, setBotsLoading] = useState(false);
-  const [botActionBusy, setBotActionBusy] = useState<string | null>(null);
   const avatarFileRef = useRef<HTMLInputElement>(null);
 
   const slowmodeLabel = (seconds: number): string => {
@@ -298,53 +277,6 @@ export function ChannelSettingsModal({
       void loadDetails();
     }
   }, [tab, loadDetails]);
-
-  const loadInstallableBots = useCallback(async () => {
-    setBotsLoading(true);
-    try {
-      const res = await getInstallableBots(initialChannel._id);
-      setInstallableBots(res.bots ?? []);
-    } catch {
-      setInstallableBots([]);
-    } finally {
-      setBotsLoading(false);
-    }
-  }, [initialChannel._id]);
-
-  useEffect(() => {
-    if (tab === "bots") {
-      void loadInstallableBots();
-      void loadDetails();
-    }
-  }, [tab, loadInstallableBots, loadDetails]);
-
-  const handleAddBot = async (botId: string) => {
-    setBotActionBusy(`add-${botId}`);
-    try {
-      await addBotToChannel(initialChannel._id, botId);
-      await loadInstallableBots();
-      await loadDetails();
-      await onRefresh();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : t("modals.channelSettings.toast.addBotFailed"));
-    } finally {
-      setBotActionBusy(null);
-    }
-  };
-
-  const handleRemoveBot = async (botId: string) => {
-    setBotActionBusy(`remove-${botId}`);
-    try {
-      await removeBotFromChannel(initialChannel._id, botId);
-      await loadInstallableBots();
-      await loadDetails();
-      await onRefresh();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : t("modals.channelSettings.toast.removeBotFailed"));
-    } finally {
-      setBotActionBusy(null);
-    }
-  };
 
   const ch: ChannelDetails = details ?? {
     ...initialChannel,
@@ -621,7 +553,6 @@ export function ChannelSettingsModal({
     const contact = mapChannelUser(member) ?? member;
     const id = contact._id;
     const isOwner = String(id) === String(adminContact._id);
-    const isBotMember = Boolean(contact.isBot);
     return (
       <div
         key={id}
@@ -641,13 +572,6 @@ export function ChannelSettingsModal({
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: "0.85rem", color: C.text, fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
             {userLabel(contact)}
-            {isBotMember ? (
-              <span style={{
-                fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.04em",
-                color: "#fff", background: "#5865f2",
-                padding: "2px 5px", borderRadius: 4, textTransform: "uppercase",
-              }}>{t("modals.bots.create.botBadge")}</span>
-            ) : null}
             {isOwner ? (
               <span style={{ marginLeft: 6, fontSize: "0.7rem", color: C.accent }}>{t("channel.members.ownerBadge")}</span>
             ) : null}
@@ -665,17 +589,7 @@ export function ChannelSettingsModal({
             </div>
           ) : null}
         </div>
-        {isAdmin && isBotMember && (
-          <HoverBtn
-            type="button"
-            style={{ ...toolbarBtn(true), flex: "none", padding: "6px 10px", fontSize: "0.65rem" }}
-            disabled={botActionBusy === `remove-${id}`}
-            onClick={() => void handleRemoveBot(id)}
-          >
-            {t("common.delete")}
-          </HoverBtn>
-        )}
-        {isAdmin && !isOwner && !isBotMember && (
+        {isAdmin && !isOwner && (
           <div style={{ display: "flex", gap: 4, flexWrap: "wrap", justifyContent: "flex-end" }}>
             {options.showKick && (
               <HoverBtn
@@ -739,8 +653,6 @@ export function ChannelSettingsModal({
     );
   };
 
-  const channelBots = allMembers.filter((m) => Boolean(m.isBot));
-
   const navItems: Array<{
     key: SettingsTab;
     label: string;
@@ -750,7 +662,6 @@ export function ChannelSettingsModal({
     { key: "general", label: t("modals.channelSettings.tabs.general"), icon: <NavIconGeneral /> },
     { key: "members", label: t("modals.channelSettings.tabs.members"), icon: <NavIconMembers /> },
     { key: "moderation", label: t("modals.channelSettings.tabs.moderation"), icon: <NavIconModeration />, adminOnly: true },
-    { key: "bots", label: t("modals.channelSettings.tabs.bots"), icon: <NavIconBots />, adminOnly: true },
   ];
 
   const renderChannelHeader = () => (
@@ -1032,69 +943,6 @@ export function ChannelSettingsModal({
               </>
             )}
 
-            {tab === "bots" && isAdmin && (
-              <>
-                <h3 className="cs-section-title">{t("modals.channelSettings.botsTitle")}</h3>
-                <p className="cs-section-subtitle">
-                  {t("modals.channelSettings.botsExtendedHint")}
-                </p>
-
-                <p style={{ margin: "0 0 8px", fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: C.textDim, fontFamily: "var(--font-sans)" }}>
-                  {t("modals.channelSettings.botsInChannel")}
-                </p>
-                {channelBots.length === 0 ? (
-                  <p style={{ color: C.textDim, fontSize: "0.85rem", fontFamily: "var(--font-sans)" }}>{t("modals.channelSettings.botsEmpty")}</p>
-                ) : (
-                  channelBots.map((b) => renderMemberRow(b, {}))
-                )}
-
-                <p style={{ margin: "18px 0 8px", fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: C.textDim, fontFamily: "var(--font-sans)" }}>
-                  {t("modals.channelSettings.botsAvailable")}
-                </p>
-                {botsLoading ? (
-                  <p style={{ color: C.textDim, fontSize: "0.85rem", fontFamily: "var(--font-sans)" }}>{t("common.loading")}</p>
-                ) : installableBots.length === 0 ? (
-                  <p style={{ color: C.textDim, fontSize: "0.85rem", fontFamily: "var(--font-sans)" }}>
-                    {t("modals.channelSettings.botsNoAvailable")}
-                  </p>
-                ) : (
-                  installableBots.map((b) => (
-                    <div
-                      key={b._id}
-                      style={{
-                        display: "flex", alignItems: "center", gap: 12,
-                        padding: "10px 12px", borderRadius: 8,
-                        background: C.bgDeep, marginBottom: 6,
-                      }}
-                    >
-                      <Avatar
-                        displayName={b.displayName}
-                        username={b.username}
-                        image={b.image}
-                        color={b.color}
-                        size={36}
-                      />
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: "0.85rem", color: C.text, fontWeight: 600, fontFamily: "var(--font-sans)" }}>
-                          {b.displayName || b.username}
-                        </div>
-                        {b.username ? (
-                          <div style={{ fontSize: "0.75rem", color: C.textDim, fontFamily: "var(--font-sans)" }}>@{b.username}</div>
-                        ) : null}
-                      </div>
-                      <HoverBtn
-                        type="button"
-                        style={{ ...toolbarBtn(false), flex: "none", padding: "6px 12px", fontSize: "0.65rem" }}
-                        disabled={botActionBusy === `add-${b._id}`}
-                        onClick={() => void handleAddBot(b._id)}
-                      >
-                        {botActionBusy === `add-${b._id}` ? "…" : t("modals.channelSettings.addBot")}
-                      </HoverBtn>
-                    </div>
-                  ))
-                )}
-              </>
-            )}
           </div>
 
           <div className="cs-footer">

@@ -2,6 +2,9 @@ import { safeHttpsHref } from "./messageFormat";
 import { isAllowedExternalMediaLink } from "../media/externalMediaLinks";
 
 const URL_REGEX = /https:\/\/[^\s<>"'`]*[^\s<>"'`.,!?:;)\]}]/g;
+const HTTP_URL_REGEX = /https?:\/\/[^\s<>"'`]*[^\s<>"'`.,!?:;)\]}]/g;
+const INVITE_ID_REGEX =
+  /\/invite\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i;
 const MAX_EMBEDS_PER_MESSAGE = 2;
 
 const SKIP_HOSTS = new Set([
@@ -27,6 +30,37 @@ export interface LinkPreviewCard {
   description?: string;
   image?: string;
   siteName?: string;
+}
+
+export interface ResolvedInviteLink {
+  inviteId: string;
+  url: string;
+}
+
+function parseInviteLink(raw: string): ResolvedInviteLink | null {
+  const match = raw.match(INVITE_ID_REGEX);
+  if (!match?.[1]) return null;
+  const inviteId = match[1].toLowerCase();
+  return { inviteId, url: raw };
+}
+
+export function extractInviteLinks(text: string): ResolvedInviteLink[] {
+  const matches = text.match(HTTP_URL_REGEX) ?? [];
+  const seen = new Set<string>();
+  const invites: ResolvedInviteLink[] = [];
+
+  for (const raw of matches) {
+    const parsed = parseInviteLink(raw);
+    if (!parsed || seen.has(parsed.inviteId)) continue;
+    seen.add(parsed.inviteId);
+    invites.push(parsed);
+  }
+
+  return invites;
+}
+
+function isInviteUrl(raw: string): boolean {
+  return INVITE_ID_REGEX.test(raw);
 }
 
 export function extractHttpsUrls(text: string): string[] {
@@ -191,15 +225,27 @@ function resolveKnownEmbed(url: URL): ResolvedLinkEmbed | null {
 }
 
 export function resolveMessageLinkEmbeds(content: string): {
+  inviteLinks: ResolvedInviteLink[];
   iframes: ResolvedLinkEmbed[];
   cardUrls: string[];
 } {
+  const inviteLinks: ResolvedInviteLink[] = [];
   const iframes: ResolvedLinkEmbed[] = [];
   const cardUrls: string[] = [];
   const seen = new Set<string>();
+  const seenInvites = new Set<string>();
 
   for (const raw of extractHttpsUrls(content)) {
-    if (iframes.length + cardUrls.length >= MAX_EMBEDS_PER_MESSAGE) break;
+    if (inviteLinks.length + iframes.length + cardUrls.length >= MAX_EMBEDS_PER_MESSAGE) {
+      break;
+    }
+
+    const invite = parseInviteLink(raw);
+    if (invite && !seenInvites.has(invite.inviteId)) {
+      seenInvites.add(invite.inviteId);
+      inviteLinks.push(invite);
+      continue;
+    }
 
     let parsed: URL;
     try {
@@ -219,14 +265,35 @@ export function resolveMessageLinkEmbeds(content: string): {
       continue;
     }
 
-    if (!seen.has(raw)) {
+    if (!seen.has(raw) && !isInviteUrl(raw)) {
       seen.add(raw);
       cardUrls.push(raw);
     }
   }
 
+  // Dev / local invite links are often http — pick them up separately.
+  if (inviteLinks.length + iframes.length + cardUrls.length < MAX_EMBEDS_PER_MESSAGE) {
+    for (const raw of content.match(HTTP_URL_REGEX) ?? []) {
+      if (inviteLinks.length + iframes.length + cardUrls.length >= MAX_EMBEDS_PER_MESSAGE) {
+        break;
+      }
+      if (raw.startsWith("https://")) continue;
+      const invite = parseInviteLink(raw);
+      if (invite && !seenInvites.has(invite.inviteId)) {
+        seenInvites.add(invite.inviteId);
+        inviteLinks.push(invite);
+      }
+    }
+  }
+
+  const remainingSlots = Math.max(
+    0,
+    MAX_EMBEDS_PER_MESSAGE - inviteLinks.length - iframes.length,
+  );
+
   return {
+    inviteLinks: inviteLinks.slice(0, MAX_EMBEDS_PER_MESSAGE),
     iframes,
-    cardUrls: cardUrls.slice(0, Math.max(0, MAX_EMBEDS_PER_MESSAGE - iframes.length)),
+    cardUrls: cardUrls.slice(0, remainingSlots),
   };
 }

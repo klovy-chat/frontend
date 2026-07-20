@@ -1,6 +1,8 @@
 import {
   CLIENT_USER_AGENT_HEADER,
 } from "../env/clientId";
+import { simplifyOsLabel } from "./osLabel";
+import { parseUserAgentPlatform } from "./parseUserAgentPlatform";
 
 export interface ClientEnvironment {
   browser: string;
@@ -39,15 +41,6 @@ const IGNORED_BROWSER_BRANDS = new Set([
   "Not)A;Brand",
   "Not A;Brand",
   "Not_A Brand",
-]);
-
-const PLATFORM_SEGMENT_NOISE = new Set([
-  "X11",
-  "WOW64",
-  "Win64",
-  "U",
-  "Mobile",
-  "Tablet",
 ]);
 
 const cache: ClientEnvironment = {
@@ -98,78 +91,19 @@ function browserFromUserAgent(ua: string): string | null {
   return null;
 }
 
-function osFromClientHints(values: {
-  platform?: string;
-  platformVersion?: string;
-  architecture?: string;
-  bitness?: string;
-  model?: string;
-  wow64?: boolean;
-}): string | null {
-  const chunks: string[] = [];
+function osFromClientHints(values: { platform?: string }): string | null {
   const platform = values.platform?.trim();
-  const platformVersion = values.platformVersion?.trim();
-
-  if (platform) {
-    if (platformVersion && platformVersion !== "0.0.0") {
-      chunks.push(`${platform} ${shortVersion(platformVersion)}`);
-    } else {
-      chunks.push(platform);
-    }
-  }
-
-  if (values.model?.trim() && platform === "Android") {
-    chunks.push(values.model.trim());
-  }
-
-  const architecture = values.architecture?.trim();
-  if (architecture && architecture !== "unknown") {
-    chunks.push(architecture);
-  }
-
-  if (values.bitness === "64") chunks.push("64-bit");
-  else if (values.bitness === "32") chunks.push("32-bit");
-
-  if (values.wow64) chunks.push("WoW64");
-
-  return chunks.length > 0 ? chunks.join(" · ") : null;
+  return platform || null;
 }
 
 function osFromUserAgentParenthetical(ua: string): string | null {
-  const match = ua.match(/\(([^)]+)\)/);
-  if (!match) return null;
-
-  const segments = match[1]
-    .split(";")
-    .map((part) => part.trim())
-    .filter(Boolean)
-    .filter((part) => {
-      if (PLATFORM_SEGMENT_NOISE.has(part)) return false;
-      if (/^rv:/i.test(part)) return false;
-      if (/^compatible$/i.test(part)) return false;
-      return true;
-    });
-
-  return segments.length > 0 ? segments.join(" · ") : null;
-}
-
-function osFromNavigatorFallback(): string | null {
-  const platform = navigator.platform?.trim();
-  if (platform) return platform;
-
-  const ua = navigator.userAgent ?? "";
-  if (/android/i.test(ua)) return "Android";
-  if (/iphone|ipad|ipod/i.test(ua)) return "iOS";
-  if (/macintosh|mac os x/i.test(ua)) return "macOS";
-  if (/windows/i.test(ua)) return "Windows";
-  if (/linux/i.test(ua)) return "Linux";
-  return null;
+  return parseUserAgentPlatform(ua);
 }
 
 async function detectClientEnvironment(): Promise<ClientEnvironment> {
   const ua = navigator.userAgent ?? "";
   let browser = browserFromUserAgent(ua);
-  let os = osFromUserAgentParenthetical(ua) ?? osFromNavigatorFallback();
+  let os: string | null = null;
 
   const nav = navigator as NavigatorWithUaData;
   const uaData = nav.userAgentData;
@@ -181,11 +115,6 @@ async function detectClientEnvironment(): Promise<ClientEnvironment> {
       try {
         const values = await uaData.getHighEntropyValues([
           "platform",
-          "platformVersion",
-          "architecture",
-          "bitness",
-          "model",
-          "wow64",
           "fullVersionList",
         ]);
 
@@ -197,12 +126,20 @@ async function detectClientEnvironment(): Promise<ClientEnvironment> {
     }
 
     if (!os && uaData.platform) {
-      os = uaData.platform;
+      os = uaData.platform.trim();
     }
   }
 
+  if (!os) {
+    os = osFromUserAgentParenthetical(ua);
+  }
+
+  if (!os) {
+    os = navigator.platform?.trim() ?? null;
+  }
+
   const browserFinal = browser ?? "Unknown browser";
-  const osFinal = os ?? "Unknown OS";
+  const osFinal = simplifyOsLabel(os ?? "") || "Unknown OS";
 
   return {
     browser: browserFinal,

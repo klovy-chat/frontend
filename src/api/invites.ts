@@ -38,7 +38,14 @@ export function getChannelInvite(inviteId: string) {
   return apiRequest<{
     invite: {
       inviteId: string;
-      channelId: { _id: string; name: string; image?: string } | null;
+      channelId: {
+        _id: string;
+        name: string;
+        image?: string;
+        description?: string | null;
+        memberCount?: number;
+        createdAt?: string | null;
+      } | null;
       inviter?: {
         displayName?: string | null;
         username: string;

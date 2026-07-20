@@ -250,7 +250,6 @@ export function MessageBubble({
         {showSenderName && (
           <span className="message-sender-name">
             {senderName}
-            {sender.isBot && <span className="message-bot-tag">{t("modals.otherUserProfile.botBadge")}</span>}
           </span>
         )}
 

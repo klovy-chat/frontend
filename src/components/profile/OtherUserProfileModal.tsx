@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { Avatar } from "../common/Avatar";
 import { userLabel, formatJoinedDate, availabilityStatusLabel } from "../../utils/user/format";
@@ -68,7 +69,7 @@ export function OtherUserProfileModal({
     ? formatJoinedDate(displayedUser.createdAt)
     : null;
 
-  return (
+  return createPortal(
     <div
       className={`up-backdrop${closing ? " closing" : ""}`}
       role="dialog"
@@ -135,24 +136,6 @@ export function OtherUserProfileModal({
             <div className="up-identity-text">
               <h2 className="up-display-name">
                 {name}
-                {displayedUser.isBot && (
-                  <span
-                    style={{
-                      marginLeft: 8,
-                      fontSize: "0.6em",
-                      fontWeight: 700,
-                      letterSpacing: "0.04em",
-                      color: "#fff",
-                      background: "#5865f2",
-                      padding: "3px 6px",
-                      borderRadius: 5,
-                      textTransform: "uppercase",
-                      verticalAlign: "middle",
-                    }}
-                  >
-                    {t("modals.otherUserProfile.botBadge")}
-                  </span>
-                )}
               </h2>
               {displayedUser.username && (
                 <p className="up-profile-handle">@{displayedUser.username}</p>
@@ -237,6 +220,7 @@ export function OtherUserProfileModal({
           ) : null}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

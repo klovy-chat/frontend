@@ -6,6 +6,7 @@ import {
   type LinkPreviewCard,
   type ResolvedLinkEmbed,
 } from "../../utils/chat/linkEmbeds";
+import { ChannelInviteEmbed } from "./ChannelInviteEmbed";
 import "../../styles/chat/link-embed.css";
 
 const previewCache = new Map<string, LinkPreviewCard>();
@@ -105,7 +106,7 @@ interface MessageLinkEmbedsProps {
 }
 
 export function MessageLinkEmbeds({ content }: MessageLinkEmbedsProps) {
-  const { iframes, cardUrls } = useMemo(
+  const { inviteLinks, iframes, cardUrls } = useMemo(
     () => resolveMessageLinkEmbeds(content),
     [content],
   );
@@ -139,12 +140,15 @@ export function MessageLinkEmbeds({ content }: MessageLinkEmbedsProps) {
     };
   }, [cardUrls]);
 
-  if (iframes.length === 0 && cards.length === 0) {
+  if (inviteLinks.length === 0 && iframes.length === 0 && cards.length === 0) {
     return null;
   }
 
   return (
     <div className="message-link-embeds">
+      {inviteLinks.map((link) => (
+        <ChannelInviteEmbed key={link.inviteId} link={link} />
+      ))}
       {iframes.map((embed) => (
         <LinkEmbedIframe key={embed.url} embed={embed} />
       ))}

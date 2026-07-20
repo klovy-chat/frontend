@@ -1,4 +1,4 @@
-import { cloneElement, isValidElement, useCallback, useEffect, useRef, useState } from "react";
+import { cloneElement, isValidElement, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getContactsForList, searchContacts, toggleContactMute, toggleContactBlock } from "../../api/contacts";
 import { removeFriend } from "../../api/friends";
@@ -11,6 +11,7 @@ import {
   toggleChannelMute,
 } from "../../api/channels";
 import { useAuth } from "../../context/AuthContext";
+import { usePresenceStore, useResolvePresence } from "../../context/PresenceContext";
 import { useToast } from "../../context/ToastContext";
 import { useWebSocket } from "../../context/WebSocketContext";
 import { WsType } from "../../api/wsProtocol";
@@ -24,7 +25,7 @@ import { MobileShellBar, type ShellOverlay } from "../layout/MobileShellBar";
 import { UserProfileModal } from "../profile/UserProfileModal";
 import { OtherUserProfileModal } from "../profile/OtherUserProfileModal";
 import { userLabel, availabilityStatusLabel } from "../../utils/user/format";
-import { channelMemberCount, channelMemberCountLabel } from "../../utils/user/presence";
+import { channelMemberCount, channelMemberCountLabel, getEffectiveStatus } from "../../utils/user/presence";
 import { useProfileSync } from "../../hooks/useProfileSync";
 import { useListeningSync } from "../../hooks/useListeningSync";
 import { useSpotifyListeningSync } from "../../hooks/useSpotifyListeningSync";
@@ -195,6 +196,8 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
   const { user } = useAuth();
   const toast = useToast();
   const ws = useWebSocket();
+  const resolvePresence = useResolvePresence();
+  const { seed: seedPresence } = usePresenceStore();
 
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [channels, setChannels] = useState<Channel[]>([]);
@@ -248,7 +251,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
   } | null>(null);
 
   const [settingsInitialSection, setSettingsInitialSection] = useState<
-    "profil" | "konto" | "sesje" | "glos" | "boty" | "integracje" | "ostrzezenia" | undefined
+    "profil" | "konto" | "sesje" | "glos" | "integracje" | "ostrzezenia" | undefined
   >(undefined);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsShellOverlay, setSettingsShellOverlay] = useState<ShellOverlay>(null);
@@ -281,9 +284,16 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
   const refresh = useCallback(async () => {
     try {
       const [contactsRes, channelsRes] = await Promise.all([getContactsForList(), getUserChannels()]);
-      setContacts(contactsRes.contacts); setChannels(channelsRes.channels);
+      setContacts(contactsRes.contacts);
+      setChannels(channelsRes.channels);
+      seedPresence(contactsRes.contacts);
     } catch { /**/ }
-  }, []);
+  }, [seedPresence]);
+
+  const displayContacts = useMemo(
+    () => contacts.map((c) => resolvePresence(c)),
+    [contacts, resolvePresence],
+  );
 
   useEffect(() => { refresh(); }, [refresh]);
 
@@ -475,38 +485,11 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
       if (availabilityRef.current === "dnd") return;
       playNotificationSound();
     };
-    const onUserStatusChanged = (payload: {
-      userId: string;
-      status: {
-        isOnline: boolean;
-        lastSeen?: string | number | null;
-        availabilityStatus?: "online" | "away" | "brb" | "dnd";
-      };
-    }) => {
-      const patch = (c: Contact): Contact =>
-        c._id === payload.userId
-          ? {
-              ...c,
-              isOnline: payload.status.isOnline,
-              lastSeen: payload.status.lastSeen
-                ? new Date(payload.status.lastSeen).toISOString()
-                : c.lastSeen ?? null,
-              availabilityStatus:
-                payload.status.availabilityStatus ?? c.availabilityStatus ?? "online",
-            }
-          : c;
-      setContacts((prev) => prev.map(patch));
-      setContactProfile((prev) => (prev ? patch(prev) : prev));
-      if (active?.type === "dm" && active.contact._id === payload.userId) {
-        onSelect({ type: "dm", contact: patch(active.contact) });
-      }
-    };
     const unsubs = [
       ws.subscribe(WsType.MESSAGE_DELETED, syncContactPreviews),
       ws.subscribe(WsType.RECEIVE_MESSAGE, onDmMessage),
       ws.subscribe(WsType.RECEIVE_CHANNEL_MESSAGE, onChannelMessage),
       ws.subscribe(WsType.UNREAD_UPDATED, onUnreadUpdated),
-      ws.subscribe(WsType.USER_STATUS_CHANGED, onUserStatusChanged),
     ];
     return () => unsubs.forEach((u) => u());
   }, [ws, refresh, applyUnreadUpdate, active, onSelect]);
@@ -795,10 +778,10 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
     );
   };
 
-  const getEffectiveStatus = (entity: {
-    isOnline?: boolean;
-    availabilityStatus?: "online" | "away" | "brb" | "dnd";
-  }) => (entity.isOnline ? (entity.availabilityStatus ?? "online") : "offline");
+  const getContactEffectiveStatus = useCallback(
+    (contact: Contact) => getEffectiveStatus(resolvePresence(contact)),
+    [resolvePresence],
+  );
 
   const handleChannelContextMenu = (e: React.MouseEvent, channel: Channel) => {
     e.preventDefault(); e.stopPropagation();
@@ -817,7 +800,8 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
 
   const handleContactContextMenu = (e: React.MouseEvent, contact: Contact) => {
     e.preventDefault(); e.stopPropagation();
-    const status = getEffectiveStatus(contact);
+    const live = resolvePresence(contact);
+    const status = getEffectiveStatus(live);
     const statusLabel = availabilityStatusLabel(status);
     setContextMenu({
       kind: "dm",
@@ -1005,12 +989,12 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
           <>
             <div className="app-shell__list">
               <ChatListPane
-                contacts={contacts}
+                contacts={displayContacts}
                 channels={channels}
                 active={active}
                 searchTerm={searchTerm}
                 onSearchChange={setSearchTerm}
-                searchResults={searchResults}
+                searchResults={searchResults.map((c) => resolvePresence(c))}
                 activeTab={chatListTab}
                 onTabChange={setChatListTab}
                 mentionSources={mentionSources}
@@ -1028,7 +1012,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
                   setNewChannelClosing(false);
                   setShowNewChannel(true);
                 }}
-                getEffectiveStatus={getEffectiveStatus}
+                getEffectiveStatus={getContactEffectiveStatus}
               />
             </div>
             <div className="app-shell__main">
@@ -1067,7 +1051,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
           setContactProfileOpen(false);
           setContactProfile(null);
         }}
-        user={contactProfile}
+        user={contactProfile ? resolvePresence(contactProfile) : null}
         isFriend
         isBlockedByMe={Boolean(contactProfile?.isBlockedByMe)}
         onToggleBlock={

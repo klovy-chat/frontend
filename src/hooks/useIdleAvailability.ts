@@ -10,7 +10,7 @@ const AUTO_IDLE_BRB_KEY = "klovy:autoIdleBrb";
 /** Cleared on manual status picks so auto-idle BRB does not stick across sessions. */
 export function clearAutoIdleBrbFlag(): void {
   try {
-    sessionStorage.removeItem(AUTO_IDLE_BRB_KEY);
+    localStorage.removeItem(AUTO_IDLE_BRB_KEY);
   } catch {
     /* private mode / blocked storage */
   }
@@ -18,7 +18,7 @@ export function clearAutoIdleBrbFlag(): void {
 
 function markAutoIdleBrb(userId: string): void {
   try {
-    sessionStorage.setItem(AUTO_IDLE_BRB_KEY, userId);
+    localStorage.setItem(AUTO_IDLE_BRB_KEY, userId);
   } catch {
     /* ignore */
   }
@@ -26,7 +26,7 @@ function markAutoIdleBrb(userId: string): void {
 
 function isMarkedAutoIdleBrb(userId: string): boolean {
   try {
-    return sessionStorage.getItem(AUTO_IDLE_BRB_KEY) === userId;
+    return localStorage.getItem(AUTO_IDLE_BRB_KEY) === userId;
   } catch {
     return false;
   }
@@ -34,11 +34,10 @@ function isMarkedAutoIdleBrb(userId: string): boolean {
 
 /**
  * While status is "online", 5 minutes without input → auto "brb".
- * Moving the cursor / typing / focusing the tab restores "online".
- * Manual away / dnd / brb are left alone.
+ * Moving the cursor / typing / focusing the tab restores "online" only when
+ * the BRB was applied automatically (not a manual pick).
  *
- * Auto BRB is tagged in sessionStorage so a later login/refresh does not keep
- * "zaraz wracam" as if the user had chosen it.
+ * Auto BRB is tagged in localStorage so all tabs share the same idle state.
  */
 export function useIdleAvailability(): void {
   const { user, updateUser } = useAuth();
@@ -69,8 +68,7 @@ export function useIdleAvailability(): void {
       }
     };
 
-    // Stale auto-idle from a previous tab session / logout — restore online once.
-    // Skip when this tab just applied auto BRB (autoIdleBrbRef is already true).
+    // Stale auto-idle from a previous session — restore online once on load.
     if (
       restoredStaleBrbRef.current !== userId &&
       !autoIdleBrbRef.current &&
@@ -82,6 +80,16 @@ export function useIdleAvailability(): void {
       void applyStatus("online");
     }
 
+    // Sync in-memory auto-idle flag with shared storage (multi-tab / WS updates).
+    if (statusRef.current === "brb" && isMarkedAutoIdleBrb(userId)) {
+      autoIdleBrbRef.current = true;
+    } else if (statusRef.current !== "brb") {
+      autoIdleBrbRef.current = false;
+    } else {
+      // Manual BRB — never auto-restore on activity.
+      autoIdleBrbRef.current = false;
+    }
+
     const clearIdleTimer = () => {
       if (idleTimerRef.current) {
         clearTimeout(idleTimerRef.current);
@@ -91,7 +99,6 @@ export function useIdleAvailability(): void {
 
     const armIdleTimer = () => {
       clearIdleTimer();
-      // Only auto-idle from explicit "online". Away / DND / manual BRB stay put.
       if (statusRef.current !== "online" || autoIdleBrbRef.current) return;
       idleTimerRef.current = setTimeout(() => {
         if (statusRef.current !== "online") return;
@@ -110,10 +117,6 @@ export function useIdleAvailability(): void {
       armIdleTimer();
     };
 
-    // Manual status (or restore) left auto-idle — drop the in-memory flag.
-    if (statusRef.current !== "brb") {
-      autoIdleBrbRef.current = false;
-    }
     if (statusRef.current !== "online") {
       clearIdleTimer();
     } else {

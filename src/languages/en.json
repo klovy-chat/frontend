@@ -206,6 +206,9 @@
     "yearsAgo_many": "{{count}} years ago",
     "yearsAgo_other": "{{count}} years ago",
     "createdAt": "Created {{time}}",
+    "lastActivity": "Last activity: {{time}}",
+    "thisDevice": "(this device)",
+    "unknownOs": "Unknown OS",
     "loadingSessions": "Loading sessions…",
     "noSessions": "No active sessions to display.",
     "revokeOthers": "Log out of all sessions except this one",
@@ -561,7 +564,7 @@
       "account": "Account",
       "myAccount": "My account",
       "profile": "Profile",
-      "sessions": "Sessions",
+      "sessions": "Devices",
       "voice": "Voice settings",
       "bots": "Bots",
       "integrations": "Integrations",
@@ -629,8 +632,8 @@
       "operationFailed": "Could not complete the operation.",
       "disableAccount": "Disable account",
       "markForDeletion": "Mark for deletion",
-      "sessionsTitle": "Sessions",
-      "activeSessions": "Active sessions",
+      "sessionsTitle": "Devices",
+      "activeSessions": "Sessions signed in to your account. The current device is marked.",
       "sessionsLoadFailed": "Could not load sessions.",
       "sessionRevokeFailed": "Could not log out session.",
       "revokeOthersFailed": "Could not log out other sessions."
@@ -657,6 +660,15 @@
   "chat": {
     "empty": {
       "selectChat": "Select a chat to start a conversation."
+    },
+    "inviteEmbed": {
+      "label": "Channel invite",
+      "established": "Est. {{date}}",
+      "invitedBy": "Invited by {{name}}",
+      "joinButton": "Join channel",
+      "openButton": "Go to channel",
+      "unavailable": "Invite unavailable",
+      "loadFailed": "Could not load invite"
     },
     "list": {
       "title": "Chats",
@@ -1054,7 +1066,7 @@
         "account": "Account",
         "myAccount": "My account",
         "profile": "Profile",
-        "sessions": "Sessions",
+        "sessions": "Devices",
         "voice": "Voice settings",
         "bots": "Bots",
         "integrations": "Integrations",
@@ -1122,8 +1134,8 @@
         "operationFailed": "Could not complete the operation.",
         "disableAccount": "Disable account",
         "markForDeletion": "Mark for deletion",
-        "sessionsTitle": "Sessions",
-        "activeSessions": "Active sessions",
+        "sessionsTitle": "Devices",
+        "activeSessions": "Sessions signed in to your account. The current device is marked.",
         "sessionsLoadFailed": "Could not load sessions.",
         "sessionRevokeFailed": "Could not log out session.",
         "revokeOthersFailed": "Could not log out other sessions."

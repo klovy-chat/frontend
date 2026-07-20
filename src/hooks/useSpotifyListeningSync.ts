@@ -42,7 +42,7 @@ export function useSpotifyListeningSync(): void {
   const armedRef = useRef(false);
 
   useEffect(() => {
-    if (!user || user.isBot) return;
+    if (!user) return;
 
     let cancelled = false;
     const userId = user.id;
@@ -91,10 +91,10 @@ export function useSpotifyListeningSync(): void {
       cancelled = true;
       window.removeEventListener(SPOTIFY_CONNECTION_CHANGED, onConnectionChanged);
     };
-  }, [user?.id, user?.isBot, user?.spotifyConnected, updateUser]);
+  }, [user?.id, user?.spotifyConnected, updateUser]);
 
   useEffect(() => {
-    if (!user || user.isBot) return;
+    if (!user) return;
 
     const clientInstanceId = getClientInstanceId();
 
@@ -136,7 +136,7 @@ export function useSpotifyListeningSync(): void {
       window.clearInterval(timer);
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [user?.id, user?.isBot, updateUser]);
+  }, [user?.id, updateUser]);
 }
 
 export function isListeningNow(

@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { Avatar } from "../common/Avatar";
 import { ListeningActivitySection } from "./ListeningActivitySection";
@@ -44,7 +45,7 @@ export function UserProfileModal({
   const joinedLabel = user.createdAt ? formatJoinedDate(user.createdAt) : t("common.emDash");
   const bioText = user.bio?.trim();
 
-  return (
+  return createPortal(
     <div
       className={`up-backdrop${closing ? " closing" : ""}`}
       role="dialog"
@@ -171,6 +172,7 @@ export function UserProfileModal({
           </section>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

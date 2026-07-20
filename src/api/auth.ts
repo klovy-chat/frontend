@@ -291,6 +291,7 @@ export interface UserSessionRow {
   label: string;
   browser: string;
   os: string;
+  userAgent?: string | null;
   isKnown: boolean;
   isCurrent: boolean;
   createdAt: string | null;

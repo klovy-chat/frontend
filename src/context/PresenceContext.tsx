@@ -8,8 +8,10 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useAuth } from "./AuthContext";
 import { useWebSocket } from "./WebSocketContext";
 import { WsType } from "../api/wsProtocol";
+import type { User } from "../types";
 
 export type AvailabilityStatus = "online" | "away" | "brb" | "dnd";
 
@@ -51,6 +53,13 @@ interface StatusChangedPayload {
  */
 export function PresenceProvider({ children }: { children: ReactNode }) {
   const ws = useWebSocket();
+  const { user, updateUser } = useAuth();
+  const userIdRef = useRef(user?.id);
+  const userRef = useRef(user);
+  userIdRef.current = user?.id;
+  userRef.current = user;
+  const updateUserRef = useRef(updateUser);
+  updateUserRef.current = updateUser;
   const [presence, setPresence] = useState<Record<string, Presence>>({});
 
   useEffect(() => {
@@ -74,6 +83,20 @@ export function PresenceProvider({ children }: { children: ReactNode }) {
           },
         };
       });
+
+      // Keep own nav-rail / idle hook in sync across tabs and WS paths.
+      if (
+        payload.userId === userIdRef.current &&
+        payload.status.availabilityStatus
+      ) {
+        const current = userRef.current;
+        if (current) {
+          updateUserRef.current({
+            ...current,
+            availabilityStatus: payload.status.availabilityStatus,
+          } satisfies User);
+        }
+      }
     };
     const unsub = ws.subscribe(WsType.USER_STATUS_CHANGED, onStatusChanged);
     return () => unsub();

@@ -27,7 +27,6 @@ import {
   MAX_AVATAR_SIZE_LABEL,
 } from "../constants/upload";
 import { TwoFactorSetupModal } from "../components/auth/TwoFactorSetupModal";
-import { BotsPanel } from "../components/bots/BotsPanel";
 import { IntegrationsPanel } from "../components/integrations/IntegrationsPanel";
 import { VoiceSettingsPanel } from "../components/account/VoiceSettingsPanel";
 import { LanguageSettingsPanel } from "../components/account/LanguageSettingsPanel";
@@ -59,9 +58,10 @@ import {
 } from "../utils/auth/pwnedPassword";
 import { normalizeUsernameInput, validateUsernameInput } from "../utils/auth/username";
 import {
-  formatSessionRelativeTime,
+  displaySessionOs,
+  formatSessionAbsoluteTime,
+  formatSessionUserAgent,
 } from "../utils/user/sessionDisplay";
-import { BrowserSessionIcon } from "../components/account/BrowserSessionIcon";
 import "../styles/account/account.css";
 import "../styles/account/profile.css";
 
@@ -75,7 +75,7 @@ interface AccountSettingsModalProps {
   spotifyOauthConnected?: boolean;
 }
 
-export type Section = "profil" | "konto" | "sesje" | "glos" | "jezyk" | "boty" | "integracje" | "ostrzezenia";
+export type Section = "profil" | "konto" | "sesje" | "glos" | "jezyk" | "integracje" | "ostrzezenia";
 
 type SectionInput = Section | "sesja";
 
@@ -754,18 +754,6 @@ export function AccountSettingsModal({
       </button>
 
       <button
-        className={`as-nav-item${section === "boty" ? " active" : ""}`}
-        onClick={() => { setSection("boty"); onSectionChange?.(); }}
-      >
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="3" y="11" width="18" height="10" rx="2"/>
-          <circle cx="12" cy="5" r="2"/>
-          <path d="M12 7v4"/>
-        </svg>
-        {t("settings.nav.bots")}
-      </button>
-
-      <button
         className={`as-nav-item${section === "integracje" ? " active" : ""}`}
         onClick={() => { setSection("integracje"); onSectionChange?.(); }}
       >
@@ -1320,35 +1308,62 @@ export function AccountSettingsModal({
                 <p className="as-hint">{t("session.noSessions")}</p>
               ) : (
                 <div className="as-sessions-list">
-                  {sessions.map((session) => (
+                  {sessions.map((session) => {
+                    const osName = displaySessionOs(session.os);
+                    const userAgent = formatSessionUserAgent(session.userAgent);
+                    const lastActivity = formatSessionAbsoluteTime(
+                      session.lastUsedAt ?? session.createdAt,
+                    );
+
+                    return (
                     <div
                       key={session.id}
                       className={`as-session-row${session.isCurrent ? " as-session-row--current" : ""}`}
                     >
-                      <BrowserSessionIcon
-                        browser={session.browser}
-                        isKnown={session.isKnown}
-                      />
                       <div className="as-session-copy">
-                        <p className="as-session-device">{session.label}</p>
+                        <div className="as-session-title-row">
+                          <p className="as-session-device">
+                            {osName}
+                            {session.isCurrent ? (
+                              <span className="as-session-current-tag">
+                                {t("session.thisDevice")}
+                              </span>
+                            ) : null}
+                          </p>
+                          {!session.isCurrent ? (
+                            <button
+                              type="button"
+                              className="as-session-revoke-btn"
+                              disabled={sessionActionId === session.id}
+                              onClick={() => void handleRevokeSession(session)}
+                              aria-label={t("common.logout")}
+                              title={t("common.logout")}
+                            >
+                              {sessionActionId === session.id ? (
+                                <span className="as-session-revoke-spinner" aria-hidden />
+                              ) : (
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                                  <polyline points="3 6 5 6 21 6" />
+                                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                  <line x1="10" y1="11" x2="10" y2="17" />
+                                  <line x1="14" y1="11" x2="14" y2="17" />
+                                </svg>
+                              )}
+                            </button>
+                          ) : null}
+                        </div>
+                        {userAgent ? (
+                          <p className="as-session-user-agent" title={userAgent}>
+                            {userAgent}
+                          </p>
+                        ) : null}
                         <p className="as-session-meta">
-                          {t("session.createdAt", {
-                            time: formatSessionRelativeTime(session.createdAt),
-                          })}
+                          {t("session.lastActivity", { time: lastActivity })}
                         </p>
                       </div>
-                      <div className="as-session-actions">
-                        <button
-                          type="button"
-                          className="as-btn-danger-text as-session-logout-btn"
-                          disabled={sessionActionId === session.id}
-                          onClick={() => void handleRevokeSession(session)}
-                        >
-                          {sessionActionId === session.id ? t("common.loggingOut") : t("common.logout")}
-                        </button>
-                      </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
 
@@ -1388,8 +1403,6 @@ export function AccountSettingsModal({
           )}
 
           {section === "jezyk" && <LanguageSettingsPanel />}
-
-          {section === "boty" && <BotsPanel />}
 
           {section === "glos" && <VoiceSettingsPanel />}
 

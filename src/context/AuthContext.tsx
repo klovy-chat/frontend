@@ -10,6 +10,7 @@ import {
 import * as authApi from "../api/auth";
 import { isTwoFactorLoginResponse } from "../api/auth";
 import { ApiError, clearCsrfToken } from "../api/client";
+import { clearAutoIdleBrbFlag } from "../hooks/useIdleAvailability";
 import { restoreSession } from "../utils/user/sessionRestore";
 import type { User } from "../types";
 
@@ -128,6 +129,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!(err instanceof ApiError) || err.status !== 401) throw err;
     } finally {
       clearCsrfToken();
+      clearAutoIdleBrbFlag();
       setUser(null);
     }
   }, []);
