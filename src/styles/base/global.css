@@ -32,6 +32,7 @@
   --list-width: 300px;
   --detail-width: 300px;
   --settings-nav-width: 220px;
+  --settings-content-min: 760px;
   --settings-content-width: 760px;
   --settings-modal-width: 1320px;
   --settings-modal-height: 840px;

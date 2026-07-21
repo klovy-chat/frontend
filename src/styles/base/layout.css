@@ -21,7 +21,6 @@
 
 .app-shell--settings-standalone {
   grid-template-columns: minmax(0, 1fr);
-  justify-items: start;
   background: var(--bg-settings-nav, var(--bg-shell));
 }
 
