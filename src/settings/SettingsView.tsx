@@ -1452,7 +1452,6 @@ export function SettingsView({
   return (
     <>
       <div className="settings-page-layout" style={accentStyle}>
-        <div className="settings-page-left-spacer" aria-hidden="true" />
         <div className="app-shell__settings-nav">{navPanel}</div>
         <div className="app-shell__settings-content as-content as-content--inline">
           <div className="as-content-topbar">

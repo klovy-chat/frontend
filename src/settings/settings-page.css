@@ -1,12 +1,14 @@
 .settings-page {
-  --settings-nav-width: 220px;
-  --settings-content-min: 760px;
+  --settings-content-min: 720px;
+  width: 100%;
+  height: 100%;
   background: var(--bg-settings-nav);
   animation: klovy-fade-in 0.18s ease both;
 }
 
 .settings-page-layout {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(240px, 28%) minmax(0, 1fr);
   width: 100%;
   height: 100%;
   min-height: 0;
@@ -14,26 +16,17 @@
   animation: klovy-slide-in 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.settings-page-left-spacer {
-  flex: 0 0 auto;
-  width: max(
-    0px,
-    calc((100vw - var(--settings-nav-width) - var(--settings-content-min)) / 2)
-  );
-  min-width: 0;
-  background: var(--bg-settings-nav);
-}
-
 .settings-page .app-shell__settings-nav {
-  flex: 0 0 var(--settings-nav-width);
+  min-height: 0;
+  overflow: hidden;
   background: var(--bg-settings-nav);
-  border-right: 1px solid var(--border-light);
+  border-right: none;
 }
 
 .settings-page .app-shell__settings-content,
 .settings-page .as-content--inline {
-  flex: 1 1 auto;
-  min-width: min(var(--settings-content-min), calc(100vw - var(--settings-nav-width)));
+  min-width: 0;
+  min-height: 0;
   background: var(--bg-settings-surface);
 }
 
@@ -43,33 +36,41 @@
 
 .settings-page .as-nav--inline {
   background: var(--bg-settings-nav);
-  padding: 22px 10px 16px;
+  padding: 28px 12px 20px 20px;
   gap: 0;
   border-right: none;
+  align-items: stretch;
 }
 
 .settings-page .as-nav-title {
-  font-size: 1.1rem;
-  margin: 0 0 14px;
-  padding: 0 8px;
+  font-size: 1rem;
+  margin: 0 0 18px;
+  padding: 0 4px;
+  text-align: left;
+  color: var(--text-muted);
+  font-weight: 500;
+  letter-spacing: 0.02em;
 }
 
 .settings-page .as-nav-label {
-  padding: 0 8px 3px;
+  padding: 0 4px 4px;
   font-size: 9px;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.11em;
+  text-align: right;
 }
 
 .settings-page .as-nav-label--spaced {
-  margin-top: 8px;
+  margin-top: 10px;
 }
 
 .settings-page .as-nav-item {
-  padding: 6px 10px;
+  padding: 7px 10px;
   border-radius: 6px;
   font-size: 13px;
-  gap: 0.5rem;
+  gap: 0.55rem;
   margin-bottom: 1px;
+  justify-content: flex-end;
+  text-align: right;
 }
 
 .settings-page .as-nav-item:hover {
@@ -88,27 +89,36 @@
   opacity: 1;
 }
 
+.settings-page .as-nav-spacer {
+  flex: 1;
+  min-height: 12px;
+}
+
+.settings-page .as-nav-item.as-nav-danger {
+  justify-content: flex-end;
+}
+
 .settings-page .as-content-inner {
   max-width: var(--settings-content-min);
-  padding: 24px 28px 40px;
+  padding: 28px 32px 48px;
 }
 
 .settings-page .as-section-title {
-  font-size: 1.5rem;
+  font-size: 1.45rem;
   margin-bottom: 2px;
 }
 
 .settings-page .as-section-subtitle {
-  margin: 0 0 14px;
+  margin: 0 0 16px;
   font-size: 12px;
 }
 
 .settings-page .as-account-hero {
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   padding: 14px 16px;
   border-radius: 10px;
   background: var(--bg-settings-card);
-  border-color: var(--border-light);
+  border-color: transparent;
 }
 
 .settings-page .as-card,
@@ -118,12 +128,11 @@
   padding: 14px 16px;
   border-radius: 10px;
   background: var(--bg-settings-card);
-  border-color: var(--border-light);
+  border-color: transparent;
 }
 
 .settings-page .as-setting-card:hover {
   background: var(--bg-settings-card-hover);
-  border-color: var(--border);
 }
 
 .settings-page .as-action-row {
@@ -132,7 +141,7 @@
   padding: 13px 16px;
   border-radius: 10px;
   background: var(--bg-settings-card);
-  border-color: var(--border-light);
+  border-color: transparent;
 }
 
 .settings-page .as-action-row:hover:not(:disabled) {
@@ -140,9 +149,9 @@
 }
 
 .settings-page .as-group-label {
-  margin: 14px 0 4px;
+  margin: 16px 0 4px;
   font-size: 9px;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.11em;
   color: var(--text-dim);
 }
 
@@ -165,18 +174,18 @@
 
 .settings-page .as-deletion-pending-banner,
 .settings-page .as-info-banner {
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   border-radius: 10px;
 }
 
 .settings-page .as-content-topbar {
-  right: 20px;
+  right: 24px;
   top: 24px;
 }
 
 .settings-page .as-close--inline {
   background: var(--bg-settings-card);
-  border-color: var(--border-light);
+  border-color: transparent;
 }
 
 .settings-page .as-close--inline:hover {
@@ -235,7 +244,7 @@
   padding: 12px 14px;
   border-radius: 10px;
   background: var(--bg-settings-card);
-  border-color: var(--border-light);
+  border-color: transparent;
 }
 
 .settings-page .as-sessions-list {
