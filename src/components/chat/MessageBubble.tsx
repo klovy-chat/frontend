@@ -5,6 +5,7 @@ import { ReactionPicker } from "./pickers/ReactionPicker";
 import { QuotedMessageBlock } from "./QuotedMessageBlock";
 import { ReadReceipt } from "./ReadReceipt";
 import { formatTime, getUserId, userLabel } from "../../utils/user/format";
+import { avatarColor } from "../../utils/media/avatar";
 import { renderFormattedText } from "../../utils/chat/messageFormat";
 import { getReactionEntries, hasUserReacted } from "../../utils/chat/reactions";
 import { MediaImage } from "../common/MediaImage";
@@ -23,6 +24,8 @@ import "../../styles/chat/messagebubble.css";
 interface MessageBubbleProps {
   message: Message;
   currentUserId: string;
+  isChannel?: boolean;
+  isGrouped?: boolean;
   highlighted?: boolean;
   canReact?: boolean;
   onReact?: (messageId: string, emoji: string) => void;
@@ -57,6 +60,8 @@ function formatCallDuration(totalSecs: number): string {
 export function MessageBubble({
   message,
   currentUserId,
+  isChannel = false,
+  isGrouped = false,
   highlighted = false,
   canReact = false,
   onReact,
@@ -97,7 +102,15 @@ export function MessageBubble({
   const isSticker = message.messageType === "STICKER";
   const isFile = message.messageType && message.messageType !== "TEXT";
   const senderName = userLabel(sender);
-  const showSenderName = !isOwn && senderName !== t("format.userLabel");
+  const senderColor = avatarColor(
+    sender.color,
+    sender.username ?? sender.displayName ?? senderId,
+  );
+  const showSenderName =
+    isChannel && !isGrouped && senderName !== t("format.userLabel");
+  const showAvatar = !isGrouped && (!isOwn || isChannel);
+  const showHeader = !isGrouped && isChannel;
+  const showCompactTime = isGrouped || !isChannel;
   const canPinAction = canPin && (onPin || onUnpin);
   const hasActions = (isOwn && (onEdit || onDelete)) || canPinAction;
   const canReplyAction = canReply && Boolean(onReply);
@@ -229,164 +242,205 @@ export function MessageBubble({
 
   return (
     <div
-      className={`message-row${isOwn ? " own" : " other"}${highlighted ? " message-row--highlight" : ""}`}
+      className={[
+        "message-row",
+        isOwn ? "own" : "other",
+        isGrouped ? "message-row--grouped" : "message-row--start",
+        isChannel ? "message-row--channel" : "message-row--dm",
+        highlighted ? "message-row--highlight" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
       data-message-id={message._id}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => {
         setHovered(false);
       }}
     >
-      {!isOwn && (
-        <Avatar
-          displayName={sender.displayName}
-          username={sender.username}
-          image={sender.image}
-          color={sender.color}
-          size={32}
-        />
-      )}
+      <div className="message-row__avatar-col">
+        {showAvatar ? (
+          <Avatar
+            displayName={sender.displayName}
+            username={sender.username}
+            image={sender.image}
+            color={sender.color}
+            size={40}
+          />
+        ) : (
+          <span className="message-row__avatar-spacer" aria-hidden />
+        )}
+      </div>
 
-      <div className="message-bubble-wrap">
-        {showSenderName && (
-          <span className="message-sender-name">
-            {senderName}
+      <div className="message-row__body">
+        {showCompactTime && (
+          <span className="message-time message-time--compact">
+            {formatTime(message.timestamp)}
           </span>
         )}
 
-        <div className="message-bubble-row">
-          {showToolbar && (
-            <div
-              className={`message-toolbar${isOwn ? " message-toolbar--own" : ""}`}
-            >
-              {canReact && onReact && (
-                <div className="message-react-wrap">
-                  <button
-                    ref={reactButtonRef}
-                    type="button"
-                    className={`message-react-btn${hovered || reactionPickerOpen ? " message-react-btn--visible" : ""}${reactionPickerOpen ? " message-react-btn--active" : ""}`}
-                    onClick={() => {
-                      setMenuOpen(false);
-                      setReactionPickerOpen((value) => !value);
-                    }}
-                    title={t("messages.actions.addReaction")}
-                    aria-label={t("messages.actions.addReaction")}
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="10" />
-                      <path d="M8 14s1.5 2 4 2 4-2 4-2" />
-                      <line x1="9" y1="9" x2="9.01" y2="9" />
-                      <line x1="15" y1="9" x2="15.01" y2="9" />
-                    </svg>
-                  </button>
+        {showHeader && (
+          <div className="message-row__header">
+            {showSenderName && (
+              <span
+                className="message-sender-name"
+                style={{ color: senderColor }}
+              >
+                {senderName}
+              </span>
+            )}
+            <span className="message-time message-time--header">
+              {formatTime(message.timestamp)}
+            </span>
+            {message.edited && (
+              <span className="message-edited">
+                ({t("chat.bubble.edited")})
+              </span>
+            )}
+            {isOwn && showReadReceipt && (
+              <ReadReceipt read={message.read} />
+            )}
+          </div>
+        )}
 
-                  {reactionPickerOpen && (
-                    <ReactionPicker
-                      onSelect={handleReactionSelect}
-                      onClose={() => setReactionPickerOpen(false)}
-                      style={reactionPickerStyles}
-                    />
-                  )}
-                </div>
-              )}
-
-              {showMenu && (
-                <div
-                  ref={menuWrapRef}
-                  className="message-dots-wrap"
+        {showToolbar && (
+          <div className="message-toolbar">
+            {canReact && onReact && (
+              <div className="message-react-wrap">
+                <button
+                  ref={reactButtonRef}
+                  type="button"
+                  className={`message-react-btn${hovered || reactionPickerOpen ? " message-react-btn--visible" : ""}${reactionPickerOpen ? " message-react-btn--active" : ""}`}
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setReactionPickerOpen((value) => !value);
+                  }}
+                  title={t("messages.actions.addReaction")}
+                  aria-label={t("messages.actions.addReaction")}
                 >
-                  <button
-                    ref={dotsButtonRef}
-                    type="button"
-                    className={`message-dots-btn${hovered || menuOpen ? " message-dots-btn--visible" : ""}`}
-                    onClick={() => {
-                      setReactionPickerOpen(false);
-                      setMenuOpen((value) => !value);
-                    }}
-                    title={t("chat.bubble.options")}
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+                    <line x1="9" y1="9" x2="9.01" y2="9" />
+                    <line x1="15" y1="9" x2="15.01" y2="9" />
+                  </svg>
+                </button>
+
+                {reactionPickerOpen && (
+                  <ReactionPicker
+                    onSelect={handleReactionSelect}
+                    onClose={() => setReactionPickerOpen(false)}
+                    style={reactionPickerStyles}
+                  />
+                )}
+              </div>
+            )}
+
+            {showMenu && (
+              <div
+                ref={menuWrapRef}
+                className="message-dots-wrap"
+              >
+                <button
+                  ref={dotsButtonRef}
+                  type="button"
+                  className={`message-dots-btn${hovered || menuOpen ? " message-dots-btn--visible" : ""}`}
+                  onClick={() => {
+                    setReactionPickerOpen(false);
+                    setMenuOpen((value) => !value);
+                  }}
+                  title={t("chat.bubble.options")}
+                >
+                  <span />
+                  <span />
+                  <span />
+                </button>
+
+                {menuOpen && (
+                  <div
+                    ref={menuRef}
+                    className={`message-dropdown message-dropdown--${dropdownPlacement}`}
+                    style={dropdownStyles}
                   >
-                    <span />
-                    <span />
-                    <span />
-                  </button>
+                    {canReplyAction && (
+                      <button
+                        type="button"
+                        className="message-dropdown-item"
+                        onClick={() => {
+                          onReply?.(message);
+                          setMenuOpen(false);
+                        }}
+                      >
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="9 17 4 12 9 7" />
+                          <path d="M20 18v-2a4 4 0 0 0-4-4H4" />
+                        </svg>
+                        {t("messages.actions.reply")}
+                      </button>
+                    )}
+                    {isOwn && onEdit && !isVoice && (
+                      <button
+                        type="button"
+                        className="message-dropdown-item"
+                        onClick={() => { onEdit(message); setMenuOpen(false); }}
+                      >
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                          <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                        </svg>
+                        {t("messages.actions.edit")}
+                      </button>
+                    )}
+                    {isOwn && onDelete && (
+                      <button
+                        type="button"
+                        className="message-dropdown-item message-dropdown-item--danger"
+                        onClick={() => { onDelete(message); setMenuOpen(false); }}
+                      >
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="3 6 5 6 21 6" />
+                          <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+                          <path d="M10 11v6M14 11v6" />
+                          <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
+                        </svg>
+                        {t("messages.actions.delete")}
+                      </button>
+                    )}
+                    {canPinAction && (
+                      <button
+                        type="button"
+                        className="message-dropdown-item"
+                        onClick={() => {
+                          if (message.pinned) {
+                            onUnpin?.(message);
+                          } else {
+                            onPin?.(message);
+                          }
+                          setMenuOpen(false);
+                        }}
+                      >
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <line x1="12" y1="17" x2="12" y2="22" />
+                          <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V17z" />
+                        </svg>
+                        {message.pinned ? t("messages.actions.unpin") : t("messages.actions.pin")}
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
-                  {menuOpen && (
-                    <div
-                      ref={menuRef}
-                      className={`message-dropdown message-dropdown--${dropdownPlacement}`}
-                      style={dropdownStyles}
-                    >
-                      {canReplyAction && (
-                        <button
-                          type="button"
-                          className="message-dropdown-item"
-                          onClick={() => {
-                            onReply?.(message);
-                            setMenuOpen(false);
-                          }}
-                        >
-                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="9 17 4 12 9 7" />
-                            <path d="M20 18v-2a4 4 0 0 0-4-4H4" />
-                          </svg>
-                          {t("messages.actions.reply")}
-                        </button>
-                      )}
-                      {isOwn && onEdit && !isVoice && (
-                        <button
-                          type="button"
-                          className="message-dropdown-item"
-                          onClick={() => { onEdit(message); setMenuOpen(false); }}
-                        >
-                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
-                            <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
-                          </svg>
-                          {t("messages.actions.edit")}
-                        </button>
-                      )}
-                      {isOwn && onDelete && (
-                        <button
-                          type="button"
-                          className="message-dropdown-item message-dropdown-item--danger"
-                          onClick={() => { onDelete(message); setMenuOpen(false); }}
-                        >
-                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="3 6 5 6 21 6" />
-                            <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
-                            <path d="M10 11v6M14 11v6" />
-                            <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
-                          </svg>
-                          {t("messages.actions.delete")}
-                        </button>
-                      )}
-                      {canPinAction && (
-                        <button
-                          type="button"
-                          className="message-dropdown-item"
-                          onClick={() => {
-                            if (message.pinned) {
-                              onUnpin?.(message);
-                            } else {
-                              onPin?.(message);
-                            }
-                            setMenuOpen(false);
-                          }}
-                        >
-                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="12" y1="17" x2="12" y2="22" />
-                            <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V17z" />
-                          </svg>
-                          {message.pinned ? t("messages.actions.unpin") : t("messages.actions.pin")}
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-
-          <div className={`message-bubble${isOwn ? " own" : ""}${mentionsMe ? " message-bubble--mention" : ""}${isSticker ? " message-bubble--sticker" : ""}`}>
+        <div
+          className={[
+            "message-content",
+            mentionsMe ? "message-content--mention" : "",
+            isSticker ? "message-content--sticker" : "",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+        >
             <QuotedMessageBlock
               quotedMessage={message.quotedMessage}
               isOwn={isOwn}
@@ -484,16 +538,15 @@ export function MessageBubble({
               </>
             )}
 
-            <div className="message-meta">
-              <span className="message-time">{formatTime(message.timestamp)}</span>
-              {message.edited && <span className="message-edited">· {t("chat.bubble.edited")}</span>}
-              {isOwn && showReadReceipt && <ReadReceipt read={message.read} />}
+          {!showHeader && isOwn && showReadReceipt && (
+            <div className="message-meta message-meta--inline">
+              <ReadReceipt read={message.read} />
             </div>
-          </div>
+          )}
         </div>
 
         {reactionEntries.length > 0 && (
-          <div className={`message-reactions${isOwn ? " message-reactions--own" : ""}`}>
+          <div className="message-reactions">
             {reactionEntries.map(([emoji, users]) => {
               const isActive = hasUserReacted(message.reactions, emoji, currentUserId);
               return (

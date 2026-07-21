@@ -1,18 +1,41 @@
 /* ============================================================
-   MESSAGE BUBBLE — messagebubble.css
+   MESSAGE — Discord-style flat layout (messagebubble.css)
    ============================================================ */
 
 .message-row {
   display: flex;
-  align-items: flex-end;
-  gap: 8px;
-  padding: 2px 0;
+  align-items: flex-start;
+  gap: 0;
+  padding: 2px 56px 2px 0;
+  margin: 0 -8px;
   flex-shrink: 0;
+  position: relative;
+  border-radius: 4px;
+  transition: background 0.1s ease;
+}
+
+.message-row--start {
+  margin-top: 6px;
+  padding-top: 4px;
+}
+
+.message-row--grouped {
+  margin-top: 0;
+  padding-top: 1px;
+}
+
+.message-row:hover {
+  background: rgba(255, 255, 255, 0.028);
 }
 
 .message-row--system {
   justify-content: center;
   padding: 6px 0;
+  margin: 0;
+}
+
+.message-row--system:hover {
+  background: transparent;
 }
 
 .message-call-log {
@@ -33,42 +56,51 @@
   flex-shrink: 0;
 }
 
-.message-row.own {
-  flex-direction: row-reverse;
-  justify-content: flex-start;
-}
-
-.message-row.other {
-  justify-content: flex-start;
-}
-
-/* ── Wrap ── */
-.message-bubble-wrap {
+/* ── Avatar column ── */
+.message-row__avatar-col {
+  width: 56px;
+  flex-shrink: 0;
   display: flex;
-  flex-direction: column;
-  gap: 3px;
-  max-width: min(72%, 520px);
+  justify-content: center;
+  padding-top: 2px;
+}
+
+.message-row--grouped .message-row__avatar-col {
+  padding-top: 0;
+}
+
+.message-row__avatar-spacer {
+  width: 40px;
+  height: 1px;
+  flex-shrink: 0;
+}
+
+/* ── Body ── */
+.message-row__body {
+  flex: 1;
   min-width: 0;
+  position: relative;
+  padding-right: 4px;
 }
 
-.message-row.own .message-bubble-wrap {
-  align-items: flex-end;
-}
-
-.message-row.other .message-bubble-wrap {
-  align-items: flex-start;
+.message-row__header {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  line-height: 1.375;
+  margin-bottom: 2px;
+  min-height: 1.375rem;
 }
 
 /* ── Sender name ── */
 .message-sender-name {
-  font-size: 11px;
+  font-size: 15px;
   font-weight: 600;
-  color: #6b6b78;
-  letter-spacing: 0.02em;
-  padding: 0 4px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+  letter-spacing: 0;
+  padding: 0;
+  display: inline;
+  cursor: var(--cursor-auto);
 }
 
 /* ── BOT tag ── */
@@ -86,24 +118,56 @@
   text-transform: uppercase;
 }
 
-/* ── Bubble row ── */
-.message-bubble-row {
+/* ── Flat content (no bubbles) ── */
+.message-content {
   display: flex;
-  align-items: center;
-  gap: 5px;
+  flex-direction: column;
+  gap: 4px;
   max-width: 100%;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.375;
 }
 
-/* ── Toolbar (react + menu) ── */
+.message-content--mention {
+  position: relative;
+  padding-left: 10px;
+  margin-left: -10px;
+  border-left: 3px solid #facc15;
+  background: rgba(250, 204, 21, 0.06);
+  border-radius: 0 4px 4px 0;
+}
+
+.message-content--sticker {
+  padding: 0;
+}
+
+/* ── Toolbar (hover action bar) ── */
 .message-toolbar {
+  position: absolute;
+  top: -14px;
+  right: 4px;
+  z-index: 10;
   display: flex;
   align-items: center;
-  gap: 2px;
-  order: -1;
+  gap: 1px;
+  padding: 2px;
+  border-radius: 8px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
 }
 
-.message-toolbar:not(.message-toolbar--own) {
-  order: 1;
+.message-row:hover .message-toolbar,
+.message-toolbar:has(.message-react-btn--active),
+.message-toolbar:has(.message-dots-btn--visible) {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .message-react-wrap {
@@ -147,12 +211,8 @@
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
-  margin-top: 2px;
-  padding: 0 2px;
-}
-
-.message-reactions--own {
-  justify-content: flex-end;
+  margin-top: 4px;
+  padding: 0;
 }
 
 .message-reaction-chip {
@@ -217,8 +277,8 @@
 }
 
 .message-quote--own {
-  border-left-color: rgba(17, 17, 19, 0.45);
-  background: rgba(17, 17, 19, 0.12);
+  border-left-color: rgba(124, 92, 255, 0.55);
+  background: rgba(124, 92, 255, 0.08);
 }
 
 .message-quote--clickable {
@@ -232,7 +292,7 @@
 }
 
 .message-quote--own.message-quote--clickable:hover {
-  background: rgba(17, 17, 19, 0.18);
+  background: rgba(124, 92, 255, 0.14);
 }
 
 .message-quote-author {
@@ -243,7 +303,7 @@
 }
 
 .message-quote--own .message-quote-author {
-  color: rgba(17, 17, 19, 0.72);
+  color: #c4b5fd;
 }
 
 .message-quote-text {
@@ -257,7 +317,7 @@
 }
 
 .message-quote--own .message-quote-text {
-  color: rgba(17, 17, 19, 0.68);
+  color: rgba(236, 236, 240, 0.72);
 }
 
 /* ── Read receipts (DM) ── */
@@ -266,7 +326,7 @@
   align-items: center;
   justify-content: center;
   margin-left: 2px;
-  color: rgba(17, 17, 19, 0.42);
+  color: var(--text-dim);
   line-height: 1;
 }
 
@@ -274,69 +334,11 @@
   color: #93c5fd;
 }
 
-.message-row.other .message-read-receipt {
-  display: none;
-}
-
-/* ── Incoming ── */
-.message-row.other .message-bubble {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 18px 18px 18px 6px;
-  padding: 11px 14px 9px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  word-break: break-word;
-  overflow-wrap: anywhere;
-  color: var(--text);
-  box-shadow: none;
-}
-
-.message-row.other .message-text {
-  color: var(--text);
-}
-
-.message-row.other .message-time {
-  color: var(--text-muted);
-}
-
-.message-row.other .message-edited {
-  color: var(--text-dim);
-}
-
-/* ── Outgoing (purple) ── */
-.message-bubble.own {
-  background: var(--accent);
-  border: none;
-  border-radius: 18px 18px 6px 18px;
-  padding: 11px 14px 9px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  word-break: break-word;
-  overflow-wrap: anywhere;
-  color: #fff;
-  box-shadow: 0 2px 12px rgba(124, 92, 255, 0.22);
-}
-
-.message-bubble.own .message-text {
-  color: #fff;
-}
-
-.message-bubble.own .message-time {
-  color: rgba(255, 255, 255, 0.65);
-}
-
-.message-bubble.own .message-edited {
-  color: rgba(255, 255, 255, 0.5);
-}
-
 /* ── Text ── */
 .message-text {
   margin: 0;
-  font-size: 14px;
-  line-height: 1.55;
+  font-size: inherit;
+  line-height: inherit;
 }
 
 .message-text strong {
@@ -369,24 +371,6 @@
   background: rgba(250, 204, 21, 0.18);
 }
 
-.message-bubble.own .msg-mention {
-  color: #2e1065;
-  background: rgba(17, 17, 19, 0.16);
-}
-
-.message-bubble.own .msg-mention--self {
-  color: #3a2a05;
-  background: rgba(250, 204, 21, 0.42);
-}
-
-/* ── Highlight: wiadomość, która wzmiankuje Ciebie ── */
-.message-bubble--mention {
-  position: relative;
-  background: rgba(250, 204, 21, 0.08) !important;
-  border-color: rgba(250, 204, 21, 0.45) !important;
-  box-shadow: inset 3px 0 0 #facc15, 0 1px 4px rgba(0, 0, 0, 0.18);
-}
-
 /* ── Inline code ── */
 .msg-inline-code {
   font-family: 'SFMono-Regular', 'Consolas', 'Liberation Mono', Menlo, monospace;
@@ -399,12 +383,6 @@
   word-break: break-word;
 }
 
-.message-bubble.own .msg-inline-code {
-  background: rgba(17, 17, 19, 0.18);
-  border-color: rgba(17, 17, 19, 0.18);
-  color: #1a0e35;
-}
-
 /* ── Link ── */
 .msg-link {
   color: #a78bfa;
@@ -415,15 +393,6 @@
 
 .msg-link:hover {
   color: #c4b5fd;
-}
-
-.message-bubble.own .msg-link {
-  color: #2e1065;
-  text-decoration-color: rgba(46, 16, 101, 0.5);
-}
-
-.message-bubble.own .msg-link:hover {
-  color: #1a0e35;
 }
 
 /* ── Code block ── */
@@ -445,12 +414,6 @@
   word-break: break-word;
 }
 
-.message-bubble.own .msg-codeblock {
-  background: rgba(17, 17, 19, 0.16);
-  border-color: rgba(17, 17, 19, 0.16);
-  color: #1a0e35;
-}
-
 /* ── File link ── */
 .message-file-link {
   display: inline-flex;
@@ -458,16 +421,9 @@
   gap: 6px;
   font-size: 13px;
   font-weight: 500;
+  color: #c4b5fd;
   text-decoration: none;
   transition: color 0.15s;
-}
-
-.message-row.other .message-file-link {
-  color: #c4b5fd;
-}
-
-.message-bubble.own .message-file-link {
-  color: #2e1065;
 }
 
 .message-file-link:hover {
@@ -475,21 +431,51 @@
   opacity: 0.9;
 }
 
-/* ── Meta ── */
+/* ── Meta / time ── */
 .message-meta {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 5px;
 }
 
+.message-meta--inline {
+  margin-top: 2px;
+}
+
 .message-time {
-  font-size: 10.5px;
+  font-size: 11px;
   white-space: nowrap;
+  color: var(--text-dim);
+  font-weight: 400;
+}
+
+.message-time--header {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.message-time--compact {
+  position: absolute;
+  left: -56px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  text-align: right;
+  font-size: 10px;
+  color: var(--text-dim);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.1s ease;
+}
+
+.message-row:hover .message-time--compact {
+  opacity: 1;
 }
 
 .message-edited {
-  font-size: 10.5px;
-  font-style: italic;
+  font-size: 10px;
+  font-style: normal;
+  color: var(--text-dim);
 }
 
 /* ── Dots trigger ── */
@@ -644,13 +630,11 @@
 }
 
 /* ── Sticker messages (bare, no bubble chrome) ── */
-.message-bubble--sticker,
-.message-bubble--sticker.own,
-.message-row.other .message-bubble--sticker {
+.message-content--sticker {
   background: none;
   border: none;
   box-shadow: none;
-  padding: 2px 0 0;
+  padding: 0;
 }
 
 .message-sticker {
@@ -665,11 +649,6 @@
 
 .message-sticker:hover {
   transform: scale(1.06);
-}
-
-.message-bubble--sticker .message-time,
-.message-bubble--sticker.own .message-time {
-  color: #9a9aa8;
 }
 
 /* ── Voice message player ── */

@@ -3,10 +3,12 @@ import { useTranslation } from "react-i18next";
 import { MessageBubble } from "./MessageBubble";
 import type { Message } from "../../types";
 import { formatMessageDateSeparator, isSameLocalDay } from "../../utils/user/format";
+import { isMessageGrouped } from "../../utils/chat/messageGrouping";
 
 interface MessageListProps {
   messages: Message[];
   currentUserId: string;
+  isChannel?: boolean;
   typingUserId?: string | null;
   highlightMessageId?: string | null;
   hasMore?: boolean;
@@ -36,6 +38,7 @@ function isNearBottom(el: HTMLElement): boolean {
 export function MessageList({
   messages,
   currentUserId,
+  isChannel = false,
   typingUserId,
   highlightMessageId,
   hasMore = false,
@@ -144,6 +147,7 @@ export function MessageList({
           const prev = messages[index - 1];
           const showDateSeparator =
             index === 0 || !isSameLocalDay(msg.timestamp, prev.timestamp);
+          const grouped = !showDateSeparator && isMessageGrouped(prev, msg);
 
           return (
             <Fragment key={msg._id}>
@@ -155,6 +159,8 @@ export function MessageList({
               <MessageBubble
                 message={msg}
                 currentUserId={currentUserId}
+                isChannel={isChannel}
+                isGrouped={grouped}
                 highlighted={highlightMessageId === msg._id}
                 canReact={canReact}
                 onReact={onReact}

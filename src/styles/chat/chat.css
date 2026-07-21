@@ -236,13 +236,22 @@
 }
 
 .message-list-date {
-  text-align: center;
+  display: flex;
+  align-items: center;
+  gap: 12px;
   font-size: 11px;
   font-weight: 600;
   color: var(--text-muted);
   padding: 16px 0 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
+}
+
+.message-list-date::before,
+.message-list-date::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
 }
 
 .chat-header__info {
@@ -289,10 +298,10 @@
   overflow-x: hidden;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
-  padding: 1rem 1.25rem;
+  padding: 0.5rem 1rem 1rem;
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
+  gap: 0;
   scrollbar-width: thin;
   scrollbar-color: rgba(124, 92, 255, 0.45) transparent;
 }
@@ -581,7 +590,8 @@
   font-size: 0.8rem;
   color: var(--text-muted);
   font-style: italic;
-  margin: 0;
+  margin: 4px 0 0;
+  padding-left: 56px;
 }
 
 .avatar {
