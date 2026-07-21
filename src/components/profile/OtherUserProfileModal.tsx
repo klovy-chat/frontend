@@ -146,8 +146,6 @@ export function OtherUserProfileModal({
 
           <ListeningActivitySection activity={displayedUser.listeningActivity} />
 
-          <ConnectedAccountsSection accounts={displayedUser.connectedAccounts} />
-
           {!isFriend ? (
             <p className="up-not-friend-hint">
               {t("modals.otherUserProfile.addFriend")}
@@ -162,6 +160,8 @@ export function OtherUserProfileModal({
               <p className="up-bio-text">{bioText}</p>
             </section>
           ) : null}
+
+          <ConnectedAccountsSection accounts={displayedUser.connectedAccounts} />
 
           <div className="up-divider" />
 

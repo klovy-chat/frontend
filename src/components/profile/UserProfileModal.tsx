@@ -124,8 +124,6 @@ export function UserProfileModal({
 
           <ListeningActivitySection activity={user.listeningActivity} />
 
-          <ConnectedAccountsSection accounts={user.connectedAccounts} />
-
           <ProfileBadgesSection badges={user.badges} />
 
           {bioText ? (
@@ -134,6 +132,8 @@ export function UserProfileModal({
               <p className="up-bio-text">{bioText}</p>
             </section>
           ) : null}
+
+          <ConnectedAccountsSection accounts={user.connectedAccounts} />
 
           <div className="up-divider" />
 

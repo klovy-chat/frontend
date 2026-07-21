@@ -417,70 +417,85 @@
   opacity: 0.95;
 }
 
+.up-listening-platform-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
 .up-connected-section {
-  margin-bottom: 18px;
+  margin: 0 0 16px;
 }
 
 .up-connected-list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin-top: 6px;
+  gap: 2px;
+  margin-top: 4px;
 }
 
 .up-connected-row {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.03);
+  gap: 8px;
+  width: fit-content;
+  max-width: 100%;
+  padding: 2px 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
   color: var(--text);
   font: inherit;
   text-align: left;
   cursor: var(--cursor-pointer);
-  transition: background 0.15s ease, border-color 0.15s ease;
+  transition: opacity 0.15s ease;
 }
 
 .up-connected-row:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: color-mix(in srgb, var(--accent) 28%, rgba(255, 255, 255, 0.08));
+  opacity: 0.82;
 }
 
-.up-connected-icon {
+.up-connected-row:hover .up-connected-name {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.up-connected-row .up-connected-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
   flex-shrink: 0;
+}
+
+.up-connected-row .up-connected-icon svg {
+  width: 10px;
+  height: 10px;
+}
+
+.up-connected-row .up-connected-icon--spotify {
+  background: #1db954;
+  color: #fff;
 }
 
 .up-connected-icon--spotify {
   background: #1db954;
   color: #fff;
-}
-
-.up-connected-copy {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.up-connected-provider {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--text);
+  border-radius: 4px;
 }
 
 .up-connected-name {
-  font-size: 0.78rem;
-  color: rgba(240, 237, 248, 0.72);
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: var(--text);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.up-connected-external {
+  flex-shrink: 0;
+  opacity: 0.55;
+  color: var(--text-muted);
 }

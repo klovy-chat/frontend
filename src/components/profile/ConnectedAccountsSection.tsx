@@ -7,13 +7,6 @@ interface ConnectedAccountsSectionProps {
   accounts: ConnectedAccount[] | null | undefined;
 }
 
-function providerLabel(provider: string, t: (key: string) => string): string {
-  if (provider === "spotify") {
-    return t("profile.connectedAccounts.providers.spotify");
-  }
-  return provider;
-}
-
 export function ConnectedAccountsSection({ accounts }: ConnectedAccountsSectionProps) {
   const { t } = useTranslation();
   if (!accounts?.length) return null;
@@ -34,12 +27,23 @@ export function ConnectedAccountsSection({ accounts }: ConnectedAccountsSectionP
             }}
           >
             <IntegrationProviderIcon provider={account.provider} />
-            <span className="up-connected-copy">
-              <span className="up-connected-provider">
-                {providerLabel(account.provider, t)}
-              </span>
-              <span className="up-connected-name">{account.accountName}</span>
-            </span>
+            <span className="up-connected-name">{account.accountName}</span>
+            <svg
+              className="up-connected-external"
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden
+            >
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+              <polyline points="15 3 21 3 21 9" />
+              <line x1="10" y1="14" x2="21" y2="3" />
+            </svg>
           </button>
         ))}
       </div>
