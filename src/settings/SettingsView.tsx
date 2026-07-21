@@ -23,6 +23,7 @@ import {
 import { ApiError } from "../api/client";
 import { BrowserSessionIcon } from "../components/account/BrowserSessionIcon";
 import { OsSessionIcon } from "../components/account/OsSessionIcon";
+import { RevokeSessionConfirmModal } from "../components/account/RevokeSessionConfirmModal";
 import { ImageCropModal } from "../components/common/ImageCropModal";
 import {
   MAX_AVATAR_SIZE_BYTES,
@@ -136,6 +137,7 @@ export function SettingsView({
   const [sessionsLoading, setSessionsLoading] = useState(false);
   const [sessionsError, setSessionsError] = useState("");
   const [sessionActionId, setSessionActionId] = useState<string | null>(null);
+  const [sessionRevokeTarget, setSessionRevokeTarget] = useState<UserSessionRow | null>(null);
   const [revokeOthersBusy, setRevokeOthersBusy] = useState(false);
 
   const formatWarningDate = useCallback(
@@ -424,11 +426,6 @@ export function SettingsView({
   const handleLogout = async () => { await logout(); requestClose(); };
 
   const handleRevokeSession = async (session: UserSessionRow) => {
-    const confirmKey = session.isCurrent
-      ? "session.revokeCurrentDeviceConfirm"
-      : "session.revokeDeviceConfirm";
-    if (!window.confirm(t(confirmKey))) return;
-
     setSessionActionId(session.id);
     setSessionsError("");
     try {
@@ -1297,7 +1294,7 @@ export function SettingsView({
                             type="button"
                             className="as-session-revoke-action"
                             disabled={sessionActionId === session.id}
-                            onClick={() => void handleRevokeSession(session)}
+                            onClick={() => setSessionRevokeTarget(session)}
                             aria-label={t("session.revokeDeviceAria")}
                           >
                             {sessionActionId === session.id ? (
@@ -1485,6 +1482,19 @@ export function SettingsView({
         onEnabled={handleTwoFactorEnabled}
       />
       {cropModal}
+      <RevokeSessionConfirmModal
+        isOpen={Boolean(sessionRevokeTarget)}
+        deviceLabel={
+          sessionRevokeTarget ? formatSessionTitle(sessionRevokeTarget) : ""
+        }
+        busy={Boolean(
+          sessionRevokeTarget && sessionActionId === sessionRevokeTarget.id,
+        )}
+        onConfirm={() => {
+          if (sessionRevokeTarget) void handleRevokeSession(sessionRevokeTarget);
+        }}
+        onClose={() => setSessionRevokeTarget(null)}
+      />
     </>
   );
 }

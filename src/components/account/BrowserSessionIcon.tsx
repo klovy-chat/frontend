@@ -1,4 +1,3 @@
-import type { CSSProperties } from "react";
 import { normalizeSessionBrowser } from "../../utils/user/sessionDisplay";
 import googleChromeIcon from "../../assets/browsers/googlechrome.svg";
 import firefoxIcon from "../../assets/browsers/firefox.svg";
@@ -94,15 +93,11 @@ function BrandBrowserIcon({ src, color }: Required<BrowserIconConfig>) {
   return (
     <span
       className="as-session-icon__brand"
-      style={
-        {
-          backgroundColor: color,
-          WebkitMaskImage: `url(${src})`,
-          maskImage: `url(${src})`,
-        } as CSSProperties
-      }
+      style={{ backgroundColor: color }}
       aria-hidden="true"
-    />
+    >
+      <img src={src} alt="" draggable={false} />
+    </span>
   );
 }
 
