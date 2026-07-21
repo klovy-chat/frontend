@@ -1,7 +1,7 @@
 .settings-page {
-  --settings-nav-width: 232px;
-  --settings-content-min: 760px;
-  --settings-column-gap: 24px;
+  --settings-nav-width: 200px;
+  --settings-content-min: 720px;
+  --settings-column-gap: 20px;
   width: 100%;
   height: 100%;
   background: var(--bg-settings-nav);
@@ -50,42 +50,38 @@
 /* --- NAV: opuszczone niżej, jak w Revolt --- */
 .settings-page .as-nav--inline {
   background: var(--bg-settings-nav);
-  padding: 56px 10px 24px 16px;
+  padding: 52px 8px 20px 14px;
   gap: 2px;
   border-right: none;
   align-items: stretch;
 }
 
 .settings-page .as-nav-title {
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  margin: 0 0 18px;
+  font-size: 0.95rem;
+  margin: 0 0 16px;
   padding: 0 6px 0 2px;
   text-align: left;
   color: var(--text-muted);
+  font-weight: 500;
 }
 
 .settings-page .as-nav-label {
-  padding: 0 6px 6px 2px;
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  padding: 0 6px 4px 2px;
+  font-size: 9px;
+  letter-spacing: 0.11em;
   text-align: right;
 }
 
 .settings-page .as-nav-label--spaced {
-  margin-top: 16px;
+  margin-top: 10px;
 }
 
 .settings-page .as-nav-item {
-  padding: 9px 10px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1.3;
-  gap: 0.55rem;
-  margin-bottom: 1px;
+  padding: 7px 8px 7px 8px;
+  border-radius: 6px;
+  font-size: 13px;
+  gap: 0.5rem;
+  margin-bottom: 2px;
   justify-content: flex-end;
   text-align: right;
 }
@@ -108,36 +104,32 @@
 
 .settings-page .as-nav-spacer {
   flex: 1;
-  min-height: 16px;
+  min-height: 12px;
 }
 
 .settings-page .as-nav-item.as-nav-danger {
   justify-content: flex-end;
 }
 
-/* --- CONTENT --- */
 .settings-page .as-content-inner {
   max-width: var(--settings-content-min);
   margin: 0;
-  padding: 40px 40px 56px 32px;
+  padding: 28px 32px 48px 28px;
 }
 
 .settings-page .as-section-title {
-  font-size: 1.7rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  margin-bottom: 4px;
+  font-size: 1.45rem;
+  margin-bottom: 2px;
 }
 
 .settings-page .as-section-subtitle {
-  margin: 0 0 20px;
-  font-size: 13px;
-  font-weight: 400;
+  margin: 0 0 16px;
+  font-size: 12px;
 }
 
 .settings-page .as-account-hero {
-  margin-bottom: 8px;
-  padding: 16px 18px;
+  margin-bottom: 6px;
+  padding: 14px 16px;
   border-radius: 10px;
   background: var(--bg-settings-card);
   border-color: transparent;
@@ -146,8 +138,8 @@
 .settings-page .as-card,
 .settings-page .as-setting-card,
 .settings-page .as-data-card {
-  margin-bottom: 6px;
-  padding: 16px 18px;
+  margin-bottom: 4px;
+  padding: 14px 16px;
   border-radius: 10px;
   background: var(--bg-settings-card);
   border-color: transparent;
@@ -158,9 +150,9 @@
 }
 
 .settings-page .as-action-row {
-  margin-top: 6px;
+  margin-top: 4px;
   margin-bottom: 0;
-  padding: 15px 18px;
+  padding: 13px 16px;
   border-radius: 10px;
   background: var(--bg-settings-card);
   border-color: transparent;
@@ -171,43 +163,38 @@
 }
 
 .settings-page .as-group-label {
-  margin: 20px 0 6px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  margin: 16px 0 4px;
+  font-size: 9px;
+  letter-spacing: 0.11em;
   color: var(--text-dim);
 }
 
 .settings-page .as-card-label {
-  margin-bottom: 5px;
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+  font-size: 9px;
   color: var(--text-dim);
   opacity: 1;
 }
 
 .settings-page .as-hint {
-  margin-bottom: 0.9rem;
-  font-size: 13px;
-  font-weight: 400;
-  line-height: 1.45;
+  margin-bottom: 0.75rem;
+  font-size: 12px;
 }
 
 .settings-page .as-form--inset {
-  margin-top: 12px;
-  padding-top: 12px;
+  margin-top: 10px;
+  padding-top: 10px;
 }
 
 .settings-page .as-deletion-pending-banner,
 .settings-page .as-info-banner {
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   border-radius: 10px;
 }
 
 .settings-page .as-content-topbar {
-  right: 28px;
-  top: 28px;
+  right: 24px;
+  top: 24px;
 }
 
 .settings-page .as-close--inline {
@@ -259,25 +246,25 @@
 }
 
 .settings-page .as-banner-block {
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .settings-page .as-profile-header-row {
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .settings-page .as-session-row {
-  margin-bottom: 6px;
-  padding: 14px 16px;
+  margin-bottom: 4px;
+  padding: 12px 14px;
   border-radius: 10px;
   background: var(--bg-settings-card);
   border-color: transparent;
 }
 
 .settings-page .as-sessions-list {
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .settings-page .as-voice-banner {
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
