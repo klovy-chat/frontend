@@ -755,6 +755,8 @@
   padding: 16px 18px;
   transition: 0.18s;
   animation: adm-fade-in 0.35s ease both;
+  position: relative;
+  overflow: visible;
 }
 
 .adm-card:hover {
@@ -942,16 +944,14 @@
 }
 
 .adm-action-menu-dropdown {
-  position: absolute;
-  left: 0;
-  top: calc(100% + 6px);
-  z-index: 30;
   min-width: 210px;
   padding: 6px;
   border-radius: 12px;
   border: 1px solid var(--border);
   background: var(--bg-panel);
   box-shadow: var(--shadow);
+  box-sizing: border-box;
+  font-family: var(--font-sans);
 }
 
 .adm-action-menu-item {
