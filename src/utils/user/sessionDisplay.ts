@@ -52,6 +52,8 @@ export function formatSessionTitle(session: {
   }
   return session.label?.trim() || browser || os || i18n.t("session.unknownOs");
 }
+
+export function formatSessionAbsoluteTime(value: string | null): string {
   if (!value) return i18n.t("common.emDash");
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return i18n.t("common.emDash");
