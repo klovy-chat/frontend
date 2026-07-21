@@ -1,6 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { useEffect } from "react";
-import { AuthProvider, useAuth } from "./context/AuthContext";
+import { useAuth } from "./context/AuthContext";
 import { WebSocketProvider } from "./context/WebSocketContext";
 import { PresenceProvider } from "./context/PresenceContext";
 import { CallProvider } from "./context/CallContext";
@@ -14,7 +14,6 @@ import { InvitePage } from "./pages/InvitePage";
 import { SettingsPage } from "./settings/SettingsPage";
 import { isPendingWhitelist } from "./utils/auth/whitelist";
 import { ToastProvider } from "./context/ToastContext";
-import { LocaleProvider } from "./context/LocaleContext";
 import type { User } from "./types";
 
 function postSetupPath(user: User): string {
@@ -173,12 +172,8 @@ export default function App() {
     return () => { if (unsub) unsub(); };
   }, []);
   return (
-    <AuthProvider>
-      <LocaleProvider>
-        <ToastProvider>
-          <AppRoutes />
-        </ToastProvider>
-      </LocaleProvider>
-    </AuthProvider>
+    <ToastProvider>
+      <AppRoutes />
+    </ToastProvider>
   );
 }

@@ -81,15 +81,22 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
 
 export function useLocale(): LocaleContextValue {
   const ctx = useContext(LocaleContext);
+  const { i18n } = useTranslation();
+
+  const fallbackSetLocale = useCallback(async (next: AppLocale) => {
+    const normalized = normalizeLocale(next);
+    changeAppLanguage(normalized);
+    saveStoredLocale(normalized);
+  }, []);
+
   if (!ctx) {
+    const locale = normalizeLocale(i18n.language);
     return {
-      locale: DEFAULT_LOCALE,
-      dateLocale: getFormattingLocale(DEFAULT_LOCALE),
-      setLocale: async (next: AppLocale) => {
-        changeAppLanguage(next);
-        saveStoredLocale(next);
-      },
+      locale,
+      dateLocale: getFormattingLocale(locale),
+      setLocale: fallbackSetLocale,
     };
   }
+
   return ctx;
 }

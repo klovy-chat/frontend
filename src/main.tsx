@@ -5,6 +5,8 @@ import { I18nextProvider } from "react-i18next";
 import App from "./App";
 import { ErrorBoundary } from "./components/common/ErrorBoundary";
 import { DesktopOnlyGate } from "./components/common/DesktopOnlyGate";
+import { AuthProvider } from "./context/AuthContext";
+import { LocaleProvider } from "./context/LocaleContext";
 import i18n from "./i18n/config";
 import "./styles/base/global.css";
 import "./styles/base/layout.css";
@@ -17,11 +19,15 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ErrorBoundary>
       <I18nextProvider i18n={i18n}>
-        <DesktopOnlyGate>
-          <BrowserRouter>
-            <App />
-          </BrowserRouter>
-        </DesktopOnlyGate>
+        <AuthProvider>
+          <LocaleProvider>
+            <DesktopOnlyGate>
+              <BrowserRouter>
+                <App />
+              </BrowserRouter>
+            </DesktopOnlyGate>
+          </LocaleProvider>
+        </AuthProvider>
       </I18nextProvider>
     </ErrorBoundary>
   </StrictMode>,
