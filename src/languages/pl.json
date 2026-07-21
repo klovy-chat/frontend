@@ -562,7 +562,7 @@
   "settings": {
     "title": "Ustawienia",
     "nav": {
-      "account": "Konto",
+      "account": "Ustawienia użytkownika",
       "myAccount": "Moje konto",
       "profile": "Profil",
       "sessions": "Urządzenia",
@@ -570,7 +570,7 @@
       "bots": "Boty",
       "integrations": "Integracje",
       "warnings": "Ostrzeżenia",
-      "app": "Aplikacja",
+      "app": "Ustawienia klienta",
       "logout": "Wyloguj się",
       "sectionsAria": "Sekcje ustawień"
     },
@@ -1064,7 +1064,7 @@
     "accountSettings": {
       "title": "Ustawienia",
       "nav": {
-        "account": "Konto",
+        "account": "Ustawienia użytkownika",
         "myAccount": "Moje konto",
         "profile": "Profil",
         "sessions": "Urządzenia",
@@ -1072,7 +1072,7 @@
         "bots": "Boty",
         "integrations": "Integracje",
         "warnings": "Ostrzeżenia",
-        "app": "Aplikacja",
+        "app": "Ustawienia klienta",
         "logout": "Wyloguj się",
         "sectionsAria": "Sekcje ustawień"
       },

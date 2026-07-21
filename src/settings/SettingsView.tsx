@@ -634,8 +634,6 @@ export function SettingsView({
 
   const navPanel = (
     <aside className="as-nav as-nav--inline">
-      <h2 className="as-nav-title">{t("settings.title")}</h2>
-
       <p className="as-nav-label">{t("settings.nav.account")}</p>
 
       <button
