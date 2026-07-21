@@ -68,6 +68,47 @@ const modalCard: React.CSSProperties = {
   overflow: "hidden",
 };
 
+const confirmModalCard: React.CSSProperties = {
+  ...modalCard,
+  width: 440,
+  maxWidth: "95vw",
+};
+
+const modalHeader: React.CSSProperties = {
+  display: "flex",
+  alignItems: "flex-start",
+  justifyContent: "space-between",
+  padding: "24px 24px 0",
+};
+
+const modalTitle: React.CSSProperties = {
+  margin: 0,
+  fontSize: "1.05rem",
+  fontWeight: 700,
+  color: C.text,
+  letterSpacing: "-0.01em",
+  fontFamily: "var(--font-sans)",
+};
+
+const modalSubtitle: React.CSSProperties = {
+  margin: "4px 0 0",
+  fontSize: "0.8rem",
+  color: C.textMuted,
+  lineHeight: 1.5,
+  fontFamily: "var(--font-sans)",
+};
+
+const modalBody: React.CSSProperties = {
+  padding: "20px 24px",
+};
+
+const modalFooter: React.CSSProperties = {
+  padding: "0 24px 22px",
+  display: "flex",
+  justifyContent: "flex-end",
+  gap: 10,
+};
+
 const REPORT_REASON_KEYS = [
   "spam",
   "offensive",
@@ -175,6 +216,8 @@ export function ChannelSettingsModal({
   const [closing, setClosing] = useState(false);
   const [actionBusy, setActionBusy] = useState<string | null>(null);
   const [leaveBusy, setLeaveBusy] = useState(false);
+  const [leaveConfirmOpen, setLeaveConfirmOpen] = useState(false);
+  const [leaveConfirmClosing, setLeaveConfirmClosing] = useState(false);
   const [avatarLoading, setAvatarLoading] = useState(false);
   const [slowmodeBusy, setSlowmodeBusy] = useState(false);
   const [chatLockBusy, setChatLockBusy] = useState(false);
@@ -218,6 +261,20 @@ export function ChannelSettingsModal({
       setReportOpen(false);
       setReportClosing(false);
     }, 220);
+  };
+
+  const closeLeaveConfirm = () => {
+    if (leaveConfirmClosing || leaveBusy) return;
+    setLeaveConfirmClosing(true);
+    window.setTimeout(() => {
+      setLeaveConfirmOpen(false);
+      setLeaveConfirmClosing(false);
+    }, 220);
+  };
+
+  const openLeaveConfirm = () => {
+    if (leaveBusy) return;
+    setLeaveConfirmOpen(true);
   };
 
   const applyBanMuteLists = useCallback(
@@ -451,12 +508,22 @@ export function ChannelSettingsModal({
       await leaveChannel(initialChannel._id);
       await onRefresh();
       onLeaveComplete?.();
+      setLeaveConfirmOpen(false);
+      setLeaveConfirmClosing(false);
       requestClose();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t("modals.channelSettings.toast.leaveFailed"));
     } finally {
       setLeaveBusy(false);
     }
+  };
+
+  const handleFooterAction = () => {
+    if (isAdmin) {
+      requestClose();
+      return;
+    }
+    openLeaveConfirm();
   };
 
   const handleAvatarUpload = async (file: File) => {
@@ -962,7 +1029,7 @@ export function ChannelSettingsModal({
               }}
               hoverStyle={{ background: C.bgHover, color: C.text }}
               disabled={leaveBusy}
-              onClick={() => void handleLeave()}
+              onClick={handleFooterAction}
             >
               {isAdmin ? t("modals.channelSettings.footerClose") : leaveBusy ? t("common.leaving") : t("modals.channelSettings.footerLeave")}
             </HoverBtn>
@@ -1148,6 +1215,109 @@ export function ChannelSettingsModal({
           onConfirm={handleChannelCropConfirm}
         />
       ) : null}
+
+      {(leaveConfirmOpen || leaveConfirmClosing) && !isAdmin && (
+        <div
+          className={`klovy-backdrop klovy-backdrop--stacked${leaveConfirmClosing ? " closing" : ""}`}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) closeLeaveConfirm();
+          }}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="channel-leave-confirm-title"
+        >
+          <div
+            className="klovy-shell"
+            style={confirmModalCard}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={modalHeader}>
+              <div>
+                <p id="channel-leave-confirm-title" style={modalTitle}>
+                  {t("modals.channelSettings.leaveConfirm.title")}
+                </p>
+                <p style={modalSubtitle}>
+                  {t("modals.channelSettings.leaveConfirm.subtitle")}
+                </p>
+              </div>
+              <HoverBtn
+                type="button"
+                style={closeBtnStyle}
+                hoverStyle={{ background: C.bgHover, color: C.text }}
+                aria-label={t("common.close")}
+                disabled={leaveBusy}
+                onClick={closeLeaveConfirm}
+              >
+                ×
+              </HoverBtn>
+            </div>
+            <div style={modalBody}>
+              <div
+                style={{
+                  background: C.dangerDim,
+                  border: `1px solid ${C.dangerBorder}`,
+                  borderRadius: 10,
+                  padding: "14px 16px",
+                  display: "flex",
+                  gap: 12,
+                  alignItems: "flex-start",
+                }}
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke={C.danger}
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  style={{ flexShrink: 0, marginTop: 1 }}
+                  aria-hidden="true"
+                >
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                  <polyline points="16 17 21 12 16 7" />
+                  <line x1="21" y1="12" x2="9" y2="12" />
+                </svg>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: "0.84rem",
+                    color: "#fca5a5",
+                    lineHeight: 1.6,
+                    fontFamily: "var(--font-sans)",
+                  }}
+                >
+                  {t("modals.channelSettings.leaveConfirm.confirmWithName", {
+                    name: details?.name ?? initialChannel.name,
+                  })}{" "}
+                  {t("modals.channelSettings.leaveConfirm.rejoinHint")}
+                </p>
+              </div>
+            </div>
+            <div style={modalFooter}>
+              <HoverBtn
+                type="button"
+                style={btnSecondary}
+                hoverStyle={{ background: C.bgHover, color: C.text }}
+                disabled={leaveBusy}
+                onClick={closeLeaveConfirm}
+              >
+                {t("common.cancel")}
+              </HoverBtn>
+              <HoverBtn
+                type="button"
+                style={btnDanger}
+                hoverStyle={{ background: "#dc2626" }}
+                disabled={leaveBusy}
+                onClick={() => void handleLeave()}
+              >
+                {leaveBusy ? t("common.leaving") : t("modals.channelSettings.leaveConfirm.submit")}
+              </HoverBtn>
+            </div>
+          </div>
+        </div>
+      )}
 
       {(reportOpen || reportClosing) && (
         <div

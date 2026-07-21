@@ -898,6 +898,13 @@
       "addBot": "Add",
       "footerClose": "CLOSE",
       "footerLeave": "LEAVE",
+      "leaveConfirm": {
+        "title": "Leave channel",
+        "subtitle": "You will lose access to this channel.",
+        "confirmWithName": "Are you sure you want to leave channel \"{{name}}\"?",
+        "rejoinHint": "To rejoin, you will need a new invite.",
+        "submit": "Leave channel"
+      },
       "reportSentAdmin": "Report was sent to the admin panel.",
       "reportDetailsPlaceholder": "Describe the issue…",
       "inviteModal": {

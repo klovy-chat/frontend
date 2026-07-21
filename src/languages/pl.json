@@ -898,6 +898,13 @@
       "addBot": "Dodaj",
       "footerClose": "ZAMKNIJ",
       "footerLeave": "WYJDŹ",
+      "leaveConfirm": {
+        "title": "Opuść kanał",
+        "subtitle": "Stracisz dostęp do tego kanału.",
+        "confirmWithName": "Czy na pewno chcesz opuścić kanał „{{name}}”?",
+        "rejoinHint": "Aby wrócić, musisz otrzymać nowe zaproszenie.",
+        "submit": "Opuść kanał"
+      },
       "reportSentAdmin": "Zgłoszenie zostało wysłane do panelu administratora.",
       "reportDetailsPlaceholder": "Opisz problem…",
       "inviteModal": {
