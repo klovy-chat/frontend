@@ -7,6 +7,7 @@ import { useWebSocket } from "../../context/WebSocketContext";
 import { WsType } from "../../api/wsProtocol";
 import { Avatar } from "../common/Avatar";
 import { userLabel, formatLiveDateTime, availabilityStatusLabel } from "../../utils/user/format";
+import { LOGO_NONE_URL } from "../../constants/branding";
 import { presenceColor } from "../../utils/user/presence";
 import "../../styles/nav/nav.css";
 
@@ -67,6 +68,14 @@ export function AppNavRail({
   return (
     <nav className="nav-rail">
       <div className="nav-rail__brand">
+        <img
+          src={LOGO_NONE_URL}
+          alt=""
+          className="nav-rail__brand-logo"
+          width={36}
+          height={36}
+          decoding="async"
+        />
         <div className="nav-rail__brand-text">
           <div className="nav-rail__title">{t("nav.brand.title")}</div>
           <div className="nav-rail__subtitle nav-rail__subtitle--clock">
