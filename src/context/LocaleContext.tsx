@@ -11,7 +11,6 @@ import { useTranslation } from "react-i18next";
 import { updateLanguage } from "../api/auth";
 import { changeAppLanguage } from "../i18n/config";
 import {
-  DEFAULT_LOCALE,
   getFormattingLocale,
   isAppLocale,
   normalizeLocale,
