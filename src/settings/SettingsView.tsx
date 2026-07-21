@@ -1270,9 +1270,9 @@ export function SettingsView({
                       key={session.id}
                       className={`as-session-row${session.isCurrent ? " as-session-row--current" : ""}`}
                     >
-                      <OsSessionIcon os={session.os} />
-                      <div className="as-session-copy">
-                        <div className="as-session-title-row">
+                      <div className="as-session-main">
+                        <OsSessionIcon os={session.os} />
+                        <div className="as-session-copy">
                           <p className="as-session-device">
                             {osName}
                             {session.isCurrent ? (
@@ -1281,30 +1281,30 @@ export function SettingsView({
                               </span>
                             ) : null}
                           </p>
-                        </div>
-                        {userAgent ? (
-                          <p className="as-session-user-agent" title={userAgent}>
-                            {userAgent}
+                          {userAgent ? (
+                            <p className="as-session-user-agent" title={userAgent}>
+                              {userAgent}
+                            </p>
+                          ) : null}
+                          <p className="as-session-meta">
+                            {t("session.lastActivity", { time: lastActivity })}
                           </p>
-                        ) : null}
-                        <p className="as-session-meta">
-                          {t("session.lastActivity", { time: lastActivity })}
-                        </p>
-                        <div className="as-session-actions">
-                          <button
-                            type="button"
-                            className="as-session-revoke-action"
-                            disabled={sessionActionId === session.id}
-                            onClick={() => void handleRevokeSession(session)}
-                            aria-label={t("session.revokeDeviceAria")}
-                          >
-                            {sessionActionId === session.id ? (
-                              <span className="as-session-revoke-spinner" aria-hidden />
-                            ) : (
-                              t("session.revokeDevice")
-                            )}
-                          </button>
                         </div>
+                      </div>
+                      <div className="as-session-actions">
+                        <button
+                          type="button"
+                          className="as-session-revoke-action"
+                          disabled={sessionActionId === session.id}
+                          onClick={() => void handleRevokeSession(session)}
+                          aria-label={t("session.revokeDeviceAria")}
+                        >
+                          {sessionActionId === session.id ? (
+                            <span className="as-session-revoke-spinner" aria-hidden />
+                          ) : (
+                            t("session.revokeDevice")
+                          )}
+                        </button>
                       </div>
                     </div>
                     );
