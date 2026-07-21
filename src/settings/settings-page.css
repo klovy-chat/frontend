@@ -82,8 +82,8 @@
   font-size: 13px;
   gap: 0.5rem;
   margin-bottom: 2px;
-  justify-content: flex-end;
-  text-align: right;
+  justify-content: flex-start;
+  text-align: left;
 }
 
 .settings-page .as-nav-item:hover {
@@ -105,10 +105,6 @@
 .settings-page .as-nav-spacer {
   flex: 1;
   min-height: 12px;
-}
-
-.settings-page .as-nav-item.as-nav-danger {
-  justify-content: flex-end;
 }
 
 .settings-page .as-content-inner {

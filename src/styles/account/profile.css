@@ -459,6 +459,13 @@
   text-underline-offset: 2px;
 }
 
+.up-connected-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
 .up-connected-row .up-connected-icon {
   display: inline-flex;
   align-items: center;
