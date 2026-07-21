@@ -1337,7 +1337,11 @@
       "review": "Review",
       "dismiss": "Reject",
       "deleteChannel": "Delete channel",
+      "deleteReport": "Delete report",
       "edit": "Edit"
+    },
+    "actions": {
+      "options": "Options"
     },
     "announcements": {
       "active": "ACTIVE",
@@ -1410,6 +1414,7 @@
       "announcement": {
         "createTitle": "New announcement",
         "editTitle": "Edit announcement",
+        "lead": "A short notice shown to all users after they sign in.",
         "title": "Title",
         "titlePlaceholder": "e.g. Update v2.1 — new features",
         "body": "Content",

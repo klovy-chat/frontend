@@ -1337,7 +1337,11 @@
       "review": "Rozpatrz",
       "dismiss": "Odrzuć",
       "deleteChannel": "Usuń kanał",
+      "deleteReport": "Usuń zgłoszenie",
       "edit": "Edytuj"
+    },
+    "actions": {
+      "options": "Opcje"
     },
     "announcements": {
       "active": "AKTYWNE",
@@ -1410,6 +1414,7 @@
       "announcement": {
         "createTitle": "Nowe ogłoszenie",
         "editTitle": "Edytuj ogłoszenie",
+        "lead": "Krótka informacja widoczna dla wszystkich użytkowników po zalogowaniu.",
         "title": "Tytuł",
         "titlePlaceholder": "np. Aktualizacja v2.1 — nowe funkcje",
         "body": "Treść",

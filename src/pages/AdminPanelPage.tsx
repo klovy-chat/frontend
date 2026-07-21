@@ -1,11 +1,30 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
+import {
+  AlertTriangle,
+  Award,
+  CheckCircle,
+  Key,
+  List,
+  Megaphone,
+  Pencil,
+  RotateCcw,
+  Shield,
+  ShieldOff,
+  ToggleLeft,
+  ToggleRight,
+  Trash2,
+  UserCheck,
+  UserX,
+  XCircle,
+} from "lucide-react";
 import { useWebSocket } from "../context/WebSocketContext";
 import { useLocale } from "../context/LocaleContext";
 import { useProfileSync } from "../hooks/useProfileSync";
 import {
   banAdminUser,
   deleteAdminChannel,
+  deleteAdminChannelReport,
   deleteAdminUser,
   listAdminChannels,
   listAdminChannelReports,
@@ -41,6 +60,7 @@ import {
 } from "../api/admin";
 import { ApiError } from "../api/client";
 import { isValidBadgeColor, isValidBadgeIcon, sanitizeBadgeColor } from "../utils/user/badgeValidation";
+import { AdminActionMenu, type AdminMenuItem } from "../components/admin/AdminActionMenu";
 import { AdminBrand } from "../components/admin/AdminBrand";
 import { Avatar } from "../components/common/Avatar";
 import BadgeComponent from "../components/common/Badge";
@@ -71,6 +91,29 @@ function AdminUserAvatar({
         color={user.color}
         size={size}
       />
+    </div>
+  );
+}
+
+function AdminChannelAvatar({ name }: { name: string }) {
+  return (
+    <div className="adm-card-avatar adm-card-avatar--channel">
+      <Avatar username={name} placeholder="#" size={42} />
+    </div>
+  );
+}
+
+function AdminListWrap({
+  fetching,
+  children,
+}: {
+  fetching: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <div className={`adm-list-wrap${fetching ? " adm-list-wrap--fetching" : ""}`}>
+      {fetching ? <div className="adm-list-fetch-bar" aria-hidden="true" /> : null}
+      {children}
     </div>
   );
 }
@@ -180,7 +223,9 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
   const [badges, setBadges] = useState<AdminBadgeRow[]>([]);
   const [announcements, setAnnouncements] = useState<AdminAnnouncementRow[]>([]);
   const [pendingReports, setPendingReports] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [fetching, setFetching] = useState(false);
+  const tabLoadedRef = useRef<Partial<Record<Tab, boolean>>>({});
   const [error, setError] = useState("");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [pendingWhitelist, setPendingWhitelist] = useState(0);
@@ -196,7 +241,7 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
   const [passwordFormError, setPasswordFormError] = useState("");
 
   const [confirmDelete, setConfirmDelete] = useState<{
-    type: "user" | "channel" | "badge" | "announcement";
+    type: "user" | "channel" | "badge" | "announcement" | "report";
     id: string;
     label: string;
   } | null>(null);
@@ -248,7 +293,12 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
 
   const loadData = useCallback(async () => {
     setError("");
-    setLoading(true);
+    const firstLoad = !tabLoadedRef.current[tab];
+    if (firstLoad) {
+      setInitialLoading(true);
+    } else {
+      setFetching(true);
+    }
     try {
       if (tab === "users") {
         const res = await listAdminUsers({
@@ -272,14 +322,16 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
         setReports(res.reports);
         setPendingReports(res.pendingCount);
       }
+      tabLoadedRef.current[tab] = true;
     } catch (err) {
       setError(
         err instanceof ApiError ? err.message : t("admin.errors.loadFailed"),
       );
     } finally {
-      setLoading(false);
+      setInitialLoading(false);
+      setFetching(false);
     }
-  }, [tab, search, whitelistFilter]);
+  }, [tab, search, whitelistFilter, t]);
 
   useEffect(() => {
     const t = setTimeout(() => loadData(), 200);
@@ -382,6 +434,8 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
       await runAction(`del-badge-${id}`, () => deleteBadge(id));
     } else if (type === "announcement") {
       await runAction(`del-ann-${id}`, () => deleteAdminAnnouncement(id));
+    } else if (type === "report") {
+      await runAction(`del-report-${id}`, () => deleteAdminChannelReport(id));
     } else {
       await runAction(`del-ch-${id}`, () => deleteAdminChannel(id));
     }
@@ -558,21 +612,24 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
         : t("admin.tabs.usersSubtitle")
       : t(`admin.tabs.${tab}Subtitle`);
 
-  const renderList = () => {
-    if (loading) {
-      return (
-        <div className="adm-placeholder">
-          <div className="adm-placeholder-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-            </svg>
-          </div>
-          <div className="adm-placeholder-title">{t("common.loadingResults")}</div>
-        </div>
-      );
-    }
+  const showInitialLoading = (empty: boolean) =>
+    initialLoading && !tabLoadedRef.current[tab] && empty;
 
+  const renderList = () => {
     if (tab === "users") {
+      if (showInitialLoading(users.length === 0)) {
+        return (
+          <div className="adm-placeholder">
+            <div className="adm-placeholder-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+              </svg>
+            </div>
+            <div className="adm-placeholder-title">{t("common.loadingResults")}</div>
+          </div>
+        );
+      }
+
       if (users.length === 0) {
         return (
           <div className="adm-placeholder">
@@ -589,8 +646,114 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
       }
 
       return (
-        <div className="adm-list">
-          {users.map((u) => (
+        <AdminListWrap fetching={fetching}>
+          <div className="adm-list">
+            {users.map((u) => {
+              const userMenuItems: AdminMenuItem[] = [];
+
+              if (whitelistEnabled && !u.isWhitelisted) {
+                userMenuItems.push({
+                  key: "approve",
+                  label: t("admin.users.approve"),
+                  icon: <UserCheck size={16} />,
+                  disabled: actionLoading === `whitelist-approve-${u.id}`,
+                  onClick: () =>
+                    runAction(`whitelist-approve-${u.id}`, () =>
+                      setAdminUserWhitelist(u.id, true),
+                    ),
+                });
+              }
+              if (whitelistEnabled && u.isWhitelisted) {
+                userMenuItems.push({
+                  key: "revoke",
+                  label: t("admin.users.revokeWhitelist"),
+                  icon: <UserX size={16} />,
+                  disabled: actionLoading === `whitelist-revoke-${u.id}`,
+                  onClick: () =>
+                    runAction(`whitelist-revoke-${u.id}`, () =>
+                      setAdminUserWhitelist(u.id, false),
+                    ),
+                });
+              }
+
+              userMenuItems.push(
+                {
+                  key: "badge",
+                  label: t("admin.users.assignBadge"),
+                  icon: <Award size={16} />,
+                  disabled: !!actionLoading?.includes(`assign-badge-${u.id}`),
+                  onClick: () => {
+                    setAssignBadgeModal({ user: u, badges });
+                    setUserAssignedBadges([]);
+                    void loadUserAssignedBadges(u.id);
+                  },
+                },
+                {
+                  key: "password",
+                  label: t("admin.users.resetPassword"),
+                  icon: <Key size={16} />,
+                  disabled: actionLoading === `password-${u.id}`,
+                  onClick: () => {
+                    setPasswordModal(u);
+                    setNewPassword("");
+                    setConfirmPassword("");
+                    setPasswordFormError("");
+                  },
+                },
+                {
+                  key: "warn",
+                  label: t("admin.users.warn"),
+                  icon: <AlertTriangle size={16} />,
+                  disabled: actionLoading === `warn-${u.id}`,
+                  onClick: () => {
+                    setWarnModal(u);
+                    setWarnReason("");
+                    setWarnSeverity("medium");
+                  },
+                },
+              );
+
+              if (u.warningCount > 0) {
+                userMenuItems.push({
+                  key: "warnings",
+                  label: t("admin.users.warningsCount", { count: u.warningCount }),
+                  icon: <List size={16} />,
+                  onClick: () => openWarnings(u),
+                });
+              }
+
+              if (u.isBlocked || u.isBanned) {
+                userMenuItems.push({
+                  key: "unban",
+                  label: t("admin.users.unban"),
+                  icon: <ShieldOff size={16} />,
+                  disabled: actionLoading === `unban-${u.id}`,
+                  onClick: () => runAction(`unban-${u.id}`, () => unbanAdminUser(u.id)),
+                });
+              } else {
+                userMenuItems.push({
+                  key: "ban",
+                  label: t("admin.users.ban"),
+                  icon: <Shield size={16} />,
+                  danger: true,
+                  onClick: () => {
+                    setBanModal(u);
+                    setBanReason(t("admin.users.defaultBanReason"));
+                  },
+                });
+              }
+
+              if (u.isDisabled) {
+                userMenuItems.push({
+                  key: "restore",
+                  label: t("admin.users.restore"),
+                  icon: <RotateCcw size={16} />,
+                  disabled: actionLoading === `restore-${u.id}`,
+                  onClick: () => runAction(`restore-${u.id}`, () => restoreAdminUser(u.id)),
+                });
+              }
+
+              return (
             <article key={u.id} className="adm-card">
               <div className="adm-card-top">
                 <AdminUserAvatar user={u} />
@@ -647,116 +810,8 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
                   ) : null}
                 </div>
               </div>
-              <div className="adm-card-actions">
-                {whitelistEnabled && !u.isWhitelisted ? (
-                  <button
-                    type="button"
-                    className="adm-act-btn adm-act-btn--success"
-                    disabled={actionLoading === `whitelist-approve-${u.id}`}
-                    onClick={() =>
-                      runAction(`whitelist-approve-${u.id}`, () =>
-                        setAdminUserWhitelist(u.id, true),
-                      )
-                    }
-                  >
-                    {t("admin.users.approve")}
-                  </button>
-                ) : null}
-                {whitelistEnabled && u.isWhitelisted ? (
-                  <button
-                    type="button"
-                    className="adm-act-btn adm-act-btn--warn"
-                    disabled={actionLoading === `whitelist-revoke-${u.id}`}
-                    onClick={() =>
-                      runAction(`whitelist-revoke-${u.id}`, () =>
-                        setAdminUserWhitelist(u.id, false),
-                      )
-                    }
-                  >
-                    {t("admin.users.revokeWhitelist")}
-                  </button>
-                ) : null}
-                <button
-                  type="button"
-                  className="adm-act-btn adm-act-btn--badge"
-                  disabled={!!actionLoading?.includes(`assign-badge-${u.id}`)}
-                  onClick={() => {
-                    setAssignBadgeModal({ user: u, badges });
-                    setUserAssignedBadges([]);
-                    void loadUserAssignedBadges(u.id);
-                  }}
-                >
-                  {t("admin.users.assignBadge")}
-                </button>
-                <button
-                  type="button"
-                  className="adm-act-btn adm-act-btn--ghost"
-                  disabled={actionLoading === `password-${u.id}`}
-                  onClick={() => {
-                    setPasswordModal(u);
-                    setNewPassword("");
-                    setConfirmPassword("");
-                    setPasswordFormError("");
-                  }}
-                >
-                  {t("admin.users.resetPassword")}
-                </button>
-                <button
-                  type="button"
-                  className="adm-act-btn adm-act-btn--warn"
-                  disabled={actionLoading === `warn-${u.id}`}
-                  onClick={() => {
-                    setWarnModal(u);
-                    setWarnReason("");
-                    setWarnSeverity("medium");
-                  }}
-                >
-                  {t("admin.users.warn")}
-                </button>
-                {u.warningCount > 0 ? (
-                  <button
-                    type="button"
-                    className="adm-act-btn adm-act-btn--ghost"
-                    onClick={() => openWarnings(u)}
-                  >
-                    {t("admin.users.warningsCount", { count: u.warningCount })}
-                  </button>
-                ) : null}
-                {u.isBlocked || u.isBanned ? (
-                  <button
-                    type="button"
-                    className="adm-act-btn adm-act-btn--success"
-                    disabled={actionLoading === `unban-${u.id}`}
-                    onClick={() =>
-                      runAction(`unban-${u.id}`, () => unbanAdminUser(u.id))
-                    }
-                  >
-                    {t("admin.users.unban")}
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    className="adm-act-btn adm-act-btn--ban"
-                    onClick={() => {
-                      setBanModal(u);
-                      setBanReason(t("admin.users.defaultBanReason"));
-                    }}
-                  >
-                    {t("admin.users.ban")}
-                  </button>
-                )}
-                {u.isDisabled ? (
-                  <button
-                    type="button"
-                    className="adm-act-btn adm-act-btn--success"
-                    disabled={actionLoading === `restore-${u.id}`}
-                    onClick={() =>
-                      runAction(`restore-${u.id}`, () => restoreAdminUser(u.id))
-                    }
-                  >
-                    {t("admin.users.restore")}
-                  </button>
-                ) : null}
+              <div className="adm-card-actions adm-card-actions--split">
+                <AdminActionMenu label={t("admin.actions.options")} items={userMenuItems} />
                 <button
                   type="button"
                   className="adm-act-btn adm-act-btn--delete"
@@ -768,16 +823,32 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
                     })
                   }
                 >
+                  <Trash2 size={14} />
                   {t("common.delete")}
                 </button>
               </div>
             </article>
-          ))}
-        </div>
+              );
+            })}
+          </div>
+        </AdminListWrap>
       );
     }
 
     if (tab === "channels") {
+      if (showInitialLoading(channels.length === 0)) {
+        return (
+          <div className="adm-placeholder">
+            <div className="adm-placeholder-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+              </svg>
+            </div>
+            <div className="adm-placeholder-title">{t("common.loadingResults")}</div>
+          </div>
+        );
+      }
+
       if (channels.length === 0) {
         return (
           <div className="adm-placeholder">
@@ -793,67 +864,82 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
       }
 
       return (
-        <div className="adm-list">
-          {channels.map((ch) => (
-            <article key={ch.id} className="adm-card">
-              <div className="adm-card-top">
-                <div className="adm-card-avatar" style={{ backgroundColor: "#0ea5e9" }}>
-                  #
-                </div>
-                <div className="adm-card-info">
-                  <div className="adm-card-handle-row">
-                    <span className="adm-card-handle">#{ch.name}</span>
-                    <span className="adm-status-pill adm-status-pill--neutral">
-                      {ch.isPrivate ? t("common.private") : t("common.public")}
-                    </span>
+        <AdminListWrap fetching={fetching}>
+          <div className="adm-list">
+            {channels.map((ch) => (
+              <article key={ch.id} className="adm-card">
+                <div className="adm-card-top">
+                  <AdminChannelAvatar name={ch.name} />
+                  <div className="adm-card-info">
+                    <div className="adm-card-handle-row">
+                      <span className="adm-card-handle">#{ch.name}</span>
+                      <span className="adm-status-pill adm-status-pill--neutral">
+                        {ch.isPrivate ? t("common.private") : t("common.public")}
+                      </span>
+                    </div>
+                    {ch.description ? (
+                      <div className="adm-card-subtitle">{ch.description}</div>
+                    ) : null}
+                    <div className="adm-card-meta">
+                      <span>
+                        <b>{t("admin.users.owner")}</b>
+                        {ch.admin ? `@${ch.admin.username}` : "—"}
+                      </span>
+                      <span>
+                        <b>{t("admin.users.members")}</b>
+                        {ch.memberCount}
+                      </span>
+                      <span>
+                        <b>{t("admin.users.messages")}</b>
+                        {ch.messageCount}
+                      </span>
+                      <span>
+                        <b>{t("admin.users.created")}</b>
+                        {ch.createdAt
+                          ? new Date(ch.createdAt).toLocaleDateString(dateLocale)
+                          : "—"}
+                      </span>
+                    </div>
                   </div>
-                  {ch.description ? (
-                    <div className="adm-card-subtitle">{ch.description}</div>
-                  ) : null}
-                  <div className="adm-card-meta">
-                    <span>
-                      <b>{t("admin.users.owner")}</b>
-                      {ch.admin ? `@${ch.admin.username}` : "—"}
-                    </span>
-                    <span>
-                      <b>{t("admin.users.members")}</b>
-                      {ch.memberCount}
-                    </span>
-                    <span>
-                      <b>{t("admin.users.messages")}</b>
-                      {ch.messageCount}
-                    </span>
-                    <span>
-                      <b>{t("admin.users.created")}</b>
-                      {ch.createdAt
-                        ? new Date(ch.createdAt).toLocaleDateString(dateLocale)
-                        : "—"}
-                    </span>
-                  </div>
                 </div>
-              </div>
-              <div className="adm-card-actions">
-                <button
-                  type="button"
-                  className="adm-act-btn adm-act-btn--delete"
-                  onClick={() =>
-                    setConfirmDelete({
-                      type: "channel",
-                      id: ch.id,
-                      label: `#${ch.name}`,
-                    })
-                  }
-                >
-                  {t("admin.users.deleteChannel")}
-                </button>
-              </div>
-            </article>
-          ))}
-        </div>
+                <div className="adm-card-actions adm-card-actions--split">
+                  <span />
+                  <button
+                    type="button"
+                    className="adm-act-btn adm-act-btn--delete"
+                    onClick={() =>
+                      setConfirmDelete({
+                        type: "channel",
+                        id: ch.id,
+                        label: `#${ch.name}`,
+                      })
+                    }
+                  >
+                    <Trash2 size={14} />
+                    {t("admin.users.deleteChannel")}
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        </AdminListWrap>
       );
     }
 
     if (tab === "badges") {
+      if (showInitialLoading(badges.length === 0)) {
+        return (
+          <div className="adm-placeholder">
+            <div className="adm-placeholder-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+              </svg>
+            </div>
+            <div className="adm-placeholder-title">{t("common.loadingResults")}</div>
+          </div>
+        );
+      }
+
       if (badges.length === 0) {
         return (
           <div className="adm-placeholder">
@@ -870,74 +956,97 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
       }
 
       return (
-        <div className="adm-list">
-          {badges.map((b) => (
-            <article key={b._id} className="adm-card">
-              <div className="adm-card-top">
-                <div
-                  className="adm-card-avatar"
-                  style={{ backgroundColor: sanitizeBadgeColor(b.color) }}
-                >
-                  {b.icon.slice(0, 1).toUpperCase()}
-                </div>
-                <div className="adm-card-info">
-                  <div className="adm-card-handle-row">
-                    <span className="adm-card-handle">{b.name}</span>
+        <AdminListWrap fetching={fetching}>
+          <div className="adm-list">
+            {badges.map((b) => (
+              <article key={b._id} className="adm-card">
+                <div className="adm-card-top">
+                  <div className="adm-card-badge-preview">
+                    <BadgeComponent
+                      name={b.name}
+                      icon={b.icon}
+                      color={b.color}
+                      description={b.description}
+                      size="lg"
+                    />
                   </div>
-                  {b.description ? (
-                    <div className="adm-card-subtitle">{b.description}</div>
-                  ) : null}
-                  <div className="adm-card-meta">
-                    <span>
-                      <b>{t("common.icon")}</b>
-                      {b.icon}
-                    </span>
-                    <span>
-                      <b>{t("admin.users.created")}</b>
-                      {b.createdAt
-                        ? new Date(b.createdAt).toLocaleDateString(dateLocale)
-                        : "—"}
-                    </span>
+                  <div className="adm-card-info">
+                    <div className="adm-card-handle-row">
+                      <span className="adm-card-handle">{b.name}</span>
+                    </div>
+                    {b.description ? (
+                      <div className="adm-card-subtitle">{b.description}</div>
+                    ) : null}
+                    <div className="adm-card-meta">
+                      <span>
+                        <b>{t("common.icon")}</b>
+                        {b.icon}
+                      </span>
+                      <span>
+                        <b>{t("admin.users.created")}</b>
+                        {b.createdAt
+                          ? new Date(b.createdAt).toLocaleDateString(dateLocale)
+                          : "—"}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="adm-card-actions">
-                <button
-                  type="button"
-                  className="adm-act-btn adm-act-btn--badge"
-                  onClick={() => {
-                    setBadgeModal({ mode: "edit", badge: b });
-                    setBadgeForm({
-                      name: b.name,
-                      icon: b.icon,
-                      color: b.color || "",
-                      description: b.description || "",
-                    });
-                  }}
-                >
-                  {t("admin.users.edit")}
-                </button>
-                <button
-                  type="button"
-                  className="adm-act-btn adm-act-btn--delete"
-                  onClick={() =>
-                    setConfirmDelete({
-                      type: "badge",
-                      id: b._id,
-                      label: b.name,
-                    })
-                  }
-                >
-                  {t("common.delete")}
-                </button>
-              </div>
-            </article>
-          ))}
-        </div>
+                <div className="adm-card-actions adm-card-actions--split">
+                  <AdminActionMenu
+                    label={t("admin.actions.options")}
+                    items={[
+                      {
+                        key: "edit",
+                        label: t("admin.users.edit"),
+                        icon: <Pencil size={16} />,
+                        onClick: () => {
+                          setBadgeModal({ mode: "edit", badge: b });
+                          setBadgeForm({
+                            name: b.name,
+                            icon: b.icon,
+                            color: b.color || "",
+                            description: b.description || "",
+                          });
+                        },
+                      },
+                    ]}
+                  />
+                  <button
+                    type="button"
+                    className="adm-act-btn adm-act-btn--delete"
+                    onClick={() =>
+                      setConfirmDelete({
+                        type: "badge",
+                        id: b._id,
+                        label: b.name,
+                      })
+                    }
+                  >
+                    <Trash2 size={14} />
+                    {t("common.delete")}
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        </AdminListWrap>
       );
     }
 
     if (tab === "announcements") {
+      if (showInitialLoading(announcements.length === 0)) {
+        return (
+          <div className="adm-placeholder">
+            <div className="adm-placeholder-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+              </svg>
+            </div>
+            <div className="adm-placeholder-title">{t("common.loadingResults")}</div>
+          </div>
+        );
+      }
+
       if (announcements.length === 0) {
         return (
           <div className="adm-placeholder">
@@ -953,80 +1062,99 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
       }
 
       return (
-        <div className="adm-list">
-          {announcements.map((a) => (
-            <article key={a.id} className="adm-card">
-              <div className="adm-card-top">
-                <div className="adm-card-avatar adm-card-avatar--announcement">📣</div>
-                <div className="adm-card-info">
-                  <div className="adm-card-handle-row">
-                    <span className="adm-card-handle">{a.title}</span>
-                    {a.active ? (
-                      <span className="adm-status-pill adm-status-pill--ok">{t("admin.announcements.active")}</span>
-                    ) : (
-                      <span className="adm-status-pill adm-status-pill--neutral">{t("admin.announcements.inactive")}</span>
-                    )}
+        <AdminListWrap fetching={fetching}>
+          <div className="adm-announce-list">
+            {announcements.map((a) => (
+              <article key={a.id} className="adm-announce-item">
+                <div className="adm-announce-item-head">
+                  <div className="adm-announce-item-icon">
+                    <Megaphone size={18} strokeWidth={2.2} />
                   </div>
-                  <div className="adm-card-subtitle ann-admin-preview">{a.body}</div>
-                  <div className="adm-card-meta">
-                    <span>
-                      <b>{t("admin.users.created")}</b>
-                      {a.createdAt
-                        ? new Date(a.createdAt).toLocaleString(dateLocale)
-                        : t("common.emDash")}
-                    </span>
+                  <div className="adm-announce-item-main">
+                    <div className="adm-announce-item-title-row">
+                      <h3 className="adm-announce-item-title">{a.title}</h3>
+                      {a.active ? (
+                        <span className="adm-status-pill adm-status-pill--ok">{t("admin.announcements.active")}</span>
+                      ) : (
+                        <span className="adm-status-pill adm-status-pill--neutral">{t("admin.announcements.inactive")}</span>
+                      )}
+                    </div>
+                    {a.createdAt ? (
+                      <div className="adm-announce-item-date">
+                        {new Date(a.createdAt).toLocaleString(dateLocale)}
+                      </div>
+                    ) : null}
+                    <div className="adm-announce-item-body">{a.body}</div>
                   </div>
                 </div>
-              </div>
-              <div className="adm-card-actions">
-                <button
-                  type="button"
-                  className="adm-act-btn adm-act-btn--badge"
-                  onClick={() => {
-                    setAnnouncementModal({ mode: "edit", announcement: a });
-                    setAnnouncementForm({
-                      title: a.title,
-                      body: a.body,
-                      active: a.active,
-                    });
-                  }}
-                >
-                  {t("admin.users.edit")}
-                </button>
-                <button
-                  type="button"
-                  className="adm-act-btn adm-act-btn--warn"
-                  disabled={actionLoading === `toggle-ann-${a.id}`}
-                  onClick={() =>
-                    runAction(`toggle-ann-${a.id}`, () =>
-                      updateAdminAnnouncement(a.id, { active: !a.active }),
-                    )
-                  }
-                >
-                  {a.active ? t("admin.announcements.deactivate") : t("admin.announcements.activate")}
-                </button>
-                <button
-                  type="button"
-                  className="adm-act-btn adm-act-btn--delete"
-                  onClick={() =>
-                    setConfirmDelete({
-                      type: "announcement",
-                      id: a.id,
-                      label: a.title,
-                    })
-                  }
-                >
-                  {t("common.delete")}
-                </button>
-              </div>
-            </article>
-          ))}
-        </div>
+                <div className="adm-card-actions adm-card-actions--split adm-announce-item-actions">
+                  <AdminActionMenu
+                    label={t("admin.actions.options")}
+                    items={[
+                      {
+                        key: "edit",
+                        label: t("admin.users.edit"),
+                        icon: <Pencil size={16} />,
+                        onClick: () => {
+                          setAnnouncementModal({ mode: "edit", announcement: a });
+                          setAnnouncementForm({
+                            title: a.title,
+                            body: a.body,
+                            active: a.active,
+                          });
+                        },
+                      },
+                      {
+                        key: "toggle",
+                        label: a.active
+                          ? t("admin.announcements.deactivate")
+                          : t("admin.announcements.activate"),
+                        icon: a.active ? <ToggleLeft size={16} /> : <ToggleRight size={16} />,
+                        disabled: actionLoading === `toggle-ann-${a.id}`,
+                        onClick: () =>
+                          runAction(`toggle-ann-${a.id}`, () =>
+                            updateAdminAnnouncement(a.id, { active: !a.active }),
+                          ),
+                      },
+                    ]}
+                  />
+                  <button
+                    type="button"
+                    className="adm-act-btn adm-act-btn--delete"
+                    onClick={() =>
+                      setConfirmDelete({
+                        type: "announcement",
+                        id: a.id,
+                        label: a.title,
+                      })
+                    }
+                  >
+                    <Trash2 size={14} />
+                    {t("common.delete")}
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        </AdminListWrap>
       );
     }
 
     if (tab !== "reports") {
       return null;
+    }
+
+    if (showInitialLoading(reports.length === 0)) {
+      return (
+        <div className="adm-placeholder">
+          <div className="adm-placeholder-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+            </svg>
+          </div>
+          <div className="adm-placeholder-title">{t("common.loadingResults")}</div>
+        </div>
+      );
     }
 
     if (reports.length === 0) {
@@ -1045,11 +1173,52 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
     }
 
     return (
-      <div className="adm-list">
-        {reports.map((r) => (
+      <AdminListWrap fetching={fetching}>
+        <div className="adm-list">
+          {reports.map((r) => {
+            const reportMenuItems: AdminMenuItem[] = [];
+
+            if (r.status === "pending") {
+              reportMenuItems.push(
+                {
+                  key: "review",
+                  label: t("admin.users.review"),
+                  icon: <CheckCircle size={16} />,
+                  disabled: actionLoading === `rep-ok-${r.id}`,
+                  onClick: () =>
+                    runAction(`rep-ok-${r.id}`, () =>
+                      updateAdminChannelReport(r.id, "reviewed"),
+                    ),
+                },
+                {
+                  key: "dismiss",
+                  label: t("admin.users.dismiss"),
+                  icon: <XCircle size={16} />,
+                  disabled: actionLoading === `rep-dismiss-${r.id}`,
+                  onClick: () =>
+                    runAction(`rep-dismiss-${r.id}`, () =>
+                      updateAdminChannelReport(r.id, "dismissed"),
+                    ),
+                },
+                {
+                  key: "delete-channel",
+                  label: t("admin.users.deleteChannel"),
+                  icon: <Trash2 size={16} />,
+                  danger: true,
+                  onClick: () =>
+                    setConfirmDelete({
+                      type: "channel",
+                      id: r.channelId,
+                      label: `#${r.channelName}`,
+                    }),
+                },
+              );
+            }
+
+            return (
           <article key={r.id} className="adm-card">
             <div className="adm-card-top">
-              <AdminUserAvatar user={r.reporter} />
+              <AdminChannelAvatar name={r.channelName} />
               <div className="adm-card-info">
                 <div className="adm-card-handle-row">
                   <span className="adm-card-handle">#{r.channelName}</span>
@@ -1071,50 +1240,32 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
                 {r.details ? <div className="adm-card-note">{r.details}</div> : null}
               </div>
             </div>
-            {r.status === "pending" ? (
-              <div className="adm-card-actions">
-                <button
-                  type="button"
-                  className="adm-act-btn adm-act-btn--success"
-                  disabled={actionLoading === `rep-ok-${r.id}`}
-                  onClick={() =>
-                    runAction(`rep-ok-${r.id}`, () =>
-                      updateAdminChannelReport(r.id, "reviewed"),
-                    )
-                  }
-                >
-                  {t("admin.users.review")}
-                </button>
-                <button
-                  type="button"
-                  className="adm-act-btn adm-act-btn--ghost"
-                  disabled={actionLoading === `rep-dismiss-${r.id}`}
-                  onClick={() =>
-                    runAction(`rep-dismiss-${r.id}`, () =>
-                      updateAdminChannelReport(r.id, "dismissed"),
-                    )
-                  }
-                >
-                  {t("admin.users.dismiss")}
-                </button>
-                <button
-                  type="button"
-                  className="adm-act-btn adm-act-btn--danger"
-                  onClick={() =>
-                    setConfirmDelete({
-                      type: "channel",
-                      id: r.channelId,
-                      label: `#${r.channelName}`,
-                    })
-                  }
-                >
-                  {t("admin.users.deleteChannel")}
-                </button>
-              </div>
-            ) : null}
+            <div className="adm-card-actions adm-card-actions--split">
+              {reportMenuItems.length > 0 ? (
+                <AdminActionMenu label={t("admin.actions.options")} items={reportMenuItems} />
+              ) : (
+                <span />
+              )}
+              <button
+                type="button"
+                className="adm-act-btn adm-act-btn--delete"
+                onClick={() =>
+                  setConfirmDelete({
+                    type: "report",
+                    id: r.id,
+                    label: `#${r.channelName}`,
+                  })
+                }
+              >
+                <Trash2 size={14} />
+                {t("admin.users.deleteReport")}
+              </button>
+            </div>
           </article>
-        ))}
-      </div>
+            );
+          })}
+        </div>
+      </AdminListWrap>
     );
   };
 
@@ -1481,7 +1632,9 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
                 disabled={
                   actionLoading === `del-user-${confirmDelete.id}` ||
                   actionLoading === `del-ch-${confirmDelete.id}` ||
-                  actionLoading === `del-badge-${confirmDelete.id}`
+                  actionLoading === `del-badge-${confirmDelete.id}` ||
+                  actionLoading === `del-ann-${confirmDelete.id}` ||
+                  actionLoading === `del-report-${confirmDelete.id}`
                 }
                 onClick={submitDelete}
               >
@@ -1572,12 +1725,23 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
 
       {announcementModal ? (
         <div className="adm-overlay" onClick={() => setAnnouncementModal(null)}>
-          <div className="adm-dialog adm-dialog--wide" onClick={(e) => e.stopPropagation()}>
-            <h2>
-              {announcementModal.mode === "create"
-                ? t("admin.modals.announcement.createTitle")
-                : t("admin.modals.announcement.editTitle")}
-            </h2>
+          <div
+            className="adm-dialog adm-dialog--wide adm-dialog--announcement"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="adm-announce-dialog-head">
+              <div className="adm-announce-item-icon">
+                <Megaphone size={20} strokeWidth={2.2} />
+              </div>
+              <div>
+                <h2>
+                  {announcementModal.mode === "create"
+                    ? t("admin.modals.announcement.createTitle")
+                    : t("admin.modals.announcement.editTitle")}
+                </h2>
+                <p className="adm-lead">{t("admin.modals.announcement.lead")}</p>
+              </div>
+            </div>
             <div className="adm-field">
               <label htmlFor="announcement-title">{t("admin.modals.announcement.title")}</label>
               <input

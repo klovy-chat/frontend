@@ -216,6 +216,12 @@ export function updateAdminChannelReport(
   });
 }
 
+export function deleteAdminChannelReport(reportId: string) {
+  return apiRequest<{ message: string }>(`/api/admin/reports/${reportId}`, {
+    method: "DELETE",
+  });
+}
+
 export function listBadges() {
   return apiRequest<{ success: boolean; data: AdminBadgeRow[] }>(
     "/api/admin/badges",
