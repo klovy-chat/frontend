@@ -1,5 +1,5 @@
 /* ============================================================
-   CONTACTS MODAL — zaproszenia, znajomi, wysłane, zablokowani
+   CONTACTS MODAL — spójny z kolorystyką Klovy Chat
    ============================================================ */
 
 .contacts-modal.klovy-shell {
@@ -9,114 +9,107 @@
   padding: 0;
   overflow: hidden;
   position: relative;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0) 12%), var(--bg-panel);
-}
-
-.contacts-modal.klovy-shell::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(124, 92, 255, 0.45), transparent);
-  opacity: 0.6;
-  pointer-events: none;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
 }
 
 .contacts-modal__header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  padding: 26px 30px 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  padding: 24px 28px 18px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-panel);
 }
 
 .contacts-modal__header h2 {
   margin: 0;
   font-family: var(--font-sans);
-  font-size: 21px;
+  font-size: 1.05rem;
   font-weight: 700;
   letter-spacing: -0.01em;
   color: var(--text);
 }
 
 .contacts-modal__header p {
-  margin: 6px 0 0;
-  font-size: 13.5px;
+  margin: 4px 0 0;
+  font-size: 0.8rem;
   color: var(--text-muted);
-  line-height: 1.45;
+  line-height: 1.5;
 }
 
 .contacts-modal__close {
   width: 32px;
   height: 32px;
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--border);
-  background: var(--bg-elevated);
+  background: transparent;
   color: var(--text-muted);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: var(--cursor-pointer);
-  transition: background 0.18s, color 0.18s, border-color 0.18s;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
   flex-shrink: 0;
 }
 
 .contacts-modal__close:hover {
   background: var(--bg-hover);
   color: var(--text);
-  border-color: rgba(255, 255, 255, 0.14);
+  border-color: var(--border);
 }
 
 .contacts-modal__tabs-row {
-  padding: 18px 30px 0;
+  padding: 16px 28px 0;
+  background: var(--bg-panel);
 }
 
 .contacts-modal__tabs {
   position: relative;
   display: inline-flex;
-  gap: 4px;
-  background: var(--bg-elevated);
+  gap: 2px;
+  background: var(--bg-shell);
   border: 1px solid var(--border);
-  padding: 4px;
-  border-radius: 12px;
+  padding: 3px;
+  border-radius: var(--radius-sm);
 }
 
 .contacts-modal__tab-indicator {
   position: absolute;
-  top: 4px;
-  bottom: 4px;
-  left: 4px;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
   width: 0;
-  border-radius: 8px;
-  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
-  box-shadow: 0 4px 16px -2px rgba(124, 92, 255, 0.45);
-  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), width 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 6px;
+  background: var(--bg-active);
+  border: 1px solid var(--accent-border);
+  box-shadow: none;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), width 0.28s cubic-bezier(0.16, 1, 0.3, 1);
   pointer-events: none;
 }
 
 .contacts-modal__tab {
   position: relative;
   z-index: 1;
-  padding: 9px 16px;
-  font-size: 13.5px;
+  padding: 8px 14px;
+  font-size: 13px;
   font-weight: 600;
   font-family: var(--font-sans);
   color: var(--text-muted);
   background: transparent;
   border: none;
   cursor: var(--cursor-pointer);
-  border-radius: 8px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   gap: 7px;
-  transition: color 0.2s;
+  transition: color 0.15s;
   white-space: nowrap;
 }
 
 .contacts-modal__tab.active {
-  color: #fff;
+  color: var(--text);
 }
 
 .contacts-modal__tab:hover:not(.active) {
@@ -125,32 +118,36 @@
 
 .contacts-modal__tab-count {
   font-size: 11px;
-  background: rgba(255, 255, 255, 0.08);
+  font-weight: 600;
+  background: var(--bg-elevated);
   padding: 1px 6px;
-  border-radius: 20px;
-  color: var(--text-muted);
+  border-radius: var(--radius-pill);
+  color: var(--text-dim);
+  border: 1px solid var(--border);
 }
 
 .contacts-modal__tab.active .contacts-modal__tab-count {
-  background: rgba(255, 255, 255, 0.22);
-  color: #fff;
+  background: var(--accent-dim);
+  border-color: var(--accent-border);
+  color: var(--accent);
 }
 
 .contacts-modal__body {
   display: grid;
   grid-template-columns: 1fr 280px;
   min-height: 340px;
+  background: var(--bg-panel);
 }
 
 .contacts-modal__main {
-  padding: 22px 30px 26px;
+  padding: 20px 28px 24px;
   min-width: 0;
 }
 
 .contacts-modal__side {
-  padding: 22px 26px 26px;
-  border-left: 1px solid rgba(255, 255, 255, 0.04);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.015), transparent 20%);
+  padding: 20px 24px 24px;
+  border-left: 1px solid var(--border);
+  background: var(--bg-shell);
 }
 
 .contacts-modal__search {
@@ -170,14 +167,14 @@
 
 .contacts-modal__search input {
   width: 100%;
-  background: var(--bg-elevated);
+  background: var(--bg-deep);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   padding: 10px 12px 10px 36px;
   font-size: 13.5px;
   color: var(--text);
   outline: none;
-  transition: border-color 0.18s, box-shadow 0.18s;
+  transition: border-color 0.15s, box-shadow 0.15s;
   font-family: inherit;
 }
 
@@ -193,7 +190,7 @@
 .contacts-modal__list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   max-height: 300px;
   overflow-y: auto;
   scrollbar-width: thin;
@@ -214,13 +211,13 @@
   align-items: center;
   gap: 12px;
   padding: 10px;
-  border-radius: 12px;
-  transition: background 0.16s;
-  animation: contacts-row-in 0.35s ease both;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s;
+  animation: contacts-row-in 0.3s ease both;
 }
 
 .contacts-modal__row:hover {
-  background: var(--bg-elevated);
+  background: var(--bg-hover);
 }
 
 @keyframes contacts-row-in {
@@ -255,7 +252,7 @@
 
 .contacts-modal__status-dot--away,
 .contacts-modal__status-dot--brb {
-  background: #eab308;
+  background: var(--warning);
 }
 
 .contacts-modal__status-dot--dnd {
@@ -298,7 +295,7 @@
 .contacts-modal__icon-btn {
   width: 32px;
   height: 32px;
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   background: var(--bg-elevated);
   display: flex;
@@ -306,24 +303,25 @@
   justify-content: center;
   cursor: var(--cursor-pointer);
   color: var(--text-muted);
-  transition: background 0.16s, color 0.16s, border-color 0.16s, transform 0.16s;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
   padding: 0;
 }
 
 .contacts-modal__icon-btn:hover {
-  transform: translateY(-1px);
+  background: var(--bg-hover);
+  color: var(--text);
 }
 
 .contacts-modal__icon-btn--accept:hover {
-  background: rgba(34, 197, 94, 0.14);
+  background: var(--success-dim);
   color: var(--success);
-  border-color: rgba(34, 197, 94, 0.3);
+  border-color: var(--success-border);
 }
 
 .contacts-modal__icon-btn--decline:hover {
-  background: rgba(239, 68, 68, 0.1);
+  background: var(--danger-dim);
   color: var(--danger);
-  border-color: rgba(239, 68, 68, 0.3);
+  border-color: var(--danger-border);
 }
 
 .contacts-modal__pill-btn {
@@ -331,17 +329,17 @@
   font-size: 12px;
   font-weight: 600;
   padding: 6px 12px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   background: var(--bg-elevated);
   color: var(--text-muted);
   cursor: var(--cursor-pointer);
-  transition: color 0.16s, border-color 0.16s, background 0.16s;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
 }
 
 .contacts-modal__pill-btn:hover {
   color: var(--text);
-  border-color: rgba(255, 255, 255, 0.16);
+  border-color: var(--border);
   background: var(--bg-hover);
 }
 
@@ -360,7 +358,7 @@
 .contacts-modal__empty-icon {
   width: 56px;
   height: 56px;
-  border-radius: 16px;
+  border-radius: var(--radius);
   background: var(--bg-elevated);
   border: 1px solid var(--border);
   display: flex;
@@ -393,8 +391,9 @@
 .contacts-modal__side-label {
   font-family: var(--font-sans);
   font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--text-dim);
   margin-bottom: 12px;
 }
@@ -407,14 +406,14 @@
 .contacts-modal__add-input {
   flex: 1;
   min-width: 0;
-  background: var(--bg-elevated);
+  background: var(--bg-deep);
   border: 1px solid var(--border);
-  border-radius: 11px;
+  border-radius: var(--radius-sm);
   padding: 11px 13px;
   font-size: 13.5px;
   color: var(--text);
   outline: none;
-  transition: border-color 0.18s, box-shadow 0.18s;
+  transition: border-color 0.15s, box-shadow 0.15s;
   font-family: inherit;
 }
 
@@ -428,42 +427,46 @@
 }
 
 .contacts-modal__add-input--error {
-  border-color: rgba(239, 68, 68, 0.5);
+  border-color: var(--danger-border);
+  box-shadow: 0 0 0 3px var(--danger-dim);
 }
 
 .contacts-modal__send-btn {
   width: 42px;
   height: 42px;
   flex-shrink: 0;
-  border-radius: 11px;
+  border-radius: var(--radius-sm);
   border: none;
-  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  background: var(--accent);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: var(--cursor-pointer);
   color: #fff;
-  box-shadow: 0 6px 18px -4px rgba(124, 92, 255, 0.45);
-  transition: transform 0.16s, box-shadow 0.16s, background 0.16s;
+  transition: background 0.15s, transform 0.15s;
   padding: 0;
 }
 
 .contacts-modal__send-btn:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 22px -4px rgba(124, 92, 255, 0.45);
+  background: var(--accent-hover);
 }
 
 .contacts-modal__send-btn:active:not(:disabled) {
-  transform: translateY(0) scale(0.96);
+  transform: scale(0.96);
 }
 
 .contacts-modal__send-btn:disabled {
-  opacity: 0.55;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
 .contacts-modal__send-btn--sent {
-  background: linear-gradient(135deg, var(--success), #16a34a);
+  background: var(--success);
+}
+
+.contacts-modal__send-btn--sent:hover:not(:disabled) {
+  background: var(--success);
+  filter: brightness(1.05);
 }
 
 .contacts-modal__hint {
@@ -474,7 +477,7 @@
 }
 
 .contacts-modal__hint b {
-  color: #b39ddb;
+  color: var(--accent);
   font-weight: 600;
 }
 
@@ -482,10 +485,10 @@
   margin-top: 14px;
   font-size: 12px;
   padding: 9px 11px;
-  border-radius: 9px;
-  background: rgba(34, 197, 94, 0.1);
-  border: 1px solid rgba(34, 197, 94, 0.25);
-  color: #86efac;
+  border-radius: var(--radius-sm);
+  background: var(--success-dim);
+  border: 1px solid var(--success-border);
+  color: var(--success);
   display: none;
   align-items: center;
   gap: 8px;
@@ -497,9 +500,9 @@
 }
 
 .contacts-modal__toast--error {
-  background: rgba(239, 68, 68, 0.1);
-  border-color: rgba(239, 68, 68, 0.25);
-  color: #fca5a5;
+  background: var(--danger-dim);
+  border-color: var(--danger-border);
+  color: var(--danger);
 }
 
 @media (max-width: 680px) {
@@ -509,7 +512,7 @@
 
   .contacts-modal__side {
     border-left: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    border-top: 1px solid var(--border);
   }
 
   .contacts-modal__tabs-row {
