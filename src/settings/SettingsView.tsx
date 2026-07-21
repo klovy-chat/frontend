@@ -815,6 +815,10 @@ export function SettingsView({
                   <p className="as-upload-hint">
                     {t("upload.maxSizeHint", { size: MAX_BANNER_SIZE_LABEL })}
                   </p>
+                </div>
+              </div>
+
+              <div className="as-profile-header-row">
                 <button
                   type="button"
                   className="as-avatar-lg"
