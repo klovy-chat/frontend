@@ -1,4 +1,5 @@
 import { cloneElement, isValidElement, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { getContactsForList, searchContacts, toggleContactMute, toggleContactBlock } from "../../api/contacts";
 import { removeFriend } from "../../api/friends";
@@ -18,7 +19,7 @@ import { WsType } from "../../api/wsProtocol";
 import { Avatar } from "../common/Avatar";
 import unreadSync from "../../utils/sync/unreadSync";
 import { playNotificationSound } from "../../utils/media/notificationSound";
-import { AccountSettingsModal } from "../../pages/AccountSettingsModal";
+import { settingsPath } from "../../settings/routes";
 import { AppNavRail } from "../layout/AppNavRail";
 import { ChatListPane, type ChatListTab } from "../layout/ChatListPane";
 import { MobileShellBar, type ShellOverlay } from "../layout/MobileShellBar";
@@ -29,7 +30,6 @@ import { channelMemberCount, channelMemberCountLabel, getEffectiveStatus } from 
 import { useProfileSync } from "../../hooks/useProfileSync";
 import { useListeningSync } from "../../hooks/useListeningSync";
 import { useSpotifyListeningSync } from "../../hooks/useSpotifyListeningSync";
-import { notifySpotifyConnectionChanged } from "../../utils/sync/spotifyConnectionSync";
 import type { Channel, ChatTarget, Contact, Message } from "../../types";
 import { ChannelSettingsModal } from "../channel/ChannelSettingsModal";
 import { ContactsModal } from "../contacts/ContactsModal";
@@ -250,15 +250,9 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
     channelId: string; channelName: string; channel: Channel;
   } | null>(null);
 
-  const [settingsInitialSection, setSettingsInitialSection] = useState<
-    "profil" | "konto" | "sesje" | "glos" | "integracje" | "ostrzezenia" | undefined
-  >(undefined);
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [settingsShellOverlay, setSettingsShellOverlay] = useState<ShellOverlay>(null);
+  const navigate = useNavigate();
   const [chatListTab, setChatListTab] = useState<ChatListTab>("dm");
   const [shellOverlay, setShellOverlay] = useState<ShellOverlay>(null);
-  const [spotifyOauthError, setSpotifyOauthError] = useState<string | null>(null);
-  const [spotifyOauthConnected, setSpotifyOauthConnected] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [contactProfileOpen, setContactProfileOpen] = useState(false);
   const [contactProfile, setContactProfile] = useState<Contact | null>(null);
@@ -619,28 +613,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
   useSpotifyListeningSync();
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const spotify = params.get("spotify");
-    if (spotify === "connected" || spotify === "error") {
-      setSettingsInitialSection("integracje");
-      setSettingsOpen(true);
-      if (spotify === "connected") {
-        setSpotifyOauthConnected(true);
-        setSpotifyOauthError(null);
-        notifySpotifyConnectionChanged();
-      } else {
-        const raw = params.get("message");
-        setSpotifyOauthError(raw ? decodeURIComponent(raw) : t("sidebar.toast.spotifyFailed"));
-        setSpotifyOauthConnected(false);
-      }
-      params.delete("spotify");
-      params.delete("message");
-      const next = `${window.location.pathname}${params.toString() ? `?${params}` : ""}`;
-      window.history.replaceState({}, "", next);
-    }
-  }, []);
-
-  useEffect(() => {
     if (showNewChannel || renameChannelInfo)
       setTimeout(() => channelInputRef.current?.focus(), 50);
   }, [showNewChannel, renameChannelInfo]);
@@ -868,59 +840,30 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
   }, [contacts, channels]);
 
   /* ─── context menu ─── */
-  const closeSettings = useCallback(() => {
-    setSettingsOpen(false);
-    setSettingsInitialSection(undefined);
-    setSettingsShellOverlay(null);
-    setSpotifyOauthError(null);
-    setSpotifyOauthConnected(false);
-  }, []);
-
   const openChats = useCallback(() => {
-    closeSettings();
     setContactsModalOpen(false);
     setContactsModalClosing(false);
     setAdminModalOpen(false);
     setAdminModalClosing(false);
     setShellOverlay(null);
-  }, [closeSettings]);
+  }, []);
 
   useEffect(() => {
-    if (!settingsOpen && !shellOverlay && !settingsShellOverlay) return;
+    if (!shellOverlay) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
-      if (settingsOpen) {
-        if (settingsShellOverlay) {
-          setSettingsShellOverlay(null);
-          return;
-        }
-        closeSettings();
-        return;
-      }
       setShellOverlay(null);
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [settingsOpen, settingsShellOverlay, shellOverlay, closeSettings]);
-
-  useEffect(() => {
-    if (settingsOpen) return;
-    setShellOverlay(null);
-  }, [active, settingsOpen]);
+  }, [shellOverlay]);
 
   const chatOverlayClass =
     shellOverlay === "nav" ? " app-shell--overlay-nav"
     : shellOverlay === "list" ? " app-shell--overlay-list"
     : "";
 
-  const settingsOverlayClass =
-    settingsShellOverlay === "nav" ? " app-shell--overlay-nav"
-    : settingsShellOverlay === "settings-nav" ? " app-shell--overlay-settings-nav"
-    : "";
-
-  const shellClass = settingsOpen
-    ? `app-shell app-shell--settings${settingsOverlayClass}`
-    : `app-shell app-shell--chat app-shell--no-detail${chatOverlayClass}`;
+  const shellClass = `app-shell app-shell--chat app-shell--no-detail${chatOverlayClass}`;
 
   const chatTitle =
     active?.type === "dm"
@@ -943,17 +886,13 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
           aria-label={t("common.closePanel")}
           onClick={() => {
             setShellOverlay(null);
-            setSettingsShellOverlay(null);
           }}
         />
         <div className="app-shell__nav">
           <AppNavRail
             onOpenChats={openChats}
-            settingsActive={settingsOpen}
-            onOpenSettings={() => {
-              setSettingsShellOverlay(null);
-              setSettingsOpen(true);
-            }}
+            settingsActive={false}
+            onOpenSettings={() => navigate(settingsPath())}
             onOpenContacts={() => {
               setContactsModalClosing(false);
               setContactsModalOpen(true);
@@ -966,83 +905,59 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
           />
         </div>
 
-        {settingsOpen ? (
-          <div className="app-shell__settings-main">
-            <MobileShellBar
-              variant="settings"
-              title={t("nav.items.settings")}
-              overlay={settingsShellOverlay}
-              onOverlayChange={setSettingsShellOverlay}
-              onClose={closeSettings}
-              showList={false}
-            />
-            <AccountSettingsModal
-              inline
-              initialSection={settingsInitialSection}
-              spotifyOauthError={spotifyOauthError}
-              spotifyOauthConnected={spotifyOauthConnected}
-              onClose={closeSettings}
-              onSectionChange={() => setSettingsShellOverlay(null)}
-            />
-          </div>
-        ) : (
-          <>
-            <div className="app-shell__list">
-              <ChatListPane
-                contacts={displayContacts}
-                channels={channels}
-                active={active}
-                searchTerm={searchTerm}
-                onSearchChange={setSearchTerm}
-                searchResults={searchResults.map((c) => resolvePresence(c))}
-                activeTab={chatListTab}
-                onTabChange={setChatListTab}
-                mentionSources={mentionSources}
-                onSelectContact={(c) => {
-                  handleSelectContact(c);
-                  setShellOverlay(null);
-                }}
-                onSelectChannel={(ch) => {
-                  handleSelectChannel(ch);
-                  setShellOverlay(null);
-                }}
-                onContactContextMenu={handleContactContextMenu}
-                onChannelContextMenu={handleChannelContextMenu}
-                onNewChannel={() => {
-                  setNewChannelClosing(false);
-                  setShowNewChannel(true);
-                }}
-                getEffectiveStatus={getContactEffectiveStatus}
-              />
-            </div>
-            <div className="app-shell__main">
-              <MobileShellBar
-                title={chatTitle}
-                overlay={shellOverlay}
-                onOverlayChange={setShellOverlay}
-              />
-              {isValidElement(children)
-                ? cloneElement(children, {
-                    onOpenChannelSettings: (channel: Channel) => {
-                      setChannelSettingsInfo({
-                        channelId: channel._id,
-                        channelName: channel.name,
-                        channel,
-                      });
-                    },
-                    onRemoveContact: (contact: Contact) => setRemoveContactInfo(contact),
-                  })
-                : children}
-            </div>
-          </>
-        )}
+        <div className="app-shell__list">
+          <ChatListPane
+            contacts={displayContacts}
+            channels={channels}
+            active={active}
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            searchResults={searchResults.map((c) => resolvePresence(c))}
+            activeTab={chatListTab}
+            onTabChange={setChatListTab}
+            mentionSources={mentionSources}
+            onSelectContact={(c) => {
+              handleSelectContact(c);
+              setShellOverlay(null);
+            }}
+            onSelectChannel={(ch) => {
+              handleSelectChannel(ch);
+              setShellOverlay(null);
+            }}
+            onContactContextMenu={handleContactContextMenu}
+            onChannelContextMenu={handleChannelContextMenu}
+            onNewChannel={() => {
+              setNewChannelClosing(false);
+              setShowNewChannel(true);
+            }}
+            getEffectiveStatus={getContactEffectiveStatus}
+          />
+        </div>
+        <div className="app-shell__main">
+          <MobileShellBar
+            title={chatTitle}
+            overlay={shellOverlay}
+            onOverlayChange={setShellOverlay}
+          />
+          {isValidElement(children)
+            ? cloneElement(children, {
+                onOpenChannelSettings: (channel: Channel) => {
+                  setChannelSettingsInfo({
+                    channelId: channel._id,
+                    channelName: channel.name,
+                    channel,
+                  });
+                },
+                onRemoveContact: (contact: Contact) => setRemoveContactInfo(contact),
+              })
+            : children}
+        </div>
       </div>
 
-      {/* ═══════════════ ACCOUNT SETTINGS ═══════════════ */}
       <UserProfileModal
         isOpen={profileOpen}
         onClose={() => setProfileOpen(false)}
-        onOpenSettings={() => setSettingsOpen(true)}
+        onOpenSettings={() => navigate(settingsPath())}
       />
       <OtherUserProfileModal
         isOpen={contactProfileOpen}

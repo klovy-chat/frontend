@@ -62,44 +62,34 @@ import {
   formatSessionAbsoluteTime,
   formatSessionUserAgent,
 } from "../utils/user/sessionDisplay";
+import type { SettingsSection } from "./routes";
+import "./settings-page.css";
 import "../styles/account/account.css";
 import "../styles/account/profile.css";
 
-interface AccountSettingsModalProps {
-  isOpen?: boolean;
-  onClose?: () => void;
-  inline?: boolean;
-  initialSection?: SectionInput;
-  onSectionChange?: () => void;
+export type { SettingsSection };
+
+interface SettingsViewProps {
+  section: SettingsSection;
+  onSectionChange: (section: SettingsSection) => void;
+  onClose: () => void;
   spotifyOauthError?: string | null;
   spotifyOauthConnected?: boolean;
 }
 
-export type Section = "profil" | "konto" | "sesje" | "glos" | "jezyk" | "integracje" | "ostrzezenia";
-
-type SectionInput = Section | "sesja";
-
-function normalizeSection(section?: SectionInput): Section {
-  if (section === "sesja") return "konto";
-  return section ?? "profil";
-}
-
-export function AccountSettingsModal({
-  isOpen = false,
-  onClose,
-  inline = false,
-  initialSection,
+export function SettingsView({
+  section,
   onSectionChange,
+  onClose,
   spotifyOauthError = null,
   spotifyOauthConnected = false,
-}: AccountSettingsModalProps) {
+}: SettingsViewProps) {
   const { t } = useTranslation();
   const { dateLocale } = useLocale();
   const { user, updateUser, logout, refreshUser } = useAuth();
   const toast = useToast();
   const avatarFileRef = useRef<HTMLInputElement>(null);
   const bannerFileRef = useRef<HTMLInputElement>(null);
-  const [section, setSection] = useState<Section>("profil");
 
   const [profileValues, setProfileValues] = useState<ProfileFormValues>(() =>
     profileValuesFromUser(user),
@@ -119,7 +109,6 @@ export function AccountSettingsModal({
     file: File;
     kind: "avatar" | "banner";
   } | null>(null);
-  const [closing, setClosing] = useState(false);
   const [twoFactorSetupOpen, setTwoFactorSetupOpen] = useState(false);
   const [disablePassword, setDisablePassword] = useState("");
   const [disableCode, setDisableCode] = useState("");
@@ -158,26 +147,10 @@ export function AccountSettingsModal({
     : "";
 
   const requestClose = () => {
-    if (closing) return;
-    if (inline) {
-      onClose?.();
-      return;
-    }
-    setClosing(true);
-    document.body.style.overflow = "";
-    window.setTimeout(() => onClose?.(), 220);
+    onClose();
   };
 
-  const visible = inline || isOpen;
-
   useEffect(() => {
-    if (!visible) return;
-    setSection(normalizeSection(initialSection));
-  }, [visible, initialSection]);
-
-  useEffect(() => {
-    if (!visible) return;
-    setClosing(false);
     setProfileValues(profileValuesFromUser(user));
     setAvatarPreview(user?.image ?? null);
     setBannerPreview(user?.banner ?? null);
@@ -194,23 +167,15 @@ export function AccountSettingsModal({
     setConfirmPassword("");
     setChangePasswordCode("");
     setPasswordError("");
-  }, [visible]);
+  }, [user]);
 
   useEffect(() => {
-    if (!visible || inline) return;
     const fn = (e: KeyboardEvent) => { if (e.key === "Escape") requestClose(); };
     document.addEventListener("keydown", fn);
     return () => document.removeEventListener("keydown", fn);
-  }, [visible, closing, inline]);
+  }, [onClose]);
 
   useEffect(() => {
-    if (inline) return;
-    document.body.style.overflow = isOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
-  }, [isOpen, inline]);
-
-  useEffect(() => {
-    if (!visible) return;
     let cancelled = false;
     setWarningsLoading(true);
     getMyWarnings()
@@ -226,7 +191,7 @@ export function AccountSettingsModal({
     return () => {
       cancelled = true;
     };
-  }, [visible]);
+  }, []);
 
   const loadSessions = async () => {
     setSessionsLoading(true);
@@ -245,14 +210,14 @@ export function AccountSettingsModal({
   };
 
   useEffect(() => {
-    if (!visible || section !== "sesje") return;
+    if (section !== "sesje") return;
     void loadSessions();
-  }, [visible, section]);
+  }, [section]);
 
   // Wejście w zakładkę „Ostrzeżenia" traktujemy jako odczytanie — potwierdzamy
   // wszystkie nieprzeczytane, aby licznik i status były aktualne.
   useEffect(() => {
-    if (!visible || section !== "ostrzezenia" || warningsLoading) return;
+    if (section !== "ostrzezenia" || warningsLoading) return;
     if (!warnings.some((w) => !w.acknowledged)) return;
 
     let cancelled = false;
@@ -272,7 +237,7 @@ export function AccountSettingsModal({
     return () => {
       cancelled = true;
     };
-  }, [visible, section, warnings, warningsLoading]);
+  }, [section, warnings, warningsLoading]);
 
   const activeColorIndex = profileValues.color ?? user?.color ?? null;
   const avatarStyle = useProfileAvatarStyle(
@@ -285,8 +250,6 @@ export function AccountSettingsModal({
     activeColorIndex,
     user?.username ?? "",
   );
-
-  if (!visible && !closing) return null;
 
   const msg = (type: "error" | "success", text: string) => {
     if (type === "error") setError(text);
@@ -670,32 +633,14 @@ export function AccountSettingsModal({
   );
 
   const navPanel = (
-    <aside className={`as-nav${inline ? " as-nav--inline" : ""}`}>
-      {!inline && (
-        <>
-          <div className="as-nav-identity">
-            <div
-              className="as-nav-avatar"
-              style={avatarStyle}
-            >
-              {renderAvatarContent("sm")}
-            </div>
-            <div className="as-nav-identity-text">
-              <strong>{navName}</strong>
-              <span>@{user?.username}</span>
-            </div>
-          </div>
-          <div className="as-nav-divider" />
-        </>
-      )}
-
-      {inline && <h2 className="as-nav-title">{t("settings.title")}</h2>}
+    <aside className="as-nav as-nav--inline">
+      <h2 className="as-nav-title">{t("settings.title")}</h2>
 
       <p className="as-nav-label">{t("settings.nav.account")}</p>
 
       <button
         className={`as-nav-item${section === "konto" ? " active" : ""}`}
-        onClick={() => { setSection("konto"); onSectionChange?.(); }}
+        onClick={() => onSectionChange("konto")}
       >
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
@@ -706,7 +651,7 @@ export function AccountSettingsModal({
 
       <button
         className={`as-nav-item${section === "profil" ? " active" : ""}`}
-        onClick={() => { setSection("profil"); onSectionChange?.(); }}
+        onClick={() => onSectionChange("profil")}
       >
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
@@ -717,7 +662,7 @@ export function AccountSettingsModal({
 
       <button
         className={`as-nav-item${section === "sesje" ? " active" : ""}`}
-        onClick={() => { setSection("sesje"); onSectionChange?.(); }}
+        onClick={() => onSectionChange("sesje")}
       >
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <rect x="2" y="3" width="20" height="14" rx="2"/>
@@ -731,7 +676,7 @@ export function AccountSettingsModal({
 
       <button
         className={`as-nav-item${section === "glos" ? " active" : ""}`}
-        onClick={() => { setSection("glos"); onSectionChange?.(); }}
+        onClick={() => onSectionChange("glos")}
       >
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
@@ -743,7 +688,7 @@ export function AccountSettingsModal({
 
       <button
         className={`as-nav-item${section === "jezyk" ? " active" : ""}`}
-        onClick={() => { setSection("jezyk"); onSectionChange?.(); }}
+        onClick={() => onSectionChange("jezyk")}
       >
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="10"/>
@@ -755,7 +700,7 @@ export function AccountSettingsModal({
 
       <button
         className={`as-nav-item${section === "integracje" ? " active" : ""}`}
-        onClick={() => { setSection("integracje"); onSectionChange?.(); }}
+        onClick={() => onSectionChange("integracje")}
       >
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 2v4"/><path d="M12 18v4"/>
@@ -767,7 +712,7 @@ export function AccountSettingsModal({
 
       <button
         className={`as-nav-item${section === "ostrzezenia" ? " active" : ""}`}
-        onClick={() => { setSection("ostrzezenia"); onSectionChange?.(); }}
+        onClick={() => onSectionChange("ostrzezenia")}
       >
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
@@ -1504,59 +1449,26 @@ export function AccountSettingsModal({
     />
   ) : null;
 
-  if (inline) {
-    return (
-      <>
-        <div className="settings-inline" style={accentStyle}>
-          <div className="app-shell__settings-nav">{navPanel}</div>
-          <div className="app-shell__settings-content as-content as-content--inline">
-            <div className="as-content-topbar">
-              <button
-                type="button"
-                className="as-close as-close--inline"
-                onClick={requestClose}
-                aria-label={t("common.closeSettings")}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                  <line x1="18" y1="6" x2="6" y2="18"/>
-                  <line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-              </button>
-              <span className="as-close-hint">ESC</span>
-            </div>
-            <div className="as-content-inner">
-              {settingsSections}
-            </div>
-          </div>
-        </div>
-        <TwoFactorSetupModal
-          isOpen={twoFactorSetupOpen}
-          onClose={() => setTwoFactorSetupOpen(false)}
-          onEnabled={handleTwoFactorEnabled}
-        />
-        {cropModal}
-      </>
-    );
-  }
-
   return (
     <>
-      <div
-        className={`klovy-backdrop as-backdrop${closing ? " closing" : ""}`}
-        onClick={(e) => { if (e.target === e.currentTarget) requestClose(); }}
-        role="dialog"
-        aria-modal="true"
-        aria-label={t("common.accountSettings")}
-      >
-        <div className="as-shell klovy-shell" style={accentStyle}>
-          {navPanel}
-          <div className="as-content">
-            <button className="as-close" onClick={requestClose} aria-label={t("common.close")}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+      <div className="settings-page-layout" style={accentStyle}>
+        <div className="app-shell__settings-nav">{navPanel}</div>
+        <div className="app-shell__settings-content as-content as-content--inline">
+          <div className="as-content-topbar">
+            <button
+              type="button"
+              className="as-close as-close--inline"
+              onClick={requestClose}
+              aria-label={t("common.closeSettings")}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                 <line x1="18" y1="6" x2="6" y2="18"/>
                 <line x1="6" y1="6" x2="18" y2="18"/>
               </svg>
             </button>
+            <span className="as-close-hint">ESC</span>
+          </div>
+          <div className="as-content-inner settings-section-panel" key={section}>
             {settingsSections}
           </div>
         </div>

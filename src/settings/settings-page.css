@@ -1,0 +1,55 @@
+.settings-page {
+  animation: klovy-fade-in 0.18s ease both;
+}
+
+.settings-page-layout {
+  grid-column: 2 / -1;
+  display: grid;
+  grid-template-columns: var(--settings-nav-width) minmax(0, 1fr);
+  min-height: 0;
+  overflow: hidden;
+  animation: klovy-slide-in 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.settings-page-layout .as-content {
+  min-height: 0;
+}
+
+.settings-section-panel {
+  animation: settings-section-in 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes settings-section-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.as-nav-item {
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    transform 0.12s ease;
+}
+
+.as-nav-item:active {
+  transform: scale(0.98);
+}
+
+.as-action-row,
+.as-setting-row {
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.12s ease;
+}
+
+.as-action-row:active,
+.as-setting-row:active {
+  transform: scale(0.995);
+}

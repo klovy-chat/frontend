@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { getUserChannels } from "../api/channels";
 import { Sidebar } from "../components/sidebar/Sidebar";
 import { ChatWindow } from "../components/chat/ChatWindow";
@@ -23,6 +23,7 @@ function patchContact(
 export function ChatPage() {
   const [active, setActive] = useState<ChatTarget | null>(null);
   const location = useLocation();
+  const navigate = useNavigate();
   const ws = useWebSocket();
 
   useIdleAvailability();
@@ -64,6 +65,14 @@ export function ChatPage() {
           : prev,
       ),
   });
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const spotify = params.get("spotify");
+    if (spotify === "connected" || spotify === "error") {
+      navigate(`/settings/integrations?${params.toString()}`, { replace: true });
+    }
+  }, [location.search, navigate]);
 
   useEffect(() => {
     const openId = (location.state as { openChannelId?: string } | null)?.openChannelId;

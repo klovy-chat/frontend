@@ -11,6 +11,7 @@ import { ProfileSetupPage } from "./pages/ProfileSetupPage";
 import { PendingApprovalPage } from "./pages/PendingApprovalPage";
 import { ChatPage } from "./pages/ChatPage";
 import { InvitePage } from "./pages/InvitePage";
+import { SettingsPage } from "./settings/SettingsPage";
 import { isPendingWhitelist } from "./utils/auth/whitelist";
 import { ToastProvider } from "./context/ToastContext";
 import { LocaleProvider } from "./context/LocaleContext";
@@ -121,6 +122,18 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <InvitePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/settings/:section?"
+        element={
+          <ProtectedRoute>
+            <WebSocketProvider>
+              <PresenceProvider>
+                <SettingsPage />
+              </PresenceProvider>
+            </WebSocketProvider>
           </ProtectedRoute>
         }
       />

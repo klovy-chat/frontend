@@ -40,6 +40,46 @@ export function formatTime(dateStr: string): string {
   });
 }
 
+function localDayKey(date: Date): string {
+  return [
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+  ].join("-");
+}
+
+export function isSameLocalDay(a: string | Date, b: string | Date): boolean {
+  const dateA = a instanceof Date ? a : new Date(a);
+  const dateB = b instanceof Date ? b : new Date(b);
+  if (Number.isNaN(dateA.getTime()) || Number.isNaN(dateB.getTime())) {
+    return false;
+  }
+  return localDayKey(dateA) === localDayKey(dateB);
+}
+
+/** Etykieta separatora dnia w liście wiadomości (Dziś / Wczoraj / 20 lipca 2026). */
+export function formatMessageDateSeparator(dateStr: string): string {
+  const date = new Date(dateStr);
+  if (Number.isNaN(date.getTime())) return i18n.t("common.emDash");
+
+  const now = new Date();
+  if (isSameLocalDay(date, now)) {
+    return i18n.t("common.today");
+  }
+
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  if (isSameLocalDay(date, yesterday)) {
+    return i18n.t("common.yesterday");
+  }
+
+  return date.toLocaleDateString(dateLocale(), {
+    day: "numeric",
+    month: "long",
+    year: date.getFullYear() !== now.getFullYear() ? "numeric" : undefined,
+  });
+}
+
 export type UserLabelSource = {
   displayName?: string | null;
   username?: string;

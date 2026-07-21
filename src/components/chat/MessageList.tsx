@@ -1,7 +1,8 @@
-import { useCallback, useLayoutEffect, useRef } from "react";
+import { useCallback, useLayoutEffect, useRef, Fragment } from "react";
 import { useTranslation } from "react-i18next";
 import { MessageBubble } from "./MessageBubble";
 import type { Message } from "../../types";
+import { formatMessageDateSeparator, isSameLocalDay } from "../../utils/user/format";
 
 interface MessageListProps {
   messages: Message[];
@@ -135,33 +136,42 @@ export function MessageList({
           </button>
         </div>
       )}
-      {hasContent && (
-        <div className="message-list-date">{t("common.today")}</div>
-      )}
       {hasContent && <div className="message-list-spacer" aria-hidden />}
       {messages.length === 0 && !typingUserId ? (
         <p className="empty-chat"></p>
       ) : (
-        messages.map((msg) => (
-          <MessageBubble
-            key={msg._id}
-            message={msg}
-            currentUserId={currentUserId}
-            highlighted={highlightMessageId === msg._id}
-            canReact={canReact}
-            onReact={onReact}
-            canReply={canReply}
-            onReply={onReply}
-            onJumpToMessage={onJumpToMessage}
-            onImageClick={onImageClick}
-            showReadReceipt={showReadReceipt}
-            onEdit={onEdit}
-            onDelete={onDelete}
-            canPin={canPin}
-            onPin={onPin}
-            onUnpin={onUnpin}
-          />
-        ))
+        messages.map((msg, index) => {
+          const prev = messages[index - 1];
+          const showDateSeparator =
+            index === 0 || !isSameLocalDay(msg.timestamp, prev.timestamp);
+
+          return (
+            <Fragment key={msg._id}>
+              {showDateSeparator ? (
+                <div className="message-list-date">
+                  {formatMessageDateSeparator(msg.timestamp)}
+                </div>
+              ) : null}
+              <MessageBubble
+                message={msg}
+                currentUserId={currentUserId}
+                highlighted={highlightMessageId === msg._id}
+                canReact={canReact}
+                onReact={onReact}
+                canReply={canReply}
+                onReply={onReply}
+                onJumpToMessage={onJumpToMessage}
+                onImageClick={onImageClick}
+                showReadReceipt={showReadReceipt}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                canPin={canPin}
+                onPin={onPin}
+                onUnpin={onUnpin}
+              />
+            </Fragment>
+          );
+        })
       )}
       {typingUserId && typingUserId !== currentUserId && (
         <p className="typing-indicator">{t("chat.typing")}</p>
