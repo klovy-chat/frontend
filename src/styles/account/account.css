@@ -1785,15 +1785,61 @@
   margin: 0;
 }
 
-.as-integration-toggle {
+/* Custom checkbox — matches auth login */
+.al-checkbox-wrap {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 14px;
-  font-size: 0.88rem;
-  cursor: pointer;
+  align-items: flex-start;
+  gap: 0.65rem;
+  cursor: var(--cursor-pointer);
+  user-select: none;
 }
 
-.as-integration-footnote {
-  margin-top: 12px;
+.al-checkbox-wrap input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.al-checkbox-box {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--bg-deep);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.al-checkbox-wrap input[type="checkbox"]:checked + .al-checkbox-box {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.al-checkbox-box svg {
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.al-checkbox-wrap input[type="checkbox"]:checked + .al-checkbox-box svg {
+  opacity: 1;
+}
+
+.al-checkbox-text {
+  font-size: 0.88rem;
+  color: var(--text);
+  line-height: 1.55;
+}
+
+.as-integration-share-toggle {
+  margin-top: 14px;
+}
+
+.as-integration-share-toggle input[type="checkbox"]:disabled + .al-checkbox-box {
+  opacity: 0.45;
+  cursor: not-allowed;
 }

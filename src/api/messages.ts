@@ -1,5 +1,9 @@
 import { apiRequest } from "./client";
-import { assertAttachmentSize, assertAttachmentType } from "../constants/upload";
+import {
+  assertAttachmentSize,
+  assertAttachmentType,
+  normalizeMimeType,
+} from "../constants/upload";
 import type { LinkPreviewCard } from "../utils/chat/linkEmbeds";
 import type { Message } from "../types";
 
@@ -38,8 +42,9 @@ export function uploadFile(file: File, context: UploadContext) {
   assertAttachmentType(file);
   const form = new FormData();
   form.append("file", file);
-  if (file.type.trim()) {
-    form.append("contentType", file.type.trim());
+  const contentType = normalizeMimeType(file.type);
+  if (contentType) {
+    form.append("contentType", contentType);
   }
   form.append("contextType", context.type);
   form.append("contextId", context.type === "dm" ? context.contactId : context.channelId);

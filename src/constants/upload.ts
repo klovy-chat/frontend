@@ -84,6 +84,11 @@ export function formatUploadLimitMb(bytes: number): string {
   return `${Math.round(bytes / (1024 * 1024))} MB`;
 }
 
+/** Strip parameters such as `;codecs=opus` from a MIME type. */
+export function normalizeMimeType(mime: string): string {
+  return mime.trim().toLowerCase().split(";")[0]?.trim() ?? "";
+}
+
 export function isImageAttachmentFile(file: File): boolean {
   const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
   return IMAGE_ATTACHMENT_EXTENSIONS.has(ext);
@@ -103,7 +108,7 @@ export function assertAttachmentType(file: File): void {
     );
   }
 
-  const mime = file.type.trim().toLowerCase();
+  const mime = normalizeMimeType(file.type);
   if (!mime) {
     return;
   }

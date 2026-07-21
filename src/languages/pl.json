@@ -318,7 +318,7 @@
     "failed": "Nie udało się wysłać pliku. Spróbuj ponownie.",
     "attachFile": "Załącz plik",
     "removeFile": "Usuń plik",
-    "maxSizeHint": "Maks. {{size}} · JPG, PNG lub WebP",
+    "maxSizeHint": "Maks. {{size}}",
     "maxAttachmentHint": "Maks. {{size}} na plik"
   },
   "imageCrop": {
@@ -979,7 +979,6 @@
       "spotify": {
         "title": "Spotify",
         "intro": "Połącz konto Spotify, aby znajomi widzieli, czego aktualnie słuchasz w Twoim profilu.",
-        "desktopAppHint": "Aktywność słuchania jest synchronizowana tylko z zainstalowanej aplikacji Spotify, nie z odtwarzacza w przeglądarce. Linki Spotify otwierają aplikację desktopową.",
         "notConfigured": "Integracja Spotify nie jest skonfigurowana na serwerze (brak zmiennych SPOTIFY_*).",
         "notConnectedHint": "Połącz konto, aby wyświetlać je w profilu.",
         "connect": "Połącz",

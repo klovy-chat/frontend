@@ -71,6 +71,7 @@ export function SettingsPage() {
         onClose={handleClose}
         spotifyOauthError={spotifyOauthError}
         spotifyOauthConnected={spotifyOauthConnected}
+        onSpotifyOauthHandled={() => setSpotifyOauthConnected(false)}
       />
     </div>
   );

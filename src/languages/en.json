@@ -318,7 +318,7 @@
     "failed": "Could not upload file. Try again.",
     "attachFile": "Attach file",
     "removeFile": "Remove file",
-    "maxSizeHint": "Max {{size}} · JPG, PNG or WebP",
+    "maxSizeHint": "Max {{size}}",
     "maxAttachmentHint": "Max {{size}} per file"
   },
   "imageCrop": {
@@ -979,7 +979,6 @@
       "spotify": {
         "title": "Spotify",
         "intro": "Connect Spotify so friends can see what you are listening to on your profile.",
-        "desktopAppHint": "Listening activity is synced only from the installed Spotify app, not from the web player. Clicking Spotify links opens the desktop app.",
         "notConfigured": "Spotify integration is not configured on the server (missing SPOTIFY_* variables).",
         "notConnectedHint": "Connect your account to show it on your profile.",
         "connect": "Connect",

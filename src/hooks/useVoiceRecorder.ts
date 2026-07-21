@@ -150,10 +150,11 @@ export function useVoiceRecorder(maxDurationMs = MAX_VOICE_DURATION_MS) {
           return;
         }
 
-        const blob = new Blob(chunks, { type: mimeType });
+        const baseMime = mimeType.split(";")[0]?.trim() || mimeType;
+        const blob = new Blob(chunks, { type: baseMime });
         const ext = extensionForMime(mimeType);
         const file = new File([blob], `voice-${Date.now()}.${ext}`, {
-          type: mimeType,
+          type: baseMime,
         });
         resolve({
           file,

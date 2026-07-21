@@ -15,11 +15,13 @@ import type { ConnectedAccount } from "../../types";
 interface IntegrationsPanelProps {
   spotifyOauthError?: string | null;
   spotifyOauthConnected?: boolean;
+  onSpotifyOauthHandled?: () => void;
 }
 
 export function IntegrationsPanel({
   spotifyOauthError = null,
   spotifyOauthConnected = false,
+  onSpotifyOauthHandled,
 }: IntegrationsPanelProps) {
   const { t } = useTranslation();
   const { user, updateUser } = useAuth();
@@ -100,13 +102,17 @@ export function IntegrationsPanel({
   useEffect(() => {
     if (!spotifyOauthConnected) return;
     void refreshStatus().then((status) => {
-      if (!status) return;
+      if (!status) {
+        onSpotifyOauthHandled?.();
+        return;
+      }
       if (status.connected) {
         setError("");
         toast.success(t("modals.integrations.spotify.toastConnected"));
       } else {
         setError(t("modals.integrations.spotify.authIncomplete"));
       }
+      onSpotifyOauthHandled?.();
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [spotifyOauthConnected]);
@@ -213,20 +219,23 @@ export function IntegrationsPanel({
       </div>
 
       {connected ? (
-        <label className="as-integration-toggle">
+        <label className="al-checkbox-wrap as-integration-share-toggle">
           <input
             type="checkbox"
             checked={shareListening}
             disabled={busy || loading}
             onChange={(e) => void handleShareToggle(e.target.checked)}
           />
-          <span>{t("modals.integrations.spotify.shareListening")}</span>
+          <span className="al-checkbox-box">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 6L9 17l-5-5" />
+            </svg>
+          </span>
+          <span className="al-checkbox-text">
+            {t("modals.integrations.spotify.shareListening")}
+          </span>
         </label>
       ) : null}
-
-      <p className="as-hint as-integration-footnote">
-        {t("modals.integrations.spotify.desktopAppHint")}
-      </p>
 
       {error ? <p className="as-error">{error}</p> : null}
     </>

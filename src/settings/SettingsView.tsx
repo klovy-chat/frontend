@@ -78,6 +78,7 @@ interface SettingsViewProps {
   onClose: () => void;
   spotifyOauthError?: string | null;
   spotifyOauthConnected?: boolean;
+  onSpotifyOauthHandled?: () => void;
 }
 
 export function SettingsView({
@@ -86,6 +87,7 @@ export function SettingsView({
   onClose,
   spotifyOauthError = null,
   spotifyOauthConnected = false,
+  onSpotifyOauthHandled,
 }: SettingsViewProps) {
   const { t } = useTranslation();
   const { dateLocale } = useLocale();
@@ -1359,6 +1361,7 @@ export function SettingsView({
             <IntegrationsPanel
               spotifyOauthError={spotifyOauthError}
               spotifyOauthConnected={spotifyOauthConnected}
+              onSpotifyOauthHandled={onSpotifyOauthHandled}
             />
           )}
 
