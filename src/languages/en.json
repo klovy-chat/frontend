@@ -217,6 +217,7 @@
     "revokeDevice": "Log out",
     "revokeDeviceAria": "Log out of this device",
     "revokeDeviceConfirm": "Log out of this device? The session will end immediately.",
+    "revokeCurrentDeviceConfirm": "Log out of this device?",
     "revokeDeviceSuccess": "Device logged out.",
     "securityHint": "If you see unknown sessions, log them out and change your password. Also enable two-factor authentication in My account."
   },

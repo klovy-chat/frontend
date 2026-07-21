@@ -217,6 +217,7 @@
     "revokeDevice": "Wyloguj",
     "revokeDeviceAria": "Wyloguj z tego urządzenia",
     "revokeDeviceConfirm": "Wylogować to urządzenie? Sesja zostanie natychmiast zakończona.",
+    "revokeCurrentDeviceConfirm": "Wylogować się z tego urządzenia?",
     "revokeDeviceSuccess": "Urządzenie zostało wylogowane.",
     "securityHint": "Jeśli widzisz nieznane sesje, wyloguj je i zmień hasło. Włącz też uwierzytelnianie dwuetapowe w sekcji Moje konto."
   },

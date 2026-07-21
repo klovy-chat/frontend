@@ -418,7 +418,10 @@ export function SettingsView({
   const handleLogout = async () => { await logout(); requestClose(); };
 
   const handleRevokeSession = async (session: UserSessionRow) => {
-    if (!window.confirm(t("session.revokeDeviceConfirm"))) return;
+    const confirmKey = session.isCurrent
+      ? "session.revokeCurrentDeviceConfirm"
+      : "session.revokeDeviceConfirm";
+    if (!window.confirm(t(confirmKey))) return;
 
     setSessionActionId(session.id);
     setSessionsError("");
@@ -1278,21 +1281,19 @@ export function SettingsView({
                               </span>
                             ) : null}
                           </p>
-                          {!session.isCurrent ? (
-                            <button
-                              type="button"
-                              className="as-session-revoke-action"
-                              disabled={sessionActionId === session.id}
-                              onClick={() => void handleRevokeSession(session)}
-                              aria-label={t("session.revokeDeviceAria")}
-                            >
-                              {sessionActionId === session.id ? (
-                                <span className="as-session-revoke-spinner" aria-hidden />
-                              ) : (
-                                t("session.revokeDevice")
-                              )}
-                            </button>
-                          ) : null}
+                          <button
+                            type="button"
+                            className="as-session-revoke-action"
+                            disabled={sessionActionId === session.id}
+                            onClick={() => void handleRevokeSession(session)}
+                            aria-label={t("session.revokeDeviceAria")}
+                          >
+                            {sessionActionId === session.id ? (
+                              <span className="as-session-revoke-spinner" aria-hidden />
+                            ) : (
+                              t("session.revokeDevice")
+                            )}
+                          </button>
                         </div>
                         {userAgent ? (
                           <p className="as-session-user-agent" title={userAgent}>
