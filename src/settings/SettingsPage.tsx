@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Navigate, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { AppNavRail } from "../components/layout/AppNavRail";
-import { MobileShellBar } from "../components/layout/MobileShellBar";
+import { MobileShellBar, type ShellOverlay } from "../components/layout/MobileShellBar";
 import { getContactsForList } from "../api/contacts";
 import { getUserChannels } from "../api/channels";
 import { useSpotifyListeningSync } from "../hooks/useSpotifyListeningSync";
@@ -15,8 +15,6 @@ import {
   type SettingsSection,
 } from "./routes";
 import "./settings-page.css";
-
-type ShellOverlay = null | "nav" | "settings-nav";
 
 export function SettingsPage() {
   const { t } = useTranslation();
