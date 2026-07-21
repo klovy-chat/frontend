@@ -138,7 +138,6 @@ export function LoginPage() {
                     spellCheck={false}
                     inputMode="text"
                   />
-                  <p className="al-field-hint">{t("auth.fields.usernameHint")}</p>
                 </div>
 
                 <div className="al-field">

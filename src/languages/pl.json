@@ -486,6 +486,8 @@
       "submitting": "Tworzenie konta…",
       "passwordPlaceholder": "Utwórz silne hasło",
       "passwordHint": "Min. 8 znaków, wielka i mała litera, cyfra oraz znak specjalny (@$!%*?&).",
+      "confirmPassword": "Potwierdź hasło",
+      "confirmPasswordPlaceholder": "Powtórz hasło",
       "termsPrefix": "Oświadczam, że zapoznałem/am się z",
       "termsLink": "Regulaminem",
       "privacyLink": "Polityką prywatności",

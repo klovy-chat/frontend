@@ -486,6 +486,8 @@
       "submitting": "Creating account…",
       "passwordPlaceholder": "Create a strong password",
       "passwordHint": "Min. 8 characters, upper and lowercase letter, digit and special character (@$!%*?&).",
+      "confirmPassword": "Confirm password",
+      "confirmPasswordPlaceholder": "Repeat password",
       "termsPrefix": "I confirm that I have read the",
       "termsLink": "Terms of Service",
       "privacyLink": "Privacy Policy",

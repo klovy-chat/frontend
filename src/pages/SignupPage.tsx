@@ -17,6 +17,9 @@ import { validatePasswordStrength } from "../utils/auth/password";
 import { loadStoredLocale } from "../utils/locale/localeStorage";
 import "../styles/auth/auth.css";
 
+const TERMS_OF_USE_URL = "https://klovy.chat/docs/Terms-of-Use-Klovy-Chat.pdf";
+const PRIVACY_POLICY_URL = "https://klovy.chat/docs/Privacy-Policy-Klovy-Chat.pdf";
+
 export function SignupPage() {
   const { t } = useTranslation();
   const { signup } = useAuth();
@@ -24,7 +27,9 @@ export function SignupPage() {
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState("");
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
@@ -50,6 +55,11 @@ export function SignupPage() {
     const passwordError = validatePasswordStrength(password);
     if (passwordError) {
       setError(passwordError);
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError(t("validation.password.mismatch"));
       return;
     }
 
@@ -106,7 +116,6 @@ export function SignupPage() {
                 spellCheck={false}
                 inputMode="text"
               />
-              <p className="al-field-hint">{t("auth.fields.usernameHint")}</p>
             </div>
 
             <div className="al-field">
@@ -150,6 +159,46 @@ export function SignupPage() {
               <p className="al-field-hint">{t("auth.signup.passwordHint")}</p>
             </div>
 
+            <div className="al-field">
+              <label htmlFor="sp-confirm-password">{t("auth.signup.confirmPassword")}</label>
+              <div className="al-input-wrap">
+                <input
+                  id="sp-confirm-password"
+                  className="al-input--pass"
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder={t("auth.signup.confirmPasswordPlaceholder")}
+                  required
+                  minLength={8}
+                  autoComplete="new-password"
+                />
+                <button
+                  type="button"
+                  className="al-toggle-pass"
+                  onClick={() => setShowConfirmPassword((v) => !v)}
+                  aria-label={
+                    showConfirmPassword
+                      ? t("auth.fields.hidePassword")
+                      : t("auth.fields.showPassword")
+                  }
+                >
+                  {showConfirmPassword ? (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                      <line x1="1" y1="1" x2="23" y2="23"/>
+                    </svg>
+                  ) : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  )}
+                </button>
+              </div>
+            </div>
+
             <TurnstileWidget
               ref={turnstileRef}
               onToken={setTurnstileToken}
@@ -188,13 +237,23 @@ export function SignupPage() {
               </span>
               <span className="al-checkbox-text">
                 {t("auth.signup.termsPrefix")}{" "}
-                <Link to="/regulamin" onClick={(e) => e.stopPropagation()}>
+                <a
+                  href={TERMS_OF_USE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   {t("auth.signup.termsLink")}
-                </Link>
+                </a>
                 {" "}{t("common.and")}{" "}
-                <Link to="/polityka-prywatnosci" onClick={(e) => e.stopPropagation()}>
+                <a
+                  href={PRIVACY_POLICY_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   {t("auth.signup.privacyLink")}
-                </Link>
+                </a>
                 {" "}{t("auth.signup.termsSuffix")}
               </span>
             </label>
