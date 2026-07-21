@@ -21,6 +21,7 @@ import {
   type UserSessionRow,
 } from "../api/auth";
 import { ApiError } from "../api/client";
+import { OsSessionIcon } from "../components/account/OsSessionIcon";
 import { ImageCropModal } from "../components/common/ImageCropModal";
 import {
   MAX_AVATAR_SIZE_BYTES,
@@ -1263,6 +1264,7 @@ export function SettingsView({
                       key={session.id}
                       className={`as-session-row${session.isCurrent ? " as-session-row--current" : ""}`}
                     >
+                      <OsSessionIcon os={session.os} />
                       <div className="as-session-copy">
                         <div className="as-session-title-row">
                           <p className="as-session-device">

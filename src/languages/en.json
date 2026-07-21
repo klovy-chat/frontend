@@ -562,7 +562,7 @@
   "settings": {
     "title": "Settings",
     "nav": {
-      "account": "User settings",
+      "account": "User",
       "myAccount": "My account",
       "profile": "Profile",
       "sessions": "Devices",
@@ -570,7 +570,7 @@
       "bots": "Bots",
       "integrations": "Integrations",
       "warnings": "Warnings",
-      "app": "Client settings",
+      "app": "Client",
       "logout": "Log out",
       "sectionsAria": "Settings sections"
     },
@@ -634,7 +634,7 @@
       "disableAccount": "Disable account",
       "markForDeletion": "Mark for deletion",
       "sessionsTitle": "Devices",
-      "activeSessions": "Sessions signed in to your account. The current device is marked.",
+      "activeSessions": "Sessions signed in to your account.",
       "sessionsLoadFailed": "Could not load sessions.",
       "sessionRevokeFailed": "Could not log out session.",
       "revokeOthersFailed": "Could not log out other sessions."
@@ -1064,7 +1064,7 @@
     "accountSettings": {
       "title": "Settings",
       "nav": {
-        "account": "User settings",
+        "account": "User",
         "myAccount": "My account",
         "profile": "Profile",
         "sessions": "Devices",
@@ -1072,7 +1072,7 @@
         "bots": "Bots",
         "integrations": "Integrations",
         "warnings": "Warnings",
-        "app": "Client settings",
+        "app": "Client",
         "logout": "Log out",
         "sectionsAria": "Settings sections"
       },
@@ -1136,7 +1136,7 @@
         "disableAccount": "Disable account",
         "markForDeletion": "Mark for deletion",
         "sessionsTitle": "Devices",
-        "activeSessions": "Sessions signed in to your account. The current device is marked.",
+        "activeSessions": "Sessions signed in to your account.",
         "sessionsLoadFailed": "Could not load sessions.",
         "sessionRevokeFailed": "Could not log out session.",
         "revokeOthersFailed": "Could not log out other sessions."

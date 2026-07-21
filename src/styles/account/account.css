@@ -571,7 +571,9 @@
 
 /* ── Session section ── */
 .as-session-row {
-  display: block;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
   padding: 1rem 1.1rem;
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -590,7 +592,41 @@
 }
 
 .as-session-copy {
+  flex: 1;
   min-width: 0;
+}
+
+.as-session-icon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: var(--bg-hover);
+  color: var(--text-muted);
+}
+
+.as-session-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.as-session-icon__brand {
+  width: 22px;
+  height: 22px;
+  display: block;
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+}
+
+.as-session-icon--unknown {
+  opacity: 0.75;
 }
 
 .as-session-title-row {

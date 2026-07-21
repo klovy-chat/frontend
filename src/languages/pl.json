@@ -562,7 +562,7 @@
   "settings": {
     "title": "Ustawienia",
     "nav": {
-      "account": "Ustawienia użytkownika",
+      "account": "Użytkownik",
       "myAccount": "Moje konto",
       "profile": "Profil",
       "sessions": "Urządzenia",
@@ -570,7 +570,7 @@
       "bots": "Boty",
       "integrations": "Integracje",
       "warnings": "Ostrzeżenia",
-      "app": "Ustawienia klienta",
+      "app": "Klient",
       "logout": "Wyloguj się",
       "sectionsAria": "Sekcje ustawień"
     },
@@ -634,7 +634,7 @@
       "disableAccount": "Wyłącz konto",
       "markForDeletion": "Oznacz do usunięcia",
       "sessionsTitle": "Urządzenia",
-      "activeSessions": "Sesje zalogowane na Twoim koncie. Bieżące urządzenie jest oznaczone.",
+      "activeSessions": "Sesje zalogowane na Twoim koncie.",
       "sessionsLoadFailed": "Nie udało się pobrać sesji.",
       "sessionRevokeFailed": "Nie udało się wylogować sesji.",
       "revokeOthersFailed": "Nie udało się wylogować innych sesji."
@@ -1064,7 +1064,7 @@
     "accountSettings": {
       "title": "Ustawienia",
       "nav": {
-        "account": "Ustawienia użytkownika",
+        "account": "Użytkownik",
         "myAccount": "Moje konto",
         "profile": "Profil",
         "sessions": "Urządzenia",
@@ -1072,7 +1072,7 @@
         "bots": "Boty",
         "integrations": "Integracje",
         "warnings": "Ostrzeżenia",
-        "app": "Ustawienia klienta",
+        "app": "Klient",
         "logout": "Wyloguj się",
         "sectionsAria": "Sekcje ustawień"
       },
@@ -1136,7 +1136,7 @@
         "disableAccount": "Wyłącz konto",
         "markForDeletion": "Oznacz do usunięcia",
         "sessionsTitle": "Urządzenia",
-        "activeSessions": "Sesje zalogowane na Twoim koncie. Bieżące urządzenie jest oznaczone.",
+        "activeSessions": "Sesje zalogowane na Twoim koncie.",
         "sessionsLoadFailed": "Nie udało się pobrać sesji.",
         "sessionRevokeFailed": "Nie udało się wylogować sesji.",
         "revokeOthersFailed": "Nie udało się wylogować innych sesji."

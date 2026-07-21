@@ -7,6 +7,38 @@ export function displaySessionOs(os: string): string {
   return simplified || os.trim() || i18n.t("session.unknownOs");
 }
 
+export type OsIconKey = "windows" | "mac" | "ios" | "android" | "linux" | "unknown";
+
+export function resolveOsIconKey(os: string): OsIconKey {
+  const raw = `${primaryOsSegment(os)} ${os}`.trim().toLowerCase();
+  if (!raw) return "unknown";
+
+  if (raw.includes("android")) return "android";
+  if (raw.includes("iphone") || raw.includes("ipad") || /\bios\b/.test(raw)) return "ios";
+  if (
+    raw.includes("mac")
+    || raw.includes("darwin")
+    || raw.includes("os x")
+    || raw.includes("macos")
+  ) {
+    return "mac";
+  }
+  if (raw.includes("windows") || raw.includes("win32") || raw.includes("win64") || /\bwin\b/.test(raw)) {
+    return "windows";
+  }
+  if (
+    raw.includes("linux")
+    || raw.includes("ubuntu")
+    || raw.includes("debian")
+    || raw.includes("fedora")
+    || raw.includes("arch")
+  ) {
+    return "linux";
+  }
+
+  return "unknown";
+}
+
 export function formatSessionAbsoluteTime(value: string | null): string {
   if (!value) return i18n.t("common.emDash");
   const date = new Date(value);
