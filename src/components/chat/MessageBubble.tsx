@@ -17,6 +17,7 @@ import {
   shouldHideTextForExternalMedia,
 } from "./MessageExternalMedia";
 import { isVideoAttachment, isVoiceAttachment } from "../../utils/media/attachments";
+import { isOnlyInviteLinkContent } from "../../utils/chat/linkEmbeds";
 import type { Message, MessageUser } from "../../types";
 import "../../styles/chat/messagebubble.css";
 
@@ -460,7 +461,8 @@ export function MessageBubble({
               </>
             ) : (
               <>
-                {!shouldHideTextForExternalMedia(message.content) && (
+                {!shouldHideTextForExternalMedia(message.content) &&
+                  !isOnlyInviteLinkContent(message.content) && (
                   <p className="message-text">
                     {renderFormattedText(message.content, {
                       mentions: message.mentions,

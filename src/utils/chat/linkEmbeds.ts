@@ -59,6 +59,19 @@ export function extractInviteLinks(text: string): ResolvedInviteLink[] {
   return invites;
 }
 
+/** True when the message is only invite URL(s) — hide redundant raw link text. */
+export function isOnlyInviteLinkContent(content: string): boolean {
+  const invites = extractInviteLinks(content);
+  if (invites.length === 0) return false;
+
+  const withoutInvites = content
+    .replace(HTTP_URL_REGEX, (url) => (isInviteUrl(url) ? "" : url))
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return withoutInvites.length === 0;
+}
+
 function isInviteUrl(raw: string): boolean {
   return INVITE_ID_REGEX.test(raw);
 }
