@@ -548,7 +548,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
   }, [mentionToast, contacts, channels, onSelect, clearMention]);
 
   useProfileSync(ws, {
-    onInfo: ({ userId, username, displayName, bio, color }) =>
+    onInfo: ({ userId, username, displayName, bio, color, connectedAccounts }) => {
       setContacts((prev) =>
         prev.map((c) =>
           c._id === userId
@@ -558,10 +558,24 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
                 displayName: displayName ?? c.displayName,
                 bio: bio ?? c.bio,
                 color: color ?? c.color,
+                connectedAccounts: connectedAccounts ?? c.connectedAccounts,
               }
             : c,
         ),
-      ),
+      );
+      setContactProfile((prev) =>
+        prev && prev._id === userId
+          ? {
+              ...prev,
+              username: username ?? prev.username,
+              displayName: displayName ?? prev.displayName,
+              bio: bio ?? prev.bio,
+              color: color ?? prev.color,
+              connectedAccounts: connectedAccounts ?? prev.connectedAccounts,
+            }
+          : prev,
+      );
+    },
     onImage: ({ userId, image }) =>
       setContacts((prev) =>
         prev.map((c) => (c._id === userId ? { ...c, image } : c)),

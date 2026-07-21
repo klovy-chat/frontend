@@ -1,5 +1,5 @@
 import { apiRequest, withTransientRetry } from "./client";
-import { assertAvatarSize } from "../constants/upload";
+import { assertAvatarSize, assertBannerSize } from "../constants/upload";
 import type { User } from "../types";
 
 export interface AuthResponse {
@@ -231,7 +231,7 @@ export function removeProfileImage() {
 }
 
 export function addProfileBanner(file: File) {
-  assertAvatarSize(file);
+  assertBannerSize(file);
   const form = new FormData();
   form.append("profile-banner", file);
   return withTransientRetry(() =>

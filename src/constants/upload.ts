@@ -6,8 +6,11 @@ export const MAX_ATTACHMENT_SIZE_BYTES = 10 * 1024 * 1024;
 /** Maximum chat image upload size (3 MB) — must match backend `MAX_IMAGE_ATTACHMENT_BYTES`. */
 export const MAX_IMAGE_ATTACHMENT_SIZE_BYTES = 3 * 1024 * 1024;
 
-/** Maximum avatar/banner size (5 MB) — must match backend `MAX_AVATAR_BYTES`. */
-export const MAX_AVATAR_SIZE_BYTES = 5 * 1024 * 1024;
+/** Maximum avatar size (6 MB) — must match backend `MAX_AVATAR_BYTES`. */
+export const MAX_AVATAR_SIZE_BYTES = 6 * 1024 * 1024;
+
+/** Maximum profile banner size (7 MB) — must match backend `MAX_BANNER_BYTES`. */
+export const MAX_BANNER_SIZE_BYTES = 7 * 1024 * 1024;
 
 /** Human-readable max attachment size, e.g. "10 MB". */
 export const MAX_ATTACHMENT_SIZE_LABEL = `${Math.round(
@@ -19,9 +22,14 @@ export const MAX_IMAGE_ATTACHMENT_SIZE_LABEL = `${Math.round(
   MAX_IMAGE_ATTACHMENT_SIZE_BYTES / (1024 * 1024),
 )} MB`;
 
-/** Human-readable max avatar/banner size, e.g. "5 MB". */
+/** Human-readable max avatar size, e.g. "6 MB". */
 export const MAX_AVATAR_SIZE_LABEL = `${Math.round(
   MAX_AVATAR_SIZE_BYTES / (1024 * 1024),
+)} MB`;
+
+/** Human-readable max banner size, e.g. "7 MB". */
+export const MAX_BANNER_SIZE_LABEL = `${Math.round(
+  MAX_BANNER_SIZE_BYTES / (1024 * 1024),
 )} MB`;
 
 export const ALLOWED_ATTACHMENT_EXTENSIONS = [
@@ -127,6 +135,16 @@ export function assertAvatarSize(file: File): void {
     throw new Error(
       i18n.t("upload.avatarTooLarge", {
         limit: formatUploadLimitMb(MAX_AVATAR_SIZE_BYTES),
+      }),
+    );
+  }
+}
+
+export function assertBannerSize(file: File): void {
+  if (file.size > MAX_BANNER_SIZE_BYTES) {
+    throw new Error(
+      i18n.t("upload.avatarTooLarge", {
+        limit: formatUploadLimitMb(MAX_BANNER_SIZE_BYTES),
       }),
     );
   }

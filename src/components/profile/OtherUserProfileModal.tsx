@@ -6,6 +6,7 @@ import { userLabel, formatJoinedDate, availabilityStatusLabel } from "../../util
 import { presenceColor } from "../../utils/user/presence";
 import { useProfileBannerStyle } from "../../hooks/usePublicMediaCacheRevision";
 import { useAnimatedModal } from "../../hooks/useAnimatedModal";
+import { ConnectedAccountsSection } from "./ConnectedAccountsSection";
 import { ListeningActivitySection } from "./ListeningActivitySection";
 import { ProfileBadgesSection } from "./ProfileBadgesSection";
 import type { Contact } from "../../types";
@@ -144,6 +145,8 @@ export function OtherUserProfileModal({
           </div>
 
           <ListeningActivitySection activity={displayedUser.listeningActivity} />
+
+          <ConnectedAccountsSection accounts={displayedUser.connectedAccounts} />
 
           {!isFriend ? (
             <p className="up-not-friend-hint">

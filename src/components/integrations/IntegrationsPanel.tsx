@@ -4,13 +4,13 @@ import {
   connectSpotify,
   disconnectSpotify,
   getSpotifyStatus,
-  syncSpotifyListening,
   updateShareListening,
 } from "../../api/integrations";
 import { notifySpotifyConnectionChanged } from "../../utils/sync/spotifyConnectionSync";
-import { getClientInstanceId } from "../../utils/env/clientInstanceId";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
+import { IntegrationProviderIcon } from "../profile/IntegrationProviderIcon";
+import type { ConnectedAccount } from "../../types";
 
 interface IntegrationsPanelProps {
   spotifyOauthError?: string | null;
@@ -27,6 +27,7 @@ export function IntegrationsPanel({
   const [connected, setConnected] = useState(false);
   const [enabled, setEnabled] = useState(false);
   const [shareListening, setShareListening] = useState(true);
+  const [accountName, setAccountName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -38,6 +39,33 @@ export function IntegrationsPanel({
     }
   }, [spotifyOauthError, toast]);
 
+  const applyStatusToUser = (
+    statusConnected: boolean,
+    statusShareListening: boolean,
+    nextAccountName: string | null,
+    nextProfileUrl: string | null,
+  ) => {
+    if (!user) return;
+    const connectedAccounts: ConnectedAccount[] =
+      statusConnected && nextAccountName && nextProfileUrl
+        ? [
+            {
+              provider: "spotify",
+              accountName: nextAccountName,
+              profileUrl: nextProfileUrl,
+            },
+          ]
+        : [];
+
+    updateUser({
+      ...user,
+      shareListening: statusShareListening,
+      spotifyConnected: statusConnected,
+      connectedAccounts,
+      listeningActivity: statusConnected ? user.listeningActivity : null,
+    });
+  };
+
   const refreshStatus = () => {
     setLoading(true);
     return getSpotifyStatus()
@@ -45,13 +73,13 @@ export function IntegrationsPanel({
         setConnected(status.connected);
         setEnabled(status.enabled);
         setShareListening(status.shareListening);
-        if (user) {
-          updateUser({
-            ...user,
-            shareListening: status.shareListening,
-            spotifyConnected: status.connected,
-          });
-        }
+        setAccountName(status.accountName ?? null);
+        applyStatusToUser(
+          status.connected,
+          status.shareListening,
+          status.accountName ?? null,
+          status.profileUrl ?? null,
+        );
         if (status.connected) {
           notifySpotifyConnectionChanged();
         }
@@ -100,48 +128,11 @@ export function IntegrationsPanel({
     try {
       await disconnectSpotify();
       setConnected(false);
-      if (user) {
-        updateUser({ ...user, listeningActivity: null, shareListening });
-      }
+      setAccountName(null);
+      applyStatusToUser(false, shareListening, null, null);
       toast.success(t("modals.integrations.spotify.toastDisconnected"));
     } catch (err) {
       setError(err instanceof Error ? err.message : t("modals.integrations.spotify.disconnectFailed"));
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const handleTestSync = async () => {
-    if (!user) return;
-    setBusy(true);
-    setError("");
-    try {
-      const result = await syncSpotifyListening({
-        clientType: "web",
-        clientInstanceId: getClientInstanceId(),
-      });
-      updateUser({
-        ...user,
-        shareListening: result.shareListening,
-        listeningActivity: result.listeningActivity,
-      });
-      if (result.listeningActivity?.isPlaying && result.listeningActivity.trackTitle) {
-        const artist = result.listeningActivity.artist
-          ? ` — ${result.listeningActivity.artist}`
-          : "";
-        toast.success(
-          t("modals.integrations.spotify.syncDetected", {
-            track: result.listeningActivity.trackTitle,
-            artist,
-          }),
-        );
-      } else if (!result.shareListening) {
-        setError(t("modals.integrations.spotify.shareRequired"));
-      } else {
-        setError(t("modals.integrations.spotify.noPlayback"));
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t("modals.integrations.spotify.syncFailed"));
     } finally {
       setBusy(false);
     }
@@ -178,93 +169,66 @@ export function IntegrationsPanel({
   return (
     <>
       <h2 className="as-section-title">{t("modals.integrations.title")}</h2>
+      <p className="as-group-label as-group-label--language">
+        {t("modals.integrations.subtitle")}
+      </p>
 
-      <div className="as-card">
-        <span className="as-card-label">{t("modals.integrations.spotify.title")}</span>
-        <p className="as-hint">{t("modals.integrations.spotify.intro")}</p>
-        <p className="as-hint" style={{ marginTop: 8 }}>
-          {t("modals.integrations.spotify.apiPrivacyNote")}
-        </p>
-        <p className="as-hint" style={{ marginTop: 8 }}>
-          {t("modals.integrations.spotify.reconnectNote")}
-        </p>
-
+      <div className="as-integration-list">
         {loading ? (
           <p className="as-hint">{t("common.loading")}</p>
         ) : !enabled ? (
           <p className="as-hint">{t("modals.integrations.spotify.notConfigured")}</p>
         ) : (
-          <>
-            <div className="as-session-row">
-              <div>
-                <strong>
-                  {connected
-                    ? t("modals.integrations.spotify.connected")
-                    : t("modals.integrations.spotify.notConnected")}
-                </strong>
-                <p className="as-hint" style={{ margin: "4px 0 0" }}>
-                  {connected
-                    ? t("modals.integrations.spotify.connectedHint")
-                    : t("modals.integrations.spotify.notConnectedHint")}
-                </p>
-              </div>
-              {connected ? (
-                <button
-                  type="button"
-                  className="as-btn-ghost"
-                  disabled={busy}
-                  onClick={() => void handleDisconnect()}
-                >
-                  {t("modals.integrations.spotify.disconnect")}
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  className="as-btn-primary"
-                  disabled={busy}
-                  onClick={() => void handleConnect()}
-                >
-                  {busy ? t("common.connecting") : t("modals.integrations.spotify.connect")}
-                </button>
-              )}
+          <div className="as-integration-row">
+            <IntegrationProviderIcon provider="spotify" className="as-integration-icon" />
+            <div className="as-integration-copy">
+              <strong>{t("modals.integrations.spotify.title")}</strong>
+              <p className="as-hint">
+                {connected && accountName
+                  ? accountName
+                  : t("modals.integrations.spotify.notConnectedHint")}
+              </p>
             </div>
-
             {connected ? (
-              <>
-                <label
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 10,
-                    marginTop: 16,
-                    fontSize: "0.88rem",
-                    cursor: busy ? "not-allowed" : "pointer",
-                  }}
-                >
-                  <input
-                    type="checkbox"
-                    checked={shareListening}
-                    disabled={busy}
-                    onChange={(e) => void handleShareToggle(e.target.checked)}
-                  />
-                  <span>{t("modals.integrations.spotify.shareListening")}</span>
-                </label>
-                <button
-                  type="button"
-                  className="as-btn-ghost"
-                  disabled={busy}
-                  style={{ marginTop: 12 }}
-                  onClick={() => void handleTestSync()}
-                >
-                  {busy ? t("common.checking") : t("modals.integrations.spotify.syncNow")}
-                </button>
-              </>
-            ) : null}
-          </>
+              <button
+                type="button"
+                className="as-btn-ghost"
+                disabled={busy}
+                onClick={() => void handleDisconnect()}
+              >
+                {t("modals.integrations.spotify.disconnect")}
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="as-btn-primary"
+                disabled={busy}
+                onClick={() => void handleConnect()}
+              >
+                {busy ? t("common.connecting") : t("modals.integrations.spotify.connect")}
+              </button>
+            )}
+          </div>
         )}
-
-        {error ? <p className="as-error">{error}</p> : null}
       </div>
+
+      {connected ? (
+        <label className="as-integration-toggle">
+          <input
+            type="checkbox"
+            checked={shareListening}
+            disabled={busy || loading}
+            onChange={(e) => void handleShareToggle(e.target.checked)}
+          />
+          <span>{t("modals.integrations.spotify.shareListening")}</span>
+        </label>
+      ) : null}
+
+      <p className="as-hint as-integration-footnote">
+        {t("modals.integrations.spotify.desktopAppHint")}
+      </p>
+
+      {error ? <p className="as-error">{error}</p> : null}
     </>
   );
 }

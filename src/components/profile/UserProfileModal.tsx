@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { Avatar } from "../common/Avatar";
+import { ConnectedAccountsSection } from "./ConnectedAccountsSection";
 import { ListeningActivitySection } from "./ListeningActivitySection";
 import { ProfileBadgesSection } from "./ProfileBadgesSection";
 import { useAuth } from "../../context/AuthContext";
@@ -122,6 +123,8 @@ export function UserProfileModal({
           </div>
 
           <ListeningActivitySection activity={user.listeningActivity} />
+
+          <ConnectedAccountsSection accounts={user.connectedAccounts} />
 
           <ProfileBadgesSection badges={user.badges} />
 

@@ -5,6 +5,8 @@ export interface SpotifyStatus {
   connected: boolean;
   shareListening: boolean;
   enabled: boolean;
+  accountName?: string | null;
+  profileUrl?: string | null;
 }
 
 export interface SpotifySyncResult {

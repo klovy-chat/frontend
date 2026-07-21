@@ -29,7 +29,7 @@ export function ChatPage() {
   useIdleAvailability();
 
   useProfileSync(ws, {
-    onInfo: ({ userId, username, displayName, bio, color }) =>
+    onInfo: ({ userId, username, displayName, bio, color, connectedAccounts }) =>
       setActive((prev) =>
         prev?.type === "dm" && prev.contact._id === userId
           ? {
@@ -39,6 +39,7 @@ export function ChatPage() {
                 displayName: displayName ?? prev.contact.displayName,
                 bio: bio ?? prev.contact.bio,
                 color: color ?? prev.contact.color,
+                connectedAccounts: connectedAccounts ?? prev.contact.connectedAccounts,
               }),
             }
           : prev,

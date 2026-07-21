@@ -975,22 +975,16 @@
     },
     "integrations": {
       "title": "Integrations",
+      "subtitle": "Connect your accounts",
       "spotify": {
         "title": "Spotify",
         "intro": "Connect Spotify so friends can see what you are listening to on your profile.",
-        "syncHint": "Sync requires active playback in the Spotify app or open.spotify.com.",
-        "privacyHint": "You can hide listening activity from friends at any time.",
-        "apiPrivacyNote": "Klovy fetches playback info only via the official Spotify API. The app does not monitor browser tabs or access local files or playback history.",
-        "reconnectNote": "If status is still not visible after connecting, disconnect Klovy in Spotify connected apps settings, then authorize again.",
+        "desktopAppHint": "Listening activity is synced only from the installed Spotify app, not from the web player. Clicking Spotify links opens the desktop app.",
         "notConfigured": "Spotify integration is not configured on the server (missing SPOTIFY_* variables).",
-        "connected": "Connected",
-        "notConnected": "Not connected",
-        "connectedHint": "Klovy syncs the track from your Spotify account.",
-        "notConnectedHint": "Connect your account to enable \"Currently listening\".",
-        "connect": "Connect Spotify",
+        "notConnectedHint": "Connect your account to show it on your profile.",
+        "connect": "Connect",
         "disconnect": "Disconnect",
         "shareListening": "Show friends what I'm listening to",
-        "syncNow": "Check what I'm listening to now",
         "toastConnected": "Connected to Spotify.",
         "toastDisconnected": "Spotify account disconnected.",
         "authIncomplete": "Spotify authorization finished but the connection was not saved. Click \"Connect Spotify\" again.",
@@ -1160,6 +1154,12 @@
   "profile": {
     "listening": {
       "title": "Currently listening"
+    },
+    "connectedAccounts": {
+      "title": "Connected accounts",
+      "providers": {
+        "spotify": "Spotify"
+      }
     },
     "form": {
       "displayName": "Display name",

@@ -58,10 +58,21 @@ export function useSpotifyListeningSync(): void {
         armedRef.current = status.connected;
         const current = userRef.current;
         if (current) {
+          const connectedAccounts =
+            status.connected && status.accountName && status.profileUrl
+              ? [
+                  {
+                    provider: "spotify" as const,
+                    accountName: status.accountName,
+                    profileUrl: status.profileUrl,
+                  },
+                ]
+              : [];
           updateUser({
             ...current,
             shareListening: status.shareListening,
             spotifyConnected: status.connected,
+            connectedAccounts,
             listeningActivity: status.connected
               ? current.listeningActivity
               : null,

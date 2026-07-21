@@ -13,6 +13,7 @@ interface ProfileInfoUpdate {
   displayName?: string | null;
   bio?: string | null;
   color?: number | null;
+  connectedAccounts?: import("../types").ConnectedAccount[];
 }
 
 interface ProfileImageUpdate {

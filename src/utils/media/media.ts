@@ -1,6 +1,4 @@
-import { getBackendBaseUrl } from "../env/backendUrl";
-import { usesDirectBackendUrl } from "../env/appEnv";
-import { isAttachmentKey, privateAttachmentApiUrl } from "./cdn";
+import { isAttachmentKey, publicCdnUrl } from "./cdn";
 import { isAllowedExternalMediaUrl, isSafeMessageUploadPath } from "./mediaAllowlist";
 import { CLIENT_HEADER_NAME, CLIENT_IDENTIFIER } from "../env/clientId";
 import i18n from "../../i18n/config";
@@ -24,12 +22,25 @@ function fetchMediaResource(url: string): Promise<Response> {
   });
 }
 
-function attachmentApiUrl(path: string): string {
-  let url = privateAttachmentApiUrl(path);
-  if (usesDirectBackendUrl) {
-    url = `${getBackendBaseUrl()}${url}`;
+function attachmentCdnUrl(path: string): string {
+  return publicCdnUrl(path);
+}
+
+/** Rewrites old `/api/messages/attachment?path=…` URLs to CDN keys. */
+function extractLegacyAttachmentPath(url: string): string | null {
+  try {
+    const parsed = new URL(url);
+    if (!parsed.pathname.endsWith("/api/messages/attachment")) {
+      return null;
+    }
+    const path = parsed.searchParams.get("path")?.trim();
+    if (!path || !isSafeMessageUploadPath(path) || !isAttachmentKey(path)) {
+      return null;
+    }
+    return path.replace(/^\/+/, "");
+  } catch {
+    return null;
   }
-  return url;
 }
 
 export function resolveMediaUrl(fileUrl: string): string | null {
@@ -41,6 +52,10 @@ export function resolveMediaUrl(fileUrl: string): string | null {
   }
 
   if (/^https?:\/\//i.test(trimmed)) {
+    const legacyAttachmentPath = extractLegacyAttachmentPath(trimmed);
+    if (legacyAttachmentPath) {
+      return publicCdnUrl(legacyAttachmentPath);
+    }
     return isAllowedExternalMediaUrl(trimmed) ? trimmed : null;
   }
 
@@ -50,7 +65,7 @@ export function resolveMediaUrl(fileUrl: string): string | null {
   }
 
   if (isAttachmentKey(path)) {
-    return attachmentApiUrl(path);
+    return attachmentCdnUrl(path);
   }
 
   return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
@@ -74,7 +89,7 @@ export function resolveChatImagePreviewUrl(fileUrl: string): string {
   return attachmentThumbKey(fileUrl) ?? fileUrl.trim();
 }
 
-/** @deprecated Use resolveMediaUrl — attachments always go through the auth proxy. */
+/** @deprecated Use resolveMediaUrl. */
 export function legacyAttachmentFallbackUrl(fileUrl: string): string | null {
   return resolveMediaUrl(fileUrl);
 }
@@ -101,22 +116,15 @@ export async function downloadMediaFile(
   const displayName = fileName.trim() || i18n.t("common.download");
 
   if (isLocalUpload(fileUrl)) {
-    const path = fileUrl.replace(/^\/+/, "");
-    if (!isSafeMessageUploadPath(path)) {
+    const resolvedUrl = resolveMediaUrl(fileUrl);
+    if (!resolvedUrl) {
       throw new Error(i18n.t("media.invalidUrl"));
     }
-    const params = new URLSearchParams({ path, name: displayName });
-    let downloadUrl = `/api/messages/download-file?${params}`;
 
-    if (usesDirectBackendUrl) {
-      downloadUrl = `${getBackendBaseUrl()}${downloadUrl}`;
-    }
-
-    const response = await fetchMediaResource(downloadUrl);
+    const response = await fetchMediaResource(resolvedUrl);
     if (!response.ok) {
       throw new Error(i18n.t("media.downloadFailed"));
     }
-
     triggerBlobDownload(await response.blob(), displayName);
     return;
   }

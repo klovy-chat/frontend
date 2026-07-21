@@ -275,6 +275,11 @@
   border-color: transparent;
 }
 
-.settings-page .as-lang-row:hover {
-  background: var(--bg-settings-card-hover);
+.settings-page .as-integration-row {
+  background: var(--bg-settings-card);
+  border-color: transparent;
+}
+
+.settings-page .as-integration-footnote {
+  margin-top: 8px;
 }

@@ -26,6 +26,8 @@ import { ImageCropModal } from "../components/common/ImageCropModal";
 import {
   MAX_AVATAR_SIZE_BYTES,
   MAX_AVATAR_SIZE_LABEL,
+  MAX_BANNER_SIZE_BYTES,
+  MAX_BANNER_SIZE_LABEL,
 } from "../constants/upload";
 import { TwoFactorSetupModal } from "../components/auth/TwoFactorSetupModal";
 import { IntegrationsPanel } from "../components/integrations/IntegrationsPanel";
@@ -332,10 +334,12 @@ export function SettingsView({
 
   const pickImageForCrop = (file: File, kind: "avatar" | "banner") => {
     msg("error", "");
-    if (file.size > MAX_AVATAR_SIZE_BYTES) {
+    const maxBytes = kind === "banner" ? MAX_BANNER_SIZE_BYTES : MAX_AVATAR_SIZE_BYTES;
+    const maxLabel = kind === "banner" ? MAX_BANNER_SIZE_LABEL : MAX_AVATAR_SIZE_LABEL;
+    if (file.size > maxBytes) {
       msg(
         "error",
-        t("upload.avatarTooLarge", { limit: MAX_AVATAR_SIZE_LABEL }),
+        t("upload.avatarTooLarge", { limit: maxLabel }),
       );
       return;
     }
@@ -809,12 +813,8 @@ export function SettingsView({
                     </button>
                   )}
                   <p className="as-upload-hint">
-                    {t("upload.maxSizeHint", { size: MAX_AVATAR_SIZE_LABEL })}
+                    {t("upload.maxSizeHint", { size: MAX_BANNER_SIZE_LABEL })}
                   </p>
-                </div>
-              </div>
-
-              <div className="as-profile-header-row">
                 <button
                   type="button"
                   className="as-avatar-lg"
@@ -1441,7 +1441,9 @@ export function SettingsView({
           ? t("imageCrop.avatarTitle")
           : t("imageCrop.bannerTitle")
       }
-      maxSizeLabel={MAX_AVATAR_SIZE_LABEL}
+      maxSizeLabel={
+        cropTarget.kind === "avatar" ? MAX_AVATAR_SIZE_LABEL : MAX_BANNER_SIZE_LABEL
+      }
       busy={cropTarget.kind === "avatar" ? avatarLoading : bannerLoading}
       onCancel={() => setCropTarget(null)}
       onConfirm={handleCropConfirm}

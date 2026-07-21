@@ -27,9 +27,3 @@ export function isAttachmentKey(path: string): boolean {
     normalized.startsWith("attachments/groups/")
   );
 }
-
-export function privateAttachmentApiUrl(key: string): string {
-  const normalized = key.trim().replace(/^\/+/, "");
-  const params = new URLSearchParams({ path: normalized });
-  return `/api/messages/attachment?${params.toString()}`;
-}

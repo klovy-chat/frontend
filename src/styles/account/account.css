@@ -1746,3 +1746,54 @@
   border: 2px solid var(--border-light);
   background: transparent;
 }
+
+/* ── Integrations ── */
+.as-integration-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.as-integration-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+}
+
+.as-integration-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+}
+
+.as-integration-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.as-integration-copy strong {
+  display: block;
+  font-size: 0.92rem;
+  margin-bottom: 2px;
+}
+
+.as-integration-copy .as-hint {
+  margin: 0;
+}
+
+.as-integration-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+
+.as-integration-footnote {
+  margin-top: 12px;
+}

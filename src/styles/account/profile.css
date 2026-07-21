@@ -328,8 +328,15 @@
 
 .up-listening-link {
   display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
   text-decoration: none;
   color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: var(--cursor-pointer);
   border-radius: 10px;
   transition: background 0.15s ease;
 }
@@ -405,5 +412,75 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  width: 18px;
+  height: 18px;
   opacity: 0.95;
+}
+
+.up-connected-section {
+  margin-bottom: 18px;
+}
+
+.up-connected-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.up-connected-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: var(--cursor-pointer);
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.up-connected-row:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: color-mix(in srgb, var(--accent) 28%, rgba(255, 255, 255, 0.08));
+}
+
+.up-connected-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.up-connected-icon--spotify {
+  background: #1db954;
+  color: #fff;
+}
+
+.up-connected-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.up-connected-provider {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.up-connected-name {
+  font-size: 0.78rem;
+  color: rgba(240, 237, 248, 0.72);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

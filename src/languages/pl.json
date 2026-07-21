@@ -975,22 +975,16 @@
     },
     "integrations": {
       "title": "Integracje",
+      "subtitle": "Połącz swoje konta",
       "spotify": {
         "title": "Spotify",
         "intro": "Połącz konto Spotify, aby znajomi widzieli, czego aktualnie słuchasz w Twoim profilu.",
-        "syncHint": "Synchronizacja wymaga aktywnego odtwarzania w aplikacji Spotify lub open.spotify.com.",
-        "privacyHint": "Możesz w każdej chwili ukryć aktywność słuchania przed znajomymi.",
-        "apiPrivacyNote": "Klovy pobiera wyłącznie informacje o bieżącym odtwarzaniu za pośrednictwem oficjalnego interfejsu API Spotify. Aplikacja nie monitoruje kart przeglądarki ani nie uzyskuje dostępu do lokalnych plików lub historii odtwarzania.",
-        "reconnectNote": "Jeśli po połączeniu konta status nadal nie jest widoczny, odłącz aplikację Klovy w ustawieniach połączonych aplikacji Spotify, a następnie wykonaj autoryzację ponownie.",
+        "desktopAppHint": "Aktywność słuchania jest synchronizowana tylko z zainstalowanej aplikacji Spotify, nie z odtwarzacza w przeglądarce. Linki Spotify otwierają aplikację desktopową.",
         "notConfigured": "Integracja Spotify nie jest skonfigurowana na serwerze (brak zmiennych SPOTIFY_*).",
-        "connected": "Połączono",
-        "notConnected": "Nie połączono",
-        "connectedHint": "Klovy synchronizuje utwór z Twojego konta Spotify.",
-        "notConnectedHint": "Połącz konto, aby włączyć „Aktualnie słucha”.",
-        "connect": "Połącz ze Spotify",
+        "notConnectedHint": "Połącz konto, aby wyświetlać je w profilu.",
+        "connect": "Połącz",
         "disconnect": "Odłącz",
         "shareListening": "Pokazuj znajomym, czego słucham",
-        "syncNow": "Sprawdź teraz, czego słucham",
         "toastConnected": "Połączono ze Spotify.",
         "toastDisconnected": "Odłączono konto Spotify.",
         "authIncomplete": "Autoryzacja Spotify zakończyła się, ale połączenie nie zostało zapisane. Kliknij „Połącz ze Spotify” ponownie.",
@@ -1160,6 +1154,12 @@
   "profile": {
     "listening": {
       "title": "Aktualnie słucha"
+    },
+    "connectedAccounts": {
+      "title": "Połączone konta",
+      "providers": {
+        "spotify": "Spotify"
+      }
     },
     "form": {
       "displayName": "Główna nazwa",
