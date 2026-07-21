@@ -214,6 +214,10 @@
     "noSessions": "Brak aktywnych sesji do wyświetlenia.",
     "revokeOthers": "Wyloguj się ze wszystkich sesji poza obecną",
     "revokeOthersHint": "Wyloguje Cię ze wszystkich urządzeń oprócz tego.",
+    "revokeDevice": "Wyloguj",
+    "revokeDeviceAria": "Wyloguj z tego urządzenia",
+    "revokeDeviceConfirm": "Wylogować to urządzenie? Sesja zostanie natychmiast zakończona.",
+    "revokeDeviceSuccess": "Urządzenie zostało wylogowane.",
     "securityHint": "Jeśli widzisz nieznane sesje, wyloguj je i zmień hasło. Włącz też uwierzytelnianie dwuetapowe w sekcji Moje konto."
   },
   "presence": {

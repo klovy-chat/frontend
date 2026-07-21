@@ -688,6 +688,35 @@
   transition: background 0.15s ease, color 0.15s ease;
 }
 
+.as-session-revoke-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 84px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--danger-border);
+  border-radius: 8px;
+  background: var(--danger-dim);
+  color: var(--danger);
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: var(--cursor-pointer);
+  flex-shrink: 0;
+  transition: background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+}
+
+.as-session-revoke-action:hover:not(:disabled) {
+  background: rgba(255, 59, 48, 0.14);
+  border-color: rgba(255, 59, 48, 0.4);
+}
+
+.as-session-revoke-action:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
 .as-session-revoke-btn:hover:not(:disabled) {
   background: rgba(255, 92, 92, 0.12);
 }

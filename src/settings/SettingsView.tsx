@@ -418,6 +418,8 @@ export function SettingsView({
   const handleLogout = async () => { await logout(); requestClose(); };
 
   const handleRevokeSession = async (session: UserSessionRow) => {
+    if (!window.confirm(t("session.revokeDeviceConfirm"))) return;
+
     setSessionActionId(session.id);
     setSessionsError("");
     try {
@@ -428,6 +430,7 @@ export function SettingsView({
         return;
       }
       await loadSessions();
+      toast.success(t("session.revokeDeviceSuccess"));
     } catch (err) {
       setSessionsError(
         err instanceof ApiError ? err.message : t("settings.account.sessionRevokeFailed"),
@@ -1278,21 +1281,15 @@ export function SettingsView({
                           {!session.isCurrent ? (
                             <button
                               type="button"
-                              className="as-session-revoke-btn"
+                              className="as-session-revoke-action"
                               disabled={sessionActionId === session.id}
                               onClick={() => void handleRevokeSession(session)}
-                              aria-label={t("common.logout")}
-                              title={t("common.logout")}
+                              aria-label={t("session.revokeDeviceAria")}
                             >
                               {sessionActionId === session.id ? (
                                 <span className="as-session-revoke-spinner" aria-hidden />
                               ) : (
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                                  <polyline points="3 6 5 6 21 6" />
-                                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                                  <line x1="10" y1="11" x2="10" y2="17" />
-                                  <line x1="14" y1="11" x2="14" y2="17" />
-                                </svg>
+                                t("session.revokeDevice")
                               )}
                             </button>
                           ) : null}
