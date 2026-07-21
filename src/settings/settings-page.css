@@ -1,7 +1,7 @@
 .settings-page {
-  --settings-nav-width: 200px;
-  --settings-content-min: 720px;
-  --settings-column-gap: 20px;
+  --settings-nav-width: 232px;
+  --settings-content-min: 760px;
+  --settings-column-gap: 24px;
   width: 100%;
   height: 100%;
   background: var(--bg-settings-nav);
@@ -49,15 +49,15 @@
 
 .settings-page .as-nav--inline {
   background: var(--bg-settings-nav);
-  padding: 28px 8px 20px 14px;
-  gap: 2px;
+  padding: 32px 10px 24px 16px;
+  gap: 4px;
   border-right: none;
   align-items: stretch;
 }
 
 .settings-page .as-nav-title {
-  font-size: 0.95rem;
-  margin: 0 0 16px;
+  font-size: 1.1rem;
+  margin: 0 0 20px;
   padding: 0 6px 0 2px;
   text-align: left;
   color: var(--text-muted);
@@ -65,21 +65,21 @@
 }
 
 .settings-page .as-nav-label {
-  padding: 0 6px 4px 2px;
-  font-size: 9px;
+  padding: 0 6px 6px 2px;
+  font-size: 11px;
   letter-spacing: 0.11em;
   text-align: right;
 }
 
 .settings-page .as-nav-label--spaced {
-  margin-top: 10px;
+  margin-top: 14px;
 }
 
 .settings-page .as-nav-item {
-  padding: 7px 8px 7px 8px;
-  border-radius: 6px;
-  font-size: 13px;
-  gap: 0.5rem;
+  padding: 10px 10px 10px 10px;
+  border-radius: 8px;
+  font-size: 15px;
+  gap: 0.6rem;
   margin-bottom: 2px;
   justify-content: flex-end;
   text-align: right;
@@ -103,7 +103,7 @@
 
 .settings-page .as-nav-spacer {
   flex: 1;
-  min-height: 12px;
+  min-height: 16px;
 }
 
 .settings-page .as-nav-item.as-nav-danger {
@@ -113,23 +113,23 @@
 .settings-page .as-content-inner {
   max-width: var(--settings-content-min);
   margin: 0;
-  padding: 28px 32px 48px 28px;
+  padding: 36px 40px 56px 32px;
 }
 
 .settings-page .as-section-title {
-  font-size: 1.45rem;
-  margin-bottom: 2px;
+  font-size: 1.75rem;
+  margin-bottom: 4px;
 }
 
 .settings-page .as-section-subtitle {
-  margin: 0 0 16px;
-  font-size: 12px;
+  margin: 0 0 20px;
+  font-size: 14px;
 }
 
 .settings-page .as-account-hero {
-  margin-bottom: 6px;
-  padding: 14px 16px;
-  border-radius: 10px;
+  margin-bottom: 8px;
+  padding: 18px 20px;
+  border-radius: 12px;
   background: var(--bg-settings-card);
   border-color: transparent;
 }
@@ -137,9 +137,9 @@
 .settings-page .as-card,
 .settings-page .as-setting-card,
 .settings-page .as-data-card {
-  margin-bottom: 4px;
-  padding: 14px 16px;
-  border-radius: 10px;
+  margin-bottom: 6px;
+  padding: 18px 20px;
+  border-radius: 12px;
   background: var(--bg-settings-card);
   border-color: transparent;
 }
@@ -149,10 +149,10 @@
 }
 
 .settings-page .as-action-row {
-  margin-top: 4px;
+  margin-top: 6px;
   margin-bottom: 0;
-  padding: 13px 16px;
-  border-radius: 10px;
+  padding: 16px 20px;
+  border-radius: 12px;
   background: var(--bg-settings-card);
   border-color: transparent;
 }
@@ -162,38 +162,38 @@
 }
 
 .settings-page .as-group-label {
-  margin: 16px 0 4px;
-  font-size: 9px;
+  margin: 20px 0 6px;
+  font-size: 11px;
   letter-spacing: 0.11em;
   color: var(--text-dim);
 }
 
 .settings-page .as-card-label {
-  margin-bottom: 4px;
-  font-size: 9px;
+  margin-bottom: 6px;
+  font-size: 11px;
   color: var(--text-dim);
   opacity: 1;
 }
 
 .settings-page .as-hint {
-  margin-bottom: 0.75rem;
-  font-size: 12px;
+  margin-bottom: 1rem;
+  font-size: 14px;
 }
 
 .settings-page .as-form--inset {
-  margin-top: 10px;
-  padding-top: 10px;
+  margin-top: 14px;
+  padding-top: 14px;
 }
 
 .settings-page .as-deletion-pending-banner,
 .settings-page .as-info-banner {
-  margin-bottom: 4px;
-  border-radius: 10px;
+  margin-bottom: 6px;
+  border-radius: 12px;
 }
 
 .settings-page .as-content-topbar {
-  right: 24px;
-  top: 24px;
+  right: 28px;
+  top: 28px;
 }
 
 .settings-page .as-close--inline {
@@ -245,25 +245,25 @@
 }
 
 .settings-page .as-banner-block {
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .settings-page .as-profile-header-row {
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .settings-page .as-session-row {
-  margin-bottom: 4px;
-  padding: 12px 14px;
-  border-radius: 10px;
+  margin-bottom: 6px;
+  padding: 15px 18px;
+  border-radius: 12px;
   background: var(--bg-settings-card);
   border-color: transparent;
 }
 
 .settings-page .as-sessions-list {
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .settings-page .as-voice-banner {
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
