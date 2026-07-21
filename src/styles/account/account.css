@@ -672,6 +672,12 @@
   margin: 0;
 }
 
+.as-session-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
 .as-session-revoke-btn {
   display: inline-flex;
   align-items: center;

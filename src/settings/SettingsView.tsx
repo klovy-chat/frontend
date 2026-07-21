@@ -1281,6 +1281,16 @@ export function SettingsView({
                               </span>
                             ) : null}
                           </p>
+                        </div>
+                        {userAgent ? (
+                          <p className="as-session-user-agent" title={userAgent}>
+                            {userAgent}
+                          </p>
+                        ) : null}
+                        <p className="as-session-meta">
+                          {t("session.lastActivity", { time: lastActivity })}
+                        </p>
+                        <div className="as-session-actions">
                           <button
                             type="button"
                             className="as-session-revoke-action"
@@ -1295,14 +1305,6 @@ export function SettingsView({
                             )}
                           </button>
                         </div>
-                        {userAgent ? (
-                          <p className="as-session-user-agent" title={userAgent}>
-                            {userAgent}
-                          </p>
-                        ) : null}
-                        <p className="as-session-meta">
-                          {t("session.lastActivity", { time: lastActivity })}
-                        </p>
                       </div>
                     </div>
                     );
