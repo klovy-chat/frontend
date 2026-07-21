@@ -19,6 +19,10 @@
   grid-template-columns: var(--nav-width) var(--settings-nav-width) 1fr;
 }
 
+.app-shell--settings-standalone {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .app-shell > * {
   min-height: 0;
   min-width: 0;

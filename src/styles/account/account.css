@@ -942,6 +942,23 @@
   gap: 6px;
 }
 
+.as-content-topbar--full {
+  left: clamp(20px, 4vw, 48px);
+  right: clamp(20px, 4vw, 48px);
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.as-content-topbar-end {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
 .as-close--inline {
   position: static;
   width: 42px;
@@ -965,6 +982,8 @@
   overflow-y: auto;
   padding: clamp(32px, 5vw, 56px) clamp(24px, 5vw, 72px) 64px;
   max-width: 880px;
+  margin: 0 auto;
+  width: 100%;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }

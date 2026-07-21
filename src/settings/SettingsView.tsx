@@ -63,6 +63,7 @@ import {
   formatSessionUserAgent,
 } from "../utils/user/sessionDisplay";
 import type { SettingsSection } from "./routes";
+import { SettingsSectionMenu } from "./SettingsSectionMenu";
 import "./settings-page.css";
 import "../styles/account/account.css";
 import "../styles/account/profile.css";
@@ -630,113 +631,6 @@ export function SettingsView({
         </div>
       )}
     </>
-  );
-
-  const navPanel = (
-    <aside className="as-nav as-nav--inline">
-      <h2 className="as-nav-title">{t("settings.title")}</h2>
-
-      <p className="as-nav-label">{t("settings.nav.account")}</p>
-
-      <button
-        className={`as-nav-item${section === "konto" ? " active" : ""}`}
-        onClick={() => onSectionChange("konto")}
-      >
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/>
-        </svg>
-        {t("settings.nav.myAccount")}
-      </button>
-
-      <button
-        className={`as-nav-item${section === "profil" ? " active" : ""}`}
-        onClick={() => onSectionChange("profil")}
-      >
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-          <circle cx="12" cy="7" r="4"/>
-        </svg>
-        {t("settings.nav.profile")}
-      </button>
-
-      <button
-        className={`as-nav-item${section === "sesje" ? " active" : ""}`}
-        onClick={() => onSectionChange("sesje")}
-      >
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="2" y="3" width="20" height="14" rx="2"/>
-          <line x1="8" y1="21" x2="16" y2="21"/>
-          <line x1="12" y1="17" x2="12" y2="21"/>
-        </svg>
-        {t("settings.nav.sessions")}
-      </button>
-
-      <p className="as-nav-label as-nav-label--spaced">{t("settings.nav.app")}</p>
-
-      <button
-        className={`as-nav-item${section === "glos" ? " active" : ""}`}
-        onClick={() => onSectionChange("glos")}
-      >
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
-          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-          <line x1="12" y1="19" x2="12" y2="22"/>
-        </svg>
-        {t("settings.nav.voice")}
-      </button>
-
-      <button
-        className={`as-nav-item${section === "jezyk" ? " active" : ""}`}
-        onClick={() => onSectionChange("jezyk")}
-      >
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10"/>
-          <path d="M2 12h20"/>
-          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-        </svg>
-        {t("settings.language.title")}
-      </button>
-
-      <button
-        className={`as-nav-item${section === "integracje" ? " active" : ""}`}
-        onClick={() => onSectionChange("integracje")}
-      >
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 2v4"/><path d="M12 18v4"/>
-          <path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/>
-          <path d="M2 12h4"/><path d="M18 12h4"/>
-        </svg>
-        {t("settings.nav.integrations")}
-      </button>
-
-      <button
-        className={`as-nav-item${section === "ostrzezenia" ? " active" : ""}`}
-        onClick={() => onSectionChange("ostrzezenia")}
-      >
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-          <line x1="12" y1="9" x2="12" y2="13"/>
-          <line x1="12" y1="17" x2="12.01" y2="17"/>
-        </svg>
-        {t("settings.nav.warnings")}
-        {warningCount > 0 ? (
-          <span className={`as-nav-count${unacknowledgedCount > 0 ? " as-nav-count--alert" : ""}`}>
-            {warningCount}
-          </span>
-        ) : null}
-      </button>
-
-      <div className="as-nav-spacer" />
-      <button className="as-nav-item as-nav-danger" onClick={handleLogout}>
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-          <polyline points="16 17 21 12 16 7"/>
-          <line x1="21" y1="12" x2="9" y2="12"/>
-        </svg>
-        {t("settings.nav.logout")}
-      </button>
-    </aside>
   );
 
   const settingsSections = (
@@ -1452,21 +1346,29 @@ export function SettingsView({
   return (
     <>
       <div className="settings-page-layout" style={accentStyle}>
-        <div className="app-shell__settings-nav">{navPanel}</div>
         <div className="app-shell__settings-content as-content as-content--inline">
-          <div className="as-content-topbar">
-            <button
-              type="button"
-              className="as-close as-close--inline"
-              onClick={requestClose}
-              aria-label={t("common.closeSettings")}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                <line x1="18" y1="6" x2="6" y2="18"/>
-                <line x1="6" y1="6" x2="18" y2="18"/>
-              </svg>
-            </button>
-            <span className="as-close-hint">ESC</span>
+          <div className="as-content-topbar as-content-topbar--full">
+            <SettingsSectionMenu
+              section={section}
+              onSectionChange={onSectionChange}
+              warningCount={warningCount}
+              unacknowledgedCount={unacknowledgedCount}
+              onLogout={handleLogout}
+            />
+            <div className="as-content-topbar-end">
+              <button
+                type="button"
+                className="as-close as-close--inline"
+                onClick={requestClose}
+                aria-label={t("common.closeSettings")}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+              <span className="as-close-hint">ESC</span>
+            </div>
           </div>
           <div className="as-content-inner settings-section-panel" key={section}>
             {settingsSections}

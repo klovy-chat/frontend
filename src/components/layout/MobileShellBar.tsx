@@ -7,6 +7,7 @@ interface MobileShellBarProps {
   overlay: ShellOverlay;
   onOverlayChange: (panel: ShellOverlay) => void;
   showList?: boolean;
+  showAppNav?: boolean;
   variant?: "chat" | "settings";
   onClose?: () => void;
 }
@@ -20,6 +21,7 @@ export function MobileShellBar({
   overlay,
   onOverlayChange,
   showList = true,
+  showAppNav = true,
   variant = "chat",
   onClose,
 }: MobileShellBarProps) {
@@ -28,18 +30,20 @@ export function MobileShellBar({
   if (variant === "settings") {
     return (
       <div className="mobile-shell-bar mobile-shell-bar--settings">
-        <button
-          type="button"
-          className={`mobile-shell-bar__btn${overlay === "nav" ? " active" : ""}`}
-          onClick={() => onOverlayChange(toggle(overlay, "nav"))}
-          aria-label={t("nav.mobile.menu")}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <line x1="3" y1="6" x2="21" y2="6" />
-            <line x1="3" y1="12" x2="21" y2="12" />
-            <line x1="3" y1="18" x2="21" y2="18" />
-          </svg>
-        </button>
+        {showAppNav ? (
+          <button
+            type="button"
+            className={`mobile-shell-bar__btn${overlay === "nav" ? " active" : ""}`}
+            onClick={() => onOverlayChange(toggle(overlay, "nav"))}
+            aria-label={t("nav.mobile.menu")}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+        ) : null}
 
         <button
           type="button"
