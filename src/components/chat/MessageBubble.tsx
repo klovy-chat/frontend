@@ -90,10 +90,10 @@ export function MessageBubble({
   const sender = resolveSender(message.sender);
   const senderId = getUserId(sender);
   const isOwn = senderId === currentUserId;
-  const isChannel = Boolean(message.channel || message.channelId);
+  const isChannelMessage = Boolean(message.channel || message.channelId);
   const mentionsMe =
     !isOwn &&
-    ((isChannel && Boolean(message.mentionsEveryone)) ||
+    ((isChannelMessage && Boolean(message.mentionsEveryone)) ||
       (message.mentions ?? []).some(
         (u) => getUserId(u) === currentUserId,
       ));
@@ -519,7 +519,7 @@ export function MessageBubble({
                     {renderFormattedText(message.content, {
                       mentions: message.mentions,
                       currentUserId,
-                      allowEveryone: isChannel,
+                      allowEveryone: isChannelMessage,
                     })}
                   </p>
                 )}
