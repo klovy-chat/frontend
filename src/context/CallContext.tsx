@@ -100,18 +100,6 @@ interface CallContextValue {
   isChannelVoiceActive: (channelId: string) => boolean;
   /** Czy użytkownik jest obecnie na kanale głosowym. */
   isInChannelVoice: (channelId: string) => boolean;
-  isCameraOn: boolean;
-  isScreenSharing: boolean;
-  isPushToTalkActive: boolean;
-  speakerVolume: number;
-  error: string | null;
-  startedAt: number | null;
-  localVideoTrack: Track | null;
-  localScreenShareTrack: Track | null;
-  remoteVideoTrack: Track | null;
-  remoteScreenShareTrack: Track | null;
-  /** Rozpoczyna połączenie wychodzące do kontaktu. */
-  startCall: (peer: CallPeer, mode: CallMode) => void;
   /** Odbiera połączenie przychodzące. */
   acceptCall: () => void;
   /** Odrzuca połączenie przychodzące. */
