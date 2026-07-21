@@ -255,15 +255,29 @@
 }
 
 .settings-page .as-session-row {
-  margin-bottom: 4px;
-  padding: 12px 14px;
-  border-radius: 10px;
+  margin-bottom: 0;
+  padding: 14px 16px;
+  border-radius: 12px;
   background: var(--bg-settings-card);
-  border-color: transparent;
+  border: 1px solid var(--border);
+}
+
+.settings-page .as-session-row--current {
+  background: color-mix(in srgb, var(--accent) 14%, var(--bg-settings-card));
+  border-color: color-mix(in srgb, var(--accent) 38%, var(--border));
 }
 
 .settings-page .as-sessions-list {
-  margin-bottom: 6px;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.settings-page .as-session-icon-stack__os {
+  border-color: var(--bg-settings-card);
+}
+
+.settings-page .as-session-row--current .as-session-icon-stack__os {
+  border-color: color-mix(in srgb, var(--accent) 14%, var(--bg-settings-card));
 }
 
 .settings-page .as-voice-banner {

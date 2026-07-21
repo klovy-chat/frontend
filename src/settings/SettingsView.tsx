@@ -21,6 +21,7 @@ import {
   type UserSessionRow,
 } from "../api/auth";
 import { ApiError } from "../api/client";
+import { BrowserSessionIcon } from "../components/account/BrowserSessionIcon";
 import { OsSessionIcon } from "../components/account/OsSessionIcon";
 import { ImageCropModal } from "../components/common/ImageCropModal";
 import {
@@ -61,9 +62,8 @@ import {
 } from "../utils/auth/pwnedPassword";
 import { normalizeUsernameInput, validateUsernameInput } from "../utils/auth/username";
 import {
-  displaySessionOs,
-  formatSessionAbsoluteTime,
-  formatSessionUserAgent,
+  formatSessionRelativeTime,
+  formatSessionTitle,
 } from "../utils/user/sessionDisplay";
 import type { SettingsSection } from "./routes";
 import "./settings-page.css";
@@ -1265,52 +1265,48 @@ export function SettingsView({
               ) : (
                 <div className="as-sessions-list">
                   {sessions.map((session) => {
-                    const osName = displaySessionOs(session.os);
-                    const userAgent = formatSessionUserAgent(session.userAgent);
-                    const lastActivity = formatSessionAbsoluteTime(
-                      session.lastUsedAt ?? session.createdAt,
-                    );
+                    const sessionTitle = formatSessionTitle(session);
+                    const createdAt = formatSessionRelativeTime(session.createdAt);
 
                     return (
                     <div
                       key={session.id}
                       className={`as-session-row${session.isCurrent ? " as-session-row--current" : ""}`}
                     >
+                      {session.isCurrent ? (
+                        <span className="as-session-device-badge">
+                          {t("session.thisDeviceLabel")}
+                        </span>
+                      ) : null}
                       <div className="as-session-main">
-                        <OsSessionIcon os={session.os} />
+                        <div className="as-session-icon-stack">
+                          <BrowserSessionIcon
+                            browser={session.browser}
+                            isKnown={session.isKnown}
+                          />
+                          <OsSessionIcon os={session.os} className="as-session-icon-stack__os" />
+                        </div>
                         <div className="as-session-copy">
-                          <p className="as-session-device">
-                            {osName}
-                            {session.isCurrent ? (
-                              <span className="as-session-current-tag">
-                                {t("session.thisDevice")}
-                              </span>
-                            ) : null}
-                          </p>
-                          {userAgent ? (
-                            <p className="as-session-user-agent" title={userAgent}>
-                              {userAgent}
-                            </p>
-                          ) : null}
+                          <p className="as-session-device">{sessionTitle}</p>
                           <p className="as-session-meta">
-                            {t("session.lastActivity", { time: lastActivity })}
+                            {t("session.createdAt", { time: createdAt })}
                           </p>
                         </div>
-                      </div>
-                      <div className="as-session-actions">
-                        <button
-                          type="button"
-                          className="as-session-revoke-action"
-                          disabled={sessionActionId === session.id}
-                          onClick={() => void handleRevokeSession(session)}
-                          aria-label={t("session.revokeDeviceAria")}
-                        >
-                          {sessionActionId === session.id ? (
-                            <span className="as-session-revoke-spinner" aria-hidden />
-                          ) : (
-                            t("session.revokeDevice")
-                          )}
-                        </button>
+                        {!session.isCurrent ? (
+                          <button
+                            type="button"
+                            className="as-session-revoke-action"
+                            disabled={sessionActionId === session.id}
+                            onClick={() => void handleRevokeSession(session)}
+                            aria-label={t("session.revokeDeviceAria")}
+                          >
+                            {sessionActionId === session.id ? (
+                              <span className="as-session-revoke-spinner" aria-hidden />
+                            ) : (
+                              t("session.revokeDevice")
+                            )}
+                          </button>
+                        ) : null}
                       </div>
                     </div>
                     );

@@ -209,6 +209,7 @@
     "createdAt": "Utworzono {{time}}",
     "lastActivity": "Ostatnia aktywność: {{time}}",
     "thisDevice": "(to urządzenie)",
+    "thisDeviceLabel": "To urządzenie",
     "unknownOs": "Nieznany system",
     "loadingSessions": "Ładowanie sesji…",
     "noSessions": "Brak aktywnych sesji do wyświetlenia.",

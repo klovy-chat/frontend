@@ -39,7 +39,19 @@ export function resolveOsIconKey(os: string): OsIconKey {
   return "unknown";
 }
 
-export function formatSessionAbsoluteTime(value: string | null): string {
+/** Etykieta urządzenia w liście sesji, np. „Chrome on Windows”. */
+export function formatSessionTitle(session: {
+  browser: string;
+  os: string;
+  label: string;
+}): string {
+  const browser = normalizeSessionBrowser(session.browser);
+  const os = displaySessionOs(session.os);
+  if (browser && os) {
+    return `${browser} on ${os}`;
+  }
+  return session.label?.trim() || browser || os || i18n.t("session.unknownOs");
+}
   if (!value) return i18n.t("common.emDash");
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return i18n.t("common.emDash");

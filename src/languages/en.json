@@ -209,6 +209,7 @@
     "createdAt": "Created {{time}}",
     "lastActivity": "Last activity: {{time}}",
     "thisDevice": "(this device)",
+    "thisDeviceLabel": "This device",
     "unknownOs": "Unknown OS",
     "loadingSessions": "Loading sessions…",
     "noSessions": "No active sessions to display.",
