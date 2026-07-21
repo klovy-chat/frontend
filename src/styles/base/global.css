@@ -31,9 +31,8 @@
   --nav-width: 220px;
   --list-width: 300px;
   --detail-width: 300px;
-  --settings-nav-width: 220px;
-  --settings-content-min: 760px;
-  --settings-content-width: 760px;
+  --settings-nav-width: 200px;
+  --settings-content-min: 720px;
   --settings-modal-width: 1320px;
   --settings-modal-height: 840px;
   --bg-settings-nav: var(--bg-shell);
