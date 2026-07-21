@@ -1,8 +1,8 @@
 import i18n from "../../i18n/config";
-import { getDateLocale, normalizeLocale } from "../../languages";
+import { getFormattingLocale, normalizeLocale } from "../../languages";
 
-function dateLocale(): string {
-  return getDateLocale(normalizeLocale(i18n.language));
+function formattingLocale(): string {
+  return getFormattingLocale(normalizeLocale(i18n.language));
 }
 
 export const CHANNEL_MOD_DURATION_OPTIONS = [
@@ -24,7 +24,7 @@ export function formatModerationExpiry(
   const date = new Date(expiresAt);
   if (Number.isNaN(date.getTime())) return i18n.t("moderation.permanent");
   if (date.getTime() <= Date.now()) return i18n.t("moderation.expired");
-  const formatted = date.toLocaleString(dateLocale(), {
+  const formatted = date.toLocaleString(formattingLocale(), {
     day: "2-digit",
     month: "2-digit",
     hour: "2-digit",

@@ -4,7 +4,7 @@ import { Avatar } from "../common/Avatar";
 import { ReactionPicker } from "./pickers/ReactionPicker";
 import { QuotedMessageBlock } from "./QuotedMessageBlock";
 import { ReadReceipt } from "./ReadReceipt";
-import { formatTime, getUserId, userLabel } from "../../utils/user/format";
+import { formatMessageTime, getUserId, userLabel } from "../../utils/user/format";
 import { avatarColor } from "../../utils/media/avatar";
 import { renderFormattedText } from "../../utils/chat/messageFormat";
 import { getReactionEntries, hasUserReacted } from "../../utils/chat/reactions";
@@ -275,7 +275,7 @@ export function MessageBubble({
       <div className="message-row__body">
         {showCompactTime && (
           <span className="message-time message-time--compact">
-            {formatTime(message.timestamp)}
+            {formatMessageTime(message.timestamp)}
           </span>
         )}
 
@@ -290,7 +290,7 @@ export function MessageBubble({
               </span>
             )}
             <span className="message-time message-time--header">
-              {formatTime(message.timestamp)}
+              {formatMessageTime(message.timestamp)}
             </span>
             {message.edited && (
               <span className="message-edited">

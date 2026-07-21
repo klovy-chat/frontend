@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Avatar } from "../common/Avatar";
 import { getPinnedMessages, searchMessages } from "../../api/messages";
-import { formatTime, userLabel } from "../../utils/user/format";
+import { formatMessageTime, userLabel } from "../../utils/user/format";
 import { stripFormatting } from "../../utils/chat/messageFormat";
 import type { ChatTarget, Message } from "../../types";
 import "../../styles/chat/chattools.css";
@@ -213,7 +213,7 @@ export function ChatToolsPanel({
                     <div className="chat-tools-item-content">
                       <div className="chat-tools-item-meta">
                         <span className="chat-tools-item-author">{userLabel(sender)}</span>
-                        <span className="chat-tools-item-time">{formatTime(msg.timestamp)}</span>
+                        <span className="chat-tools-item-time">{formatMessageTime(msg.timestamp)}</span>
                       </div>
                       <p className="chat-tools-item-text">{messagePreview(msg)}</p>
                     </div>

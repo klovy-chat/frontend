@@ -12,7 +12,7 @@ import { updateLanguage } from "../api/auth";
 import { changeAppLanguage } from "../i18n/config";
 import {
   DEFAULT_LOCALE,
-  getDateLocale,
+  getFormattingLocale,
   isAppLocale,
   normalizeLocale,
   type AppLocale,
@@ -68,7 +68,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     () => ({
       locale,
-      dateLocale: getDateLocale(locale),
+      dateLocale: getFormattingLocale(locale),
       setLocale,
     }),
     [locale, setLocale],

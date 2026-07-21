@@ -1,9 +1,17 @@
 import type { WarningSeverity } from "../../api/auth";
 import i18n from "../../i18n/config";
-import { getDateLocale, normalizeLocale } from "../../languages";
+import { getFormattingLocale, normalizeLocale } from "../../languages";
 
-function dateLocale(): string {
-  return getDateLocale(normalizeLocale(i18n.language));
+function formattingLocale(): string {
+  return getFormattingLocale(normalizeLocale(i18n.language));
+}
+
+function formatClockTime(date: Date, withSeconds = false): string {
+  return date.toLocaleTimeString(formattingLocale(), {
+    hour: "2-digit",
+    minute: "2-digit",
+    ...(withSeconds ? { second: "2-digit" } : {}),
+  });
 }
 
 export function warningSeverityLabel(severity: WarningSeverity): string {
@@ -19,8 +27,16 @@ export const WARNING_SEVERITY_LABELS = new Proxy(
   },
 );
 
+export function formatMessageTime(dateStr: string): string {
+  const date = new Date(dateStr);
+  if (Number.isNaN(date.getTime())) return i18n.t("common.emDash");
+  return formatClockTime(date);
+}
+
 export function formatTime(dateStr: string): string {
   const date = new Date(dateStr);
+  if (Number.isNaN(date.getTime())) return i18n.t("common.emDash");
+
   const now = new Date();
   const isToday =
     date.getDate() === now.getDate() &&
@@ -28,13 +44,10 @@ export function formatTime(dateStr: string): string {
     date.getFullYear() === now.getFullYear();
 
   if (isToday) {
-    return date.toLocaleTimeString(dateLocale(), {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    return formatClockTime(date);
   }
 
-  return date.toLocaleDateString(dateLocale(), {
+  return date.toLocaleDateString(formattingLocale(), {
     day: "numeric",
     month: "short",
   });
@@ -73,7 +86,7 @@ export function formatMessageDateSeparator(dateStr: string): string {
     return i18n.t("common.yesterday");
   }
 
-  return date.toLocaleDateString(dateLocale(), {
+  return date.toLocaleDateString(formattingLocale(), {
     day: "numeric",
     month: "long",
     year: date.getFullYear() !== now.getFullYear() ? "numeric" : undefined,
@@ -93,7 +106,7 @@ export function userLabel(user?: UserLabelSource | null): string {
 }
 
 export function formatJoinedDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString(dateLocale(), {
+  return new Date(dateStr).toLocaleDateString(formattingLocale(), {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -114,13 +127,12 @@ export function availabilityStatusLabel(status: AvailabilityStatus): string {
 }
 
 export function formatLiveDateTime(date: Date): string {
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const year = date.getFullYear();
-  const time = date.toLocaleTimeString(dateLocale(), {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
+  const locale = formattingLocale();
+  const datePart = date.toLocaleDateString(locale, {
+    day: "numeric",
+    month: "numeric",
+    year: "numeric",
   });
-  return `${day}.${month}.${year} · ${time}`;
+  const timePart = formatClockTime(date, true);
+  return `${datePart} · ${timePart}`;
 }

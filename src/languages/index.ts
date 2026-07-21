@@ -20,3 +20,12 @@ export function normalizeLocale(value: string | null | undefined): AppLocale {
 export function getDateLocale(locale: AppLocale): string {
   return locale === "en" ? "en-US" : "pl-PL";
 }
+
+/** Locale for dates/times — prefers browser region (system / VPN), falls back to app language. */
+export function getFormattingLocale(appLocale?: AppLocale): string {
+  if (typeof navigator !== "undefined") {
+    const browserLocale = navigator.language?.trim();
+    if (browserLocale) return browserLocale;
+  }
+  return getDateLocale(appLocale ?? DEFAULT_LOCALE);
+}
