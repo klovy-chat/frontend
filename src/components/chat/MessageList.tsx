@@ -1,14 +1,11 @@
-import { useCallback, useLayoutEffect, useRef, Fragment } from "react";
+import { useCallback, useLayoutEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { MessageBubble } from "./MessageBubble";
 import type { Message } from "../../types";
-import { formatMessageDateSeparator, isSameLocalDay } from "../../utils/user/format";
-import { isMessageGrouped, findGroupAnchor } from "../../utils/chat/messageGrouping";
 
 interface MessageListProps {
   messages: Message[];
   currentUserId: string;
-  isChannel?: boolean;
   typingUserId?: string | null;
   highlightMessageId?: string | null;
   hasMore?: boolean;
@@ -38,7 +35,6 @@ function isNearBottom(el: HTMLElement): boolean {
 export function MessageList({
   messages,
   currentUserId,
-  isChannel = false,
   typingUserId,
   highlightMessageId,
   hasMore = false,
@@ -139,46 +135,33 @@ export function MessageList({
           </button>
         </div>
       )}
+      {hasContent && (
+        <div className="message-list-date">{t("common.today")}</div>
+      )}
       {hasContent && <div className="message-list-spacer" aria-hidden />}
       {messages.length === 0 && !typingUserId ? (
         <p className="empty-chat"></p>
       ) : (
-        messages.map((msg, index) => {
-          const prev = messages[index - 1];
-          const showDateSeparator =
-            index === 0 || !isSameLocalDay(msg.timestamp, prev.timestamp);
-          const groupAnchor = showDateSeparator ? undefined : findGroupAnchor(messages, index);
-          const grouped = Boolean(groupAnchor) && isMessageGrouped(groupAnchor, msg);
-
-          return (
-            <Fragment key={msg._id}>
-              {showDateSeparator ? (
-                <div className="message-list-date">
-                  {formatMessageDateSeparator(msg.timestamp)}
-                </div>
-              ) : null}
-              <MessageBubble
-                message={msg}
-                currentUserId={currentUserId}
-                isChannel={isChannel}
-                isGrouped={grouped}
-                highlighted={highlightMessageId === msg._id}
-                canReact={canReact}
-                onReact={onReact}
-                canReply={canReply}
-                onReply={onReply}
-                onJumpToMessage={onJumpToMessage}
-                onImageClick={onImageClick}
-                showReadReceipt={showReadReceipt}
-                onEdit={onEdit}
-                onDelete={onDelete}
-                canPin={canPin}
-                onPin={onPin}
-                onUnpin={onUnpin}
-              />
-            </Fragment>
-          );
-        })
+        messages.map((msg) => (
+          <MessageBubble
+            key={msg._id}
+            message={msg}
+            currentUserId={currentUserId}
+            highlighted={highlightMessageId === msg._id}
+            canReact={canReact}
+            onReact={onReact}
+            canReply={canReply}
+            onReply={onReply}
+            onJumpToMessage={onJumpToMessage}
+            onImageClick={onImageClick}
+            showReadReceipt={showReadReceipt}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            canPin={canPin}
+            onPin={onPin}
+            onUnpin={onUnpin}
+          />
+        ))
       )}
       {typingUserId && typingUserId !== currentUserId && (
         <p className="typing-indicator">{t("chat.typing")}</p>

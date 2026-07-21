@@ -1057,7 +1057,6 @@ export function ChatWindow({
           <MessageList
             messages={messages}
             currentUserId={currentUserId}
-            isChannel={target.type === "channel"}
             typingUserId={typingUserId}
             highlightMessageId={highlightMessageId}
             hasMore={hasMore}
