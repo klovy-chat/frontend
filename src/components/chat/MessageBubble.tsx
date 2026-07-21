@@ -107,10 +107,11 @@ export function MessageBubble({
     sender.username ?? sender.displayName ?? senderId,
   );
   const showSenderName =
-    isChannel && !isGrouped && senderName !== t("format.userLabel");
+    !isGrouped && senderName !== t("format.userLabel") && (!isOwn || isChannel);
   const showAvatar = !isGrouped && (!isOwn || isChannel);
-  const showHeader = !isGrouped && isChannel;
-  const showCompactTime = isGrouped || !isChannel;
+  const showHeader =
+    !isGrouped && ((!isOwn && !isChannel) || isChannel);
+  const showCompactTime = !showHeader;
   const canPinAction = canPin && (onPin || onUnpin);
   const hasActions = (isOwn && (onEdit || onDelete)) || canPinAction;
   const canReplyAction = canReply && Boolean(onReply);
@@ -521,6 +522,11 @@ export function MessageBubble({
                       currentUserId,
                       allowEveryone: isChannelMessage,
                     })}
+                    {isOwn && showReadReceipt && !showHeader && (
+                      <span className="message-read-receipt-inline">
+                        <ReadReceipt read={message.read} />
+                      </span>
+                    )}
                   </p>
                 )}
                 <MessageExternalMedia
@@ -537,12 +543,6 @@ export function MessageBubble({
                 <MessageLinkEmbeds content={message.content} />
               </>
             )}
-
-          {!showHeader && isOwn && showReadReceipt && (
-            <div className="message-meta message-meta--inline">
-              <ReadReceipt read={message.read} />
-            </div>
-          )}
         </div>
 
         {reactionEntries.length > 0 && (

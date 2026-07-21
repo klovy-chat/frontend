@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { MessageBubble } from "./MessageBubble";
 import type { Message } from "../../types";
 import { formatMessageDateSeparator, isSameLocalDay } from "../../utils/user/format";
-import { isMessageGrouped } from "../../utils/chat/messageGrouping";
+import { isMessageGrouped, findGroupAnchor } from "../../utils/chat/messageGrouping";
 
 interface MessageListProps {
   messages: Message[];
@@ -147,7 +147,8 @@ export function MessageList({
           const prev = messages[index - 1];
           const showDateSeparator =
             index === 0 || !isSameLocalDay(msg.timestamp, prev.timestamp);
-          const grouped = !showDateSeparator && isMessageGrouped(prev, msg);
+          const groupAnchor = showDateSeparator ? undefined : findGroupAnchor(messages, index);
+          const grouped = Boolean(groupAnchor) && isMessageGrouped(groupAnchor, msg);
 
           return (
             <Fragment key={msg._id}>
