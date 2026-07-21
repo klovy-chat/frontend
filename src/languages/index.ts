@@ -9,6 +9,11 @@ export const LOCALE_LABELS: Record<AppLocale, string> = {
   en: "English",
 };
 
+export const LOCALE_NATIVE_LABELS: Record<AppLocale, string> = {
+  pl: "Polski",
+  en: "English",
+};
+
 export function isAppLocale(value: string | null | undefined): value is AppLocale {
   return value === "pl" || value === "en";
 }

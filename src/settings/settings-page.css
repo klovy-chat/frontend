@@ -268,3 +268,13 @@
 .settings-page .as-voice-banner {
   margin-bottom: 6px;
 }
+
+.settings-page .as-lang-row {
+  margin-bottom: 0;
+  background: var(--bg-settings-card);
+  border-color: transparent;
+}
+
+.settings-page .as-lang-row:hover {
+  background: var(--bg-settings-card-hover);
+}

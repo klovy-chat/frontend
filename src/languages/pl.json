@@ -653,7 +653,8 @@
       "unread": "Nieprzeczytane"
     },
     "language": {
-      "title": "Język"
+      "title": "Język",
+      "chooseLanguage": "Wybierz swój język"
     },
     "accountExtra": {
       "authGroup": "Uwierzytelnianie",

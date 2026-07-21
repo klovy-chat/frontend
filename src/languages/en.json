@@ -653,7 +653,8 @@
       "unread": "Unread"
     },
     "language": {
-      "title": "Language"
+      "title": "Language",
+      "chooseLanguage": "Choose your language"
     },
     "accountExtra": {
       "authGroup": "Authentication",
