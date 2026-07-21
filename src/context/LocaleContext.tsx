@@ -84,7 +84,7 @@ export function useLocale(): LocaleContextValue {
   if (!ctx) {
     return {
       locale: DEFAULT_LOCALE,
-      dateLocale: getDateLocale(DEFAULT_LOCALE),
+      dateLocale: getFormattingLocale(DEFAULT_LOCALE),
       setLocale: async (next: AppLocale) => {
         changeAppLanguage(next);
         saveStoredLocale(next);
