@@ -40,6 +40,8 @@ import {
 
 export type CallMode = "audio" | "video";
 
+export type CallKind = "dm" | "channel";
+
 export type CallState =
   | "idle"
   | "outgoing"
@@ -55,11 +57,49 @@ export interface CallPeer {
   color?: number | null;
 }
 
+export interface CallChannel {
+  _id: string;
+  name: string;
+  image?: string | null;
+}
+
+type ConnectTarget =
+  | { kind: "dm"; peerId: string }
+  | { kind: "channel"; channelId: string };
+
 interface CallContextValue {
   state: CallState;
+  callKind: CallKind;
   mode: CallMode;
   peer: CallPeer | null;
+  channel: CallChannel | null;
+  participantCount: number;
+  channelVoiceParticipants: Record<string, string[]>;
   isMuted: boolean;
+  isCameraOn: boolean;
+  isScreenSharing: boolean;
+  isPushToTalkActive: boolean;
+  speakerVolume: number;
+  error: string | null;
+  startedAt: number | null;
+  localVideoTrack: Track | null;
+  localScreenShareTrack: Track | null;
+  remoteVideoTrack: Track | null;
+  remoteScreenShareTrack: Track | null;
+  /** Rozpoczyna połączenie wychodzące do kontaktu. */
+  startCall: (peer: CallPeer, mode: CallMode) => void;
+  /** Dołącza do kanału głosowego (bez dzwonienia). */
+  joinChannelVoice: (channel: CallChannel, mode?: CallMode) => void;
+  /** Opuszcza kanał głosowy, jeśli jesteś na nim. */
+  leaveChannelVoice: () => void;
+  /** Przełącza udział w kanale głosowym. */
+  toggleChannelVoice: (channel: CallChannel, mode?: CallMode) => void;
+  /** Odświeża listę uczestników kanału głosowego. */
+  requestChannelVoiceState: (channelId: string) => void;
+  /** Sprawdza, czy kanał ma aktywnych uczestników głosu. */
+  isChannelVoiceActive: (channelId: string) => boolean;
+  /** Czy użytkownik jest obecnie na kanale głosowym. */
+  isInChannelVoice: (channelId: string) => boolean;
   isCameraOn: boolean;
   isScreenSharing: boolean;
   isPushToTalkActive: boolean;
@@ -98,8 +138,14 @@ export function CallProvider({ children }: { children: ReactNode }) {
   const myId = user?.id ?? "";
 
   const [state, setState] = useState<CallState>("idle");
+  const [callKind, setCallKind] = useState<CallKind>("dm");
   const [mode, setMode] = useState<CallMode>("audio");
   const [peer, setPeer] = useState<CallPeer | null>(null);
+  const [channel, setChannel] = useState<CallChannel | null>(null);
+  const [participantCount, setParticipantCount] = useState(1);
+  const [channelVoiceParticipants, setChannelVoiceParticipants] = useState<
+    Record<string, string[]>
+  >({});
   const [isMuted, setIsMuted] = useState(false);
   const [isCameraOn, setIsCameraOn] = useState(false);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
@@ -115,8 +161,12 @@ export function CallProvider({ children }: { children: ReactNode }) {
   const roomRef = useRef<Room | null>(null);
   const stateRef = useRef<CallState>(state);
   stateRef.current = state;
+  const callKindRef = useRef<CallKind>(callKind);
+  callKindRef.current = callKind;
   const peerRef = useRef<CallPeer | null>(peer);
   peerRef.current = peer;
+  const channelRef = useRef<CallChannel | null>(channel);
+  channelRef.current = channel;
   const speakerVolumeRef = useRef(1);
   const micVolumeRef = useRef(1);
   const pushToTalkActiveRef = useRef(false);
@@ -175,7 +225,10 @@ export function CallProvider({ children }: { children: ReactNode }) {
     cleanupRoom();
     clearPersistedCall();
     setState("idle");
+    setCallKind("dm");
     setPeer(null);
+    setChannel(null);
+    setParticipantCount(1);
     setMode("audio");
     setIsMuted(false);
     setIsCameraOn(false);
@@ -262,15 +315,28 @@ export function CallProvider({ children }: { children: ReactNode }) {
     [],
   );
 
+  const updateParticipantCount = useCallback(() => {
+    const room = roomRef.current;
+    if (!room) {
+      setParticipantCount(1);
+      return;
+    }
+    setParticipantCount(room.remoteParticipants.size + 1);
+  }, []);
+
   const connectToRoom = useCallback(
     async (
-      peerId: string,
+      target: ConnectTarget,
       callMode: CallMode,
       options?: { startedAt?: number; isRestore?: boolean },
     ) => {
       try {
         setState("connecting");
-        const { token, url } = await requestVoiceToken(peerId);
+        const tokenParams =
+          target.kind === "dm"
+            ? { peerId: target.peerId }
+            : { channelId: target.channelId };
+        const { token, url } = await requestVoiceToken(tokenParams);
         if (!isAllowedLiveKitUrl(url)) {
           throw new Error(t("call.invalidServerUrl"));
         }
@@ -304,12 +370,12 @@ export function CallProvider({ children }: { children: ReactNode }) {
           },
         );
         room.on(RoomEvent.Disconnected, () => {
-          // Rozłączenie zainicjowane lokalnie obsługujemy w endCall;
-          // tutaj reagujemy tylko na nieoczekiwane rozłączenie.
           if (stateRef.current === "active") {
             resetCall();
           }
         });
+        room.on(RoomEvent.ParticipantConnected, updateParticipantCount);
+        room.on(RoomEvent.ParticipantDisconnected, updateParticipantCount);
 
         await room.connect(url, token);
 
@@ -349,6 +415,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
           });
         });
         refreshRemoteMediaTracks();
+        updateParticipantCount();
 
         setIsMuted(false);
         setStartedAt(options?.startedAt ?? Date.now());
@@ -359,8 +426,24 @@ export function CallProvider({ children }: { children: ReactNode }) {
         }
         setError(t("call.connectFailed"));
         const other = peerRef.current?._id;
-        if (!options?.isRestore && ws && other && myId) {
+        const activeChannel = channelRef.current;
+        if (
+          !options?.isRestore &&
+          ws &&
+          myId &&
+          callKindRef.current === "dm" &&
+          other
+        ) {
           ws.send(WsType.CALL_END, { from: myId, to: other });
+        }
+        if (
+          !options?.isRestore &&
+          ws &&
+          myId &&
+          callKindRef.current === "channel" &&
+          activeChannel
+        ) {
+          ws.send(WsType.CHANNEL_VOICE_LEAVE, { channelId: activeChannel._id });
         }
         resetCall();
       }
@@ -370,6 +453,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
       detachRemoteTrack,
       refreshLocalMediaTracks,
       refreshRemoteMediaTracks,
+      updateParticipantCount,
       applyMicVolume,
       resetCall,
       ws,
@@ -384,6 +468,8 @@ export function CallProvider({ children }: { children: ReactNode }) {
     (target: CallPeer, callMode: CallMode) => {
       if (!ws || !myId || stateRef.current !== "idle") return;
       setError(null);
+      setCallKind("dm");
+      setChannel(null);
       setPeer(target);
       setMode(callMode);
       setState("outgoing");
@@ -404,6 +490,69 @@ export function CallProvider({ children }: { children: ReactNode }) {
       }, 60_000);
     },
     [ws, myId, clearRingTimeout, resetCall],
+  );
+
+  const joinChannelVoice = useCallback(
+    (targetChannel: CallChannel, callMode: CallMode = "audio") => {
+      if (!ws || !myId || stateRef.current !== "idle") return;
+      setError(null);
+      setCallKind("channel");
+      setChannel(targetChannel);
+      setPeer(null);
+      setMode(callMode);
+      ws.send(WsType.CHANNEL_VOICE_JOIN, { channelId: targetChannel._id });
+      void connectToRoom(
+        { kind: "channel", channelId: targetChannel._id },
+        callMode,
+      );
+    },
+    [ws, myId, connectToRoom],
+  );
+
+  const leaveChannelVoice = useCallback(() => {
+    const activeChannel = channelRef.current;
+    if (ws && myId && activeChannel && callKindRef.current === "channel") {
+      ws.send(WsType.CHANNEL_VOICE_LEAVE, { channelId: activeChannel._id });
+    }
+    resetCall();
+  }, [ws, myId, resetCall]);
+
+  const toggleChannelVoice = useCallback(
+    (targetChannel: CallChannel, callMode: CallMode = "audio") => {
+      if (
+        callKindRef.current === "channel" &&
+        channelRef.current?._id === targetChannel._id &&
+        stateRef.current !== "idle"
+      ) {
+        leaveChannelVoice();
+        return;
+      }
+      if (stateRef.current !== "idle") return;
+      joinChannelVoice(targetChannel, callMode);
+    },
+    [joinChannelVoice, leaveChannelVoice],
+  );
+
+  const requestChannelVoiceState = useCallback(
+    (channelId: string) => {
+      if (!ws || !channelId.trim()) return;
+      ws.send(WsType.CHANNEL_VOICE_STATE, { channelId });
+    },
+    [ws],
+  );
+
+  const isChannelVoiceActive = useCallback(
+    (channelId: string) =>
+      (channelVoiceParticipants[channelId]?.length ?? 0) > 0,
+    [channelVoiceParticipants],
+  );
+
+  const isInChannelVoice = useCallback(
+    (channelId: string) =>
+      callKind === "channel" &&
+      channel?._id === channelId &&
+      (state === "connecting" || state === "active"),
+    [callKind, channel, state],
   );
 
   const acceptCall = useCallback(() => {
@@ -430,8 +579,13 @@ export function CallProvider({ children }: { children: ReactNode }) {
 
   const endCall = useCallback(() => {
     const target = peerRef.current;
-    if (ws && myId && target) {
-      ws.send(WsType.CALL_END, { from: myId, to: target._id });
+    const activeChannel = channelRef.current;
+    if (ws && myId) {
+      if (callKindRef.current === "channel" && activeChannel) {
+        ws.send(WsType.CHANNEL_VOICE_LEAVE, { channelId: activeChannel._id });
+      } else if (target) {
+        ws.send(WsType.CALL_END, { from: myId, to: target._id });
+      }
     }
     resetCall();
   }, [ws, myId, resetCall]);
@@ -597,8 +751,10 @@ export function CallProvider({ children }: { children: ReactNode }) {
       }
 
       setPeer(restorePeer);
+      setCallKind("dm");
+      setChannel(null);
       setMode(callMode);
-      await connectToRoom(peerId, callMode, {
+      await connectToRoom({ kind: "dm", peerId }, callMode, {
         startedAt: restoreStartedAt,
         isRestore: true,
       });
@@ -620,6 +776,8 @@ export function CallProvider({ children }: { children: ReactNode }) {
         return;
       }
       setError(null);
+      setCallKind("dm");
+      setChannel(null);
       setPeer(data.caller ?? { _id: data.from });
       setMode(data.mode === "video" ? "video" : "audio");
       setState("incoming");
@@ -632,11 +790,11 @@ export function CallProvider({ children }: { children: ReactNode }) {
       clearRingTimeout();
 
       if (stateRef.current === "outgoing" && data.from === peerId) {
-        connectToRoom(peerId, mode);
+        connectToRoom({ kind: "dm", peerId }, mode);
         return;
       }
       if (stateRef.current === "incoming" && data.from === myId) {
-        connectToRoom(peerId, mode);
+        connectToRoom({ kind: "dm", peerId }, mode);
       }
     };
 
@@ -695,6 +853,21 @@ export function CallProvider({ children }: { children: ReactNode }) {
     return () => unsubs.forEach((u) => u());
   }, [ws, myId, mode, connectToRoom, resetCall, clearRingTimeout, t]);
 
+  useEffect(() => {
+    if (!ws) return;
+    return ws.subscribe(
+      WsType.CHANNEL_VOICE_STATE,
+      (data: { channelId?: string; participants?: string[] }) => {
+        const channelId = data.channelId?.trim();
+        if (!channelId) return;
+        setChannelVoiceParticipants((prev) => ({
+          ...prev,
+          [channelId]: Array.isArray(data.participants) ? data.participants : [],
+        }));
+      },
+    );
+  }, [ws]);
+
   // Sprzątanie przy odmontowaniu (np. wylogowanie).
   useEffect(() => {
     return () => cleanupRoom();
@@ -703,8 +876,12 @@ export function CallProvider({ children }: { children: ReactNode }) {
   const value = useMemo<CallContextValue>(
     () => ({
       state,
+      callKind,
       mode,
       peer,
+      channel,
+      participantCount,
+      channelVoiceParticipants,
       isMuted,
       isCameraOn,
       isScreenSharing,
@@ -717,6 +894,12 @@ export function CallProvider({ children }: { children: ReactNode }) {
       remoteVideoTrack,
       remoteScreenShareTrack,
       startCall,
+      joinChannelVoice,
+      leaveChannelVoice,
+      toggleChannelVoice,
+      requestChannelVoiceState,
+      isChannelVoiceActive,
+      isInChannelVoice,
       acceptCall,
       rejectCall,
       cancelCall,
@@ -731,8 +914,12 @@ export function CallProvider({ children }: { children: ReactNode }) {
     }),
     [
       state,
+      callKind,
       mode,
       peer,
+      channel,
+      participantCount,
+      channelVoiceParticipants,
       isMuted,
       isCameraOn,
       isScreenSharing,
@@ -745,6 +932,12 @@ export function CallProvider({ children }: { children: ReactNode }) {
       remoteVideoTrack,
       remoteScreenShareTrack,
       startCall,
+      joinChannelVoice,
+      leaveChannelVoice,
+      toggleChannelVoice,
+      requestChannelVoiceState,
+      isChannelVoiceActive,
+      isInChannelVoice,
       acceptCall,
       rejectCall,
       cancelCall,

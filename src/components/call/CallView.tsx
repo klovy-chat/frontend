@@ -2,7 +2,6 @@ import {
   useEffect,
   useRef,
   useState,
-  type MouseEvent as ReactMouseEvent,
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import { createPortal } from "react-dom";
@@ -80,8 +79,11 @@ export function CallView() {
   const { t } = useTranslation();
   const {
     state,
+    callKind,
     mode,
     peer,
+    channel,
+    participantCount,
     isMuted,
     isCameraOn,
     isScreenSharing,
@@ -89,6 +91,7 @@ export function CallView() {
     speakerVolume,
     startedAt,
     localVideoTrack,
+    localScreenShareTrack,
     remoteVideoTrack,
     remoteScreenShareTrack,
     toggleMute,
@@ -101,18 +104,19 @@ export function CallView() {
   } = useCall();
 
   const localVideoRef = useRef<HTMLVideoElement>(null);
+  const localScreenShareRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const [elapsed, setElapsed] = useState(0);
   const [layout, setLayout] = useState<CallLayout>("expanded");
   const [mainPortalTarget, setMainPortalTarget] = useState<HTMLElement | null>(null);
   const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
+  const autoMinimizedRef = useRef(false);
   const dragRef = useRef<{
     pointerId: number;
     offsetX: number;
     offsetY: number;
+    moved: boolean;
   } | null>(null);
-
-  const mainRemoteTrack = remoteScreenShareTrack ?? remoteVideoTrack;
 
   useEffect(() => {
     setMainPortalTarget(
@@ -131,14 +135,25 @@ export function CallView() {
   }, [localVideoTrack]);
 
   useEffect(() => {
-    const el = remoteVideoRef.current;
-    if (el && mainRemoteTrack) {
-      mainRemoteTrack.attach(el);
+    const el = localScreenShareRef.current;
+    if (el && localScreenShareTrack) {
+      localScreenShareTrack.attach(el);
       return () => {
-        mainRemoteTrack.detach(el);
+        localScreenShareTrack.detach(el);
       };
     }
-  }, [mainRemoteTrack]);
+  }, [localScreenShareTrack]);
+
+  useEffect(() => {
+    const el = remoteVideoRef.current;
+    const track = remoteScreenShareTrack ?? remoteVideoTrack;
+    if (el && track) {
+      track.attach(el);
+      return () => {
+        track.detach(el);
+      };
+    }
+  }, [remoteScreenShareTrack, remoteVideoTrack]);
 
   useEffect(() => {
     if (state !== "active" || !startedAt) {
@@ -156,13 +171,43 @@ export function CallView() {
     if (state === "idle") {
       setLayout("expanded");
       setPos(null);
+      autoMinimizedRef.current = false;
     }
   }, [state]);
 
-  const onDragStart = (e: ReactPointerEvent<HTMLDivElement>) => {
+  useEffect(() => {
+    if (state !== "active" && !(state === "connecting" && callKind === "channel")) return;
+    if (autoMinimizedRef.current) return;
+    autoMinimizedRef.current = true;
+    const panelW = Math.min(mode === "video" ? 360 : 300, window.innerWidth - 24);
+    const panelH = 72;
+    setPos({
+      x: Math.max(8, window.innerWidth - panelW - 20),
+      y: Math.max(8, window.innerHeight - panelH - 28),
+    });
+    setLayout("minimized");
+  }, [state, callKind, mode]);
+
+  const clampPanelPosition = (
+    x: number,
+    y: number,
+    panel: HTMLElement,
+  ): { x: number; y: number } => {
+    const w = panel.offsetWidth;
+    const h = panel.offsetHeight;
+    const maxX = Math.max(8, window.innerWidth - w - 8);
+    const maxY = Math.max(8, window.innerHeight - h - 8);
+    return {
+      x: Math.min(maxX, Math.max(8, x)),
+      y: Math.min(maxY, Math.max(8, y)),
+    };
+  };
+
+  const onDragStart = (e: ReactPointerEvent<HTMLElement>) => {
     if (layout !== "minimized") return;
     if ((e.target as HTMLElement).closest("button, input, label")) return;
-    const panel = e.currentTarget;
+    const panel = e.currentTarget.closest(".call-view") as HTMLDivElement | null;
+    if (!panel) return;
     const rect = panel.getBoundingClientRect();
     const next = pos ?? { x: rect.left, y: rect.top };
     if (!pos) setPos(next);
@@ -170,35 +215,46 @@ export function CallView() {
       pointerId: e.pointerId,
       offsetX: e.clientX - next.x,
       offsetY: e.clientY - next.y,
+      moved: false,
     };
-    panel.setPointerCapture(e.pointerId);
+    e.currentTarget.setPointerCapture(e.pointerId);
   };
 
-  const onDragMove = (e: ReactPointerEvent<HTMLDivElement>) => {
+  const onDragMove = (e: ReactPointerEvent<HTMLElement>) => {
     const drag = dragRef.current;
     if (!drag || drag.pointerId !== e.pointerId) return;
-    const panel = e.currentTarget;
-    const w = panel.offsetWidth;
-    const h = panel.offsetHeight;
-    const maxX = Math.max(8, window.innerWidth - w - 8);
-    const maxY = Math.max(8, window.innerHeight - h - 8);
-    setPos({
-      x: Math.min(maxX, Math.max(8, e.clientX - drag.offsetX)),
-      y: Math.min(maxY, Math.max(8, e.clientY - drag.offsetY)),
-    });
+    const panel = e.currentTarget.closest(".call-view") as HTMLDivElement | null;
+    if (!panel) return;
+    const nextX = e.clientX - drag.offsetX;
+    const nextY = e.clientY - drag.offsetY;
+    if (Math.abs(nextX - (pos?.x ?? nextX)) > 4 || Math.abs(nextY - (pos?.y ?? nextY)) > 4) {
+      drag.moved = true;
+    }
+    setPos(clampPanelPosition(nextX, nextY, panel));
   };
 
-  const onDragEnd = (e: ReactPointerEvent<HTMLDivElement>) => {
-    if (dragRef.current?.pointerId === e.pointerId) {
-      dragRef.current = null;
+  const onDragEnd = (e: ReactPointerEvent<HTMLElement>) => {
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== e.pointerId) return;
+    dragRef.current = null;
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+      e.currentTarget.releasePointerCapture(e.pointerId);
     }
   };
 
-  const handleMinimizedClick = (event: ReactMouseEvent<HTMLDivElement>) => {
-    if (layout !== "minimized") return;
-    if ((event.target as HTMLElement).closest("button, input, label")) return;
+  const openFullscreen = () => {
     setLayout("fullscreen");
     setPos(null);
+  };
+
+  const minimizeWithPosition = () => {
+    const panelW = Math.min(mode === "video" ? 360 : 300, window.innerWidth - 24);
+    const panelH = 72;
+    setPos({
+      x: Math.max(8, window.innerWidth - panelW - 20),
+      y: Math.max(8, window.innerHeight - panelH - 28),
+    });
+    setLayout("minimized");
   };
 
   const handlePushToTalkStart = (event: ReactPointerEvent<HTMLButtonElement>) => {
@@ -211,18 +267,26 @@ export function CallView() {
   if (state !== "outgoing" && state !== "connecting" && state !== "active") {
     return null;
   }
-  if (!peer) return null;
+  if (!peer && !channel) return null;
 
-  const name = userLabel(peer);
+  const isChannelCall = callKind === "channel" && channel;
+  const name = isChannelCall ? `#${channel.name}` : peer ? userLabel(peer) : "";
   const statusText =
     state === "outgoing"
       ? t("call.status.calling")
       : state === "connecting"
         ? t("call.status.connecting")
-        : formatDuration(elapsed);
+        : isChannelCall
+          ? t("call.channel.participants", { count: participantCount })
+          : formatDuration(elapsed);
 
+  const mainRemoteTrack = remoteScreenShareTrack ?? remoteVideoTrack;
   const showRemoteVideo = state === "active" && Boolean(mainRemoteTrack);
+  const showLocalScreenPreview =
+    state === "active" && isScreenSharing && Boolean(localScreenShareTrack);
+  const showLocalScreenInMain = showLocalScreenPreview && !showRemoteVideo;
   const showLocalVideo = isCameraOn && Boolean(localVideoTrack);
+  const showLocalPip = showLocalVideo && (showRemoteVideo || showLocalScreenInMain || !showLocalScreenPreview);
   const isVideoCall = mode === "video";
   const controlsLive = state === "active";
   const isLargeLayout = layout === "expanded" || layout === "fullscreen";
@@ -245,37 +309,37 @@ export function CallView() {
         .filter(Boolean)
         .join(" ")}
       style={style}
-      onPointerDown={onDragStart}
-      onPointerMove={onDragMove}
-      onPointerUp={onDragEnd}
-      onPointerCancel={onDragEnd}
-      onClick={handleMinimizedClick}
-      role={layout === "minimized" ? "button" : undefined}
-      tabIndex={layout === "minimized" ? 0 : undefined}
-      onKeyDown={(event) => {
-        if (layout !== "minimized") return;
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          setLayout("fullscreen");
-          setPos(null);
-        }
-      }}
-      aria-label={
-        layout === "minimized"
-          ? t("call.layout.openFullscreen", { name })
-          : undefined
-      }
     >
-      <header className="call-view__header">
+      <header
+        className={[
+          "call-view__header",
+          layout === "minimized" && "call-view__header--draggable",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+        onPointerDown={onDragStart}
+        onPointerMove={onDragMove}
+        onPointerUp={onDragEnd}
+        onPointerCancel={onDragEnd}
+      >
         <div className="call-view__header-main">
           {layout === "minimized" ? (
-            <Avatar
-              displayName={peer.displayName}
-              username={peer.username}
-              image={peer.image}
-              color={peer.color}
-              size={36}
-            />
+            isChannelCall ? (
+              <Avatar
+                displayName={channel.name}
+                username={channel.name}
+                image={channel.image}
+                size={36}
+              />
+            ) : peer ? (
+              <Avatar
+                displayName={peer.displayName}
+                username={peer.username}
+                image={peer.image}
+                color={peer.color}
+                size={36}
+              />
+            ) : null
           ) : null}
           <div className="call-view__header-text">
             <div className="call-view__name">{name}</div>
@@ -284,6 +348,17 @@ export function CallView() {
         </div>
 
         <div className="call-view__header-actions">
+          {layout === "minimized" && (
+            <button
+              type="button"
+              className="call-view__icon-btn"
+              title={t("call.controls.fullscreen")}
+              aria-label={t("call.controls.fullscreen")}
+              onClick={openFullscreen}
+            >
+              <Maximize2 size={16} strokeWidth={2} />
+            </button>
+          )}
           {layout === "expanded" && (
             <button
               type="button"
@@ -312,7 +387,7 @@ export function CallView() {
               className="call-view__icon-btn"
               title={t("call.controls.minimize")}
               aria-label={t("call.controls.minimize")}
-              onClick={() => setLayout("minimized")}
+              onClick={minimizeWithPosition}
             >
               <X size={18} strokeWidth={2} />
             </button>
@@ -334,22 +409,39 @@ export function CallView() {
                 .filter(Boolean)
                 .join(" ")}
             />
+          ) : showLocalScreenInMain ? (
+            <video
+              ref={localScreenShareRef}
+              autoPlay
+              playsInline
+              muted
+              className="call-view__remote call-view__remote--screen call-view__remote--local-preview"
+            />
           ) : (
             <div className="call-view__avatar-wrap">
-              <Avatar
-                displayName={peer.displayName}
-                username={peer.username}
-                image={peer.image}
-                color={peer.color}
-                size={isLargeLayout ? 112 : 72}
-              />
-              {!showRemoteVideo && state === "active" && (
+              {isChannelCall ? (
+                <Avatar
+                  displayName={channel.name}
+                  username={channel.name}
+                  image={channel.image}
+                  size={isLargeLayout ? 112 : 72}
+                />
+              ) : peer ? (
+                <Avatar
+                  displayName={peer.displayName}
+                  username={peer.username}
+                  image={peer.image}
+                  color={peer.color}
+                  size={isLargeLayout ? 112 : 72}
+                />
+              ) : null}
+              {!showRemoteVideo && !showLocalScreenInMain && state === "active" && (
                 <p className="call-view__stage-label">{name}</p>
               )}
             </div>
           )}
 
-          {showLocalVideo && (
+          {showLocalPip && (
             <video
               ref={localVideoRef}
               autoPlay
@@ -440,7 +532,11 @@ export function CallView() {
         <CtrlButton
           title={t("call.controls.end")}
           danger
-          onClick={state === "outgoing" ? cancelCall : endCall}
+          onClick={
+            state === "outgoing"
+              ? cancelCall
+              : endCall
+          }
         >
           <PhoneOff size={20} strokeWidth={2} />
         </CtrlButton>

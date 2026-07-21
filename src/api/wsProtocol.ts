@@ -23,6 +23,9 @@ export const WsType = {
   CALL_CANCEL: "call:cancel",
   CALL_END: "call:end",
   CALL_TIMEOUT: "call:timeout",
+  CHANNEL_VOICE_JOIN: "channel-voice:join",
+  CHANNEL_VOICE_LEAVE: "channel-voice:leave",
+  CHANNEL_VOICE_STATE: "channel-voice:state",
 
   // Serwer → klient
   RECEIVE_MESSAGE: "receiveMessage",

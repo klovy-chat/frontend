@@ -1451,6 +1451,14 @@
     "layout": {
       "openFullscreen": "Expand call with {{name}}"
     },
+    "channel": {
+      "join": "Join voice chat",
+      "leave": "Leave voice chat",
+      "participants_one": "{{count}} participant",
+      "participants_few": "{{count}} participants",
+      "participants_many": "{{count}} participants",
+      "participants_other": "{{count}} participants"
+    },
     "incoming": {
       "ariaLabel": "Incoming call"
     }

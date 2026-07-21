@@ -134,7 +134,14 @@ export function ChatWindow({
   const { user } = useAuth();
   const ws = useWebSocket();
   const wsConnected = useWebSocketConnected();
-  const { startCall, state: callState } = useCall();
+  const {
+    startCall,
+    state: callState,
+    toggleChannelVoice,
+    isInChannelVoice,
+    isChannelVoiceActive,
+    requestChannelVoiceState,
+  } = useCall();
   const resolvePresence = useResolvePresence();
   const { seed: seedPresence } = usePresenceStore();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -324,6 +331,11 @@ export function ChatWindow({
     setReplyingTo(null);
     loadMessages();
   }, [loadMessages]);
+
+  useEffect(() => {
+    if (target?.type !== "channel") return;
+    requestChannelVoiceState(target.channel._id);
+  }, [target, requestChannelVoiceState]);
 
   useEffect(() => {
     if (!target || target.type !== "dm") {
@@ -897,13 +909,39 @@ export function ChatWindow({
 
           {/* grouped pill toolbar */}
           <div className="chat-header__toolbar">
-            {/* Phone (tylko DM ze znajomym) */}
+            {/* Phone (DM ze znajomym) */}
             {target.type === "dm" && canSendDm && (
               <IconBtn
                 title={t("chat.window.call")}
                 onClick={() =>
                   callState === "idle" &&
                   startCall(toCallPeer(target.contact), "audio")
+                }
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.41 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.78a16 16 0 0 0 6.29 6.29l1.14-.95a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+              </IconBtn>
+            )}
+
+            {/* Voice channel (kanał) */}
+            {target.type === "channel" && (
+              <IconBtn
+                title={
+                  isInChannelVoice(target.channel._id)
+                    ? t("call.channel.leave")
+                    : t("call.channel.join")
+                }
+                active={
+                  isInChannelVoice(target.channel._id) ||
+                  isChannelVoiceActive(target.channel._id)
+                }
+                onClick={() =>
+                  toggleChannelVoice({
+                    _id: target.channel._id,
+                    name: target.channel.name,
+                    image: target.channel.image,
+                  })
                 }
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">

@@ -1451,6 +1451,14 @@
     "layout": {
       "openFullscreen": "Powiększ rozmowę z {{name}}"
     },
+    "channel": {
+      "join": "Dołącz do rozmowy głosowej",
+      "leave": "Opuść rozmowę głosową",
+      "participants_one": "{{count}} uczestnik",
+      "participants_few": "{{count}} uczestników",
+      "participants_many": "{{count}} uczestników",
+      "participants_other": "{{count}} uczestników"
+    },
     "incoming": {
       "ariaLabel": "Połączenie przychodzące"
     }

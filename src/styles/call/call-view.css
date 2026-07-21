@@ -56,14 +56,22 @@
 }
 
 .call-view--minimized {
-  width: min(360px, calc(100vw - 24px));
+  width: min(360px, calc(100vw - 16px));
   min-height: 72px;
   border-radius: 14px;
-  cursor: var(--cursor-pointer);
   touch-action: none;
   flex-direction: row;
   align-items: center;
   padding-right: 8px;
+}
+
+.call-view__header--draggable {
+  cursor: grab;
+  touch-action: none;
+}
+
+.call-view__header--draggable:active {
+  cursor: grabbing;
 }
 
 .call-view--minimized:hover {
@@ -325,6 +333,10 @@
   background: #000;
 }
 
+.call-view__remote--local-preview {
+  transform: none;
+}
+
 .call-view__levels:has(.call-view__level:only-child) {
   grid-template-columns: 1fr;
   justify-items: center;
@@ -344,6 +356,7 @@
     right: 12px;
     bottom: calc(12px + var(--safe-bottom));
     width: auto;
+    max-width: calc(100vw - 16px);
   }
 
   .call-view--minimized.call-view--dragged {

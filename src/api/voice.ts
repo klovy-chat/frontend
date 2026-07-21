@@ -6,11 +6,11 @@ export interface VoiceTokenResponse {
   room: string;
 }
 
-/** Pobiera token dostępu LiveKit dla rozmowy 1:1 z danym kontaktem. */
-export function requestVoiceToken(peerId: string) {
+/** Pobiera token dostępu LiveKit dla rozmowy 1:1 lub kanału głosowego. */
+export function requestVoiceToken(params: { peerId?: string; channelId?: string }) {
   return apiRequest<VoiceTokenResponse>("/api/voice/token", {
     method: "POST",
-    body: JSON.stringify({ peerId }),
+    body: JSON.stringify(params),
   });
 }
 
