@@ -1,10 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useLocale } from "../../context/LocaleContext";
-import {
-  LOCALE_NATIVE_LABELS,
-  SUPPORTED_LOCALES,
-  type AppLocale,
-} from "../../languages";
+import { SUPPORTED_LOCALES, type AppLocale } from "../../languages";
 import { LanguageFlag } from "./LanguageFlag";
 
 export function LanguageSettingsPanel() {
@@ -37,7 +33,7 @@ export function LanguageSettingsPanel() {
               onClick={() => handlePick(loc)}
             >
               <LanguageFlag locale={loc} />
-              <span className="as-lang-name">{LOCALE_NATIVE_LABELS[loc]}</span>
+              <span className="as-lang-name">{t(`common.language.${loc}`)}</span>
               <span
                 className={`as-lang-mark${selected ? " as-lang-mark--selected" : " as-lang-mark--idle"}`}
                 aria-hidden="true"
