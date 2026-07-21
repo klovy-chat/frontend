@@ -4,7 +4,6 @@ import {
   useState,
   type PointerEvent as ReactPointerEvent,
 } from "react";
-import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import {
   Maximize2,
@@ -23,7 +22,16 @@ import { userLabel } from "../../utils/user/format";
 import { useCall } from "../../context/CallContext";
 import "../../styles/call/call-view.css";
 
-type CallLayout = "expanded" | "minimized" | "fullscreen";
+type CallLayout = "floating" | "minimized" | "fullscreen";
+
+function getDefaultFloatingPosition(isVideoCall: boolean) {
+  const panelW = Math.min(isVideoCall ? 360 : 300, window.innerWidth - 24);
+  const panelH = isVideoCall ? 420 : 380;
+  return {
+    x: Math.max(8, window.innerWidth - panelW - 20),
+    y: Math.max(8, window.innerHeight - panelH - 28),
+  };
+}
 
 function formatDuration(ms: number): string {
   const total = Math.floor(ms / 1000);
@@ -107,10 +115,9 @@ export function CallView() {
   const localScreenShareRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const [elapsed, setElapsed] = useState(0);
-  const [layout, setLayout] = useState<CallLayout>("expanded");
-  const [mainPortalTarget, setMainPortalTarget] = useState<HTMLElement | null>(null);
+  const [layout, setLayout] = useState<CallLayout>("floating");
   const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
-  const autoMinimizedRef = useRef(false);
+  const autoFloatedRef = useRef(false);
   const dragRef = useRef<{
     pointerId: number;
     offsetX: number;
@@ -119,10 +126,22 @@ export function CallView() {
   } | null>(null);
 
   useEffect(() => {
-    setMainPortalTarget(
-      document.querySelector(".app-shell__main") as HTMLElement | null,
-    );
-  }, []);
+    if (state === "idle") {
+      setLayout("floating");
+      setPos(null);
+      autoFloatedRef.current = false;
+    }
+  }, [state]);
+
+  useEffect(() => {
+    if (state !== "outgoing" && state !== "connecting" && state !== "active") return;
+    if (autoFloatedRef.current) return;
+    autoFloatedRef.current = true;
+    setLayout("floating");
+    setPos(getDefaultFloatingPosition(mode === "video"));
+  }, [state, mode]);
+
+  const isDraggableLayout = layout === "floating" || layout === "minimized";
 
   useEffect(() => {
     const el = localVideoRef.current;
@@ -167,27 +186,6 @@ export function CallView() {
     return () => window.clearInterval(id);
   }, [state, startedAt]);
 
-  useEffect(() => {
-    if (state === "idle") {
-      setLayout("expanded");
-      setPos(null);
-      autoMinimizedRef.current = false;
-    }
-  }, [state]);
-
-  useEffect(() => {
-    if (state !== "active" && !(state === "connecting" && callKind === "channel")) return;
-    if (autoMinimizedRef.current) return;
-    autoMinimizedRef.current = true;
-    const panelW = Math.min(mode === "video" ? 360 : 300, window.innerWidth - 24);
-    const panelH = 72;
-    setPos({
-      x: Math.max(8, window.innerWidth - panelW - 20),
-      y: Math.max(8, window.innerHeight - panelH - 28),
-    });
-    setLayout("minimized");
-  }, [state, callKind, mode]);
-
   const clampPanelPosition = (
     x: number,
     y: number,
@@ -204,7 +202,7 @@ export function CallView() {
   };
 
   const onDragStart = (e: ReactPointerEvent<HTMLElement>) => {
-    if (layout !== "minimized") return;
+    if (!isDraggableLayout) return;
     if ((e.target as HTMLElement).closest("button, input, label")) return;
     const panel = e.currentTarget.closest(".call-view") as HTMLDivElement | null;
     if (!panel) return;
@@ -247,13 +245,13 @@ export function CallView() {
     setPos(null);
   };
 
+  const restoreFloating = () => {
+    setLayout("floating");
+    setPos((current) => current ?? getDefaultFloatingPosition(mode === "video"));
+  };
+
   const minimizeWithPosition = () => {
-    const panelW = Math.min(mode === "video" ? 360 : 300, window.innerWidth - 24);
-    const panelH = 72;
-    setPos({
-      x: Math.max(8, window.innerWidth - panelW - 20),
-      y: Math.max(8, window.innerHeight - panelH - 28),
-    });
+    setPos((current) => current ?? getDefaultFloatingPosition(mode === "video"));
     setLayout("minimized");
   };
 
@@ -289,10 +287,10 @@ export function CallView() {
   const showLocalPip = showLocalVideo && (showRemoteVideo || showLocalScreenInMain || !showLocalScreenPreview);
   const isVideoCall = mode === "video";
   const controlsLive = state === "active";
-  const isLargeLayout = layout === "expanded" || layout === "fullscreen";
+  const isLargeLayout = layout === "floating" || layout === "fullscreen";
 
   const style =
-    layout === "minimized" && pos != null
+    isDraggableLayout && pos != null
       ? ({ left: pos.x, top: pos.y, right: "auto", bottom: "auto" } as const)
       : undefined;
 
@@ -301,10 +299,10 @@ export function CallView() {
       className={[
         "call-view",
         isVideoCall && "call-view--video",
-        layout === "expanded" && "call-view--expanded",
+        layout === "floating" && "call-view--floating",
         layout === "minimized" && "call-view--minimized",
         layout === "fullscreen" && "call-view--fullscreen",
-        layout === "minimized" && pos && "call-view--dragged",
+        isDraggableLayout && pos && "call-view--dragged",
       ]
         .filter(Boolean)
         .join(" ")}
@@ -313,7 +311,7 @@ export function CallView() {
       <header
         className={[
           "call-view__header",
-          layout === "minimized" && "call-view__header--draggable",
+          isDraggableLayout && "call-view__header--draggable",
         ]
           .filter(Boolean)
           .join(" ")}
@@ -352,20 +350,20 @@ export function CallView() {
             <button
               type="button"
               className="call-view__icon-btn"
-              title={t("call.controls.fullscreen")}
-              aria-label={t("call.controls.fullscreen")}
-              onClick={openFullscreen}
+              title={t("call.controls.restore")}
+              aria-label={t("call.controls.restore")}
+              onClick={restoreFloating}
             >
               <Maximize2 size={16} strokeWidth={2} />
             </button>
           )}
-          {layout === "expanded" && (
+          {layout === "floating" && (
             <button
               type="button"
               className="call-view__icon-btn"
               title={t("call.controls.fullscreen")}
               aria-label={t("call.controls.fullscreen")}
-              onClick={() => setLayout("fullscreen")}
+              onClick={openFullscreen}
             >
               <Maximize2 size={18} strokeWidth={2} />
             </button>
@@ -376,7 +374,7 @@ export function CallView() {
               className="call-view__icon-btn"
               title={t("call.controls.restore")}
               aria-label={t("call.controls.restore")}
-              onClick={() => setLayout("expanded")}
+              onClick={restoreFloating}
             >
               <Minimize2 size={18} strokeWidth={2} />
             </button>
@@ -543,10 +541,6 @@ export function CallView() {
       </div>
     </div>
   );
-
-  if (layout === "expanded" && mainPortalTarget) {
-    return createPortal(panel, mainPortalTarget);
-  }
 
   return panel;
 }
