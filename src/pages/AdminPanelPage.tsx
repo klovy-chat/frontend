@@ -59,7 +59,7 @@ import {
   type WarningSeverity,
 } from "../api/admin";
 import { ApiError } from "../api/client";
-import { isValidBadgeColor, isValidBadgeIcon, sanitizeBadgeColor } from "../utils/user/badgeValidation";
+import { isValidBadgeColor, isValidBadgeIcon } from "../utils/user/badgeValidation";
 import { AdminActionMenu, type AdminMenuItem } from "../components/admin/AdminActionMenu";
 import { AdminBrand } from "../components/admin/AdminBrand";
 import { Avatar } from "../components/common/Avatar";
@@ -1487,7 +1487,7 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
             type="button"
             className={`adm-tb-btn adm-tb-btn--primary${refreshing ? " spin" : ""}`}
             onClick={handleRefresh}
-            disabled={loading}
+            disabled={fetching || refreshing || initialLoading}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 12a9 9 0 1 1-2.64-6.36" />
