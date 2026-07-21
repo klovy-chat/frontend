@@ -104,6 +104,11 @@ export function ImageLightbox({
   }, [initialIndex, items]);
 
   useEffect(() => {
+    setImageLoaded(false);
+    setImageError(false);
+  }, [item?.url, item?.messageId, index]);
+
+  useEffect(() => {
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
@@ -250,7 +255,7 @@ export function ImageLightbox({
           <p className="image-lightbox__error">{t("media.lightbox.cannotDisplay")}</p>
         ) : (
         <MediaImage
-          key={item.messageId}
+          key={`${item.messageId}:${item.url}`}
           fileUrl={item.url}
           alt={item.fileName}
           className={`image-lightbox__image${imageLoaded ? " image-lightbox__image--loaded" : ""}`}

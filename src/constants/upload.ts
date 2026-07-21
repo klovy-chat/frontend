@@ -1,10 +1,11 @@
 import i18n from "../i18n/config";
+import { ApiError } from "../api/client";
 
 /** Maximum non-image chat attachment size (10 MB) — must match backend `MAX_ATTACHMENT_BYTES`. */
 export const MAX_ATTACHMENT_SIZE_BYTES = 10 * 1024 * 1024;
 
-/** Maximum chat image upload size (3 MB) — must match backend `MAX_IMAGE_ATTACHMENT_BYTES`. */
-export const MAX_IMAGE_ATTACHMENT_SIZE_BYTES = 3 * 1024 * 1024;
+/** Maximum chat image upload size (10 MB) — must match backend `MAX_IMAGE_ATTACHMENT_BYTES`. */
+export const MAX_IMAGE_ATTACHMENT_SIZE_BYTES = MAX_ATTACHMENT_SIZE_BYTES;
 
 /** Maximum avatar size (6 MB) — must match backend `MAX_AVATAR_BYTES`. */
 export const MAX_AVATAR_SIZE_BYTES = 6 * 1024 * 1024;
@@ -17,7 +18,7 @@ export const MAX_ATTACHMENT_SIZE_LABEL = `${Math.round(
   MAX_ATTACHMENT_SIZE_BYTES / (1024 * 1024),
 )} MB`;
 
-/** Human-readable max image attachment size, e.g. "3 MB". */
+/** Human-readable max image attachment size, e.g. "10 MB". */
 export const MAX_IMAGE_ATTACHMENT_SIZE_LABEL = `${Math.round(
   MAX_IMAGE_ATTACHMENT_SIZE_BYTES / (1024 * 1024),
 )} MB`;
@@ -153,4 +154,24 @@ export function assertBannerSize(file: File): void {
       }),
     );
   }
+}
+
+/** Must match backend `MAX_CHAT_ATTACHMENTS_PER_WINDOW`. */
+export const MAX_CHAT_ATTACHMENTS_PER_WINDOW = 20;
+
+export function formatChatUploadError(error: unknown): string {
+  if (error instanceof ApiError && error.code === "CHAT_ATTACHMENT_LIMIT") {
+    const minutes = Math.max(1, Math.ceil((error.retryAfter ?? 40 * 60) / 60));
+    return i18n.t("upload.attachmentLimit", {
+      count: MAX_CHAT_ATTACHMENTS_PER_WINDOW,
+      minutes,
+    });
+  }
+  if (error instanceof ApiError && error.message.trim()) {
+    return error.message;
+  }
+  if (error instanceof Error && error.message.trim()) {
+    return error.message;
+  }
+  return i18n.t("upload.failed");
 }

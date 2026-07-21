@@ -321,6 +321,7 @@
     "invalidType": "Niedozwolony typ pliku. Dozwolone: {{extensions}}.",
     "mimeMismatch": "Typ MIME pliku nie pasuje do rozszerzenia.",
     "attachmentTooLarge": "Plik jest za duży. Maksymalny rozmiar to {{limit}}.",
+    "attachmentLimit": "Osiągnięto limit {{count}} załączników. Spróbuj ponownie za {{minutes}} min.",
     "avatarTooLarge": "Obraz jest za duży. Maksymalny rozmiar to {{limit}}.",
     "failed": "Nie udało się wysłać pliku. Spróbuj ponownie.",
     "attachFile": "Załącz plik",

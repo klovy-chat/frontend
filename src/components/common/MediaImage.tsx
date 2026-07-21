@@ -22,7 +22,8 @@ interface MediaImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, "src
 /** Remember which URL worked for a given file key so remounts don't re-hit the API. */
 const resolvedSrcCache = new Map<string, string>();
 
-const MAX_CONCURRENT_LOADS = 4;
+/** Lazy chat thumbnails share this pool; lightbox uses priority loading instead. */
+const MAX_CONCURRENT_LOADS = 10;
 let activeLoads = 0;
 const loadWaitQueue: Array<() => void> = [];
 
@@ -142,6 +143,13 @@ export function MediaImage({
       setSrc(resolvedSrcCache.get(cacheKey) ?? null);
       return;
     }
+    // Lightbox / other eager loads must not wait behind lazy message-list thumbnails.
+    if (!deferUntilVisible) {
+      slotHeld.current = false;
+      setSlotReady(true);
+      setSrc(candidates[0] ?? null);
+      return;
+    }
     setSlotReady(false);
     void acquireLoadSlot().then(() => {
       if (cancelled) {
@@ -159,7 +167,7 @@ export function MediaImage({
         slotHeld.current = false;
       }
     };
-  }, [visible, cacheKey, candidates]);
+  }, [visible, cacheKey, candidates, deferUntilVisible]);
 
   useEffect(() => {
     if (!slotReady || cached) return;
@@ -191,10 +199,17 @@ export function MediaImage({
   useEffect(() => {
     const img = imgRef.current;
     if (!img || !src || !slotReady) return;
-    if (img.complete && img.naturalWidth > 0) {
-      notifyLoaded({ currentTarget: img } as React.SyntheticEvent<HTMLImageElement>);
-    }
-  }, [src, slotReady, notifyLoaded]);
+
+    const markIfReady = () => {
+      if (img.complete && img.naturalWidth > 0) {
+        notifyLoaded({ currentTarget: img } as React.SyntheticEvent<HTMLImageElement>);
+      }
+    };
+
+    markIfReady();
+    const frame = window.requestAnimationFrame(markIfReady);
+    return () => window.cancelAnimationFrame(frame);
+  }, [src, slotReady, notifyLoaded, cacheKey]);
 
   return (
     <img

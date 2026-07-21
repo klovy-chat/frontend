@@ -16,6 +16,8 @@ export class ApiError extends Error {
   constructor(
     message: string,
     public status: number,
+    public code?: string,
+    public retryAfter?: number,
   ) {
     super(message);
     this.name = "ApiError";
@@ -211,17 +213,23 @@ export async function apiRequest<T>(
 
   if (!response.ok) {
     let message = response.statusText;
+    let code: string | undefined;
+    let retryAfter: number | undefined;
     if (isJson) {
       const data = (await response.json()) as {
         message?: string;
         error?: string;
+        retryAfter?: number;
       };
+      code = data.error;
+      retryAfter =
+        typeof data.retryAfter === "number" ? data.retryAfter : undefined;
       message = data.message ?? data.error ?? message;
     } else {
       const text = await response.text();
       if (text) message = text;
     }
-    throw new ApiError(message, response.status);
+    throw new ApiError(message, response.status, code, retryAfter);
   }
 
   if (response.status === 204) {

@@ -13,6 +13,7 @@ import {
   assertAttachmentSize,
   assertAttachmentType,
   formatUploadLimitMb,
+  formatChatUploadError,
   isImageAttachmentFile,
   MAX_ATTACHMENT_SIZE_BYTES,
   MAX_IMAGE_ATTACHMENT_SIZE_BYTES,
@@ -288,8 +289,8 @@ export function MessageInput({
       setUploadError(null);
       try {
         await onFile(attachedFile);
-      } catch {
-        setUploadError(t("upload.failed"));
+      } catch (error) {
+        setUploadError(formatChatUploadError(error));
         setUploading(false);
         return;
       }
@@ -517,8 +518,8 @@ export function MessageInput({
         return;
       }
       await onVoiceNote(result.file, result.durationMs);
-    } catch {
-      setUploadError(t("voice.sendFailed"));
+    } catch (error) {
+      setUploadError(formatChatUploadError(error));
     } finally {
       setUploading(false);
     }

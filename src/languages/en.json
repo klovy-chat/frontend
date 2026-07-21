@@ -321,6 +321,7 @@
     "invalidType": "File type not allowed. Allowed: {{extensions}}.",
     "mimeMismatch": "File MIME type does not match the extension.",
     "attachmentTooLarge": "File is too large. Maximum size is {{limit}}.",
+    "attachmentLimit": "Attachment limit reached ({{count}}). Try again in {{minutes}} min.",
     "avatarTooLarge": "Image is too large. Maximum size is {{limit}}.",
     "failed": "Could not upload file. Try again.",
     "attachFile": "Attach file",
