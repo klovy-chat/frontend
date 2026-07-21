@@ -58,8 +58,8 @@
 }
 
 .app-shell__settings-nav {
-  border-right: 1px solid var(--border);
-  background: var(--bg-panel);
+  border-right: 1px solid var(--border-light);
+  background: var(--bg-settings-nav, var(--bg-panel));
   z-index: 125;
 }
 
@@ -68,7 +68,7 @@
 }
 
 .app-shell__settings-content {
-  background: var(--bg-shell);
+  background: var(--bg-settings-surface, var(--bg-shell));
   overflow: hidden;
   min-height: 0;
   display: flex;

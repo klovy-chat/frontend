@@ -31,9 +31,14 @@
   --nav-width: 220px;
   --list-width: 300px;
   --detail-width: 300px;
-  --settings-nav-width: 260px;
+  --settings-nav-width: 240px;
   --settings-modal-width: 1320px;
   --settings-modal-height: 840px;
+  --bg-settings-nav: var(--bg-shell);
+  --bg-settings-surface: #131318;
+  --bg-settings-card: #18181F;
+  --bg-settings-card-hover: #1E1E28;
+  --bg-settings-active: #22222C;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);

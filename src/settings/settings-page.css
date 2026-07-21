@@ -1,4 +1,6 @@
 .settings-page {
+  --settings-nav-width: 240px;
+  background: var(--bg-settings-nav);
   animation: klovy-fade-in 0.18s ease both;
 }
 
@@ -13,6 +15,153 @@
 
 .settings-page-layout .as-content {
   min-height: 0;
+}
+
+.settings-page .app-shell__settings-nav {
+  background: var(--bg-settings-nav);
+  border-right: 1px solid var(--border-light);
+}
+
+.settings-page .app-shell__settings-content,
+.settings-page .as-content--inline {
+  background: var(--bg-settings-surface);
+}
+
+.settings-page .as-nav--inline {
+  background: var(--bg-settings-nav);
+  padding: 22px 10px 16px;
+  gap: 0;
+  border-right: none;
+}
+
+.settings-page .as-nav-title {
+  font-size: 1.1rem;
+  margin: 0 0 14px;
+  padding: 0 8px;
+}
+
+.settings-page .as-nav-label {
+  padding: 0 8px 3px;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+}
+
+.settings-page .as-nav-label--spaced {
+  margin-top: 8px;
+}
+
+.settings-page .as-nav-item {
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  gap: 0.5rem;
+  margin-bottom: 1px;
+}
+
+.settings-page .as-nav-item:hover {
+  background: var(--bg-settings-card);
+  color: var(--text);
+}
+
+.settings-page .as-nav-item.active {
+  background: var(--bg-settings-active);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.settings-page .as-nav-item.active svg {
+  color: var(--accent);
+  opacity: 1;
+}
+
+.settings-page .as-content-inner {
+  max-width: none;
+  padding: 24px 36px 40px;
+}
+
+.settings-page .as-section-title {
+  font-size: 1.5rem;
+  margin-bottom: 2px;
+}
+
+.settings-page .as-section-subtitle {
+  margin: 0 0 14px;
+  font-size: 12px;
+}
+
+.settings-page .as-account-hero {
+  margin-bottom: 6px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: var(--bg-settings-card);
+  border-color: var(--border-light);
+}
+
+.settings-page .as-card,
+.settings-page .as-setting-card,
+.settings-page .as-data-card {
+  margin-bottom: 2px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: var(--bg-settings-card);
+  border-color: var(--border-light);
+}
+
+.settings-page .as-setting-card:hover {
+  background: var(--bg-settings-card-hover);
+  border-color: var(--border);
+}
+
+.settings-page .as-action-row {
+  margin-top: 2px;
+  margin-bottom: 0;
+  padding: 13px 16px;
+  border-radius: 10px;
+  background: var(--bg-settings-card);
+  border-color: var(--border-light);
+}
+
+.settings-page .as-action-row:hover:not(:disabled) {
+  background: var(--bg-settings-card-hover);
+}
+
+.settings-page .as-group-label {
+  margin: 14px 0 4px;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+}
+
+.settings-page .as-card-label {
+  margin-bottom: 4px;
+  font-size: 9px;
+  color: var(--text-dim);
+  opacity: 1;
+}
+
+.settings-page .as-hint {
+  margin-bottom: 0.75rem;
+  font-size: 12px;
+}
+
+.settings-page .as-form--inset {
+  margin-top: 10px;
+  padding-top: 10px;
+}
+
+.settings-page .as-deletion-pending-banner,
+.settings-page .as-info-banner {
+  margin-bottom: 6px;
+  border-radius: 10px;
+}
+
+.settings-page .as-close--inline {
+  background: var(--bg-settings-card);
+  border-color: var(--border-light);
+}
+
+.settings-page .as-close--inline:hover {
+  background: var(--bg-settings-card-hover);
 }
 
 .settings-section-panel {
@@ -30,26 +179,50 @@
   }
 }
 
-.as-nav-item {
+.settings-page .as-nav-item {
   transition:
     background 0.15s ease,
     color 0.15s ease,
     transform 0.12s ease;
 }
 
-.as-nav-item:active {
+.settings-page .as-nav-item:active {
   transform: scale(0.98);
 }
 
-.as-action-row,
-.as-setting-row {
+.settings-page .as-action-row,
+.settings-page .as-setting-row {
   transition:
     background 0.15s ease,
     border-color 0.15s ease,
     transform 0.12s ease;
 }
 
-.as-action-row:active,
-.as-setting-row:active {
+.settings-page .as-action-row:active,
+.settings-page .as-setting-row:active {
   transform: scale(0.995);
+}
+
+.settings-page .as-banner-block {
+  margin-bottom: 8px;
+}
+
+.settings-page .as-profile-header-row {
+  margin-bottom: 8px;
+}
+
+.settings-page .as-session-row {
+  margin-bottom: 2px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--bg-settings-card);
+  border-color: var(--border-light);
+}
+
+.settings-page .as-sessions-list {
+  margin-bottom: 6px;
+}
+
+.settings-page .as-voice-banner {
+  margin-bottom: 6px;
 }
