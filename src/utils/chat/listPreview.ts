@@ -20,7 +20,7 @@ function channelId(msg: Message): string | undefined {
 }
 
 function messageTime(msg: Message): string {
-  return msg.timestamp ?? msg.createdAt ?? new Date().toISOString();
+  return msg.timestamp || new Date().toISOString();
 }
 
 function bumpEntry<T extends { lastMessage?: string; lastMessageTime?: string }>(
