@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { useAnimatedModal } from "../../hooks/useAnimatedModal";
@@ -14,6 +14,35 @@ function formatFingerprint(value: string | null): string {
     chunks.push(value.slice(i, i + 4));
   }
   return chunks.join(" ");
+}
+
+function SettingsSwitch({
+  checked,
+  disabled,
+  compact,
+  onChange,
+  children,
+}: {
+  checked: boolean;
+  disabled?: boolean;
+  compact?: boolean;
+  onChange: (next: boolean) => void;
+  children: ReactNode;
+}) {
+  return (
+    <div className={`e2e-settings-toggle${compact ? " e2e-settings-toggle--compact" : ""}`}>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={checked}
+        disabled={disabled}
+        className="e2e-settings-toggle__track"
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={() => onChange(!checked)}
+      />
+      <div className="e2e-settings-toggle__copy">{children}</div>
+    </div>
+  );
 }
 
 interface EncryptionSettingsModalProps {
@@ -119,22 +148,14 @@ export function EncryptionSettingsModal({
               </span>
             </div>
 
-            <label
-              className="e2e-settings-toggle"
-              onMouseDown={(e) => e.preventDefault()}
+            <SettingsSwitch
+              checked={enabled && hasKeys}
+              disabled={loading || busy}
+              onChange={onToggle}
             >
-              <input
-                type="checkbox"
-                checked={enabled && hasKeys}
-                disabled={loading || busy}
-                onChange={(e) => onToggle(e.target.checked)}
-              />
-              <span className="e2e-settings-toggle__track" aria-hidden />
-              <span className="e2e-settings-toggle__copy">
-                <strong>{t("settings.encryption.toggle")}</strong>
-                <span>{t(`settings.encryption.status.${uiStatus}`)}</span>
-              </span>
-            </label>
+              <strong>{t("settings.encryption.toggle")}</strong>
+              <span>{t(`settings.encryption.status.${uiStatus}`)}</span>
+            </SettingsSwitch>
           </section>
 
           <section className="e2e-settings-block">
@@ -164,22 +185,15 @@ export function EncryptionSettingsModal({
           </section>
 
           <section className="e2e-settings-block e2e-settings-block--compact">
-            <label
-              className="e2e-settings-toggle e2e-settings-toggle--compact"
-              onMouseDown={(e) => e.preventDefault()}
+            <SettingsSwitch
+              checked={clearOnLogout}
+              disabled={loading || busy}
+              compact
+              onChange={onClearOnLogoutChange}
             >
-              <input
-                type="checkbox"
-                checked={clearOnLogout}
-                disabled={loading || busy}
-                onChange={(e) => onClearOnLogoutChange(e.target.checked)}
-              />
-              <span className="e2e-settings-toggle__track" aria-hidden />
-              <span className="e2e-settings-toggle__copy">
-                <strong>{t("settings.encryption.clearOnLogout")}</strong>
-                <span>{t("settings.encryption.clearOnLogoutHint")}</span>
-              </span>
-            </label>
+              <strong>{t("settings.encryption.clearOnLogout")}</strong>
+              <span>{t("settings.encryption.clearOnLogoutHint")}</span>
+            </SettingsSwitch>
           </section>
         </div>
 

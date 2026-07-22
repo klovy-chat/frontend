@@ -278,8 +278,12 @@ export function ChatWindow({
     async (list: Message[]) => {
       if (!currentUserId) return list.map(normalizeMessage);
       const normalized = list.map(normalizeMessage);
-      if (!(await e2eService.canDecryptMessages())) return normalized;
-      return e2eService.decryptMessages(normalized, currentUserId);
+      try {
+        if (!(await e2eService.canDecryptMessages())) return normalized;
+        return await e2eService.decryptMessages(normalized, currentUserId);
+      } catch {
+        return normalized;
+      }
     },
     [currentUserId],
   );

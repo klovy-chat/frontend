@@ -12,7 +12,7 @@ import { isTwoFactorLoginResponse } from "../api/auth";
 import { ApiError, clearCsrfToken } from "../api/client";
 import { e2eService } from "../crypto/e2e/e2eService";
 import { clearAutoIdleBrbFlag } from "../hooks/useIdleAvailability";
-import { restoreSession } from "../utils/user/sessionRestore";
+import { restoreSession, clearCachedSessionUser } from "../utils/user/sessionRestore";
 import type { User } from "../types";
 
 export interface LoginResult {
@@ -131,6 +131,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       await e2eService.clearLocalKeysOnLogout();
       clearCsrfToken();
+      clearCachedSessionUser();
       clearAutoIdleBrbFlag();
       setUser(null);
     }
@@ -140,11 +141,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!user?.id) return;
 
     let cancelled = false;
+    let lastCheckAt = 0;
+    const MIN_CHECK_INTERVAL_MS = 60_000;
 
     const verifySession = async () => {
       if (cancelled || document.visibilityState === "hidden") return;
+      const now = Date.now();
+      if (now - lastCheckAt < MIN_CHECK_INTERVAL_MS) return;
+      lastCheckAt = now;
       try {
-        await authApi.getUserInfo();
+        const info = await restoreSession(true);
+        if (info && !cancelled) {
+          setUser(info);
+        }
       } catch (error) {
         if (error instanceof ApiError && error.status === 401) {
           await logout();

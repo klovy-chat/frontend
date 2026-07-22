@@ -1,6 +1,7 @@
 import { arrayBufferToBase64, base64ToArrayBuffer } from "../bufferUtils";
 
-const DB_NAME = "klovy-e2e-v1";
+import { idbGet, idbPut } from "./e2eDb";
+
 const IDENTITY_CHANGE_EVENT = "klovy:e2e-identity-changed";
 
 export interface IdentityChangeDetail {
@@ -22,31 +23,11 @@ function emitIdentityChange(detail: IdentityChangeDetail) {
 }
 
 async function metaGet<T>(key: string): Promise<T | undefined> {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME);
-    req.onsuccess = () => {
-      const db = req.result;
-      const tx = db.transaction("meta", "readonly");
-      const getReq = tx.objectStore("meta").get(key);
-      getReq.onsuccess = () => resolve(getReq.result as T | undefined);
-      getReq.onerror = () => reject(getReq.error);
-    };
-    req.onerror = () => reject(req.error);
-  });
+  return idbGet<T>("meta", key);
 }
 
 async function metaPut(key: string, value: unknown): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME);
-    req.onsuccess = () => {
-      const db = req.result;
-      const tx = db.transaction("meta", "readwrite");
-      tx.objectStore("meta").put(value, key);
-      tx.oncomplete = () => resolve();
-      tx.onerror = () => reject(tx.error);
-    };
-    req.onerror = () => reject(req.error);
-  });
+  await idbPut("meta", key, value);
 }
 
 export async function fingerprintFromIdentityKeyB64(identityKeyB64: string): Promise<string> {

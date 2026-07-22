@@ -24,7 +24,7 @@ export function PendingApprovalPage() {
     }, 15000);
 
     return () => clearInterval(interval);
-  }, [user, navigate, refreshUser]);
+  }, [user?.id, navigate, refreshUser]);
 
   const handleLogout = async () => {
     await logout();

@@ -2048,6 +2048,7 @@
 }
 
 .e2e-settings-toggle {
+  position: relative;
   display: flex;
   align-items: flex-start;
   gap: 12px;
@@ -2058,12 +2059,6 @@
   align-items: center;
 }
 
-.e2e-settings-toggle input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-
 .e2e-settings-toggle__track {
   position: relative;
   width: 42px;
@@ -2072,6 +2067,12 @@
   background: var(--bg-hover);
   border: 1px solid var(--border);
   flex-shrink: 0;
+  padding: 0;
+  margin: 0;
+  appearance: none;
+  cursor: inherit;
+  font: inherit;
+  color: inherit;
   transition: background 0.18s ease, border-color 0.18s ease;
 }
 
@@ -2087,18 +2088,19 @@
   transition: transform 0.18s ease, background 0.18s ease;
 }
 
-.e2e-settings-toggle input:checked + .e2e-settings-toggle__track {
+.e2e-settings-toggle__track[aria-checked="true"] {
   background: var(--success-dim);
   border-color: var(--success-border);
 }
 
-.e2e-settings-toggle input:checked + .e2e-settings-toggle__track::after {
+.e2e-settings-toggle__track[aria-checked="true"]::after {
   transform: translateX(18px);
   background: var(--success);
 }
 
-.e2e-settings-toggle input:disabled + .e2e-settings-toggle__track {
+.e2e-settings-toggle__track:disabled {
   opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .e2e-settings-toggle__copy {

@@ -5,6 +5,7 @@ import { waitForBackend } from "../env/waitForBackend";
 import type { User } from "../../types";
 
 const BASE_DELAY_MS = 350;
+const MIN_FORCE_REFRESH_MS = 5_000;
 
 type UserInfoResponse = User & { sessionNeedsRefresh?: boolean };
 
@@ -30,9 +31,9 @@ async function fetchUserInfoWithRetry(): Promise<User | null> {
     if (!ready) return null;
   }
 
-  for (let attempt = 0; attempt < 3; attempt++) {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
     try {
-      const user = await authApi.getUserInfo() as UserInfoResponse;
+      const user = (await authApi.getUserInfo()) as UserInfoResponse;
       return await bindSessionIfNeeded(user);
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) {
@@ -42,6 +43,10 @@ async function fetchUserInfoWithRetry(): Promise<User | null> {
         } catch {
           return null;
         }
+      }
+
+      if (error instanceof ApiError && error.status === 429) {
+        return null;
       }
 
       if (isTransientApiError(error) && attempt < 2) {
@@ -61,13 +66,39 @@ async function fetchUserInfoWithRetry(): Promise<User | null> {
 }
 
 let sessionRestorePromise: Promise<User | null> | null = null;
+let lastSuccessfulRestoreAt = 0;
+let cachedUser: User | null = null;
 
 export function restoreSession(force = false): Promise<User | null> {
-  if (force || !sessionRestorePromise) {
-    sessionRestorePromise = fetchUserInfoWithRetry().finally(() => {
-      sessionRestorePromise = null;
-    });
+  const now = Date.now();
+  if (
+    force &&
+    cachedUser &&
+    now - lastSuccessfulRestoreAt < MIN_FORCE_REFRESH_MS
+  ) {
+    return Promise.resolve(cachedUser);
   }
 
+  if (sessionRestorePromise) {
+    return sessionRestorePromise;
+  }
+
+  sessionRestorePromise = fetchUserInfoWithRetry()
+    .then((user) => {
+      if (user) {
+        cachedUser = user;
+        lastSuccessfulRestoreAt = Date.now();
+      }
+      return user;
+    })
+    .finally(() => {
+      sessionRestorePromise = null;
+    });
+
   return sessionRestorePromise;
+}
+
+export function clearCachedSessionUser(): void {
+  cachedUser = null;
+  lastSuccessfulRestoreAt = 0;
 }

@@ -6,69 +6,12 @@ import {
   loadStoredIdentityKey,
   persistIdentityKey,
 } from "./identityTrust";
+import { idbDelete, idbGet, idbPut, openE2eDb, type E2eStoreName } from "./e2eDb";
 
-const DB_NAME = "klovy-e2e-v1";
-const DB_VERSION = 1;
-
-type StoreName =
-  | "meta"
-  | "preKeys"
-  | "signedPreKeys"
-  | "sessions"
-  | "channelSenderKeys";
-
-function openDb(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
-    req.onupgradeneeded = () => {
-      const db = req.result;
-      if (!db.objectStoreNames.contains("meta")) db.createObjectStore("meta");
-      if (!db.objectStoreNames.contains("preKeys")) db.createObjectStore("preKeys");
-      if (!db.objectStoreNames.contains("signedPreKeys")) {
-        db.createObjectStore("signedPreKeys");
-      }
-      if (!db.objectStoreNames.contains("sessions")) db.createObjectStore("sessions");
-      if (!db.objectStoreNames.contains("channelSenderKeys")) {
-        db.createObjectStore("channelSenderKeys");
-      }
-    };
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
-}
-
-async function idbGet<T>(store: StoreName, key: string): Promise<T | undefined> {
-  const db = await openDb();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(store, "readonly");
-    const req = tx.objectStore(store).get(key);
-    req.onsuccess = () => resolve(req.result as T | undefined);
-    req.onerror = () => reject(req.error);
-  });
-}
-
-async function idbPut(store: StoreName, key: string, value: unknown): Promise<void> {
-  const db = await openDb();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(store, "readwrite");
-    tx.objectStore(store).put(value, key);
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
-}
-
-async function idbDelete(store: StoreName, key: string): Promise<void> {
-  const db = await openDb();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(store, "readwrite");
-    tx.objectStore(store).delete(key);
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
-}
+type StoreName = E2eStoreName;
 
 export async function clearE2eStore(): Promise<void> {
-  const db = await openDb();
+  const db = await openE2eDb();
   const stores: StoreName[] = [
     "meta",
     "preKeys",
@@ -113,7 +56,7 @@ export async function loadChannelSenderKey(
 }
 
 export async function clearChannelSenderKeys(channelId: string, senderId: string): Promise<void> {
-  const db = await openDb();
+  const db = await openE2eDb();
   await new Promise<void>((resolve, reject) => {
     const tx = db.transaction("channelSenderKeys", "readwrite");
     const store = tx.objectStore("channelSenderKeys");
@@ -142,8 +85,12 @@ export async function loadMeta<T>(key: string): Promise<T | undefined> {
 }
 
 export async function hasLocalE2eKeys(): Promise<boolean> {
-  const identity = await loadMeta<{ pubKey?: string }>("identityKey");
-  return Boolean(identity?.pubKey);
+  try {
+    const identity = await loadMeta<{ pubKey?: string }>("identityKey");
+    return Boolean(identity?.pubKey);
+  } catch {
+    return false;
+  }
 }
 
 function parsePeerIdFromAddress(encodedAddress: string): string {

@@ -170,7 +170,11 @@ export class SignalE2EProvider implements IE2EProvider {
 
   async canDecryptMessages(): Promise<boolean> {
     if (this.isEnabled()) return true;
-    return hasLocalE2eKeys();
+    try {
+      return await hasLocalE2eKeys();
+    } catch {
+      return false;
+    }
   }
 
   getFingerprint(): string | null {
