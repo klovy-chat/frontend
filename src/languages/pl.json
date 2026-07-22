@@ -600,6 +600,8 @@
       "changePhoto": "Zmień zdjęcie",
       "changeBannerAria": "Zmień baner profilu",
       "changePhotoAria": "Zmień zdjęcie profilowe",
+      "viewProfile": "Podgląd profilu",
+      "viewProfileHint": "Zobacz swój profil tak, jak widzą go inni użytkownicy.",
       "saved": "Profil zapisany",
       "saveFailed": "Nie udało się zapisać profilu",
       "avatarUpdated": "Zdjęcie profilowe zaktualizowane.",
@@ -813,7 +815,8 @@
       "chats": "Czaty",
       "contacts": "Kontakty",
       "settings": "Ustawienia",
-      "admin": "Administracja"
+      "admin": "Administracja",
+      "viewProfile": "Zobacz profil"
     },
     "mobile": {
       "menu": "Menu",

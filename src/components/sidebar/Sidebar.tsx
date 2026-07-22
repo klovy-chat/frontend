@@ -959,6 +959,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
             onOpenChats={openChats}
             settingsActive={false}
             onOpenSettings={() => navigate(settingsPath())}
+            onOpenProfile={() => setProfileOpen(true)}
             onOpenContacts={() => {
               setContactsModalClosing(false);
               setContactsModalOpen(true);

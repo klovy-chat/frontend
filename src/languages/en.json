@@ -600,6 +600,8 @@
       "changePhoto": "Change photo",
       "changeBannerAria": "Change profile banner",
       "changePhotoAria": "Change profile photo",
+      "viewProfile": "Profile preview",
+      "viewProfileHint": "See your profile the way other users see it.",
       "saved": "Profile saved",
       "saveFailed": "Could not save profile",
       "avatarUpdated": "Profile photo updated.",
@@ -813,7 +815,8 @@
       "chats": "Chats",
       "contacts": "Contacts",
       "settings": "Settings",
-      "admin": "Administration"
+      "admin": "Administration",
+      "viewProfile": "View profile"
     },
     "mobile": {
       "menu": "Menu",

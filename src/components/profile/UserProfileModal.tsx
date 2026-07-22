@@ -7,8 +7,10 @@ import { ListeningActivitySection } from "./ListeningActivitySection";
 import { ProfileBadgesSection } from "./ProfileBadgesSection";
 import { useAuth } from "../../context/AuthContext";
 import { userLabel, formatJoinedDate, availabilityStatusLabel } from "../../utils/user/format";
+import { presenceColor } from "../../utils/user/presence";
 import { useProfileBannerStyle } from "../../hooks/usePublicMediaCacheRevision";
 import { useAnimatedModal } from "../../hooks/useAnimatedModal";
+import type { User } from "../../types";
 import "../../styles/account/profile.css";
 import "../common/badge.css";
 
@@ -16,15 +18,22 @@ interface UserProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
   onOpenSettings?: () => void;
+  /** Np. niezapisany szkic z ustawień profilu — podgląd „jak widzą inni”. */
+  previewOverride?: Partial<User> | null;
 }
 
 export function UserProfileModal({
   isOpen,
   onClose,
   onOpenSettings,
+  previewOverride = null,
 }: UserProfileModalProps) {
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const { user: authUser } = useAuth();
+  const user =
+    authUser && previewOverride
+      ? { ...authUser, ...previewOverride }
+      : authUser;
   const { closing, visible, requestClose } = useAnimatedModal(isOpen, onClose, {
     resetKey: user?.id ?? null,
   });
@@ -100,18 +109,7 @@ export function UserProfileModal({
                     : availabilityStatusLabel("offline")
                 }
                 style={{
-                  background: user.isOnline
-                    ? ((): string => {
-                        const m: Record<string, string> = {
-                          online: "#22c55e",
-                          away: "#9ca3af",
-                          brb: "#f97316",
-                          dnd: "#ef4444",
-                          offline: "#6b7280",
-                        };
-                        return m[user.availabilityStatus ?? "online"] ?? "#6b7280";
-                      })()
-                    : "#6b7280",
+                  background: presenceColor(user),
                 }}
               />
             </div>

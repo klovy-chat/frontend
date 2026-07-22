@@ -1,4 +1,4 @@
-import { CSSProperties, FormEvent, useCallback, useRef, useState, useEffect } from "react";
+import { CSSProperties, FormEvent, useCallback, useMemo, useRef, useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import {
   acknowledgeMyWarnings,
@@ -35,6 +35,7 @@ import { TwoFactorSetupModal } from "../components/auth/TwoFactorSetupModal";
 import { IntegrationsPanel } from "../components/integrations/IntegrationsPanel";
 import { VoiceSettingsPanel } from "../components/account/VoiceSettingsPanel";
 import { LanguageSettingsPanel } from "../components/account/LanguageSettingsPanel";
+import { UserProfileModal } from "../components/profile/UserProfileModal";
 import { useAuth } from "../context/AuthContext";
 import { useLocale } from "../context/LocaleContext";
 import { useToast } from "../context/ToastContext";
@@ -139,6 +140,7 @@ export function SettingsView({
   const [sessionActionId, setSessionActionId] = useState<string | null>(null);
   const [sessionRevokeTarget, setSessionRevokeTarget] = useState<UserSessionRow | null>(null);
   const [revokeOthersBusy, setRevokeOthersBusy] = useState(false);
+  const [profilePreviewOpen, setProfilePreviewOpen] = useState(false);
 
   const formatWarningDate = useCallback(
     (value: string | null): string => {
@@ -268,6 +270,17 @@ export function SettingsView({
 
   const accentColor = avatarColor(activeColorIndex, user?.username ?? "");
   const accentStyle = { "--as-accent": accentColor } as CSSProperties;
+
+  const profilePreviewOverride = useMemo(
+    () => ({
+      displayName: profileValues.displayName.trim() || null,
+      bio: profileValues.bio.trim() || null,
+      color: profileValues.color,
+      image: avatarPreview,
+      banner: bannerPreview,
+    }),
+    [profileValues, avatarPreview, bannerPreview],
+  );
 
   const handleSave = async (e: FormEvent) => {
     e.preventDefault();
@@ -755,6 +768,17 @@ export function SettingsView({
               <p className="as-section-subtitle">
                 {t("settings.profile.subtitle")}
               </p>
+
+              <div className="as-profile-preview-actions">
+                <button
+                  type="button"
+                  className="as-btn-secondary"
+                  onClick={() => setProfilePreviewOpen(true)}
+                >
+                  {t("settings.profile.viewProfile")}
+                </button>
+                <p className="as-hint">{t("settings.profile.viewProfileHint")}</p>
+              </div>
 
               <input
                 ref={avatarFileRef}
@@ -1494,6 +1518,11 @@ export function SettingsView({
           if (sessionRevokeTarget) void handleRevokeSession(sessionRevokeTarget);
         }}
         onClose={() => setSessionRevokeTarget(null)}
+      />
+      <UserProfileModal
+        isOpen={profilePreviewOpen}
+        onClose={() => setProfilePreviewOpen(false)}
+        previewOverride={profilePreviewOverride}
       />
     </>
   );

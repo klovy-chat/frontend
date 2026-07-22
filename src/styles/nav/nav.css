@@ -152,6 +152,32 @@
   transition: background 0.15s;
 }
 
+.nav-rail__profile-avatar-btn,
+.nav-rail__profile-status-btn {
+  display: flex;
+  align-items: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+  min-width: 0;
+}
+
+.nav-rail__profile-avatar-btn {
+  flex-shrink: 0;
+  border-radius: 999px;
+  transition: opacity 0.15s;
+}
+
+.nav-rail__profile-avatar-btn:hover {
+  opacity: 0.88;
+}
+
+.nav-rail__profile-status-btn {
+  flex: 1;
+}
+
 .nav-rail__profile:hover {
   background: var(--bg-hover);
 }

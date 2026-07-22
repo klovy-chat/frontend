@@ -14,6 +14,7 @@ import "../../styles/nav/nav.css";
 interface AppNavRailProps {
   onOpenChats: () => void;
   onOpenSettings: () => void;
+  onOpenProfile?: () => void;
   onOpenContacts: () => void;
   onOpenAdmin: () => void;
   totalUnread: number;
@@ -23,6 +24,7 @@ interface AppNavRailProps {
 export function AppNavRail({
   onOpenChats,
   onOpenSettings,
+  onOpenProfile,
   onOpenContacts,
   onOpenAdmin,
   totalUnread,
@@ -163,8 +165,10 @@ export function AppNavRail({
         <div className="nav-rail__profile">
           <button
             type="button"
-            style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, minWidth: 0 }}
-            onClick={() => setStatusMenuOpen((v) => !v)}
+            className="nav-rail__profile-avatar-btn"
+            title={t("nav.items.viewProfile")}
+            aria-label={t("nav.items.viewProfile")}
+            onClick={() => onOpenProfile?.()}
           >
             <div style={{ position: "relative", display: "inline-flex" }}>
               <Avatar
@@ -178,6 +182,12 @@ export function AppNavRail({
                 style={{ background: presenceColor({ isOnline: true, availabilityStatus: ownStatus }) }}
               />
             </div>
+          </button>
+          <button
+            type="button"
+            className="nav-rail__profile-status-btn"
+            onClick={() => setStatusMenuOpen((v) => !v)}
+          >
             <div className="nav-rail__profile-info">
               <div className="nav-rail__profile-name">{userLabel(user)}</div>
               <div

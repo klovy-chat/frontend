@@ -1334,6 +1334,18 @@
   align-items: center;
 }
 
+.as-profile-preview-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.as-profile-preview-actions .as-hint {
+  margin: 0;
+}
+
 .as-upload-hint {
   margin: 0;
   width: 100%;
