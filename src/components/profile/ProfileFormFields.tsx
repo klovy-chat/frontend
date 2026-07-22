@@ -4,7 +4,6 @@ import { BIO_MAX_LENGTH, DISPLAY_NAME_MAX_LENGTH } from "../../constants/profile
 import {
   sanitizeBioInput,
   sanitizeDisplayNameInput,
-  sanitizeMessageInput,
 } from "../../utils/text/unicodeText";
 import type { ReactNode } from "react";
 
