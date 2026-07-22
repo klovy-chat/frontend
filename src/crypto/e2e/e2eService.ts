@@ -23,7 +23,9 @@ export const e2eService = {
   getClearKeysOnLogout: () => provider.getClearKeysOnLogout(),
   setClearKeysOnLogout: (enabled: boolean) => provider.setClearKeysOnLogout(enabled),
   clearLocalKeysOnLogout: () => provider.clearLocalKeysOnLogout(),
-  loadCapabilities: (userIds: string[]) => provider.loadCapabilities(userIds),
+  clearCapabilityCache: () => provider.clearCapabilityCache(),
+  loadCapabilities: (userIds: string[], options?: { force?: boolean }) =>
+    provider.loadCapabilities(userIds, options),
   peerSupportsE2e: (cap: E2ECapabilityMap, peerId: string) =>
     provider.peerSupportsE2e(cap, peerId),
   shouldEncryptDm: (peerId: string, cap: E2ECapabilityMap) =>

@@ -830,8 +830,10 @@
       "mutedOnChannel": "Jesteś wyciszony na tym kanale i nie możesz wysyłać wiadomości.",
       "e2eActive": "Rozmowa z szyfrowaniem E2E",
       "e2ePeerFingerprint": "Odcisk rozmówcy: {{fingerprint}}",
-      "e2eFallback": "Rozmówca nie ma włączonego E2E — wiadomości tekstowe wysyłane są bez szyfrowania end-to-end.",
-      "e2eEncryptFailed": "Nie udało się zaszyfrować wiadomości. Spróbuj ponownie lub sprawdź klucze E2E."
+      "e2eFallback": "Rozmówca nie ma włączonego E2E — nie możesz wysłać wiadomości, dopóki druga strona też nie włączy szyfrowania end-to-end.",
+      "e2eChannelFallback": "Nikt na tym kanale nie ma włączonego E2E — wiadomości nie zostaną wysłane, dopóki co najmniej jeden członek nie włączy szyfrowania end-to-end.",
+      "e2eEncryptFailed": "Nie udało się zaszyfrować wiadomości. Spróbuj ponownie lub sprawdź klucze E2E.",
+      "e2ePeerNotReady": "Nie można wysłać wiadomości bez szyfrowania E2E. Poproś rozmówcę o włączenie E2E w ustawieniach konta."
     },
     "bubble": {
       "edited": "edytowano",

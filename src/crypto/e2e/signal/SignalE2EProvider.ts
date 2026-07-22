@@ -192,6 +192,10 @@ export class SignalE2EProvider implements IE2EProvider {
     }
   }
 
+  clearCapabilityCache(): void {
+    this.capabilityCache.clear();
+  }
+
   async enable(userId: string): Promise<void> {
     this.setCurrentUserId(userId);
     const fingerprint = await generateAndUploadKeyBundle();
@@ -199,11 +203,13 @@ export class SignalE2EProvider implements IE2EProvider {
     this.enabled = true;
     this.hasKeys = true;
     this.fingerprint = fingerprint;
+    this.capabilityCache.clear();
   }
 
   async disable(): Promise<void> {
     await patchE2eSettings(false);
     this.enabled = false;
+    this.capabilityCache.clear();
   }
 
   async resetKeys(): Promise<void> {
@@ -215,7 +221,15 @@ export class SignalE2EProvider implements IE2EProvider {
     this.capabilityCache.clear();
   }
 
-  async loadCapabilities(userIds: string[]): Promise<E2ECapabilityMap> {
+  async loadCapabilities(
+    userIds: string[],
+    options?: { force?: boolean },
+  ): Promise<E2ECapabilityMap> {
+    if (options?.force) {
+      for (const id of userIds) {
+        this.capabilityCache.delete(id);
+      }
+    }
     const missing = userIds.filter((id) => !this.capabilityCache.has(id));
     if (missing.length > 0) {
       const { users } = await fetchE2eCapabilities(missing);

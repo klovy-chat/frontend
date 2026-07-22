@@ -169,6 +169,7 @@ export function ChatWindow({
   const [highlightMessageId, setHighlightMessageId] = useState<string | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [e2eCapabilities, setE2eCapabilities] = useState<E2ECapabilityMap>({});
+  const [localE2eEnabled, setLocalE2eEnabled] = useState(false);
   const [e2ePlaintextFallback, setE2ePlaintextFallback] = useState(false);
   const [e2eConversationActive, setE2eConversationActive] = useState(false);
   const [peerFingerprint, setPeerFingerprint] = useState<string | null>(null);
@@ -308,10 +309,21 @@ export function ChatWindow({
   }, [currentUserId, target]);
 
   useEffect(() => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      setLocalE2eEnabled(false);
+      return;
+    }
     e2eService.setCurrentUserId(user.id);
-    void e2eService.refreshStatus();
-  }, [user?.id]);
+    let cancelled = false;
+    void e2eService.refreshStatus().then(() => {
+      if (!cancelled) {
+        setLocalE2eEnabled(e2eService.isEnabled());
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id, user?.e2eEnabled]);
 
   useEffect(() => {
     return onIdentityChange(() => {
@@ -320,7 +332,7 @@ export function ChatWindow({
   }, [t, toast]);
 
   useEffect(() => {
-    if (!currentUserId || !e2eService.isEnabled()) {
+    if (!currentUserId || !localE2eEnabled) {
       setE2eCapabilities({});
       setE2ePlaintextFallback(false);
       setE2eConversationActive(false);
@@ -330,7 +342,9 @@ export function ChatWindow({
     let cancelled = false;
     const loadCaps = async () => {
       if (target?.type === "dm") {
-        const cap = await e2eService.loadCapabilities([target.contact._id]);
+        const cap = await e2eService.loadCapabilities([target.contact._id], {
+          force: true,
+        });
         if (cancelled) return;
         setE2eCapabilities(cap);
         const peerReady = e2eService.peerSupportsE2e(cap, target.contact._id);
@@ -342,16 +356,17 @@ export function ChatWindow({
           setPeerFingerprint(null);
         }
       } else if (target?.type === "channel") {
-        const cap = await e2eService.loadCapabilities(channelMemberIds);
+        const cap = await e2eService.loadCapabilities(channelMemberIds, {
+          force: true,
+        });
         if (cancelled) return;
         setE2eCapabilities(cap);
-        setE2ePlaintextFallback(false);
-        setPeerFingerprint(null);
-        setE2eConversationActive(
-          channelMemberIds.some(
-            (id) => id !== currentUserId && e2eService.peerSupportsE2e(cap, id),
-          ),
+        const hasE2ePeer = channelMemberIds.some(
+          (id) => id !== currentUserId && e2eService.peerSupportsE2e(cap, id),
         );
+        setE2ePlaintextFallback(!hasE2ePeer);
+        setPeerFingerprint(null);
+        setE2eConversationActive(hasE2ePeer);
       } else {
         setE2eCapabilities({});
         setE2ePlaintextFallback(false);
@@ -364,10 +379,10 @@ export function ChatWindow({
     return () => {
       cancelled = true;
     };
-  }, [target, currentUserId, channelMemberIds]);
+  }, [target, currentUserId, channelMemberIds, localE2eEnabled]);
 
   useEffect(() => {
-    if (!ws || !user?.id || target?.type !== "channel" || !e2eService.isEnabled()) {
+    if (!ws || !user?.id || target?.type !== "channel" || !localE2eEnabled) {
       return;
     }
     void e2eService.onChannelMembersChanged(
@@ -377,7 +392,7 @@ export function ChatWindow({
       ws,
       e2eCapabilities,
     );
-  }, [ws, user?.id, target, channelMemberIds, e2eCapabilities]);
+  }, [ws, user?.id, target, channelMemberIds, e2eCapabilities, localE2eEnabled]);
 
   useEffect(() => {
     if (
@@ -736,17 +751,33 @@ export function ChatWindow({
   });
 
   const mustEncryptOutgoing = useCallback((): boolean => {
-    return e2eService.isEnabled() && e2eConversationActive;
-  }, [e2eConversationActive]);
+    return localE2eEnabled && e2eConversationActive;
+  }, [localE2eEnabled, e2eConversationActive]);
 
-  const loadE2eCapabilities = useCallback(async (): Promise<E2ECapabilityMap> => {
-    if (!target) return {};
-    if (Object.keys(e2eCapabilities).length > 0) return e2eCapabilities;
-    if (target.type === "dm") {
-      return e2eService.loadCapabilities([target.contact._id]);
-    }
-    return e2eService.loadCapabilities(channelMemberIds);
-  }, [target, e2eCapabilities, channelMemberIds]);
+  const e2eSendBlocked = localE2eEnabled && e2ePlaintextFallback;
+
+  const showE2eSendError = useCallback(
+    (error: unknown) => {
+      if (error instanceof Error && error.message === "E2E_PEER_NOT_READY") {
+        toast.error(t("chat.window.e2ePeerNotReady"));
+        return;
+      }
+      toast.error(t("chat.window.e2eEncryptFailed"));
+    },
+    [toast, t],
+  );
+
+  const loadE2eCapabilities = useCallback(
+    async (force = false): Promise<E2ECapabilityMap> => {
+      if (!target) return {};
+      if (!force && Object.keys(e2eCapabilities).length > 0) return e2eCapabilities;
+      if (target.type === "dm") {
+        return e2eService.loadCapabilities([target.contact._id], { force });
+      }
+      return e2eService.loadCapabilities(channelMemberIds, { force });
+    },
+    [target, e2eCapabilities, channelMemberIds],
+  );
 
   const encryptOutgoingText = useCallback(
     async (
@@ -754,43 +785,49 @@ export function ChatWindow({
       force = false,
     ): Promise<{ content: string; e2eEncrypted?: boolean; e2eVersion?: number }> => {
       if (!target || !user) return { content: plaintext };
-      if (!e2eService.isEnabled() && !force) return { content: plaintext };
+      if (!localE2eEnabled && !force) return { content: plaintext };
 
       try {
-        const cap = await loadE2eCapabilities();
+        const cap = await loadE2eCapabilities(true);
         if (target.type === "dm") {
           if (force || e2eService.shouldEncryptDm(target.contact._id, cap)) {
             return e2eService.encryptOutgoingDm(target.contact._id, plaintext);
           }
-        } else {
-          const encrypted = await e2eService.encryptOutgoingChannel(
-            target.channel._id,
-            user.id,
-            plaintext,
-            channelMemberIds,
-            ws,
-            cap,
-          );
-          if (encrypted) return encrypted;
+          throw new Error("E2E_PEER_NOT_READY");
         }
-      } catch {
-        if (mustEncryptOutgoing() || force) {
-          throw new Error("E2E_ENCRYPT_FAILED");
-        }
-      }
 
-      if (mustEncryptOutgoing() || force) {
+        const encrypted = await e2eService.encryptOutgoingChannel(
+          target.channel._id,
+          user.id,
+          plaintext,
+          channelMemberIds,
+          ws,
+          cap,
+        );
+        if (encrypted) return encrypted;
+        throw new Error("E2E_PEER_NOT_READY");
+      } catch (error) {
+        if (error instanceof Error && error.message === "E2E_PEER_NOT_READY") {
+          throw error;
+        }
         throw new Error("E2E_ENCRYPT_FAILED");
       }
-      return { content: plaintext };
     },
-    [target, user, ws, channelMemberIds, loadE2eCapabilities, mustEncryptOutgoing],
+    [
+      target,
+      user,
+      ws,
+      channelMemberIds,
+      loadE2eCapabilities,
+      mustEncryptOutgoing,
+      localE2eEnabled,
+    ],
   );
 
   const prepareEncryptedUpload = useCallback(
     async (file: File) => {
-      if (!target || !user || !e2eService.isEnabled()) return null;
-      const cap = await loadE2eCapabilities();
+      if (!target || !user || !localE2eEnabled) return null;
+      const cap = await loadE2eCapabilities(true);
       const encryptedPack =
         target.type === "dm"
           ? await e2eService.encryptOutgoingAttachment(
@@ -810,7 +847,7 @@ export function ChatWindow({
             );
 
       if (!encryptedPack) {
-        if (mustEncryptOutgoing()) throw new Error("E2E_ENCRYPT_FAILED");
+        if (localE2eEnabled) throw new Error("E2E_PEER_NOT_READY");
         return null;
       }
 
@@ -823,7 +860,7 @@ export function ChatWindow({
         displayFileType: file.type || "application/octet-stream",
       };
     },
-    [target, user, ws, channelMemberIds, loadE2eCapabilities, mustEncryptOutgoing],
+    [target, user, ws, channelMemberIds, loadE2eCapabilities, localE2eEnabled],
   );
 
   const sendFileMessage = useCallback(
@@ -861,14 +898,8 @@ export function ChatWindow({
           displayFileType = encrypted.displayFileType;
         }
       } catch (error) {
-        if (error instanceof Error && error.message === "E2E_ENCRYPT_FAILED") {
-          toast.error(t("chat.window.e2eEncryptFailed"));
-          return;
-        }
-        if (mustEncryptOutgoing()) {
-          toast.error(t("chat.window.e2eEncryptFailed"));
-          return;
-        }
+        showE2eSendError(error);
+        return;
       }
 
       const { filePath } = await uploadFile(uploadFileObj, uploadContext);
@@ -900,7 +931,7 @@ export function ChatWindow({
       canSendDm,
       replyingTo,
       prepareEncryptedUpload,
-      mustEncryptOutgoing,
+      showE2eSendError,
       toast,
       t,
     ],
@@ -922,11 +953,11 @@ export function ChatWindow({
           type: fileType || blob.type || "application/octet-stream",
         });
         await sendFileMessage(file, { messageType, content: title });
-      } catch {
-        toast.error(t("chat.window.e2eEncryptFailed"));
+      } catch (error) {
+        showE2eSendError(error);
       }
     },
-    [sendFileMessage, toast, t],
+    [sendFileMessage, showE2eSendError],
   );
 
   const sendMessage = async (content: string) => {
@@ -946,8 +977,8 @@ export function ChatWindow({
               }
             : {}),
         });
-      } catch {
-        toast.error(t("chat.window.e2eEncryptFailed"));
+      } catch (error) {
+        showE2eSendError(error);
         return;
       }
       setEditingMessage(null);
@@ -981,8 +1012,8 @@ export function ChatWindow({
             e2eVersion: encrypted.e2eVersion,
           };
         }
-      } catch {
-        toast.error(t("chat.window.e2eEncryptFailed"));
+      } catch (error) {
+        showE2eSendError(error);
         return;
       }
     }
@@ -1463,7 +1494,7 @@ export function ChatWindow({
         </div>
       ) : (
         <>
-          {target.type === "dm" && e2ePlaintextFallback && e2eService.isEnabled() ? (
+          {e2eSendBlocked ? (
             <div
               style={{
                 padding: "10px 18px",
@@ -1476,7 +1507,9 @@ export function ChatWindow({
                 fontFamily: "var(--font-sans)",
               }}
             >
-              {t("chat.window.e2eFallback")}
+              {target.type === "channel"
+                ? t("chat.window.e2eChannelFallback")
+                : t("chat.window.e2eFallback")}
             </div>
           ) : null}
           <MessageInput
@@ -1491,7 +1524,7 @@ export function ChatWindow({
             onVoiceNote={handleVoiceNote}
             onGif={handleGif}
             onSticker={handleSticker}
-            disabled={!canSendChannel || !wsConnected}
+            disabled={!canSendChannel || !wsConnected || e2eSendBlocked}
             placeholder={
               editingMessage
                 ? t("chat.input.editPlaceholder")
