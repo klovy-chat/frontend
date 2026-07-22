@@ -1909,6 +1909,14 @@
 }
 
 /* ── E2E encryption settings ── */
+.e2e-settings-backdrop {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  min-height: 100vh;
+}
+
 .e2e-settings-entry {
   margin-top: 12px;
 }
@@ -1927,6 +1935,29 @@
   overflow-y: auto;
   gap: 14px;
   padding-top: 16px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(124, 92, 255, 0.42) transparent;
+}
+
+.e2e-settings-modal__body::-webkit-scrollbar {
+  width: 7px;
+}
+
+.e2e-settings-modal__body::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 4px 0;
+}
+
+.e2e-settings-modal__body::-webkit-scrollbar-thumb {
+  background: rgba(124, 92, 255, 0.38);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.e2e-settings-modal__body::-webkit-scrollbar-thumb:hover {
+  background: rgba(124, 92, 255, 0.58);
+  background-clip: padding-box;
 }
 
 .e2e-settings-modal__footer {

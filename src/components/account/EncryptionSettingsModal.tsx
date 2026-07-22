@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { useAnimatedModal } from "../../hooks/useAnimatedModal";
 import "../../styles/chat/chat.css";
@@ -63,9 +64,9 @@ export function EncryptionSettingsModal({
 
   if (!visible) return null;
 
-  return (
+  return createPortal(
     <div
-      className={`klovy-backdrop klovy-backdrop--high delete-msg-backdrop${closing ? " closing" : ""}`}
+      className={`klovy-backdrop klovy-backdrop--high e2e-settings-backdrop delete-msg-backdrop${closing ? " closing" : ""}`}
       role="dialog"
       aria-modal="true"
       aria-labelledby="e2e-settings-title"
@@ -213,6 +214,7 @@ export function EncryptionSettingsModal({
           </div>
         ) : null}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
