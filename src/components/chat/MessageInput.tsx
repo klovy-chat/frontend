@@ -19,6 +19,7 @@ import {
   MAX_IMAGE_ATTACHMENT_SIZE_BYTES,
 } from "../../constants/upload";
 import { MAX_MESSAGE_LENGTH } from "../../constants/messages";
+import { sanitizeMessageInput } from "../../utils/text/unicodeText";
 import { isAllowedGifMediaUrl } from "../../utils/media/mediaAllowlist";
 import {
   formatVoiceDuration,
@@ -826,10 +827,7 @@ export function MessageInput({
           className="mi-textarea"
           value={text}
           onChange={(e) => {
-            const next =
-              e.target.value.length > MAX_MESSAGE_LENGTH
-                ? e.target.value.slice(0, MAX_MESSAGE_LENGTH)
-                : e.target.value;
+            const next = sanitizeMessageInput(e.target.value, MAX_MESSAGE_LENGTH);
             setText(next);
             notifyTyping(next.length > 0);
             detectMention(next, e.target.selectionStart);

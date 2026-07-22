@@ -1,6 +1,11 @@
 import { useTranslation } from "react-i18next";
 import { ColorPicker } from "../account/ColorPicker";
 import { BIO_MAX_LENGTH, DISPLAY_NAME_MAX_LENGTH } from "../../constants/profile";
+import {
+  sanitizeBioInput,
+  sanitizeDisplayNameInput,
+  sanitizeMessageInput,
+} from "../../utils/text/unicodeText";
 import type { ReactNode } from "react";
 
 export interface ProfileFormValues {
@@ -34,7 +39,7 @@ export function ProfileFormFields({
       id="profile-display-name"
       type="text"
       value={values.displayName}
-      onChange={(e) => onChange({ displayName: e.target.value })}
+      onChange={(e) => onChange({ displayName: sanitizeDisplayNameInput(e.target.value) })}
       placeholder={t("profile.form.displayNamePlaceholder")}
       required
       maxLength={DISPLAY_NAME_MAX_LENGTH}
@@ -47,7 +52,7 @@ export function ProfileFormFields({
       id="profile-bio"
       value={values.bio}
       onChange={(e) =>
-        onChange({ bio: e.target.value.slice(0, BIO_MAX_LENGTH) })
+        onChange({ bio: sanitizeBioInput(e.target.value) })
       }
       placeholder={t("profile.form.bioPlaceholderOptional")}
       rows={4}
