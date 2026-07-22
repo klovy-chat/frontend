@@ -676,12 +676,19 @@
     },
     "encryption": {
       "title": "Szyfrowanie end-to-end",
+      "panelLead": "Klucze, odcisk tożsamości i opcje zaawansowane otwierasz w panelu poniżej.",
+      "manage": "Zarządzaj szyfrowaniem",
       "subtitle": "Treść wiadomości w DM i kanałach może być szyfrowana lokalnie kluczami Signal Protocol. Serwer przechowuje wyłącznie zaszyfrowaną treść i klucze publiczne.",
       "toggle": "Szyfrowanie end-to-end",
       "status": {
         "disabled": "Wyłączone — nowe wiadomości wysyłane są jako zwykły tekst.",
         "generating": "Generowanie kluczy…",
         "active": "Aktywne — nowe wiadomości z kontaktami z E2E są szyfrowane."
+      },
+      "statusShort": {
+        "disabled": "Wył.",
+        "generating": "…",
+        "active": "Wł."
       },
       "fingerprintLabel": "Odcisk klucza tożsamości",
       "fingerprintHint": "Porównaj ten kod z rozmówcą (np. na głos), aby upewnić się, że nikt nie podsłuchuje sesji.",

@@ -4,22 +4,15 @@ import { ApiError } from "../../api/client";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
 import { e2eService } from "../../crypto/e2e/e2eService";
+import { EncryptionSettingsModal } from "./EncryptionSettingsModal";
 
 type E2eUiStatus = "disabled" | "generating" | "active";
-
-function formatFingerprint(value: string | null): string {
-  if (!value) return "—";
-  const chunks: string[] = [];
-  for (let i = 0; i < value.length; i += 4) {
-    chunks.push(value.slice(i, i + 4));
-  }
-  return chunks.join(" ");
-}
 
 export function EncryptionSettingsPanel() {
   const { t } = useTranslation();
   const { user, updateUser } = useAuth();
   const toast = useToast();
+  const [modalOpen, setModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [enabled, setEnabled] = useState(false);
@@ -108,119 +101,61 @@ export function EncryptionSettingsPanel() {
   return (
     <>
       <h2 className="as-section-title">{t("settings.encryption.title")}</h2>
-      <p className="as-group-label">{t("settings.encryption.subtitle")}</p>
+      <p className="as-hint">{t("settings.encryption.panelLead")}</p>
 
-      <div style={{ marginBottom: 20 }}>
-        <label className="al-checkbox-wrap as-integration-share-toggle">
-          <input
-            type="checkbox"
-            checked={enabled && hasKeys}
-            disabled={loading || busy}
-            onChange={(e) => void handleToggle(e.target.checked)}
-          />
-          <span className="al-checkbox-box">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20 6L9 17l-5-5" />
-            </svg>
-          </span>
-          <span className="al-checkbox-text">{t("settings.encryption.toggle")}</span>
-        </label>
-
-        <p className="as-group-label as-group-label--language">
-          {t(`settings.encryption.status.${uiStatus}`)}
-        </p>
-      </div>
-
-      <div style={{ marginBottom: 20 }}>
-        <p className="as-group-label">{t("settings.encryption.fingerprintLabel")}</p>
-        <p
-          style={{
-            fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
-            fontSize: 13,
-            wordBreak: "break-all",
-            margin: "8px 0",
-          }}
+      <button
+        type="button"
+        className="as-action-row e2e-settings-entry"
+        disabled={loading}
+        onClick={() => setModalOpen(true)}
+      >
+        <span className="as-action-row-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+          </svg>
+        </span>
+        <span className="as-action-row-copy">
+          <strong>{t("settings.encryption.manage")}</strong>
+          <span>{t(`settings.encryption.status.${uiStatus}`)}</span>
+        </span>
+        <span
+          className={`as-status-pill e2e-settings-entry__pill${
+            uiStatus === "active"
+              ? " as-status-pill--success"
+              : uiStatus === "generating"
+                ? " e2e-settings-status-pill--busy"
+                : " as-status-pill--warn"
+          }`}
         >
-          {formatFingerprint(fingerprint)}
-        </p>
-        <p className="as-group-label as-group-label--language">
-          {t("settings.encryption.fingerprintHint")}
-        </p>
-      </div>
+          {t(`settings.encryption.statusShort.${uiStatus}`)}
+        </span>
+        <span className="as-action-row-chevron" aria-hidden>›</span>
+      </button>
 
-      <div style={{ marginBottom: 20 }}>
-        <p className="as-group-label">{t("settings.encryption.limitationsTitle")}</p>
-        <ul style={{ margin: "8px 0 0", paddingLeft: 20, lineHeight: 1.6 }}>
-          <li>{t("settings.encryption.limitations.search")}</li>
-          <li>{t("settings.encryption.limitations.preview")}</li>
-          <li>{t("settings.encryption.limitations.attachments")}</li>
-          <li>{t("settings.encryption.limitations.deviceLoss")}</li>
-          <li>{t("settings.encryption.limitations.plaintextHistory")}</li>
-        </ul>
-      </div>
-
-      <div style={{ marginBottom: 20 }}>
-        <label className="al-checkbox-wrap as-integration-share-toggle">
-          <input
-            type="checkbox"
-            checked={clearOnLogout}
-            disabled={loading || busy}
-            onChange={(e) => {
-              const next = e.target.checked;
-              setClearOnLogout(next);
-              void e2eService.setClearKeysOnLogout(next);
-            }}
-          />
-          <span className="al-checkbox-box">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20 6L9 17l-5-5" />
-            </svg>
-          </span>
-          <span className="al-checkbox-text">{t("settings.encryption.clearOnLogout")}</span>
-        </label>
-        <p className="as-group-label as-group-label--language">
-          {t("settings.encryption.clearOnLogoutHint")}
-        </p>
-      </div>
-
-      {hasKeys ? (
-        <div style={{ marginTop: 8 }}>
-          {!resetConfirmOpen ? (
-            <button
-              type="button"
-              className="as-btn-danger"
-              disabled={loading || busy}
-              onClick={() => setResetConfirmOpen(true)}
-            >
-              {t("settings.encryption.resetKeys")}
-            </button>
-          ) : (
-            <div>
-              <p className="as-error" style={{ marginBottom: 12 }}>
-                {t("settings.encryption.resetConfirm")}
-              </p>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              <button
-                type="button"
-                className="as-btn-danger"
-                disabled={busy}
-                onClick={() => void handleResetKeys()}
-              >
-                {t("settings.encryption.resetConfirmAction")}
-              </button>
-              <button
-                type="button"
-                className="as-btn-ghost"
-                disabled={busy}
-                onClick={() => setResetConfirmOpen(false)}
-              >
-                {t("common.cancel")}
-              </button>
-              </div>
-            </div>
-          )}
-        </div>
-      ) : null}
+      <EncryptionSettingsModal
+        isOpen={modalOpen}
+        onClose={() => {
+          setModalOpen(false);
+          setResetConfirmOpen(false);
+        }}
+        loading={loading}
+        busy={busy}
+        enabled={enabled}
+        hasKeys={hasKeys}
+        fingerprint={fingerprint}
+        clearOnLogout={clearOnLogout}
+        resetConfirmOpen={resetConfirmOpen}
+        uiStatus={uiStatus}
+        onToggle={(next) => void handleToggle(next)}
+        onClearOnLogoutChange={(next) => {
+          setClearOnLogout(next);
+          void e2eService.setClearKeysOnLogout(next);
+        }}
+        onResetClick={() => setResetConfirmOpen(true)}
+        onResetConfirm={() => void handleResetKeys()}
+        onResetCancel={() => setResetConfirmOpen(false)}
+      />
     </>
   );
 }

@@ -676,12 +676,19 @@
     },
     "encryption": {
       "title": "End-to-end encryption",
+      "panelLead": "Open the panel below for keys, identity fingerprint, and advanced options.",
+      "manage": "Manage encryption",
       "subtitle": "Message content in DMs and channels can be encrypted locally with Signal Protocol keys. The server only stores ciphertext and public keys.",
       "toggle": "End-to-end encryption",
       "status": {
         "disabled": "Disabled — new messages are sent as plain text.",
         "generating": "Generating keys…",
         "active": "Active — new messages to E2E-capable contacts are encrypted."
+      },
+      "statusShort": {
+        "disabled": "Off",
+        "generating": "…",
+        "active": "On"
       },
       "fingerprintLabel": "Identity key fingerprint",
       "fingerprintHint": "Compare this code with your contact (e.g. over a call) to verify the session is not intercepted.",
