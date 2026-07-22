@@ -502,7 +502,8 @@
       "termsSuffix": "i je akceptuję.",
       "hasAccount": "Masz już konto?",
       "loginLink": "Zaloguj się",
-      "success": "Konto utworzone. Możesz się zalogować."
+      "success": "Konto utworzone. Możesz się zalogować.",
+      "closed": "Rejestracja nowych kont jest obecnie wyłączona."
     },
     "setup": {
       "title": "Uzupełnij profil",

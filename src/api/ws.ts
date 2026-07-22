@@ -1,4 +1,9 @@
 import { sanitizeWsPayload } from "../utils/chat/wsPayload";
+import {
+  WsFrameCrypto,
+  WS_CRYPTO_QUERY_PARAM,
+  type WsCryptoSession,
+} from "../utils/chat/wsCrypto";
 import { getBackendBaseUrl } from "../utils/env/backendUrl";
 import { usesDirectBackendUrl } from "../utils/env/appEnv";
 import { CLIENT_QUERY_PARAM, CLIENT_QUERY_VALUE } from "../utils/env/clientId";
@@ -13,6 +18,7 @@ export interface WebSocketClientOptions {
   reconnectionAttempts?: number;
   reconnectionDelay?: number;
   reconnectionDelayMax?: number;
+  resolveCrypto?: () => Promise<WsCryptoSession | undefined>;
 }
 
 /**
@@ -23,18 +29,22 @@ const CLIENT_PING_INTERVAL_MS = 45_000;
 /** Force reconnect if no server traffic (incl. pong) arrives. */
 const IDLE_TIMEOUT_MS = 90_000;
 
-function getWsUrl(): string {
-  const clientQuery = `${CLIENT_QUERY_PARAM}=${encodeURIComponent(
-    CLIENT_QUERY_VALUE,
-  )}`;
+function getWsUrl(cryptoToken?: string): string {
+  const params = new URLSearchParams({
+    [CLIENT_QUERY_PARAM]: CLIENT_QUERY_VALUE,
+  });
+  if (cryptoToken) {
+    params.set(WS_CRYPTO_QUERY_PARAM, cryptoToken);
+  }
+
   if (!usesDirectBackendUrl) {
     const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
-    return `${proto}//${window.location.host}/ws?${clientQuery}`;
+    return `${proto}//${window.location.host}/ws?${params.toString()}`;
   }
   const base = new URL(getBackendBaseUrl());
   base.protocol = base.protocol === "https:" ? "wss:" : "ws:";
   base.pathname = "/ws";
-  base.search = `?${clientQuery}`;
+  base.search = `?${params.toString()}`;
   base.hash = "";
   return base.toString();
 }
@@ -50,7 +60,13 @@ export class WebSocketClient {
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private idleTimer: ReturnType<typeof setTimeout> | null = null;
   private pingTimer: ReturnType<typeof setInterval> | null = null;
-  private readonly options: Required<WebSocketClientOptions>;
+  private readonly options: Required<
+    Pick<WebSocketClientOptions, "reconnectionAttempts" | "reconnectionDelay" | "reconnectionDelayMax">
+  >;
+  private readonly resolveCrypto?: () => Promise<WsCryptoSession | undefined>;
+  private frameCrypto: WsFrameCrypto | null = null;
+  private activeCrypto: WsCryptoSession | null = null;
+  private connectPromise: Promise<void> | null = null;
 
   constructor(options: WebSocketClientOptions = {}) {
     this.options = {
@@ -58,7 +74,8 @@ export class WebSocketClient {
       reconnectionDelay: options.reconnectionDelay ?? 2000,
       reconnectionDelayMax: options.reconnectionDelayMax ?? 10000,
     };
-    this.connect();
+    this.resolveCrypto = options.resolveCrypto;
+    this.connectPromise = this.connect();
   }
 
   private setStatus(status: WsStatus) {
@@ -117,16 +134,35 @@ export class WebSocketClient {
     this.clearPingTimer();
     this.pingTimer = setInterval(() => {
       if (this.ws?.readyState === WebSocket.OPEN) {
-        this.sendFrame({ type: WsType.PING, payload: {} });
+        void this.sendFrame({ type: WsType.PING, payload: {} });
       }
     }, CLIENT_PING_INTERVAL_MS);
   }
 
-  private connect() {
+  private async ensureFrameCrypto() {
+    if (!this.resolveCrypto) {
+      this.frameCrypto = null;
+      this.activeCrypto = null;
+      return;
+    }
+    const session = await this.resolveCrypto();
+    if (!session) {
+      this.frameCrypto = null;
+      this.activeCrypto = null;
+      return;
+    }
+    this.activeCrypto = session;
+    this.frameCrypto = await WsFrameCrypto.create(session);
+  }
+
+  private async connect() {
     if (this.closed) return;
 
     this.setStatus("connecting");
-    this.ws = new WebSocket(getWsUrl());
+    await this.ensureFrameCrypto();
+
+    this.ws = new WebSocket(getWsUrl(this.activeCrypto?.token));
+    this.ws.binaryType = "arraybuffer";
 
     this.ws.onopen = () => {
       this.reconnectAttempts = 0;
@@ -136,21 +172,7 @@ export class WebSocketClient {
     };
 
     this.ws.onmessage = (ev) => {
-      this.bumpIdleTimer();
-      if (typeof ev.data !== "string") return;
-      try {
-        const frame = JSON.parse(ev.data) as WsFrame;
-        if (!frame.type) return;
-        // Keepalive — do not dispatch to app handlers.
-        if (frame.type === WsType.PING || frame.type === WsType.PONG) {
-          return;
-        }
-        const safePayload = sanitizeWsPayload(frame.type, frame.payload);
-        if (safePayload == null) return;
-        this.dispatch(frame.type, safePayload);
-      } catch {
-        // ignoruj uszkodzone ramki
-      }
+      void this.handleMessage(ev.data);
     };
 
     this.ws.onclose = () => {
@@ -166,6 +188,34 @@ export class WebSocketClient {
     this.ws.onerror = () => {
       // reconnect obsługuje onclose
     };
+  }
+
+  private async handleMessage(data: string | ArrayBuffer) {
+    this.bumpIdleTimer();
+    try {
+      let raw: string;
+      if (typeof data === "string") {
+        if (this.frameCrypto) {
+          return;
+        }
+        raw = data;
+      } else if (this.frameCrypto) {
+        raw = await this.frameCrypto.decrypt(data);
+      } else {
+        return;
+      }
+
+      const frame = JSON.parse(raw) as WsFrame;
+      if (!frame.type) return;
+      if (frame.type === WsType.PING || frame.type === WsType.PONG) {
+        return;
+      }
+      const safePayload = sanitizeWsPayload(frame.type, frame.payload);
+      if (safePayload == null) return;
+      this.dispatch(frame.type, safePayload);
+    } catch {
+      // ignoruj uszkodzone ramki
+    }
   }
 
   private scheduleReconnect() {
@@ -186,14 +236,19 @@ export class WebSocketClient {
 
     this.reconnectTimer = setTimeout(() => {
       this.reconnectTimer = null;
-      this.connect();
+      this.connectPromise = this.connect();
     }, delay);
   }
 
-  private sendFrame(frame: WsFrame) {
-    if (this.ws?.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify(frame));
+  private async sendFrame(frame: WsFrame) {
+    if (this.ws?.readyState !== WebSocket.OPEN) return;
+    const raw = JSON.stringify(frame);
+    if (this.frameCrypto) {
+      const encrypted = await this.frameCrypto.encrypt(raw);
+      this.ws.send(encrypted);
+      return;
     }
+    this.ws.send(raw);
   }
 
   private dispatch(type: string, payload: unknown) {
@@ -212,7 +267,7 @@ export class WebSocketClient {
 
   /** Wyślij wiadomość do serwera. */
   send(type: string, payload?: unknown) {
-    this.sendFrame({ type, payload: payload ?? {} });
+    void this.sendFrame({ type, payload: payload ?? {} });
   }
 
   /** Subskrybuj typ wiadomości z serwera. Zwraca funkcję rezygnacji. */

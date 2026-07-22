@@ -89,6 +89,27 @@ export function signup(
   });
 }
 
+export interface RegistrationStatusResponse {
+  open: boolean;
+  message: string;
+}
+
+export function getRegistrationStatus() {
+  return apiRequest<RegistrationStatusResponse>("/api/auth/registration-status");
+}
+
+export interface WsCryptoResponse {
+  token: string;
+  key: string;
+  expiresIn: number;
+}
+
+export function issueWsCryptoKey() {
+  return apiRequest<WsCryptoResponse>("/api/auth/ws-crypto", {
+    method: "POST",
+  });
+}
+
 export function changePassword(
   currentPassword: string,
   newPassword: string,

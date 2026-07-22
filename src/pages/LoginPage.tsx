@@ -1,8 +1,9 @@
-import { FormEvent, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
 import { ApiError } from "../api/client";
+import { getRegistrationStatus } from "../api/auth";
 import { normalizeAuthError } from "../utils/auth/authErrors";
 import {
   TurnstileWidget,
@@ -22,6 +23,13 @@ export function LoginPage() {
   const [turnstileToken, setTurnstileToken] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [registrationOpen, setRegistrationOpen] = useState(true);
+
+  useEffect(() => {
+    getRegistrationStatus()
+      .then((status) => setRegistrationOpen(status.open))
+      .catch(() => setRegistrationOpen(true));
+  }, []);
 
   const [step, setStep] = useState<"credentials" | "2fa">("credentials");
   const [twoFactorToken, setTwoFactorToken] = useState("");
@@ -203,12 +211,14 @@ export function LoginPage() {
 
               <div className="al-divider" />
 
-              <p className="al-signup">
-                {t("auth.login.noAccount")}{" "}
-                <Link to="/signup" className="al-link">
-                  {t("auth.login.signupLink")}
-                </Link>
-              </p>
+              {registrationOpen ? (
+                <p className="al-signup">
+                  {t("auth.login.noAccount")}{" "}
+                  <Link to="/signup" className="al-link">
+                    {t("auth.login.signupLink")}
+                  </Link>
+                </p>
+              ) : null}
             </>
           ) : (
             <>

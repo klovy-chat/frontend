@@ -1,8 +1,9 @@
-import { FormEvent, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
 import { ApiError } from "../api/client";
+import { getRegistrationStatus } from "../api/auth";
 import {
   TurnstileWidget,
   type TurnstileWidgetHandle,
@@ -35,12 +36,24 @@ export function SignupPage() {
   const [info, setInfo] = useState("");
   const [loading, setLoading] = useState(false);
   const [accepted, setAccepted] = useState(false);
+  const [registrationOpen, setRegistrationOpen] = useState<boolean | null>(null);
   const turnstileRef = useRef<TurnstileWidgetHandle>(null);
+
+  useEffect(() => {
+    getRegistrationStatus()
+      .then((status) => setRegistrationOpen(status.open))
+      .catch(() => setRegistrationOpen(true));
+  }, []);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
     setInfo("");
+
+    if (registrationOpen === false) {
+      setError(t("auth.signup.closed"));
+      return;
+    }
 
     if (!turnstileToken) {
       setError(t("validation.captcha.signup"));
@@ -96,6 +109,12 @@ export function SignupPage() {
       <div className="al-card al-card--solo">
         <div className="al-left">
           <h1 className="al-title">{t("auth.signup.title")}</h1>
+
+          {registrationOpen === false ? (
+            <div className="al-error" role="alert">
+              {t("auth.signup.closed")}
+            </div>
+          ) : null}
 
           <form className="al-form" onSubmit={handleSubmit} noValidate>
             <div className="al-field">
@@ -258,7 +277,11 @@ export function SignupPage() {
               </span>
             </label>
 
-            <button type="submit" className="al-btn-submit" disabled={loading}>
+            <button
+              type="submit"
+              className="al-btn-submit"
+              disabled={loading || registrationOpen === false}
+            >
               {loading ? t("auth.signup.submitting") : t("auth.signup.submit")}
             </button>
           </form>

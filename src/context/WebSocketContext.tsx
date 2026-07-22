@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import { WebSocketClient } from "../api/ws";
+import { issueWsCryptoKey } from "../api/auth";
 import { WsType } from "../api/wsProtocol";
 import {
   bumpPublicMediaCache,
@@ -66,6 +67,18 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
         reconnectionAttempts: usesDirectBackendUrl ? Infinity : 12,
         reconnectionDelay: 2000,
         reconnectionDelayMax: 10000,
+        resolveCrypto: async () => {
+          try {
+            const session = await issueWsCryptoKey();
+            return { token: session.token, keyHex: session.key };
+          } catch (err) {
+            if (import.meta.env.DEV) {
+              console.warn("[ws] Brak klucza szyfrującego — połączenie bez szyfrowania ramek.", err);
+              return undefined;
+            }
+            throw err;
+          }
+        },
       });
 
       unsubs.push(

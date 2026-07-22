@@ -502,7 +502,8 @@
       "termsSuffix": "and accept them.",
       "hasAccount": "Already have an account?",
       "loginLink": "Sign in",
-      "success": "Account created. You can sign in."
+      "success": "Account created. You can sign in.",
+      "closed": "New account registration is currently disabled."
     },
     "setup": {
       "title": "Complete your profile",
