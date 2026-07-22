@@ -1419,6 +1419,33 @@
   display: flex;
 }
 
+.adm-access-gate__elevate {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.adm-access-gate__elevate label {
+  font-size: 0.82rem;
+  color: var(--adm-muted, rgba(255, 255, 255, 0.72));
+}
+
+.adm-access-gate__elevate input {
+  width: 100%;
+  padding: 0.75rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.25);
+  color: inherit;
+}
+
+.adm-access-gate__error {
+  margin: 0;
+  color: #ff8a8a;
+  font-size: 0.82rem;
+}
+
 /* ============ RESPONSIVE ============ */
 @media (max-width: 860px) {
   .adm-login-view {

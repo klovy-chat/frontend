@@ -77,6 +77,7 @@ export function EncryptionSettingsModal({
       <div
         className={`delete-msg-modal e2e-settings-modal klovy-shell${closing ? " closing" : ""}`}
         onClick={(e) => e.stopPropagation()}
+        onWheel={(e) => e.stopPropagation()}
       >
         <div className="delete-msg-modal__header">
           <div>
@@ -117,7 +118,10 @@ export function EncryptionSettingsModal({
               </span>
             </div>
 
-            <label className="e2e-settings-toggle">
+            <label
+              className="e2e-settings-toggle"
+              onMouseDown={(e) => e.preventDefault()}
+            >
               <input
                 type="checkbox"
                 checked={enabled && hasKeys}
@@ -159,7 +163,10 @@ export function EncryptionSettingsModal({
           </section>
 
           <section className="e2e-settings-block e2e-settings-block--compact">
-            <label className="e2e-settings-toggle e2e-settings-toggle--compact">
+            <label
+              className="e2e-settings-toggle e2e-settings-toggle--compact"
+              onMouseDown={(e) => e.preventDefault()}
+            >
               <input
                 type="checkbox"
                 checked={clearOnLogout}

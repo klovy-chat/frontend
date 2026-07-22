@@ -1292,6 +1292,16 @@
       "notConfiguredMsg": "The administrator has not set ADMIN_USER_IDS in the server configuration.",
       "forbiddenMsg": "Account @{{username}} does not have access to the admin panel.",
       "forbiddenGeneric": "This account does not have administrator permissions.",
+      "ipNotAllowed": "Access blocked",
+      "ipNotAllowedMsg": "The admin panel is only available from IP addresses allowed in the server configuration (ADMIN_ALLOWED_IPS).",
+      "elevationRequired": "Access confirmation required",
+      "elevationRequiredMsg": "You are signed in as an administrator, but you must also confirm access with the server secret (ADMIN_SECRET). Being listed in ADMIN_USER_IDS alone is not enough.",
+      "elevationSecretLabel": "Administrator secret",
+      "elevationSecretPlaceholder": "Enter ADMIN_SECRET from the server configuration",
+      "elevationSecretRequired": "Enter the administrator secret.",
+      "elevationSubmit": "Confirm access",
+      "elevationSubmitting": "Confirming…",
+      "elevationFailed": "Could not confirm administrator access.",
       "loginMsg": "Sign in to your Klovy Chat account. Only users listed in the server configuration can access the panel."
     },
     "modal": {

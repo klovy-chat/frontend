@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
-import { getAdminSession } from "../../api/admin";
+import { getAdminSession, type AdminSessionReason } from "../../api/admin";
+import { useAuth } from "../../context/AuthContext";
 import { AdminPanel } from "../../pages/AdminPanelPage";
 import { AdminAccessGate } from "./AdminAccessGate";
 import "../../styles/admin/admin.css";
@@ -14,13 +16,19 @@ interface AdminPanelModalProps {
 type AdminAccessState =
   | { status: "loading" }
   | { status: "ok" }
-  | { status: "denied"; reason: "not_logged_in" | "forbidden" | "not_configured" };
+  | { status: "denied"; reason: AdminSessionReason };
 
 export function AdminPanelModal({ isOpen, isClosing, onClose }: AdminPanelModalProps) {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [access, setAccess] = useState<AdminAccessState>({ status: "loading" });
 
   const refreshAccess = () => {
+    if (!user?.isPanelAdmin) {
+      setAccess({ status: "denied", reason: "forbidden" });
+      return;
+    }
+
     setAccess({ status: "loading" });
     getAdminSession()
       .then((session) => {
@@ -32,14 +40,18 @@ export function AdminPanelModal({ isOpen, isClosing, onClose }: AdminPanelModalP
         setAccess({ status: "denied", reason });
       })
       .catch(() => {
-        setAccess({ status: "denied", reason: "not_logged_in" });
+        setAccess({ status: "denied", reason: "forbidden" });
       });
   };
 
   useEffect(() => {
     if (!isOpen || isClosing) return;
+    if (!user?.isPanelAdmin) {
+      onClose();
+      return;
+    }
     refreshAccess();
-  }, [isOpen, isClosing]);
+  }, [isOpen, isClosing, user?.isPanelAdmin, onClose]);
 
   useEffect(() => {
     if (!isOpen || isClosing) return;
@@ -58,9 +70,9 @@ export function AdminPanelModal({ isOpen, isClosing, onClose }: AdminPanelModalP
     };
   }, [isOpen]);
 
-  if (!isOpen && !isClosing) return null;
+  if ((!isOpen && !isClosing) || !user?.isPanelAdmin) return null;
 
-  return (
+  return createPortal(
     <div
       className={`adm-backdrop klovy-backdrop klovy-backdrop--high${isClosing ? " closing" : ""}`}
       onClick={(e) => {
@@ -78,9 +90,10 @@ export function AdminPanelModal({ isOpen, isClosing, onClose }: AdminPanelModalP
         ) : access.status === "ok" ? (
           <AdminPanel onClose={onClose} />
         ) : (
-          <AdminAccessGate reason={access.reason} onClose={onClose} />
+          <AdminAccessGate reason={access.reason} onClose={onClose} onAccessGranted={refreshAccess} />
         )}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

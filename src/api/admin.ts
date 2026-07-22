@@ -52,7 +52,12 @@ export interface AdminBadgeRow {
   updatedAt: string;
 }
 
-export type AdminSessionReason = "not_logged_in" | "forbidden" | "not_configured";
+export type AdminSessionReason =
+  | "not_logged_in"
+  | "forbidden"
+  | "not_configured"
+  | "ip_not_allowed"
+  | "elevation_required";
 
 export function getAdminSession() {
   return apiRequest<{
@@ -64,6 +69,13 @@ export function getAdminSession() {
     whitelistEnabled?: boolean;
     pendingWhitelistCount?: number;
   }>("/api/admin/session");
+}
+
+export function elevateAdminSession(adminSecret: string) {
+  return apiRequest<{ message: string }>("/api/admin/elevate", {
+    method: "POST",
+    body: JSON.stringify({ adminSecret }),
+  });
 }
 
 export function listAdminUsers(params?: {

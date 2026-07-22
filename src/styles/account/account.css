@@ -1915,6 +1915,15 @@
   width: 100vw;
   height: 100dvh;
   min-height: 100vh;
+  overflow: hidden;
+  overscroll-behavior: none;
+  display: grid;
+  place-items: center;
+  align-content: center;
+}
+
+.e2e-settings-backdrop.delete-msg-backdrop {
+  padding: 1.25rem;
 }
 
 .e2e-settings-entry {
@@ -1927,14 +1936,22 @@
 }
 
 .e2e-settings-modal {
-  width: min(520px, 95vw);
-  max-height: min(92vh, 720px);
+  width: min(520px, calc(100vw - 2.5rem));
+  max-height: min(92dvh, 720px);
+  min-height: 0;
+  margin: auto;
 }
 
 .e2e-settings-modal__body {
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
+  overflow-anchor: none;
+  overscroll-behavior: contain;
   gap: 14px;
   padding-top: 16px;
+  scrollbar-gutter: stable;
   scrollbar-width: thin;
   scrollbar-color: rgba(124, 92, 255, 0.42) transparent;
 }

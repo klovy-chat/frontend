@@ -1292,6 +1292,16 @@
       "notConfiguredMsg": "Administrator nie ustawił ADMIN_USER_IDS w konfiguracji serwera.",
       "forbiddenMsg": "Konto @{{username}} nie ma dostępu do panelu administratora.",
       "forbiddenGeneric": "To konto nie ma uprawnień administratora.",
+      "ipNotAllowed": "Dostęp zablokowany",
+      "ipNotAllowedMsg": "Panel administratora jest dostępny tylko z dozwolonych adresów IP skonfigurowanych na serwerze (ADMIN_ALLOWED_IPS).",
+      "elevationRequired": "Wymagane potwierdzenie dostępu",
+      "elevationRequiredMsg": "Jesteś zalogowany jako administrator, ale musisz dodatkowo potwierdzić dostęp sekretem serwera (ADMIN_SECRET). Samo ID użytkownika w ADMIN_USER_IDS nie wystarczy.",
+      "elevationSecretLabel": "Sekret administratora",
+      "elevationSecretPlaceholder": "Wpisz ADMIN_SECRET z konfiguracji serwera",
+      "elevationSecretRequired": "Podaj sekret administratora.",
+      "elevationSubmit": "Potwierdź dostęp",
+      "elevationSubmitting": "Potwierdzanie…",
+      "elevationFailed": "Nie udało się potwierdzić dostępu administratora.",
       "loginMsg": "Zaloguj się na swoje konto Klovy Chat. Dostęp do panelu mają tylko użytkownicy wskazani w konfiguracji serwera."
     },
     "modal": {

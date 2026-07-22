@@ -88,8 +88,6 @@ function isCsrfExempt(path: string, method: string): boolean {
     "/api/auth/register",
     "/api/auth/login/2fa",
     "/api/auth/refresh",
-    "/api/admin/login",
-    "/api/admins/login",
   ];
 
   if (exactExemptPaths.includes(path)) {

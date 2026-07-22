@@ -198,6 +198,7 @@ interface MentionToast extends MentionEvent {
 export function Sidebar({ active, onSelect, children }: SidebarProps) {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const canOpenAdminPanel = Boolean(user?.isPanelAdmin);
   const toast = useToast();
   const ws = useWebSocket();
   const resolvePresence = useResolvePresence();
@@ -965,6 +966,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
               setContactsModalOpen(true);
             }}
             onOpenAdmin={() => {
+              if (!canOpenAdminPanel) return;
               setAdminModalClosing(false);
               setAdminModalOpen(true);
             }}
@@ -1064,7 +1066,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
         />
       )}
 
-      {(adminModalOpen || adminModalClosing) && (
+      {canOpenAdminPanel && (adminModalOpen || adminModalClosing) && (
         <AdminPanelModal
           isOpen={adminModalOpen}
           isClosing={adminModalClosing}
