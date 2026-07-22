@@ -350,6 +350,10 @@
     "file": "Plik: {{name}}",
     "attachment": "Załącznik",
     "default": "Wiadomość",
+    "e2e": {
+      "decryptFailed": "Nie można odszyfrować wiadomości",
+      "encrypted": "Wiadomość szyfrowana end-to-end"
+    },
     "thisMessage": "Ta wiadomość",
     "quote": {
       "jumpTo": "Przejdź do wiadomości"
@@ -583,6 +587,7 @@
       "profile": "Profil",
       "sessions": "Urządzenia",
       "voice": "Ustawienia głosu",
+      "encryption": "Szyfrowanie",
       "bots": "Boty",
       "integrations": "Integracje",
       "warnings": "Ostrzeżenia",
@@ -668,6 +673,39 @@
     "language": {
       "title": "Język",
       "chooseLanguage": "Wybierz swój język"
+    },
+    "encryption": {
+      "title": "Szyfrowanie end-to-end",
+      "subtitle": "Treść wiadomości w DM i kanałach może być szyfrowana lokalnie kluczami Signal Protocol. Serwer przechowuje wyłącznie zaszyfrowaną treść i klucze publiczne.",
+      "toggle": "Szyfrowanie end-to-end",
+      "status": {
+        "disabled": "Wyłączone — nowe wiadomości wysyłane są jako zwykły tekst.",
+        "generating": "Generowanie kluczy…",
+        "active": "Aktywne — nowe wiadomości z kontaktami z E2E są szyfrowane."
+      },
+      "fingerprintLabel": "Odcisk klucza tożsamości",
+      "fingerprintHint": "Porównaj ten kod z rozmówcą (np. na głos), aby upewnić się, że nikt nie podsłuchuje sesji.",
+      "limitationsTitle": "Ograniczenia",
+      "limitations": {
+        "search": "Wyszukiwanie treści po stronie serwera nie obejmuje wiadomości E2E.",
+        "preview": "Podglądy linków i wzmianki dla wiadomości E2E wymagają logiki po stronie klienta (w tej wersji są ograniczone).",
+        "attachments": "GIF-y, naklejki i wklejone linki do obrazów są uploadowane i szyfrowane jak pozostałe załączniki.",
+        "metadata": "Kto z kim rozmawia i kiedy nadal jest widoczne dla serwera (typowe ograniczenie E2E).",
+        "deviceLoss": "Utrata urządzenia bez kopii zapasowej kluczy oznacza utratę możliwości odszyfrowania starej historii E2E.",
+        "plaintextHistory": "Wiadomości wysłane przed włączeniem E2E pozostają zwykłym tekstem."
+      },
+      "resetKeys": "Wygeneruj klucze ponownie",
+      "resetConfirm": "Stare wiadomości E2E nie będą możliwe do odszyfrowania po tej operacji. Kontynuować?",
+      "resetConfirmAction": "Tak, wygeneruj ponownie",
+      "enabledToast": "Szyfrowanie end-to-end włączone.",
+      "disabledToast": "Szyfrowanie end-to-end wyłączone.",
+      "toggleFailed": "Nie udało się zmienić ustawień szyfrowania.",
+      "loadFailed": "Nie udało się wczytać ustawień szyfrowania.",
+      "resetDone": "Klucze zostały zresetowane.",
+      "resetFailed": "Nie udało się zresetować kluczy.",
+      "clearOnLogout": "Usuń klucze E2E po wylogowaniu",
+      "clearOnLogoutHint": "Po wylogowaniu lokalne klucze prywatne zostaną usunięte z tej przeglądarki.",
+      "identityChanged": "Klucz tożsamości rozmówcy uległ zmianie. Zweryfikuj odcisk przed kontynuowaniem rozmowy."
     },
     "accountExtra": {
       "authGroup": "Uwierzytelnianie",
@@ -782,7 +820,11 @@
       "closeChat": "Zamknij czat",
       "contactProfile": "Profil kontaktu",
       "channelLocked": "Czat na tym kanale jest zablokowany przez administratora.",
-      "mutedOnChannel": "Jesteś wyciszony na tym kanale i nie możesz wysyłać wiadomości."
+      "mutedOnChannel": "Jesteś wyciszony na tym kanale i nie możesz wysyłać wiadomości.",
+      "e2eActive": "Rozmowa z szyfrowaniem E2E",
+      "e2ePeerFingerprint": "Odcisk rozmówcy: {{fingerprint}}",
+      "e2eFallback": "Rozmówca nie ma włączonego E2E — wiadomości tekstowe wysyłane są bez szyfrowania end-to-end.",
+      "e2eEncryptFailed": "Nie udało się zaszyfrować wiadomości. Spróbuj ponownie lub sprawdź klucze E2E."
     },
     "bubble": {
       "edited": "edytowano",

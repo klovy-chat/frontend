@@ -10,6 +10,7 @@ import {
 import * as authApi from "../api/auth";
 import { isTwoFactorLoginResponse } from "../api/auth";
 import { ApiError, clearCsrfToken } from "../api/client";
+import { e2eService } from "../crypto/e2e/e2eService";
 import { clearAutoIdleBrbFlag } from "../hooks/useIdleAvailability";
 import { restoreSession } from "../utils/user/sessionRestore";
 import type { User } from "../types";
@@ -128,6 +129,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       if (!(err instanceof ApiError) || err.status !== 401) throw err;
     } finally {
+      await e2eService.clearLocalKeysOnLogout();
       clearCsrfToken();
       clearAutoIdleBrbFlag();
       setUser(null);

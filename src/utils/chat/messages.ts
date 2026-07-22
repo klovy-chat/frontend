@@ -34,10 +34,22 @@ export function resolveQuotedMessage(
 export function getMessagePreview(
   message: Pick<
     Message,
-    "content" | "messageType" | "fileName" | "fileUrl" | "fileType" | "deleted" | "durationMs"
+    | "content"
+    | "fileUrl"
+    | "messageType"
+    | "fileType"
+    | "fileName"
+    | "durationMs"
+    | "deleted"
+    | "e2eEncrypted"
+    | "e2eDecryptFailed"
   >,
 ): string {
   if (message.deleted) return i18n.t("messages.deleted");
+  if (message.e2eDecryptFailed) return i18n.t("messages.e2e.decryptFailed");
+  if (message.e2eEncrypted && !message.content.trim()) {
+    return i18n.t("messages.e2e.encrypted");
+  }
 
   if (isOnlyExternalMediaContent(message.content)) {
     const media = extractExternalMediaLinks(message.content);

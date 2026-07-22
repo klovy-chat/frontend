@@ -26,6 +26,7 @@ export const WsType = {
   CHANNEL_VOICE_JOIN: "channel-voice:join",
   CHANNEL_VOICE_LEAVE: "channel-voice:leave",
   CHANNEL_VOICE_STATE: "channel-voice:state",
+  E2E_SENDER_KEY: "e2e-sender-key",
 
   // Serwer → klient
   RECEIVE_MESSAGE: "receiveMessage",

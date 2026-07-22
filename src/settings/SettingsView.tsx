@@ -35,6 +35,7 @@ import { TwoFactorSetupModal } from "../components/auth/TwoFactorSetupModal";
 import { IntegrationsPanel } from "../components/integrations/IntegrationsPanel";
 import { VoiceSettingsPanel } from "../components/account/VoiceSettingsPanel";
 import { LanguageSettingsPanel } from "../components/account/LanguageSettingsPanel";
+import { EncryptionSettingsPanel } from "../components/account/EncryptionSettingsPanel";
 import { UserProfileModal } from "../components/profile/UserProfileModal";
 import { useAuth } from "../context/AuthContext";
 import { useLocale } from "../context/LocaleContext";
@@ -720,6 +721,17 @@ export function SettingsView({
       </button>
 
       <button
+        className={`as-nav-item${section === "szyfrowanie" ? " active" : ""}`}
+        onClick={() => onSectionChange("szyfrowanie")}
+      >
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+        </svg>
+        {t("settings.nav.encryption")}
+      </button>
+
+      <button
         className={`as-nav-item${section === "integracje" ? " active" : ""}`}
         onClick={() => onSectionChange("integracje")}
       >
@@ -1371,6 +1383,8 @@ export function SettingsView({
           )}
 
           {section === "jezyk" && <LanguageSettingsPanel />}
+
+          {section === "szyfrowanie" && <EncryptionSettingsPanel />}
 
           {section === "glos" && <VoiceSettingsPanel />}
 

@@ -350,6 +350,10 @@
     "file": "File: {{name}}",
     "attachment": "Attachment",
     "default": "Message",
+    "e2e": {
+      "decryptFailed": "Cannot decrypt message",
+      "encrypted": "End-to-end encrypted message"
+    },
     "thisMessage": "This message",
     "quote": {
       "jumpTo": "Jump to message"
@@ -583,6 +587,7 @@
       "profile": "Profile",
       "sessions": "Devices",
       "voice": "Voice settings",
+      "encryption": "Encryption",
       "bots": "Bots",
       "integrations": "Integrations",
       "warnings": "Warnings",
@@ -668,6 +673,39 @@
     "language": {
       "title": "Language",
       "chooseLanguage": "Choose your language"
+    },
+    "encryption": {
+      "title": "End-to-end encryption",
+      "subtitle": "Message content in DMs and channels can be encrypted locally with Signal Protocol keys. The server only stores ciphertext and public keys.",
+      "toggle": "End-to-end encryption",
+      "status": {
+        "disabled": "Disabled — new messages are sent as plain text.",
+        "generating": "Generating keys…",
+        "active": "Active — new messages to E2E-capable contacts are encrypted."
+      },
+      "fingerprintLabel": "Identity key fingerprint",
+      "fingerprintHint": "Compare this code with your contact (e.g. over a call) to verify the session is not intercepted.",
+      "limitationsTitle": "Limitations",
+      "limitations": {
+        "search": "Server-side content search does not include E2E messages.",
+        "preview": "Link previews and mentions for E2E messages require client-side logic (limited in this version).",
+        "attachments": "GIF/sticker pickers and pasted image links are uploaded and encrypted like other attachments.",
+        "metadata": "Who talks to whom and when is still visible to the server (standard E2E metadata limitation).",
+        "deviceLoss": "Losing this device without a key backup means you cannot decrypt old E2E history.",
+        "plaintextHistory": "Messages sent before enabling E2E remain plain text."
+      },
+      "resetKeys": "Regenerate keys",
+      "resetConfirm": "Old E2E messages will no longer be decryptable after this operation. Continue?",
+      "resetConfirmAction": "Yes, regenerate",
+      "enabledToast": "End-to-end encryption enabled.",
+      "disabledToast": "End-to-end encryption disabled.",
+      "toggleFailed": "Could not change encryption settings.",
+      "loadFailed": "Could not load encryption settings.",
+      "resetDone": "Keys have been reset.",
+      "resetFailed": "Could not reset keys.",
+      "clearOnLogout": "Remove E2E keys on logout",
+      "clearOnLogoutHint": "Private keys are removed from this browser when you log out.",
+      "identityChanged": "Your contact's identity key changed. Verify their fingerprint before continuing."
     },
     "accountExtra": {
       "authGroup": "Authentication",
@@ -782,7 +820,11 @@
       "closeChat": "Close chat",
       "contactProfile": "Contact profile",
       "channelLocked": "Chat on this channel is locked by an administrator.",
-      "mutedOnChannel": "You are muted on this channel and cannot send messages."
+      "mutedOnChannel": "You are muted on this channel and cannot send messages.",
+      "e2eActive": "End-to-end encrypted conversation",
+      "e2ePeerFingerprint": "Contact fingerprint: {{fingerprint}}",
+      "e2eFallback": "This contact does not have E2E enabled — text messages are sent without end-to-end encryption.",
+      "e2eEncryptFailed": "Could not encrypt this message. Try again or check your E2E keys."
     },
     "bubble": {
       "edited": "edited",

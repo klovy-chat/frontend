@@ -492,6 +492,20 @@
   font-style: italic;
 }
 
+.message-e2e-lock {
+  display: inline-flex;
+  align-items: center;
+  opacity: 0.75;
+}
+
+.message-text--e2e-failed {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-style: italic;
+  opacity: 0.85;
+}
+
 /* ── Dots trigger ── */
 .message-dots-wrap {
   position: relative;

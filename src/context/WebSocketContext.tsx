@@ -9,6 +9,7 @@ import {
 import { WebSocketClient } from "../api/ws";
 import { issueWsCryptoKey } from "../api/auth";
 import { WsType } from "../api/wsProtocol";
+import { e2eService } from "../crypto/e2e/e2eService";
 import {
   bumpPublicMediaCache,
   bumpPublicMediaCacheForChannel,
@@ -171,6 +172,26 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
           (data: { channelId: string; image: string }) => {
             bumpPublicMediaCache(data.image);
             bumpPublicMediaCacheForChannel(data.channelId);
+          },
+        ),
+      );
+
+      unsubs.push(
+        instance.subscribe(
+          WsType.E2E_SENDER_KEY,
+          (data: {
+            sender?: string;
+            senderId?: string;
+            recipientId?: string;
+            channelId?: string;
+            distributionMessage?: string;
+          }) => {
+            if (data.recipientId && data.recipientId !== userId) return;
+            void e2eService.handleSenderKeyEvent({
+              senderId: data.senderId ?? data.sender,
+              channelId: data.channelId,
+              distributionMessage: data.distributionMessage,
+            });
           },
         ),
       );

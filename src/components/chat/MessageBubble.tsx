@@ -19,6 +19,7 @@ import {
 import { isVideoAttachment, isVoiceAttachment } from "../../utils/media/attachments";
 import { isOnlyInviteLinkContent } from "../../utils/chat/linkEmbeds";
 import type { Message, MessageUser } from "../../types";
+import { useE2eAttachmentBlobUrl } from "../../crypto/e2e/useE2eAttachmentBlobUrl";
 import "../../styles/chat/messagebubble.css";
 
 interface MessageBubbleProps {
@@ -105,6 +106,9 @@ export function MessageBubble({
   const showMenu = hasActions || canReplyAction;
   const reactionEntries = getReactionEntries(message.reactions);
   const showToolbar = canReact || showMenu;
+
+  const e2eAttachmentUrl = useE2eAttachmentBlobUrl(message);
+  const resolvedFileUrl = e2eAttachmentUrl ?? message.fileUrl ?? "";
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -429,19 +433,19 @@ export function MessageBubble({
                   })()
                 ) : isVideo ? (
                   <VideoMessagePlayer
-                    src={message.fileUrl}
+                    src={resolvedFileUrl}
                     fileName={message.fileName}
                     fileType={message.fileType}
                   />
                 ) : isVoice ? (
                   <VoiceMessagePlayer
-                    src={message.fileUrl}
+                    src={resolvedFileUrl}
                     durationMs={message.durationMs}
                     isOwn={isOwn}
                   />
                 ) : (
                   (() => {
-                    const mediaUrl = resolveMediaUrl(message.fileUrl);
+                    const mediaUrl = resolveMediaUrl(resolvedFileUrl);
                     if (!mediaUrl) return null;
                     return (
                       <a
@@ -461,7 +465,17 @@ export function MessageBubble({
               </>
             ) : (
               <>
-                {!shouldHideTextForExternalMedia(message.content) &&
+                {message.e2eDecryptFailed ? (
+                  <p className="message-text message-text--e2e-failed">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg>
+                    {t("messages.e2e.decryptFailed")}
+                  </p>
+                ) : null}
+                {!message.e2eDecryptFailed &&
+                !shouldHideTextForExternalMedia(message.content) &&
                   !isOnlyInviteLinkContent(message.content) && (
                   <p className="message-text">
                     {renderFormattedText(message.content, {
@@ -487,6 +501,18 @@ export function MessageBubble({
             )}
 
             <div className="message-meta">
+              {message.e2eEncrypted ? (
+                <span
+                  className="message-e2e-lock"
+                  title={t("messages.e2e.encrypted")}
+                  aria-label={t("messages.e2e.encrypted")}
+                >
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                  </svg>
+                </span>
+              ) : null}
               <span className="message-time">{formatMessageTime(message.timestamp)}</span>
               {message.edited && <span className="message-edited">· {t("chat.bubble.edited")}</span>}
               {isOwn && showReadReceipt && <ReadReceipt read={message.read} />}
