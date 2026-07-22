@@ -12,10 +12,17 @@ function hexToBytes(hex: string): Uint8Array {
   return out;
 }
 
+function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
+  return bytes.buffer.slice(
+    bytes.byteOffset,
+    bytes.byteOffset + bytes.byteLength,
+  ) as ArrayBuffer;
+}
+
 async function importAesKey(keyHex: string): Promise<CryptoKey> {
   return crypto.subtle.importKey(
     "raw",
-    hexToBytes(keyHex),
+    toArrayBuffer(hexToBytes(keyHex)),
     { name: "AES-GCM" },
     false,
     ["encrypt", "decrypt"],
@@ -62,9 +69,9 @@ export class WsFrameCrypto {
     const iv = bytes.slice(1, 1 + NONCE_LEN);
     const ciphertext = bytes.slice(1 + NONCE_LEN);
     const plain = await crypto.subtle.decrypt(
-      { name: "AES-GCM", iv },
+      { name: "AES-GCM", iv: toArrayBuffer(iv) },
       this.key,
-      ciphertext,
+      toArrayBuffer(ciphertext),
     );
     return new TextDecoder().decode(plain);
   }

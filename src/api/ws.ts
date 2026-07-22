@@ -66,7 +66,6 @@ export class WebSocketClient {
   private readonly resolveCrypto?: () => Promise<WsCryptoSession | undefined>;
   private frameCrypto: WsFrameCrypto | null = null;
   private activeCrypto: WsCryptoSession | null = null;
-  private connectPromise: Promise<void> | null = null;
 
   constructor(options: WebSocketClientOptions = {}) {
     this.options = {
@@ -75,7 +74,7 @@ export class WebSocketClient {
       reconnectionDelayMax: options.reconnectionDelayMax ?? 10000,
     };
     this.resolveCrypto = options.resolveCrypto;
-    this.connectPromise = this.connect();
+    void this.connect();
   }
 
   private setStatus(status: WsStatus) {
@@ -236,7 +235,7 @@ export class WebSocketClient {
 
     this.reconnectTimer = setTimeout(() => {
       this.reconnectTimer = null;
-      this.connectPromise = this.connect();
+      void this.connect();
     }, delay);
   }
 
