@@ -27,6 +27,10 @@ import { UserProfileModal } from "../profile/UserProfileModal";
 import { OtherUserProfileModal } from "../profile/OtherUserProfileModal";
 import { userLabel, availabilityStatusLabel } from "../../utils/user/format";
 import { channelMemberCount, channelMemberCountLabel, getEffectiveStatus } from "../../utils/user/presence";
+import {
+  patchChannelsFromMessage,
+  patchContactsFromMessage,
+} from "../../utils/chat/listPreview";
 import { useProfileSync } from "../../hooks/useProfileSync";
 import { useListeningSync } from "../../hooks/useListeningSync";
 import { useSpotifyListeningSync } from "../../hooks/useSpotifyListeningSync";
@@ -273,16 +277,57 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
   const channelAvatarInputRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const refreshInFlightRef = useRef<Promise<void> | null>(null);
+  const refreshDebounceRef = useRef<ReturnType<typeof setTimeout>>();
 
   /* data */
   const refresh = useCallback(async () => {
+    if (refreshInFlightRef.current) {
+      return refreshInFlightRef.current;
+    }
+
+    const run = (async () => {
+      try {
+        const [contactsRes, channelsRes] = await Promise.all([
+          getContactsForList(),
+          getUserChannels(),
+        ]);
+        setContacts(contactsRes.contacts);
+        setChannels(channelsRes.channels);
+        seedPresence(contactsRes.contacts);
+      } catch {
+        /**/
+      }
+    })();
+
+    refreshInFlightRef.current = run;
     try {
-      const [contactsRes, channelsRes] = await Promise.all([getContactsForList(), getUserChannels()]);
-      setContacts(contactsRes.contacts);
-      setChannels(channelsRes.channels);
-      seedPresence(contactsRes.contacts);
-    } catch { /**/ }
+      await run;
+    } finally {
+      if (refreshInFlightRef.current === run) {
+        refreshInFlightRef.current = null;
+      }
+    }
   }, [seedPresence]);
+
+  const scheduleRefresh = useCallback(() => {
+    if (refreshDebounceRef.current) {
+      clearTimeout(refreshDebounceRef.current);
+    }
+    refreshDebounceRef.current = setTimeout(() => {
+      refreshDebounceRef.current = undefined;
+      void refresh();
+    }, 750);
+  }, [refresh]);
+
+  useEffect(
+    () => () => {
+      if (refreshDebounceRef.current) {
+        clearTimeout(refreshDebounceRef.current);
+      }
+    },
+    [],
+  );
 
   const displayContacts = useMemo(
     () => contacts.map((c) => resolvePresence(c)),
@@ -419,7 +464,9 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
       if (active?.type === "channel" && active.channel._id === e.channelId)
         onSelect({ type: "channel", channel: { ...active.channel, isMutedHere: e.isMutedHere } });
     };
-    const onChannelAdded = () => { void refresh(); };
+    const onChannelAdded = () => {
+      scheduleRefresh();
+    };
     const onChannelLeft = (e: { channelId: string }) => {
       setChannels((p) => p.filter((ch) => ch._id !== e.channelId));
       if (active?.type === "channel" && active.channel._id === e.channelId) onSelect(null);
@@ -436,13 +483,11 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
       ws.subscribe(WsType.CHANNEL_LEFT, onChannelLeft),
     ];
     return () => unsubs.forEach((u) => u());
-  }, [ws, active, onSelect, refresh, channelSettingsInfo]);
+  }, [ws, active, onSelect, scheduleRefresh, channelSettingsInfo]);
 
   useEffect(() => {
     if (!ws) return;
-    const syncContactPreviews = () => {
-      void refresh();
-    };
+
     const onUnreadUpdated = (payload: {
       type: "dm" | "channel";
       id: string;
@@ -457,9 +502,11 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
       return typeof s === "string" ? s : s._id ?? s.id;
     };
 
-    // Wiadomość DM od kogoś innego niż my, z kontaktu, którego nie wyciszyliśmy.
     const onDmMessage = (msg: Message) => {
-      void refresh();
+      setContacts((prev) =>
+        patchContactsFromMessage(prev, msg, currentUserIdRef.current),
+      );
+
       const senderId = getSenderId(msg);
       if (!senderId || senderId === currentUserIdRef.current) return;
       const contact = contactsRef.current.find((c) => c._id === senderId);
@@ -468,9 +515,9 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
       playNotificationSound();
     };
 
-    // Wiadomość kanałowa od kogoś innego, na kanale, którego nie wyciszyliśmy.
     const onChannelMessage = (msg: Message) => {
-      void refresh();
+      setChannels((prev) => patchChannelsFromMessage(prev, msg));
+
       const senderId = getSenderId(msg);
       if (!senderId || senderId === currentUserIdRef.current) return;
       const channelId = msg?.channelId ?? msg?.channel;
@@ -479,14 +526,19 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
       if (availabilityRef.current === "dnd") return;
       playNotificationSound();
     };
+
+    const onMessageDeleted = () => {
+      scheduleRefresh();
+    };
+
     const unsubs = [
-      ws.subscribe(WsType.MESSAGE_DELETED, syncContactPreviews),
+      ws.subscribe(WsType.MESSAGE_DELETED, onMessageDeleted),
       ws.subscribe(WsType.RECEIVE_MESSAGE, onDmMessage),
       ws.subscribe(WsType.RECEIVE_CHANNEL_MESSAGE, onChannelMessage),
       ws.subscribe(WsType.UNREAD_UPDATED, onUnreadUpdated),
     ];
     return () => unsubs.forEach((u) => u());
-  }, [ws, refresh, applyUnreadUpdate, active, onSelect]);
+  }, [ws, scheduleRefresh, applyUnreadUpdate]);
 
   const clearMention = useCallback((sourceId: string) => {
     setMentionSources((prev) => {
