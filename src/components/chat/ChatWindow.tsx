@@ -53,7 +53,7 @@ import type {
   MessageReactions,
   MessageUser,
 } from "../../types";
-import { e2eService, onIdentityChange } from "../../crypto/e2e/e2eService";
+import { e2eService, onIdentityChange, onSenderKeyStored } from "../../crypto/e2e/e2eService";
 import type { E2ECapabilityMap } from "../../crypto/e2e/types";
 import { useToast } from "../../context/ToastContext";
 
@@ -278,11 +278,30 @@ export function ChatWindow({
     async (list: Message[]) => {
       if (!currentUserId) return list.map(normalizeMessage);
       const normalized = list.map(normalizeMessage);
-      if (!e2eService.isEnabled()) return normalized;
+      if (!(await e2eService.canDecryptMessages())) return normalized;
       return e2eService.decryptMessages(normalized, currentUserId);
     },
     [currentUserId],
   );
+
+  const retryFailedE2eDecrypt = useCallback(async () => {
+    if (!currentUserId || target?.type !== "channel") return;
+    if (!(await e2eService.canDecryptMessages())) return;
+    setMessages((prev) => {
+      const failed = prev.filter((m) => m.e2eEncrypted && m.e2eDecryptFailed);
+      if (failed.length === 0) return prev;
+      void e2eService.decryptMessages(failed, currentUserId).then((decrypted) => {
+        const byId = new Map(decrypted.map((m) => [m._id, m]));
+        setMessages((current) =>
+          current.map((m) => {
+            const next = byId.get(m._id);
+            return next && !next.e2eDecryptFailed ? { ...m, ...next } : m;
+          }),
+        );
+      });
+      return prev;
+    });
+  }, [currentUserId, target]);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -314,8 +333,7 @@ export function ChatWindow({
         setE2ePlaintextFallback(!peerReady);
         setE2eConversationActive(peerReady);
         if (peerReady) {
-          const fp = await e2eService.getPeerFingerprint(target.contact._id);
-          if (!cancelled) setPeerFingerprint(fp);
+          setPeerFingerprint(cap[target.contact._id]?.fingerprint ?? null);
         } else if (!cancelled) {
           setPeerFingerprint(null);
         }
@@ -356,6 +374,31 @@ export function ChatWindow({
       e2eCapabilities,
     );
   }, [ws, user?.id, target, channelMemberIds, e2eCapabilities]);
+
+  useEffect(() => {
+    if (
+      !ws ||
+      !user?.id ||
+      target?.type !== "channel" ||
+      !e2eConversationActive
+    ) {
+      return;
+    }
+    void e2eService.requestChannelSenderKeys(
+      target.channel._id,
+      user.id,
+      channelMemberIds,
+      ws,
+    );
+  }, [ws, user?.id, target, channelMemberIds, e2eConversationActive]);
+
+  useEffect(() => {
+    if (target?.type !== "channel") return;
+    return onSenderKeyStored((detail) => {
+      if (target.channel._id !== detail.channelId) return;
+      void retryFailedE2eDecrypt();
+    });
+  }, [target, retryFailedE2eDecrypt]);
 
   const loadMessages = useCallback(async () => {
     if (!target || !currentUserId) return;

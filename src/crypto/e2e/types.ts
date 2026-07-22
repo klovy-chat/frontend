@@ -15,5 +15,9 @@ export interface E2EDecryptResult {
 }
 
 export interface E2ECapabilityMap {
-  [userId: string]: { e2eEnabled: boolean; hasKeys: boolean };
+  [userId: string]: {
+    e2eEnabled: boolean;
+    hasKeys: boolean;
+    fingerprint?: string;
+  };
 }

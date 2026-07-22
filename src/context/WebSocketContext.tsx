@@ -196,6 +196,16 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
         ),
       );
 
+      unsubs.push(
+        instance.subscribe(
+          WsType.E2E_SENDER_KEY_REQUEST,
+          (data: { channelId?: string; requesterId?: string }) => {
+            if (!userId || !instance || data.requesterId === userId) return;
+            void e2eService.handleSenderKeyRequest(data, instance, userId);
+          },
+        ),
+      );
+
       if (!cancelled) {
         setWs(instance);
       } else {

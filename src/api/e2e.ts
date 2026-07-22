@@ -33,6 +33,7 @@ export interface E2eCapability {
   userId: string;
   e2eEnabled: boolean;
   hasKeys: boolean;
+  fingerprint?: string;
 }
 
 export function getE2eStatus() {
@@ -69,6 +70,12 @@ export function deleteE2eKeys() {
 
 export function fetchPreKeyBundle(userId: string) {
   return api.get<PublicPreKeyBundle>(`/api/e2e/keys/${userId}`);
+}
+
+export function fetchPeerFingerprint(userId: string) {
+  return api.get<{ userId: string; fingerprint: string }>(
+    `/api/e2e/keys/${userId}/fingerprint`,
+  );
 }
 
 export function fetchPreKeyBundlesBulk(userIds: string[]) {

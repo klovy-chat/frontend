@@ -3,16 +3,18 @@ import type { WebSocketClient } from "../../api/ws";
 import type { E2ECapabilityMap } from "./types";
 import { SignalE2EProvider } from "./signal/SignalE2EProvider";
 import { onIdentityChange } from "./signal/identityTrust";
+import { onSenderKeyStored } from "./signal/events";
 import type { E2eAttachmentMeta } from "./signal/attachmentCipher";
 
 const provider = new SignalE2EProvider();
 
-export { onIdentityChange };
+export { onIdentityChange, onSenderKeyStored };
 
 export const e2eService = {
   refreshStatus: () => provider.refreshStatus(),
   setCurrentUserId: (userId: string | null) => provider.setCurrentUserId(userId),
   isEnabled: () => provider.isEnabled(),
+  canDecryptMessages: () => provider.canDecryptMessages(),
   getFingerprint: () => provider.getFingerprint(),
   getPeerFingerprint: (peerId: string) => provider.getPeerFingerprint(peerId),
   enable: (userId: string) => provider.enable(userId),
@@ -71,6 +73,17 @@ export const e2eService = {
     channelId?: string;
     distributionMessage?: string;
   }) => provider.handleSenderKeyEvent(payload),
+  requestChannelSenderKeys: (
+    channelId: string,
+    requesterId: string,
+    memberIds: string[],
+    ws: WebSocketClient,
+  ) => provider.requestChannelSenderKeys(channelId, requesterId, memberIds, ws),
+  handleSenderKeyRequest: (
+    payload: { channelId?: string; requesterId?: string },
+    ws: WebSocketClient,
+    ourUserId: string,
+  ) => provider.handleSenderKeyRequest(payload, ws, ourUserId),
   decryptMessage: (message: Message, currentUserId: string) =>
     provider.decryptMessage(message, currentUserId),
   decryptMessages: (messages: Message[], currentUserId: string) =>

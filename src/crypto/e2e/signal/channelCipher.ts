@@ -140,14 +140,22 @@ export async function decryptChannelMessage(
   const envelope = parseChannelEnvelope(content);
   if (!envelope) throw new Error("INVALID_CHANNEL_E2E");
 
-  const record = await loadChannelSenderKey(channelId, senderId, envelope.keyId);
-  if (!record) throw new Error("MISSING_SENDER_KEY");
+  const maxAttempts = 6;
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    const record = await loadChannelSenderKey(channelId, senderId, envelope.keyId);
+    if (record) {
+      const plaintext = await aesGcmDecrypt(
+        base64ToArrayBuffer(record.key),
+        envelope.payload,
+      );
+      return new TextDecoder().decode(plaintext);
+    }
+    if (attempt < maxAttempts - 1) {
+      await new Promise((resolve) => setTimeout(resolve, 150 * (attempt + 1)));
+    }
+  }
 
-  const plaintext = await aesGcmDecrypt(
-    base64ToArrayBuffer(record.key),
-    envelope.payload,
-  );
-  return new TextDecoder().decode(plaintext);
+  throw new Error("MISSING_SENDER_KEY");
 }
 
 export function buildSenderKeyDistribution(senderKey: {

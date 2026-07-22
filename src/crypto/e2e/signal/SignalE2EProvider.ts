@@ -8,9 +8,11 @@ import {
   buildSenderKeyDistribution,
   decryptChannelMessage,
   encryptChannelMessage,
+  getOrCreateOwnSenderKey,
   rotateChannelSenderKey,
   storeReceivedSenderKey,
 } from "./channelCipher";
+import { emitSenderKeyStored } from "./events";
 import {
   decryptFileFromE2e,
   encryptFileForE2e,
@@ -25,7 +27,7 @@ import {
   generateAndUploadKeyBundle,
   replenishPreKeysIfNeeded,
 } from "./dmCipher";
-import { clearE2eStore } from "./signalStore";
+import { clearE2eStore, hasLocalE2eKeys } from "./signalStore";
 import {
   clearLocalKeysIfConfigured,
   getClearKeysOnLogout,
@@ -34,6 +36,7 @@ import {
 import {
   deleteE2eKeys,
   fetchE2eCapabilities,
+  fetchPeerFingerprint,
   getE2eStatus,
   patchE2eSettings,
   type E2eCapability,
@@ -149,7 +152,7 @@ export class SignalE2EProvider implements IE2EProvider {
   async refreshStatus() {
     const status = await getE2eStatus();
     this.enabled = status.enabled;
-    this.hasKeys = status.hasKeys;
+    this.hasKeys = status.hasKeys || (await hasLocalE2eKeys());
     this.fingerprint = status.fingerprint ?? null;
     if (status.oneTimePreKeysRemaining !== undefined) {
       void replenishPreKeysIfNeeded(status.oneTimePreKeysRemaining);
@@ -165,15 +168,21 @@ export class SignalE2EProvider implements IE2EProvider {
     return this.enabled && this.hasKeys;
   }
 
+  async canDecryptMessages(): Promise<boolean> {
+    if (this.isEnabled()) return true;
+    return hasLocalE2eKeys();
+  }
+
   getFingerprint(): string | null {
     return this.fingerprint;
   }
 
   async getPeerFingerprint(peerId: string): Promise<string | null> {
+    const cached = this.capabilityCache.get(peerId)?.fingerprint;
+    if (cached) return cached;
     try {
-      const { fetchPreKeyBundle } = await import("./prekeyClient");
-      const bundle = await fetchPreKeyBundle(peerId);
-      return bundle.identityFingerprint ?? null;
+      const { fingerprint } = await fetchPeerFingerprint(peerId);
+      return fingerprint ?? null;
     } catch {
       return null;
     }
@@ -214,10 +223,61 @@ export class SignalE2EProvider implements IE2EProvider {
     for (const id of userIds) {
       const row = this.capabilityCache.get(id);
       if (row) {
-        out[id] = { e2eEnabled: row.e2eEnabled, hasKeys: row.hasKeys };
+        out[id] = {
+          e2eEnabled: row.e2eEnabled,
+          hasKeys: row.hasKeys,
+          fingerprint: row.fingerprint,
+        };
       }
     }
     return out;
+  }
+
+  async requestChannelSenderKeys(
+    channelId: string,
+    requesterId: string,
+    memberIds: string[],
+    ws: WebSocketClient,
+  ): Promise<void> {
+    if (!this.isEnabled()) return;
+    const targetUserIds = memberIds.filter((id) => id !== requesterId);
+    if (targetUserIds.length === 0) return;
+    ws.send(WsType.E2E_SENDER_KEY_REQUEST, {
+      requesterId,
+      channelId,
+      targetUserIds,
+    });
+  }
+
+  async handleSenderKeyRequest(
+    payload: { channelId?: string; requesterId?: string },
+    ws: WebSocketClient,
+    ourUserId: string,
+  ): Promise<void> {
+    if (!this.isEnabled() || !payload.channelId || !payload.requesterId) return;
+    if (payload.requesterId === ourUserId) return;
+
+    try {
+      const senderKey = await getOrCreateOwnSenderKey(payload.channelId, ourUserId);
+      const distribution = buildSenderKeyDistribution({
+        channelId: payload.channelId,
+        senderId: ourUserId,
+        keyId: senderKey.keyId,
+        key: senderKey.key,
+      });
+      const distributionMessage = await encryptDistributionPayload(
+        payload.requesterId,
+        distribution,
+      );
+      ws.send(WsType.E2E_SENDER_KEY, {
+        sender: ourUserId,
+        recipientId: payload.requesterId,
+        channelId: payload.channelId,
+        distributionMessage,
+      });
+    } catch {
+      /**/
+    }
   }
 
   peerSupportsE2e(cap: E2ECapabilityMap, peerId: string): boolean {
@@ -318,6 +378,10 @@ export class SignalE2EProvider implements IE2EProvider {
         senderId: decoded.senderId,
         keyId: decoded.keyId,
         key: decoded.key,
+      });
+      emitSenderKeyStored({
+        channelId: decoded.channelId,
+        senderId: decoded.senderId,
       });
     } catch {
       /**/

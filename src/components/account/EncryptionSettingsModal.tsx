@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { useAnimatedModal } from "../../hooks/useAnimatedModal";
 import "../../styles/chat/chat.css";
+import "../../styles/account/account.css";
 
 type E2eUiStatus = "disabled" | "generating" | "active";
 

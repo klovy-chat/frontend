@@ -231,6 +231,8 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
   const [pendingWhitelist, setPendingWhitelist] = useState(0);
   const [whitelistEnabled, setWhitelistEnabled] = useState(false);
   const [whitelistFilter, setWhitelistFilter] = useState<"all" | "pending" | "approved">("all");
+  const [userStats, setUserStats] = useState({ total: 0, active: 0, banned: 0 });
+  const [listTotal, setListTotal] = useState(0);
 
   const [banModal, setBanModal] = useState<AdminUserRow | null>(null);
   const [banReason, setBanReason] = useState("");
@@ -306,20 +308,26 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
           whitelist: whitelistFilter === "all" ? undefined : whitelistFilter,
         });
         setUsers(res.users);
+        setListTotal(res.total);
+        setUserStats(res.stats ?? { total: res.total, active: 0, banned: 0 });
         setPendingWhitelist(res.pendingCount);
         setWhitelistEnabled(res.whitelistEnabled);
       } else if (tab === "channels") {
         const res = await listAdminChannels({ search: search || undefined });
         setChannels(res.channels);
+        setListTotal(res.total);
       } else if (tab === "badges") {
         const res = await listBadges();
         setBadges(res.data);
+        setListTotal(res.data.length);
       } else if (tab === "announcements") {
         const res = await listAdminAnnouncements();
         setAnnouncements(res.announcements);
+        setListTotal(res.announcements.length);
       } else {
         const res = await listAdminChannelReports();
         setReports(res.reports);
+        setListTotal(res.total ?? res.reports.length);
         setPendingReports(res.pendingCount);
       }
       tabLoadedRef.current[tab] = true;
@@ -578,22 +586,7 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
     });
   };
 
-  const resultCount =
-    tab === "users"
-      ? users.length
-      : tab === "channels"
-        ? channels.length
-        : tab === "badges"
-          ? badges.length
-          : tab === "announcements"
-            ? announcements.length
-            : reports.length;
-
-  const userStats = {
-    total: users.length,
-    active: users.filter((u) => u.isActive && !u.isBlocked && !u.isBanned).length,
-    banned: users.filter((u) => u.isBanned || u.isBlocked).length,
-  };
+  const resultCount = listTotal;
 
   const handleRefresh = async () => {
     setRefreshing(true);

@@ -141,6 +141,11 @@ export async function loadMeta<T>(key: string): Promise<T | undefined> {
   return idbGet<T>("meta", key);
 }
 
+export async function hasLocalE2eKeys(): Promise<boolean> {
+  const identity = await loadMeta<{ pubKey?: string }>("identityKey");
+  return Boolean(identity?.pubKey);
+}
+
 function parsePeerIdFromAddress(encodedAddress: string): string {
   const dot = encodedAddress.indexOf(".");
   return dot >= 0 ? encodedAddress.slice(0, dot) : encodedAddress;

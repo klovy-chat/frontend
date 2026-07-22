@@ -78,6 +78,12 @@ export function elevateAdminSession(adminSecret: string) {
   });
 }
 
+export interface AdminUserStats {
+  total: number;
+  active: number;
+  banned: number;
+}
+
 export function listAdminUsers(params?: {
   page?: number;
   search?: string;
@@ -95,6 +101,7 @@ export function listAdminUsers(params?: {
     limit: number;
     pendingCount: number;
     whitelistEnabled: boolean;
+    stats: AdminUserStats;
   }>(`/api/admin/users${qs ? `?${qs}` : ""}`);
 }
 
@@ -215,6 +222,7 @@ export function listAdminChannelReports() {
   return apiRequest<{
     reports: AdminChannelReportRow[];
     pendingCount: number;
+    total: number;
   }>("/api/admin/reports");
 }
 

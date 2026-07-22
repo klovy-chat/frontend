@@ -51,9 +51,9 @@
   --shadow-sm: 0 8px 24px rgba(0, 0, 0, 0.4);
   --font-sans: "Space Grotesk", system-ui, sans-serif;
   --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  --cursor-auto: url("/assets/cursor.png"), auto;
-  --cursor-pointer: url("/assets/cursor.png"), pointer;
-  --cursor-text: url("/assets/cursor.png"), text;
+  --cursor-auto: auto;
+  --cursor-pointer: pointer;
+  --cursor-text: text;
   font-family: var(--font-sans);
   font-synthesis: none;
   text-rendering: optimizeLegibility;

@@ -1940,6 +1940,14 @@
   max-height: min(92dvh, 720px);
   min-height: 0;
   margin: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.delete-msg-modal.e2e-settings-modal {
+  width: min(520px, calc(100vw - 2.5rem));
+  max-height: min(92dvh, 720px);
 }
 
 .e2e-settings-modal__body {
@@ -1950,7 +1958,7 @@
   overflow-anchor: none;
   overscroll-behavior: contain;
   gap: 14px;
-  padding-top: 16px;
+  padding: 16px 24px 12px;
   scrollbar-gutter: stable;
   scrollbar-width: thin;
   scrollbar-color: rgba(124, 92, 255, 0.42) transparent;
@@ -1978,9 +1986,27 @@
 }
 
 .e2e-settings-modal__footer {
+  flex-shrink: 0;
   flex-direction: column;
   align-items: stretch;
   gap: 10px;
+  padding: 16px 24px 24px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-panel);
+}
+
+.e2e-settings-modal__footer .delete-msg-modal__btn {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
+.delete-msg-modal.e2e-settings-modal .delete-msg-modal__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .e2e-settings-block {
@@ -2116,6 +2142,7 @@
 .e2e-settings-limitations {
   margin: 0;
   padding-left: 18px;
+  padding-bottom: 4px;
   display: flex;
   flex-direction: column;
   gap: 8px;
