@@ -294,3 +294,29 @@
   background: var(--bg-settings-card);
   border-color: transparent;
 }
+
+@media (max-width: 960px) {
+  .settings-page-left-spacer {
+    display: none;
+  }
+
+  .settings-page-layout {
+    width: 100%;
+  }
+
+  .settings-page .app-shell__settings-content,
+  .settings-page .as-content--inline {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .settings-page .as-content-inner {
+    max-width: none;
+    padding: 20px 16px 32px;
+  }
+}
+
+html[data-klovy-native="1"] .settings-page .as-content-inner {
+  max-width: none;
+  padding: 20px 16px calc(32px + var(--safe-bottom));
+}

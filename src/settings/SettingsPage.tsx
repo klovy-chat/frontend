@@ -1,6 +1,10 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Navigate, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { AppNavRail } from "../components/layout/AppNavRail";
+import { MobileShellBar, type ShellOverlay } from "../components/layout/MobileShellBar";
+import { getContactsForList } from "../api/contacts";
+import { getUserChannels } from "../api/channels";
 import { useSpotifyListeningSync } from "../hooks/useSpotifyListeningSync";
 import { notifySpotifyConnectionChanged } from "../utils/sync/spotifyConnectionSync";
 import { SettingsView } from "./SettingsView";
@@ -19,10 +23,37 @@ export function SettingsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const section = parseSettingsSection(sectionSlug) ?? DEFAULT_SETTINGS_SECTION;
 
+  const [shellOverlay, setShellOverlay] = useState<ShellOverlay>(null);
+  const [totalUnread, setTotalUnread] = useState(0);
   const [spotifyOauthError, setSpotifyOauthError] = useState<string | null>(null);
   const [spotifyOauthConnected, setSpotifyOauthConnected] = useState(false);
 
   useSpotifyListeningSync();
+
+  const refreshUnread = useCallback(async () => {
+    try {
+      const [contactsRes, channelsRes] = await Promise.all([
+        getContactsForList(),
+        getUserChannels(),
+      ]);
+      const unread =
+        contactsRes.contacts.reduce(
+          (sum, c) => sum + (c.isMuted ? 0 : (c.unreadCount ?? 0)),
+          0,
+        )
+        + channelsRes.channels.reduce(
+          (sum, ch) => sum + (ch.isMuted ? 0 : (ch.unreadCount ?? 0)),
+          0,
+        );
+      setTotalUnread(unread);
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  useEffect(() => {
+    void refreshUnread();
+  }, [refreshUnread]);
 
   useEffect(() => {
     const spotify = searchParams.get("spotify");
@@ -46,6 +77,7 @@ export function SettingsPage() {
 
   const handleSectionChange = useCallback(
     (nextSection: SettingsSection) => {
+      setShellOverlay(null);
       navigate(settingsPath(nextSection));
     },
     [navigate],
@@ -54,6 +86,12 @@ export function SettingsPage() {
   const handleClose = useCallback(() => {
     navigate("/");
   }, [navigate]);
+
+  const overlayClass = useMemo(() => {
+    if (shellOverlay === "nav") return " app-shell--overlay-nav";
+    if (shellOverlay === "settings-nav") return " app-shell--overlay-settings-nav";
+    return "";
+  }, [shellOverlay]);
 
   if (!sectionSlug) {
     return <Navigate to={settingsPath(DEFAULT_SETTINGS_SECTION)} replace />;
@@ -64,15 +102,41 @@ export function SettingsPage() {
   }
 
   return (
-    <div className="app-shell app-shell--settings-standalone settings-page">
-      <SettingsView
-        section={section}
-        onSectionChange={handleSectionChange}
-        onClose={handleClose}
-        spotifyOauthError={spotifyOauthError}
-        spotifyOauthConnected={spotifyOauthConnected}
-        onSpotifyOauthHandled={() => setSpotifyOauthConnected(false)}
+    <div className={`app-shell app-shell--settings settings-page${overlayClass}`}>
+      <button
+        type="button"
+        className="mobile-shell-scrim"
+        aria-label={t("common.closePanel")}
+        onClick={() => setShellOverlay(null)}
       />
+      <div className="app-shell__nav">
+        <AppNavRail
+          settingsActive
+          totalUnread={totalUnread}
+          onOpenChats={() => navigate("/")}
+          onOpenSettings={() => navigate(settingsPath(section))}
+          onOpenContacts={() => navigate("/")}
+          onOpenAdmin={() => navigate("/")}
+        />
+      </div>
+      <div className="app-shell__settings-main">
+        <MobileShellBar
+          variant="settings"
+          title={t("nav.items.settings")}
+          overlay={shellOverlay}
+          onOverlayChange={setShellOverlay}
+          onClose={handleClose}
+          showList={false}
+        />
+        <SettingsView
+          section={section}
+          onSectionChange={handleSectionChange}
+          onClose={handleClose}
+          spotifyOauthError={spotifyOauthError}
+          spotifyOauthConnected={spotifyOauthConnected}
+          onSpotifyOauthHandled={() => setSpotifyOauthConnected(false)}
+        />
+      </div>
     </div>
   );
 }
