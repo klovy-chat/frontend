@@ -30,10 +30,11 @@
   min-width: 0;
 }
 
-.app-shell--settings-standalone > .settings-page-layout {
+.app-shell--settings-standalone .settings-page-layout {
   grid-column: 1;
   width: 100%;
   min-width: 0;
+  height: 100%;
 }
 
 .app-shell__nav,
@@ -152,9 +153,11 @@
   cursor: var(--cursor-auto);
 }
 
-.app-shell--overlay-nav .mobile-shell-scrim,
+.app-shell--overlay-nav.app-shell--chat .mobile-shell-scrim,
 .app-shell--overlay-list .mobile-shell-scrim,
-.app-shell--overlay-settings-nav .mobile-shell-scrim {
+.app-shell--overlay-settings-nav .mobile-shell-scrim,
+.settings-page.app-shell--overlay-nav .mobile-shell-scrim,
+.settings-page.app-shell--overlay-settings-nav .mobile-shell-scrim {
   opacity: 1;
   pointer-events: auto;
 }
@@ -186,11 +189,7 @@
     grid-template-columns: 1fr;
   }
 
-  .app-shell--settings {
-    grid-template-columns: 1fr;
-  }
-
-  .app-shell__nav {
+  .app-shell--chat .app-shell__nav {
     position: fixed;
     top: 0;
     left: 0;
@@ -202,32 +201,24 @@
     z-index: 130;
   }
 
-  .app-shell--overlay-nav .app-shell__nav {
+  .app-shell--overlay-nav.app-shell--chat .app-shell__nav {
     transform: translateX(0);
   }
 
-  .app-shell--chat .app-shell__main,
-  .app-shell--settings .app-shell__settings-main {
+  .app-shell--chat .app-shell__main {
     grid-column: 1 / -1;
     width: 100%;
     max-width: 100%;
   }
 
   @media (min-width: 641px) {
-    .app-shell__nav {
+    .app-shell--chat .app-shell__nav {
       width: min(280px, 72vw);
     }
 
     .app-shell--chat .app-shell__list {
       width: min(var(--list-width), 92vw);
       max-width: 360px;
-    }
-
-    .app-shell--settings .app-shell__settings-nav,
-    .settings-inline .app-shell__settings-nav,
-    .settings-page .app-shell__settings-nav {
-      width: min(var(--settings-nav-width), 92vw);
-      max-width: 320px;
     }
   }
 
@@ -249,37 +240,6 @@
   .settings-inline {
     grid-template-columns: 1fr !important;
   }
-
-  .app-shell--settings .app-shell__settings-nav,
-  .settings-inline .app-shell__settings-nav,
-  .settings-page .app-shell__settings-nav {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: min(var(--settings-nav-width), 92vw);
-    max-width: 320px;
-    transform: translateX(-105%);
-    box-shadow: 8px 0 32px rgba(0, 0, 0, 0.3);
-    z-index: 125;
-    flex: none;
-    padding-right: 0;
-  }
-
-  .app-shell--overlay-settings-nav.app-shell--settings .app-shell__settings-nav,
-  .app-shell--overlay-settings-nav .settings-inline .app-shell__settings-nav,
-  .app-shell--overlay-settings-nav.settings-page .app-shell__settings-nav {
-    transform: translateX(0);
-  }
-
-  .app-shell__settings-main {
-    grid-column: 1 / -1;
-  }
-
-  .mobile-shell-bar--settings {
-    display: flex;
-    width: 100%;
-  }
 }
 
 /* ── ≤640px: pełna szerokość na telefonie ── */
@@ -290,18 +250,16 @@
   }
 
   .app-shell--chat,
-  .app-shell--chat.app-shell--no-detail,
-  .app-shell--settings {
+  .app-shell--chat.app-shell--no-detail {
     grid-template-columns: 1fr;
   }
 
-  .mobile-shell-bar--chat,
-  .mobile-shell-bar--settings {
+  .mobile-shell-bar--chat {
     display: flex;
     width: 100%;
   }
 
-  .app-shell__nav {
+  .app-shell--chat .app-shell__nav {
     width: min(var(--nav-width), 92vw);
     max-width: none;
   }
@@ -312,16 +270,7 @@
     max-width: none;
   }
 
-  .app-shell--settings .app-shell__settings-nav,
-  .settings-inline .app-shell__settings-nav,
-  .settings-page .app-shell__settings-nav {
-    left: 0;
-    width: min(var(--settings-nav-width), 100vw);
-    max-width: none;
-  }
-
-  .app-shell__main,
-  .app-shell__settings-main {
+  .app-shell__main {
     grid-column: 1 / -1;
     width: 100%;
     max-width: 100%;
@@ -331,18 +280,16 @@
 
 /* Oficjalna apka Tauri — zawsze mobile shell (niezależnie od viewport WebView) */
 html[data-klovy-native="1"] .app-shell--chat,
-html[data-klovy-native="1"] .app-shell--chat.app-shell--no-detail,
-html[data-klovy-native="1"] .app-shell--settings {
+html[data-klovy-native="1"] .app-shell--chat.app-shell--no-detail {
   grid-template-columns: 1fr;
 }
 
-html[data-klovy-native="1"] .mobile-shell-bar--chat,
-html[data-klovy-native="1"] .mobile-shell-bar--settings {
+html[data-klovy-native="1"] .mobile-shell-bar--chat {
   display: flex;
   width: 100%;
 }
 
-html[data-klovy-native="1"] .app-shell__nav {
+html[data-klovy-native="1"] .app-shell--chat .app-shell__nav {
   position: fixed;
   top: 0;
   left: 0;
@@ -354,7 +301,7 @@ html[data-klovy-native="1"] .app-shell__nav {
   z-index: 130;
 }
 
-html[data-klovy-native="1"] .app-shell--overlay-nav .app-shell__nav {
+html[data-klovy-native="1"] .app-shell--overlay-nav.app-shell--chat .app-shell__nav {
   transform: translateX(0);
 }
 
@@ -374,46 +321,11 @@ html[data-klovy-native="1"] .app-shell--overlay-list.app-shell--chat .app-shell_
   transform: translateX(0);
 }
 
-html[data-klovy-native="1"] .app-shell--chat .app-shell__main,
-html[data-klovy-native="1"] .app-shell--settings .app-shell__settings-main {
+html[data-klovy-native="1"] .app-shell--chat .app-shell__main {
   grid-column: 1 / -1;
   width: 100%;
   max-width: 100%;
   padding-bottom: var(--safe-bottom);
-}
-
-html[data-klovy-native="1"] .app-shell--settings .app-shell__settings-nav,
-html[data-klovy-native="1"] .settings-page .app-shell__settings-nav {
-  position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: min(var(--settings-nav-width), 92vw);
-  max-width: 320px;
-  transform: translateX(-105%);
-  box-shadow: 8px 0 32px rgba(0, 0, 0, 0.3);
-  z-index: 125;
-  flex: none;
-  padding-right: 0;
-}
-
-html[data-klovy-native="1"] .app-shell--overlay-settings-nav .app-shell__settings-nav,
-html[data-klovy-native="1"] .app-shell--overlay-settings-nav.settings-page .app-shell__settings-nav {
-  transform: translateX(0);
-}
-
-html[data-klovy-native="1"] .settings-page-left-spacer {
-  display: none;
-}
-
-html[data-klovy-native="1"] .settings-page-layout {
-  width: 100%;
-}
-
-html[data-klovy-native="1"] .settings-page .app-shell__settings-content {
-  width: 100%;
-  flex: 1;
-  min-width: 0;
 }
 
 .error-boundary {

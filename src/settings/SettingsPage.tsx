@@ -102,14 +102,14 @@ export function SettingsPage() {
   }
 
   return (
-    <div className={`app-shell app-shell--settings settings-page${overlayClass}`}>
+    <div className={`app-shell app-shell--settings-standalone settings-page${overlayClass}`}>
       <button
         type="button"
-        className="mobile-shell-scrim"
+        className="mobile-shell-scrim settings-page__mobile-only"
         aria-label={t("common.closePanel")}
         onClick={() => setShellOverlay(null)}
       />
-      <div className="app-shell__nav">
+      <div className="app-shell__nav settings-page__mobile-only">
         <AppNavRail
           settingsActive
           totalUnread={totalUnread}
@@ -119,15 +119,17 @@ export function SettingsPage() {
           onOpenAdmin={() => navigate("/")}
         />
       </div>
-      <div className="app-shell__settings-main">
-        <MobileShellBar
-          variant="settings"
-          title={t("nav.items.settings")}
-          overlay={shellOverlay}
-          onOverlayChange={setShellOverlay}
-          onClose={handleClose}
-          showList={false}
-        />
+      <div className="settings-page__shell">
+        <div className="settings-page__mobile-only">
+          <MobileShellBar
+            variant="settings"
+            title={t("nav.items.settings")}
+            overlay={shellOverlay}
+            onOverlayChange={setShellOverlay}
+            onClose={handleClose}
+            showList={false}
+          />
+        </div>
         <SettingsView
           section={section}
           onSectionChange={handleSectionChange}
