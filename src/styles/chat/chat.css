@@ -179,10 +179,6 @@
   flex-shrink: 0;
 }
 
-.chat-header__mobile-chrome {
-  display: none;
-}
-
 .chat-header__toolbar {
   display: flex;
   align-items: center;
@@ -657,5 +653,3 @@
     max-width: none;
   }
 }
-
-/* Usunięto martwą regułę .sidebar — layout obsługuje mobile-shell */

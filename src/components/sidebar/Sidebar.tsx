@@ -22,8 +22,6 @@ import { playNotificationSound } from "../../utils/media/notificationSound";
 import { settingsPath } from "../../settings/routes";
 import { AppNavRail } from "../layout/AppNavRail";
 import { ChatListPane, type ChatListTab } from "../layout/ChatListPane";
-import { MobileShellBar } from "../layout/MobileShellBar";
-import type { ShellOverlay } from "../layout/MobileShellBar.types";
 import { UserProfileModal } from "../profile/UserProfileModal";
 import { OtherUserProfileModal } from "../profile/OtherUserProfileModal";
 import { userLabel, availabilityStatusLabel } from "../../utils/user/format";
@@ -258,7 +256,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
 
   const navigate = useNavigate();
   const [chatListTab, setChatListTab] = useState<ChatListTab>("dm");
-  const [shellOverlay, setShellOverlay] = useState<ShellOverlay>(null);
   const [profileOpen, setProfileOpen] = useState(false);
   const [contactProfileOpen, setContactProfileOpen] = useState(false);
   const [contactProfile, setContactProfile] = useState<Contact | null>(null);
@@ -913,33 +910,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
     setContactsModalClosing(false);
     setAdminModalOpen(false);
     setAdminModalClosing(false);
-    setShellOverlay(null);
   }, []);
-
-  useEffect(() => {
-    if (!shellOverlay) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      setShellOverlay(null);
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [shellOverlay]);
-
-  const chatOverlayClass =
-    shellOverlay === "nav" ? " app-shell--overlay-nav"
-    : shellOverlay === "list" ? " app-shell--overlay-list"
-    : "";
-
-  const shellClass = `app-shell app-shell--chat app-shell--no-detail${chatOverlayClass}`;
-
-  const chatTitle =
-    active?.type === "dm"
-      ? userLabel(active.contact)
-      : active?.type === "channel"
-        ? active.channel.name
-        : t("nav.brand.title");
-
   const totalUnread =
     contacts.reduce((s, c) => s + (c.isMuted ? 0 : (c.unreadCount ?? 0)), 0) +
     channels.reduce((s, ch) => s + (ch.isMuted ? 0 : (ch.unreadCount ?? 0)), 0);
@@ -947,15 +918,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
   /* ───────────────────── JSX ───────────────────── */
   return (
     <>
-      <div className={shellClass}>
-        <button
-          type="button"
-          className="mobile-shell-scrim"
-          aria-label={t("common.closePanel")}
-          onClick={() => {
-            setShellOverlay(null);
-          }}
-        />
+      <div className="app-shell app-shell--chat app-shell--no-detail">
         <div className="app-shell__nav">
           <AppNavRail
             onOpenChats={openChats}
@@ -988,11 +951,9 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
             mentionSources={mentionSources}
             onSelectContact={(c) => {
               handleSelectContact(c);
-              setShellOverlay(null);
             }}
             onSelectChannel={(ch) => {
               handleSelectChannel(ch);
-              setShellOverlay(null);
             }}
             onContactContextMenu={handleContactContextMenu}
             onChannelContextMenu={handleChannelContextMenu}
@@ -1003,14 +964,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
             getEffectiveStatus={getContactEffectiveStatus}
           />
         </div>
-        <div className={`app-shell__main${active ? " app-shell__main--chat-open" : ""}`}>
-          {!active ? (
-            <MobileShellBar
-              title={chatTitle}
-              overlay={shellOverlay}
-              onOverlayChange={setShellOverlay}
-            />
-          ) : null}
+        <div className="app-shell__main">
           {isValidElement(children)
             ? cloneElement(children, {
                 onOpenChannelSettings: (channel: Channel) => {
@@ -1021,8 +975,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
                   });
                 },
                 onRemoveContact: (contact: Contact) => setRemoveContactInfo(contact),
-                mobileShellOverlay: shellOverlay,
-                onMobileShellOverlayChange: setShellOverlay,
               })
             : children}
         </div>

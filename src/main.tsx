@@ -10,7 +10,6 @@ import { LocaleProvider } from "./context/LocaleContext";
 import i18n from "./i18n/config";
 import "./styles/base/global.css";
 import "./styles/base/layout.css";
-import "./styles/base/mobile.css";
 import "./styles/common/toast.css";
 import { preloadClientEnvironment } from "./utils/device/clientEnvironment";
 

@@ -56,9 +56,6 @@ import type {
 import { e2eService, onIdentityChange, onSenderKeyStored } from "../../crypto/e2e/e2eService";
 import type { E2ECapabilityMap } from "../../crypto/e2e/types";
 import { useToast } from "../../context/ToastContext";
-import { useCompactMobileShell } from "../../hooks/useCompactMobileShell";
-import { MobileChatHeaderChrome } from "../layout/MobileShellBar";
-import type { ShellOverlay } from "../layout/MobileShellBar.types";
 
 type ToolsPanelMode = "pinned" | "search" | null;
 
@@ -91,8 +88,6 @@ interface ChatWindowProps {
   onClose?: () => void;
   onOpenChannelSettings?: (channel: import("../../types").Channel) => void;
   onRemoveContact?: (contact: Contact) => void;
-  mobileShellOverlay?: ShellOverlay;
-  onMobileShellOverlayChange?: (panel: ShellOverlay) => void;
 }
 
 /* ─── design tokens ─── */
@@ -136,12 +131,8 @@ export function ChatWindow({
   onClose,
   onOpenChannelSettings,
   onRemoveContact,
-  mobileShellOverlay = null,
-  onMobileShellOverlayChange,
 }: ChatWindowProps) {
   const { t } = useTranslation();
-  const compactMobile = useCompactMobileShell();
-  const showMobileChrome = compactMobile && onMobileShellOverlayChange != null;
   const { user } = useAuth();
   const ws = useWebSocket();
   const wsConnected = useWebSocketConnected();
@@ -1230,12 +1221,6 @@ export function ChatWindow({
   return (
     <div className="chat-window">
       <header className="chat-header">
-        {showMobileChrome ? (
-          <MobileChatHeaderChrome
-            overlay={mobileShellOverlay}
-            onOverlayChange={onMobileShellOverlayChange}
-          />
-        ) : null}
         {/* ── Left: avatar + name ── */}
         {target.type === "dm" ? (
           <div style={{ position: "relative", display: "inline-flex" }}>

@@ -1,7 +1,7 @@
 {
   "desktopOnly": {
     "title": "Dostępne tylko na komputerze",
-    "body": "Aplikacja w przeglądarce nie jest dostępna na telefonach ani tabletach — także po włączeniu opcji „Wyświetlaj jak na komputerze”. Otwórz ją na komputerze albo zainstaluj oficjalną aplikację mobilną Klovy Chat."
+    "body": "Aplikacja w przeglądarce nie jest dostępna na telefonach ani tabletach — także po włączeniu opcji „Wyświetlaj jak na komputerze”. Otwórz ją na komputerze."
   },
   "common": {
     "save": "Zapisz",
