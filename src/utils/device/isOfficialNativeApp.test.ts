@@ -9,10 +9,8 @@ describe("isOfficialNativeApp", () => {
 
   beforeEach(() => {
     delete document.documentElement.dataset.klovyNative;
-    // @ts-expect-error test override
-    delete window.__TAURI__;
-    // @ts-expect-error test override
-    delete window.__TAURI_INTERNALS__;
+    window.__TAURI__ = undefined;
+    window.__TAURI_INTERNALS__ = undefined;
   });
 
   afterEach(() => {
