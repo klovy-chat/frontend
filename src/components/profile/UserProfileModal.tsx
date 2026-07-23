@@ -6,6 +6,7 @@ import { ConnectedAccountsSection } from "./ConnectedAccountsSection";
 import { ListeningActivitySection } from "./ListeningActivitySection";
 import { ProfileBadgesSection } from "./ProfileBadgesSection";
 import { useAuth } from "../../context/AuthContext";
+import { useResolvePresence } from "../../context/PresenceContext";
 import { userLabel, formatJoinedDate, availabilityStatusLabel } from "../../utils/user/format";
 import { presenceColor } from "../../utils/user/presence";
 import { useProfileBannerStyle } from "../../hooks/usePublicMediaCacheRevision";
@@ -30,10 +31,16 @@ export function UserProfileModal({
 }: UserProfileModalProps) {
   const { t } = useTranslation();
   const { user: authUser } = useAuth();
-  const user =
+  const resolvePresence = useResolvePresence();
+  const baseUser =
     authUser && previewOverride
       ? { ...authUser, ...previewOverride }
       : authUser;
+  const resolved = baseUser ? resolvePresence(baseUser) : null;
+  // Logged-in user is online in this session; match nav-rail behavior.
+  const user = resolved
+    ? { ...resolved, isOnline: resolved.isOnline ?? true }
+    : null;
   const { closing, visible, requestClose } = useAnimatedModal(isOpen, onClose, {
     resetKey: user?.id ?? null,
   });

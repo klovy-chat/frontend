@@ -22,5 +22,11 @@ export function isOfficialNativeApp(): boolean {
     return false;
   }
 
-  return hasTauriRuntime() && hasNativeAppUserAgentToken();
+  // Android/iOS: token UA ustawiany wyłącznie w tauri.android/ios.conf.json.
+  // Nie polegamy na __TAURI__ — na zdalnym URL Tauri czasem nie wstrzykuje runtime
+  // (błędy „Cannot redefine property: postMessage” w logcat).
+  if (hasNativeAppUserAgentToken()) return true;
+
+  // Desktop Tauri (bez custom UA).
+  return hasTauriRuntime();
 }
