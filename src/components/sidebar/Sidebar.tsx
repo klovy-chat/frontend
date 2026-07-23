@@ -22,7 +22,8 @@ import { playNotificationSound } from "../../utils/media/notificationSound";
 import { settingsPath } from "../../settings/routes";
 import { AppNavRail } from "../layout/AppNavRail";
 import { ChatListPane, type ChatListTab } from "../layout/ChatListPane";
-import { MobileShellBar, type ShellOverlay } from "../layout/MobileShellBar";
+import { MobileShellBar } from "../layout/MobileShellBar";
+import type { ShellOverlay } from "../layout/MobileShellBar.types";
 import { UserProfileModal } from "../profile/UserProfileModal";
 import { OtherUserProfileModal } from "../profile/OtherUserProfileModal";
 import { userLabel, availabilityStatusLabel } from "../../utils/user/format";
@@ -1002,12 +1003,14 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
             getEffectiveStatus={getContactEffectiveStatus}
           />
         </div>
-        <div className="app-shell__main">
-          <MobileShellBar
-            title={chatTitle}
-            overlay={shellOverlay}
-            onOverlayChange={setShellOverlay}
-          />
+        <div className={`app-shell__main${active ? " app-shell__main--chat-open" : ""}`}>
+          {!active ? (
+            <MobileShellBar
+              title={chatTitle}
+              overlay={shellOverlay}
+              onOverlayChange={setShellOverlay}
+            />
+          ) : null}
           {isValidElement(children)
             ? cloneElement(children, {
                 onOpenChannelSettings: (channel: Channel) => {
@@ -1018,6 +1021,8 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
                   });
                 },
                 onRemoveContact: (contact: Contact) => setRemoveContactInfo(contact),
+                mobileShellOverlay: shellOverlay,
+                onMobileShellOverlayChange: setShellOverlay,
               })
             : children}
         </div>

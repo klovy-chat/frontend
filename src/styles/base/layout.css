@@ -88,15 +88,27 @@
 .mobile-shell-bar {
   display: none;
   align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  padding-top: calc(10px + var(--safe-top));
-  padding-left: calc(14px + var(--safe-left));
-  padding-right: calc(14px + var(--safe-right));
+  gap: 10px;
+  padding: 8px 12px;
+  padding-top: calc(8px + var(--safe-top));
+  padding-left: calc(12px + var(--safe-left));
+  padding-right: calc(12px + var(--safe-right));
   border-bottom: 1px solid var(--border);
   background: var(--bg-panel);
   flex-shrink: 0;
-  min-height: calc(48px + var(--safe-top));
+  min-height: calc(52px + var(--safe-top));
+}
+
+.mobile-shell-bar__leading,
+.mobile-shell-bar__trailing {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.mobile-shell-bar__trailing {
+  margin-left: auto;
 }
 
 .mobile-shell-bar__btn {
@@ -104,7 +116,8 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  height: 34px;
+  height: 40px;
+  min-width: 40px;
   padding: 0 12px;
   border-radius: 10px;
   border: 1px solid var(--border);
@@ -113,6 +126,11 @@
   font-size: 13px;
   font-weight: 600;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.mobile-shell-bar__btn--icon {
+  width: 40px;
+  padding: 0;
 }
 
 .mobile-shell-bar__btn:hover {
@@ -129,13 +147,15 @@
 
 .mobile-shell-bar__title {
   flex: 1;
-  font-size: 14px;
-  font-weight: 600;
+  min-width: 0;
+  font-size: 16px;
+  font-weight: 700;
   color: var(--text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   text-align: center;
+  letter-spacing: -0.01em;
 }
 
 .mobile-shell-scrim {

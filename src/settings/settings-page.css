@@ -399,6 +399,10 @@
     max-width: none;
     padding: 20px 16px 32px;
   }
+
+  .settings-page .as-content-topbar {
+    display: none;
+  }
 }
 
 html[data-klovy-native="1"] .settings-page__mobile-only {
