@@ -10,6 +10,10 @@ import {
 } from "../media/externalMediaLinks";
 import { isVideoAttachment, isVoiceAttachment } from "../media/attachments";
 import type { Message, MessageUser } from "../../types";
+import {
+  isSignalEnvelopeContent,
+  readableContentForPreview,
+} from "../../crypto/messageContent";
 
 function capContent(content: unknown): string {
   return typeof content === "string"
@@ -47,12 +51,20 @@ export function getMessagePreview(
 ): string {
   if (message.deleted) return i18n.t("messages.deleted");
   if (message.e2eDecryptFailed) return i18n.t("messages.e2e.decryptFailed");
+  if (message.e2eEncrypted && isSignalEnvelopeContent(message.content)) {
+    return i18n.t("messages.e2e.encrypted");
+  }
   if (message.e2eEncrypted && !message.content.trim()) {
     return i18n.t("messages.e2e.encrypted");
   }
 
-  if (isOnlyExternalMediaContent(message.content)) {
-    const media = extractExternalMediaLinks(message.content);
+  const readable = readableContentForPreview(
+    message.content,
+    message.e2eEncrypted,
+  );
+
+  if (isOnlyExternalMediaContent(readable)) {
+    const media = extractExternalMediaLinks(readable);
     if (media.length === 1 && media[0].kind === "gif") {
       return i18n.t("messages.image");
     }
@@ -76,7 +88,18 @@ export function getMessagePreview(
       : i18n.t("messages.attachment");
   }
 
-  const text = stripFormatting(message.content).trim();
+  const text = stripFormatting(readable).trim();
+  if (!text) return i18n.t("messages.default");
+  return text.length > 120 ? `${text.slice(0, 120)}…` : text;
+}
+
+/** Podgląd ostatniej wiadomości z listy kontaktów/kanałów (surowy opaque z API). */
+export function formatListLastMessage(raw?: string): string {
+  if (!raw?.trim()) return "";
+  if (isSignalEnvelopeContent(raw)) {
+    return i18n.t("messages.e2e.encrypted");
+  }
+  const text = stripFormatting(readableContentForPreview(raw)).trim();
   if (!text) return i18n.t("messages.default");
   return text.length > 120 ? `${text.slice(0, 120)}…` : text;
 }

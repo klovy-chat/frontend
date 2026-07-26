@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { Avatar } from "../common/Avatar";
 import { UnreadBadge } from "../common/UnreadBadge";
 import { userLabel, formatTime } from "../../utils/user/format";
+import { formatListLastMessage } from "../../utils/chat/messages";
 import { PRESENCE_COLORS } from "../../utils/user/presence";
 import type { Channel, ChatTarget, Contact } from "../../types";
 import "../../styles/chat/chat-list.css";
@@ -84,7 +85,11 @@ export function ChatListPane({
         </div>
         <div className="chat-list-item__inner">
           <span className="chat-list-item__name">{userLabel(c)}</span>
-          {c.lastMessage && <span className="chat-list-item__preview">{c.lastMessage}</span>}
+          {c.lastMessage && (
+            <span className="chat-list-item__preview">
+              {formatListLastMessage(c.lastMessage)}
+            </span>
+          )}
         </div>
         {(c.lastMessageTime || muted || unread > 0 || (!a && mentionSources.has(c._id))) && (
           <div className="chat-list-item__meta">
@@ -129,7 +134,9 @@ export function ChatListPane({
         <div className="chat-list-item__inner">
           <span className="chat-list-item__name">{ch.name}</span>
           {(ch.lastMessage || ch.description) && (
-            <span className="chat-list-item__preview">{ch.lastMessage ?? ch.description}</span>
+            <span className="chat-list-item__preview">
+              {ch.lastMessage ? formatListLastMessage(ch.lastMessage) : ch.description}
+            </span>
           )}
         </div>
         {(ch.lastMessageTime || muted || unread > 0 || (!a && mentionSources.has(ch._id))) && (
