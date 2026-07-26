@@ -88,6 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         };
       }
       setUser(response.user);
+      void e2eService.ensureReady(response.user.id).catch(() => {});
       return { requiresTwoFactor: false };
     },
     [],
@@ -101,6 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         turnstileToken,
       );
       setUser(loggedIn);
+      void e2eService.ensureReady(loggedIn.id).catch(() => {});
     },
     [],
   );
@@ -141,6 +143,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!user?.id) return;
 
     let cancelled = false;
+    void e2eService.ensureReady(user.id).catch(() => {
+      /* retry on next session check */
+    });
+
     let lastCheckAt = 0;
     const MIN_CHECK_INTERVAL_MS = 60_000;
 

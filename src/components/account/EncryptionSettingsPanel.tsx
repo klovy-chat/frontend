@@ -32,6 +32,7 @@ export function EncryptionSettingsPanel() {
     setLoading(true);
     try {
       e2eService.setCurrentUserId(user.id);
+      await e2eService.ensureReady(user.id);
       const status = await e2eService.refreshStatus();
       setEnabled(status.enabled);
       setHasKeys(status.hasKeys);

@@ -54,6 +54,11 @@ import type {
   MessageUser,
 } from "../../types";
 import { e2eService, onIdentityChange, onSenderKeyStored } from "../../crypto/e2e/e2eService";
+import {
+  wrapOutgoingContent,
+  unwrapIncomingMessages,
+  unwrapIncomingMessage,
+} from "../../crypto/messageContent";
 import type { E2ECapabilityMap } from "../../crypto/e2e/types";
 import { useToast } from "../../context/ToastContext";
 
@@ -277,13 +282,14 @@ export function ChatWindow({
 
   const decryptForDisplay = useCallback(
     async (list: Message[]) => {
-      if (!currentUserId) return list.map(normalizeMessage);
       const normalized = list.map(normalizeMessage);
+      const unwrapped = unwrapIncomingMessages(normalized);
+      if (!currentUserId) return unwrapped;
       try {
-        if (!(await e2eService.canDecryptMessages())) return normalized;
-        return await e2eService.decryptMessages(normalized, currentUserId);
+        if (!(await e2eService.canDecryptMessages())) return unwrapped;
+        return await e2eService.decryptMessages(unwrapped, currentUserId);
       } catch {
-        return normalized;
+        return unwrapped;
       }
     },
     [currentUserId],
@@ -317,7 +323,7 @@ export function ChatWindow({
     let cancelled = false;
     void e2eService.refreshStatus().then(() => {
       if (!cancelled) {
-        setLocalE2eEnabled(e2eService.isEnabled());
+        setLocalE2eEnabled(e2eService.canEncryptOutgoing());
       }
     });
     return () => {
@@ -784,8 +790,10 @@ export function ChatWindow({
       plaintext: string,
       force = false,
     ): Promise<{ content: string; e2eEncrypted?: boolean; e2eVersion?: number }> => {
-      if (!target || !user) return { content: plaintext };
-      if (!localE2eEnabled && !force) return { content: plaintext };
+      if (!target || !user) return { content: wrapOutgoingContent(plaintext) };
+      if (e2eService.isEnabled() || force) {
+        await e2eService.ensureReady(user.id);
+      }
 
       try {
         const cap = await loadE2eCapabilities(true);
@@ -793,19 +801,23 @@ export function ChatWindow({
           if (force || e2eService.shouldEncryptDm(target.contact._id, cap)) {
             return e2eService.encryptOutgoingDm(target.contact._id, plaintext);
           }
-          throw new Error("E2E_PEER_NOT_READY");
+          if (force) throw new Error("E2E_PEER_NOT_READY");
+          return { content: wrapOutgoingContent(plaintext) };
         }
 
-        const encrypted = await e2eService.encryptOutgoingChannel(
-          target.channel._id,
-          user.id,
-          plaintext,
-          channelMemberIds,
-          ws,
-          cap,
-        );
-        if (encrypted) return encrypted;
-        throw new Error("E2E_PEER_NOT_READY");
+        if (e2eService.canEncryptOutgoing()) {
+          const encrypted = await e2eService.encryptOutgoingChannel(
+            target.channel._id,
+            user.id,
+            plaintext,
+            channelMemberIds,
+            ws,
+            cap,
+          );
+          if (encrypted) return encrypted;
+        }
+        if (force) throw new Error("E2E_PEER_NOT_READY");
+        return { content: wrapOutgoingContent(plaintext) };
       } catch (error) {
         if (error instanceof Error && error.message === "E2E_PEER_NOT_READY") {
           throw error;
@@ -826,7 +838,9 @@ export function ChatWindow({
 
   const prepareEncryptedUpload = useCallback(
     async (file: File) => {
-      if (!target || !user || !localE2eEnabled) return null;
+      if (!target || !user) return null;
+      await e2eService.ensureReady(user.id);
+      if (!e2eService.canEncryptOutgoing()) return null;
       const cap = await loadE2eCapabilities(true);
       const encryptedPack =
         target.type === "dm"
@@ -847,7 +861,7 @@ export function ChatWindow({
             );
 
       if (!encryptedPack) {
-        if (localE2eEnabled) throw new Error("E2E_PEER_NOT_READY");
+        if (!e2eService.canEncryptOutgoing()) throw new Error("E2E_PEER_NOT_READY");
         return null;
       }
 
@@ -1524,7 +1538,7 @@ export function ChatWindow({
             onVoiceNote={handleVoiceNote}
             onGif={handleGif}
             onSticker={handleSticker}
-            disabled={!canSendChannel || !wsConnected || e2eSendBlocked}
+            disabled={!canSendChannel || !wsConnected}
             placeholder={
               editingMessage
                 ? t("chat.input.editPlaceholder")
