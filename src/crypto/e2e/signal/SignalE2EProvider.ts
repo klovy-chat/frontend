@@ -75,7 +75,7 @@ export class SignalE2EProvider implements IE2EProvider {
     ws: WebSocketClient | null,
     cap: E2ECapabilityMap,
   ): Promise<void> {
-    if (!this.hasKeys) return;
+    if (!this.isEnabled() || !this.hasKeys) return;
     const snapshot = this.memberSnapshotKey(memberIds);
     const prev = this.channelMemberSnapshot.get(channelId);
     this.channelMemberSnapshot.set(channelId, snapshot);
@@ -118,7 +118,7 @@ export class SignalE2EProvider implements IE2EProvider {
       | { kind: "channel"; channelId: string; senderId: string; memberIds: string[]; cap: E2ECapabilityMap; ws: WebSocketClient | null },
     file: File,
   ): Promise<{ encryptedFile: Blob; wsPayload: E2EEncryptResult; fileName: string } | null> {
-    if (!this.hasKeys) return null;
+    if (!this.isEnabled() || !this.hasKeys) return null;
 
     const packed = await encryptFileForE2e(file);
     if (target.kind === "dm") {
@@ -211,19 +211,20 @@ export class SignalE2EProvider implements IE2EProvider {
     this.capabilityCache.clear();
   }
 
-  /** Ensure local keys exist and are uploaded — independent of the E2E settings toggle. */
+  /** Prepare local E2E keys when the user opted in — never auto-generates or enables E2E. */
   async ensureReady(userId: string): Promise<void> {
     this.setCurrentUserId(userId);
-    if (await hasLocalE2eKeys()) {
-      this.hasKeys = true;
-      const status = await getE2eStatus();
-      this.fingerprint = status.fingerprint ?? this.fingerprint;
-      if (!status.hasKeys) {
-        this.fingerprint = await generateAndUploadKeyBundle();
-      }
+    if (!(await hasLocalE2eKeys())) {
+      await this.refreshStatus();
       return;
     }
-    await this.enable(userId);
+    this.hasKeys = true;
+    const status = await getE2eStatus();
+    this.enabled = status.enabled;
+    this.fingerprint = status.fingerprint ?? this.fingerprint;
+    if (!status.hasKeys) {
+      this.fingerprint = await generateAndUploadKeyBundle();
+    }
   }
 
   async disable(): Promise<void> {
@@ -277,7 +278,7 @@ export class SignalE2EProvider implements IE2EProvider {
     memberIds: string[],
     ws: WebSocketClient,
   ): Promise<void> {
-    if (!this.hasKeys) return;
+    if (!this.isEnabled() || !this.hasKeys) return;
     const targetUserIds = memberIds.filter((id) => id !== requesterId);
     if (targetUserIds.length === 0) return;
     ws.send(WsType.E2E_SENDER_KEY_REQUEST, {
@@ -319,11 +320,12 @@ export class SignalE2EProvider implements IE2EProvider {
   }
 
   peerSupportsE2e(cap: E2ECapabilityMap, peerId: string): boolean {
-    return Boolean(cap[peerId]?.hasKeys);
+    const peer = cap[peerId];
+    return Boolean(peer?.e2eEnabled && peer?.hasKeys);
   }
 
   shouldEncryptDm(peerId: string, cap: E2ECapabilityMap): boolean {
-    return this.hasKeys && this.peerSupportsE2e(cap, peerId);
+    return this.isEnabled() && this.peerSupportsE2e(cap, peerId);
   }
 
   async encryptOutgoingDm(peerId: string, plaintext: string): Promise<E2EEncryptResult> {
@@ -343,7 +345,7 @@ export class SignalE2EProvider implements IE2EProvider {
     ws: WebSocketClient | null,
     cap: E2ECapabilityMap,
   ): Promise<E2EEncryptResult | null> {
-    if (!this.hasKeys) return null;
+    if (!this.isEnabled() || !this.hasKeys) return null;
     const e2eMembers = memberIds.filter(
       (id) => id !== senderId && this.peerSupportsE2e(cap, id),
     );

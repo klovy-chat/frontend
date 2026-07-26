@@ -174,7 +174,6 @@ export function ChatWindow({
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [e2eCapabilities, setE2eCapabilities] = useState<E2ECapabilityMap>({});
   const [localE2eEnabled, setLocalE2eEnabled] = useState(false);
-  const [e2ePlaintextFallback, setE2ePlaintextFallback] = useState(false);
   const [e2eConversationActive, setE2eConversationActive] = useState(false);
   const [peerFingerprint, setPeerFingerprint] = useState<string | null>(null);
 
@@ -322,7 +321,7 @@ export function ChatWindow({
     let cancelled = false;
     void e2eService.refreshStatus().then(() => {
       if (!cancelled) {
-        setLocalE2eEnabled(e2eService.canEncryptOutgoing());
+        setLocalE2eEnabled(e2eService.isEnabled());
       }
     });
     return () => {
@@ -339,7 +338,6 @@ export function ChatWindow({
   useEffect(() => {
     if (!currentUserId || !localE2eEnabled) {
       setE2eCapabilities({});
-      setE2ePlaintextFallback(false);
       setE2eConversationActive(false);
       return;
     }
@@ -353,7 +351,6 @@ export function ChatWindow({
         if (cancelled) return;
         setE2eCapabilities(cap);
         const peerReady = e2eService.peerSupportsE2e(cap, target.contact._id);
-        setE2ePlaintextFallback(!peerReady);
         setE2eConversationActive(peerReady);
         if (peerReady) {
           setPeerFingerprint(cap[target.contact._id]?.fingerprint ?? null);
@@ -369,12 +366,10 @@ export function ChatWindow({
         const hasE2ePeer = channelMemberIds.some(
           (id) => id !== currentUserId && e2eService.peerSupportsE2e(cap, id),
         );
-        setE2ePlaintextFallback(!hasE2ePeer);
         setPeerFingerprint(null);
         setE2eConversationActive(hasE2ePeer);
       } else {
         setE2eCapabilities({});
-        setE2ePlaintextFallback(false);
         setE2eConversationActive(false);
         setPeerFingerprint(null);
       }
@@ -759,8 +754,6 @@ export function ChatWindow({
     return localE2eEnabled && e2eConversationActive;
   }, [localE2eEnabled, e2eConversationActive]);
 
-  const e2eSendBlocked = localE2eEnabled && e2ePlaintextFallback;
-
   const showE2eSendError = useCallback(
     (error: unknown) => {
       if (error instanceof Error && error.message === "E2E_PEER_NOT_READY") {
@@ -804,7 +797,7 @@ export function ChatWindow({
           return { content: wrapOutgoingContent(plaintext) };
         }
 
-        if (e2eService.canEncryptOutgoing()) {
+        if (e2eService.isEnabled() && e2eService.canEncryptOutgoing()) {
           const encrypted = await e2eService.encryptOutgoingChannel(
             target.channel._id,
             user.id,
@@ -837,7 +830,7 @@ export function ChatWindow({
 
   const prepareEncryptedUpload = useCallback(
     async (file: File) => {
-      if (!target || !user) return null;
+      if (!target || !user || !e2eService.isEnabled()) return null;
       await e2eService.ensureReady(user.id);
       if (!e2eService.canEncryptOutgoing()) return null;
       const cap = await loadE2eCapabilities(true);
@@ -1506,26 +1499,7 @@ export function ChatWindow({
           {t("chat.window.mutedOnChannel")}
         </div>
       ) : (
-        <>
-          {e2eSendBlocked ? (
-            <div
-              style={{
-                padding: "10px 18px",
-                borderTop: `1px solid ${C.border}`,
-                background: C.bgPanel,
-                color: C.textMuted,
-                fontSize: "0.82rem",
-                lineHeight: 1.5,
-                textAlign: "center",
-                fontFamily: "var(--font-sans)",
-              }}
-            >
-              {target.type === "channel"
-                ? t("chat.window.e2eChannelFallback")
-                : t("chat.window.e2eFallback")}
-            </div>
-          ) : null}
-          <MessageInput
+        <MessageInput
             key={
               target.type === "dm"
                 ? target.contact._id
@@ -1557,7 +1531,6 @@ export function ChatWindow({
             mentionCandidates={mentionCandidates}
             allowMentionEveryone={allowMentionEveryone}
           />
-        </>
       )}
 
       {target.type === "dm" && (
