@@ -481,15 +481,8 @@
   height: 10px;
 }
 
-.up-connected-row .up-connected-icon--spotify {
-  background: #1db954;
+.up-connected-row .up-connected-icon--brand {
   color: #fff;
-}
-
-.up-connected-icon--spotify {
-  background: #1db954;
-  color: #fff;
-  border-radius: 4px;
 }
 
 .up-connected-icon--brand,
@@ -498,13 +491,6 @@
   border-radius: 4px;
   min-width: 28px;
   min-height: 28px;
-  font-size: 0.62rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-}
-
-.up-connected-icon-label {
-  line-height: 1;
 }
 
 .up-connected-name {
