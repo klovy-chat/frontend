@@ -32,7 +32,7 @@ import {
 } from "../../utils/chat/listPreview";
 import { useProfileSync } from "../../hooks/useProfileSync";
 import { useListeningSync } from "../../hooks/useListeningSync";
-import { useListeningSync } from "../../hooks/useListeningSync";
+import { useIntegrationListeningPoll } from "../../hooks/useIntegrationListeningPoll";
 import type { Channel, ChatTarget, Contact, Message } from "../../types";
 import { ChannelSettingsModal } from "../channel/ChannelSettingsModal";
 import { ContactsModal } from "../contacts/ContactsModal";
@@ -675,7 +675,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
     return () => unsubs.forEach((unsub) => unsub());
   }, [ws, active, onSelect]);
 
-  useListeningSync();
+  useIntegrationListeningPoll();
 
   useEffect(() => {
     if (showNewChannel || renameChannelInfo)

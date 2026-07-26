@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Navigate, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useListeningSync } from "../hooks/useListeningSync";
+import { useIntegrationListeningPoll } from "../hooks/useIntegrationListeningPoll";
 import { notifyListeningConnectionChanged } from "../utils/sync/listeningConnectionSync";
 import { SettingsView } from "./SettingsView";
 import {
@@ -25,7 +25,7 @@ export function SettingsPage() {
   );
   const [integrationOauthError, setIntegrationOauthError] = useState<string | null>(null);
 
-  useListeningSync();
+  useIntegrationListeningPoll();
 
   useEffect(() => {
     const spotify = searchParams.get("spotify");
