@@ -1,6 +1,7 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
+import { getContactProfile } from "../../api/contacts";
 import { Avatar } from "../common/Avatar";
 import { userLabel, formatJoinedDate, availabilityStatusLabel } from "../../utils/user/format";
 import { presenceColor } from "../../utils/user/presence";
@@ -37,6 +38,7 @@ export function OtherUserProfileModal({
 }: OtherUserProfileModalProps) {
   const { t } = useTranslation();
   const displayedUserRef = useRef<Contact | null>(null);
+  const [loadedProfile, setLoadedProfile] = useState<Contact | null>(null);
 
   if (user) {
     displayedUserRef.current = user;
@@ -46,7 +48,27 @@ export function OtherUserProfileModal({
     resetKey: user ? `${user._id}:${openKey}` : openKey,
   });
 
-  const displayedUser = user ?? displayedUserRef.current;
+  useEffect(() => {
+    if (!visible || !user?._id || !isFriend) {
+      setLoadedProfile(null);
+      return;
+    }
+
+    let cancelled = false;
+    void getContactProfile(user._id)
+      .then(({ contact }) => {
+        if (!cancelled) setLoadedProfile(contact);
+      })
+      .catch(() => {
+        if (!cancelled) setLoadedProfile(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [visible, user?._id, isFriend, openKey]);
+
+  const displayedUser = loadedProfile ?? user ?? displayedUserRef.current;
   const bannerStyle = useProfileBannerStyle(
     displayedUser?.banner,
     displayedUser?.color,

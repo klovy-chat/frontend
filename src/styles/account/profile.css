@@ -492,6 +492,21 @@
   border-radius: 4px;
 }
 
+.up-connected-icon--brand,
+.as-integration-icon.up-connected-icon--brand {
+  color: #fff;
+  border-radius: 4px;
+  min-width: 28px;
+  min-height: 28px;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.up-connected-icon-label {
+  line-height: 1;
+}
+
 .up-connected-name {
   font-size: 0.84rem;
   font-weight: 500;

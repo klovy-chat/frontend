@@ -3,6 +3,24 @@ interface IntegrationProviderIconProps {
   className?: string;
 }
 
+const PROVIDER_META: Record<string, { label: string; color: string }> = {
+  spotify: { label: "SP", color: "#1DB954" },
+  youtube: { label: "YT", color: "#FF0000" },
+  tiktok: { label: "TT", color: "#010101" },
+  kick: { label: "K", color: "#53FC18" },
+  twitch: { label: "TW", color: "#9146FF" },
+  github: { label: "GH", color: "#24292F" },
+  steam: { label: "ST", color: "#171A21" },
+  reddit: { label: "RD", color: "#FF4500" },
+  twitter: { label: "X", color: "#000000" },
+  playstation: { label: "PS", color: "#003791" },
+  xbox: { label: "XB", color: "#107C10" },
+  epic: { label: "EG", color: "#2F2D2E" },
+  paypal: { label: "PP", color: "#003087" },
+  riot: { label: "RG", color: "#D13639" },
+  ebay: { label: "EB", color: "#E53238" },
+};
+
 export function IntegrationProviderIcon({
   provider,
   className = "",
@@ -17,11 +35,15 @@ export function IntegrationProviderIcon({
     );
   }
 
+  const meta = PROVIDER_META[provider] ?? { label: provider.slice(0, 2).toUpperCase(), color: "#6366f1" };
+
   return (
-    <span className={`up-connected-icon ${className}`.trim()} aria-hidden>
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <circle cx="12" cy="12" r="9" />
-      </svg>
+    <span
+      className={`up-connected-icon up-connected-icon--brand ${className}`.trim()}
+      style={{ backgroundColor: meta.color }}
+      aria-hidden
+    >
+      <span className="up-connected-icon-label">{meta.label}</span>
     </span>
   );
 }

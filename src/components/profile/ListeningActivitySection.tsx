@@ -1,6 +1,6 @@
 import type { ListeningActivity } from "../../types";
 import { useTranslation } from "react-i18next";
-import { isListeningNow } from "../../hooks/useSpotifyListeningSync";
+import { isListeningNow } from "../../hooks/useListeningSync";
 import { isAllowedListeningUrl } from "../../utils/media/mediaAllowlist";
 import { openSpotifyAppLink } from "../../utils/integrations/spotifyLinks";
 import { IntegrationProviderIcon } from "./IntegrationProviderIcon";

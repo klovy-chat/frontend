@@ -79,18 +79,20 @@ interface SettingsViewProps {
   section: SettingsSection;
   onSectionChange: (section: SettingsSection) => void;
   onClose: () => void;
-  spotifyOauthError?: string | null;
-  spotifyOauthConnected?: boolean;
-  onSpotifyOauthHandled?: () => void;
+  integrationOauthProvider?: string | null;
+  integrationOauthStatus?: "connected" | "error" | null;
+  integrationOauthError?: string | null;
+  onIntegrationOauthHandled?: () => void;
 }
 
 export function SettingsView({
   section,
   onSectionChange,
   onClose,
-  spotifyOauthError = null,
-  spotifyOauthConnected = false,
-  onSpotifyOauthHandled,
+  integrationOauthProvider = null,
+  integrationOauthStatus = null,
+  integrationOauthError = null,
+  onIntegrationOauthHandled,
 }: SettingsViewProps) {
   const { t } = useTranslation();
   const { dateLocale } = useLocale();
@@ -1390,9 +1392,10 @@ export function SettingsView({
 
           {section === "integracje" && (
             <IntegrationsPanel
-              spotifyOauthError={spotifyOauthError}
-              spotifyOauthConnected={spotifyOauthConnected}
-              onSpotifyOauthHandled={onSpotifyOauthHandled}
+              integrationOauthProvider={integrationOauthProvider}
+              integrationOauthStatus={integrationOauthStatus}
+              integrationOauthError={integrationOauthError}
+              onOauthHandled={onIntegrationOauthHandled}
             />
           )}
 

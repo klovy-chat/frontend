@@ -1,6 +1,5 @@
 import { useTranslation } from "react-i18next";
 import type { ConnectedAccount } from "../../types";
-import { openSpotifyAppLink } from "../../utils/integrations/spotifyLinks";
 import { IntegrationProviderIcon } from "./IntegrationProviderIcon";
 
 interface ConnectedAccountsSectionProps {
@@ -21,8 +20,8 @@ export function ConnectedAccountsSection({ accounts }: ConnectedAccountsSectionP
             type="button"
             className="up-connected-row"
             onClick={() => {
-              if (account.provider === "spotify") {
-                openSpotifyAppLink(account.profileUrl);
+              if (account.profileUrl) {
+                window.open(account.profileUrl, "_blank", "noopener,noreferrer");
               }
             }}
           >

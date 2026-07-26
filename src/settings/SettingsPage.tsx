@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { Navigate, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useSpotifyListeningSync } from "../hooks/useSpotifyListeningSync";
-import { notifySpotifyConnectionChanged } from "../utils/sync/spotifyConnectionSync";
+import { useListeningSync } from "../hooks/useListeningSync";
+import { notifyListeningConnectionChanged } from "../utils/sync/listeningConnectionSync";
 import { SettingsView } from "./SettingsView";
 import {
   DEFAULT_SETTINGS_SECTION,
@@ -19,27 +19,52 @@ export function SettingsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const section = parseSettingsSection(sectionSlug) ?? DEFAULT_SETTINGS_SECTION;
 
-  const [spotifyOauthError, setSpotifyOauthError] = useState<string | null>(null);
-  const [spotifyOauthConnected, setSpotifyOauthConnected] = useState(false);
+  const [integrationOauthProvider, setIntegrationOauthProvider] = useState<string | null>(null);
+  const [integrationOauthStatus, setIntegrationOauthStatus] = useState<"connected" | "error" | null>(
+    null,
+  );
+  const [integrationOauthError, setIntegrationOauthError] = useState<string | null>(null);
 
-  useSpotifyListeningSync();
+  useListeningSync();
 
   useEffect(() => {
     const spotify = searchParams.get("spotify");
-    if (spotify !== "connected" && spotify !== "error") return;
+    if (spotify === "connected" || spotify === "error") {
+      setIntegrationOauthProvider("spotify");
+      setIntegrationOauthStatus(spotify === "connected" ? "connected" : "error");
+      if (spotify === "connected") {
+        setIntegrationOauthError(null);
+        notifyListeningConnectionChanged();
+      } else {
+        const raw = searchParams.get("message");
+        setIntegrationOauthError(raw ? decodeURIComponent(raw) : t("sidebar.toast.spotifyFailed"));
+      }
+      const next = new URLSearchParams(searchParams);
+      next.delete("spotify");
+      next.delete("message");
+      setSearchParams(next, { replace: true });
+      return;
+    }
 
-    if (spotify === "connected") {
-      setSpotifyOauthConnected(true);
-      setSpotifyOauthError(null);
-      notifySpotifyConnectionChanged();
-    } else {
+    const integration = searchParams.get("integration");
+    const status = searchParams.get("status");
+    if (!integration || (status !== "connected" && status !== "error")) return;
+
+    setIntegrationOauthProvider(integration);
+    setIntegrationOauthStatus(status);
+    if (status === "error") {
       const raw = searchParams.get("message");
-      setSpotifyOauthError(raw ? decodeURIComponent(raw) : t("sidebar.toast.spotifyFailed"));
-      setSpotifyOauthConnected(false);
+      setIntegrationOauthError(raw ? decodeURIComponent(raw) : t("modals.integrations.connectFailed"));
+    } else {
+      setIntegrationOauthError(null);
+      if (integration === "spotify") {
+        notifyListeningConnectionChanged();
+      }
     }
 
     const next = new URLSearchParams(searchParams);
-    next.delete("spotify");
+    next.delete("integration");
+    next.delete("status");
     next.delete("message");
     setSearchParams(next, { replace: true });
   }, [searchParams, setSearchParams, t]);
@@ -69,9 +94,14 @@ export function SettingsPage() {
         section={section}
         onSectionChange={handleSectionChange}
         onClose={handleClose}
-        spotifyOauthError={spotifyOauthError}
-        spotifyOauthConnected={spotifyOauthConnected}
-        onSpotifyOauthHandled={() => setSpotifyOauthConnected(false)}
+        integrationOauthProvider={integrationOauthProvider}
+        integrationOauthStatus={integrationOauthStatus}
+        integrationOauthError={integrationOauthError}
+        onIntegrationOauthHandled={() => {
+          setIntegrationOauthProvider(null);
+          setIntegrationOauthStatus(null);
+          setIntegrationOauthError(null);
+        }}
       />
     </div>
   );

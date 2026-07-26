@@ -7,6 +7,10 @@ export function getContactsForList() {
   );
 }
 
+export function getContactProfile(contactId: string) {
+  return apiRequest<{ contact: Contact }>(`/api/contacts/${contactId}/profile`);
+}
+
 export function searchContacts(searchTerm: string) {
   return apiRequest<{ contacts: Contact[] }>("/api/contacts/search", {
     method: "POST",

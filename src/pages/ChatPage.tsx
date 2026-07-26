@@ -70,7 +70,13 @@ export function ChatPage() {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const spotify = params.get("spotify");
-    if (spotify === "connected" || spotify === "error") {
+    const integration = params.get("integration");
+    const status = params.get("status");
+    if (
+      spotify === "connected" ||
+      spotify === "error" ||
+      (integration && (status === "connected" || status === "error"))
+    ) {
       navigate(`/settings/integrations?${params.toString()}`, { replace: true });
     }
   }, [location.search, navigate]);

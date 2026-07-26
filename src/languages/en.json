@@ -1047,7 +1047,17 @@
     },
     "integrations": {
       "title": "Integrations",
-      "subtitle": "Connect your accounts",
+      "subtitle": "Connect your accounts — shown on your profile for friends",
+      "connect": "Connect",
+      "disconnect": "Disconnect",
+      "connected": "{{provider}} account connected.",
+      "disconnected": "Account disconnected.",
+      "connectFailed": "Could not connect account.",
+      "disconnectFailed": "Could not disconnect account.",
+      "loadFailed": "Could not load integrations.",
+      "notConfigured": "Not configured on the server (missing OAuth keys).",
+      "notConnectedHint": "Connect to show the account on your profile.",
+      "noPublicApi": "No public OAuth API for this platform.",
       "spotify": {
         "title": "Spotify",
         "intro": "Connect Spotify so friends can see what you are listening to on your profile.",
@@ -1223,6 +1233,9 @@
     }
   },
   "profile": {
+    "badges": {
+      "title": "Badges"
+    },
     "listening": {
       "title": "Currently listening"
     },
@@ -1541,6 +1554,19 @@
     },
     "incoming": {
       "ariaLabel": "Incoming call"
+    }
+  },
+  "badges": {
+    "received": {
+      "titleSelf": "You received a badge!",
+      "titleOther": "{{name}} received a badge",
+      "leadSelf": "An administrator awarded you a badge. You can also see it on your profile.",
+      "leadOther": "Your contact just received a new badge.",
+      "dismiss": "Nice!",
+      "remaining_one": "{{count}} more badge in queue",
+      "remaining_few": "{{count}} more badges in queue",
+      "remaining_many": "{{count}} more badges in queue",
+      "remaining_other": "{{count}} more badges in queue"
     }
   },
   "warnings": {

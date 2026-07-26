@@ -1047,7 +1047,17 @@
     },
     "integrations": {
       "title": "Integracje",
-      "subtitle": "Połącz swoje konta",
+      "subtitle": "Połącz swoje konta — widoczne w profilu dla znajomych",
+      "connect": "Połącz",
+      "disconnect": "Odłącz",
+      "connected": "Konto {{provider}} połączone.",
+      "disconnected": "Konto odłączone.",
+      "connectFailed": "Nie udało się połączyć konta.",
+      "disconnectFailed": "Nie udało się odłączyć konta.",
+      "loadFailed": "Nie udało się wczytać integracji.",
+      "notConfigured": "Nie skonfigurowano na serwerze (brak kluczy OAuth).",
+      "notConnectedHint": "Połącz konto, aby wyświetlać je w profilu.",
+      "noPublicApi": "Brak publicznego OAuth API dla tej platformy.",
       "spotify": {
         "title": "Spotify",
         "intro": "Połącz konto Spotify, aby znajomi widzieli, czego aktualnie słuchasz w Twoim profilu.",
@@ -1223,6 +1233,9 @@
     }
   },
   "profile": {
+    "badges": {
+      "title": "Odznaki"
+    },
     "listening": {
       "title": "Aktualnie słucha"
     },
@@ -1541,6 +1554,19 @@
     },
     "incoming": {
       "ariaLabel": "Połączenie przychodzące"
+    }
+  },
+  "badges": {
+    "received": {
+      "titleSelf": "Otrzymałeś odznakę!",
+      "titleOther": "{{name}} otrzymał odznakę",
+      "leadSelf": "Administrator przyznał Ci wyróżnienie. Zobacz je też w swoim profilu.",
+      "leadOther": "Twój znajomy właśnie otrzymał nową odznakę.",
+      "dismiss": "Super!",
+      "remaining_one": "Jeszcze {{count}} odznaka w kolejce",
+      "remaining_few": "Jeszcze {{count}} odznaki w kolejce",
+      "remaining_many": "Jeszcze {{count}} odznak w kolejce",
+      "remaining_other": "Jeszcze {{count}} odznaki w kolejce"
     }
   },
   "warnings": {
