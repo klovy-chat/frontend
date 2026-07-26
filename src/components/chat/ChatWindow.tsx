@@ -57,7 +57,6 @@ import { e2eService, onIdentityChange, onSenderKeyStored } from "../../crypto/e2
 import {
   wrapOutgoingContent,
   unwrapIncomingMessages,
-  unwrapIncomingMessage,
 } from "../../crypto/messageContent";
 import type { E2ECapabilityMap } from "../../crypto/e2e/types";
 import { useToast } from "../../context/ToastContext";
