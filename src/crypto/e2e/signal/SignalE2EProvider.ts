@@ -20,6 +20,11 @@ import {
   type E2eAttachmentMeta,
 } from "./attachmentCipher";
 import {
+  rememberSentE2ePlaintext,
+  resolveSentE2ePlaintext,
+} from "../sentPlaintextCache";
+import { unwrapOpaquePayload } from "../opaquePayload";
+import {
   decryptDm,
   decryptDistributionPayload,
   encryptDistributionPayload,
@@ -330,6 +335,7 @@ export class SignalE2EProvider implements IE2EProvider {
 
   async encryptOutgoingDm(peerId: string, plaintext: string): Promise<E2EEncryptResult> {
     const result = await encryptDm(peerId, plaintext);
+    rememberSentE2ePlaintext(result.content, plaintext);
     return {
       content: result.content,
       e2eEncrypted: true,
@@ -379,6 +385,7 @@ export class SignalE2EProvider implements IE2EProvider {
       );
     }
 
+    rememberSentE2ePlaintext(encrypted.content, plaintext);
     return {
       content: encrypted.content,
       e2eEncrypted: true,
@@ -427,7 +434,7 @@ export class SignalE2EProvider implements IE2EProvider {
     }
   }
 
-  async decryptMessage(message: Message, _currentUserId: string): Promise<Message> {
+  async decryptMessage(message: Message, currentUserId: string): Promise<Message> {
     if (!message.e2eEncrypted) return message;
 
     const senderId =
@@ -435,6 +442,14 @@ export class SignalE2EProvider implements IE2EProvider {
         ? message.sender
         : message.sender._id ?? message.sender.id;
     if (!senderId) return { ...message, content: "[encrypted]" };
+
+    const isOwn = senderId === currentUserId;
+    if (isOwn) {
+      const cached = await resolveSentE2ePlaintext(message._id, message.content);
+      if (cached) {
+        return { ...message, content: cached, ...this.applyAttachmentMeta(cached, message) };
+      }
+    }
 
     try {
       let plaintext: string;
@@ -450,6 +465,16 @@ export class SignalE2EProvider implements IE2EProvider {
       }
       return { ...message, content: plaintext, ...this.applyAttachmentMeta(plaintext, message) };
     } catch {
+      if (isOwn) {
+        const cached = await resolveSentE2ePlaintext(message._id, message.content);
+        if (cached) {
+          return { ...message, content: cached, ...this.applyAttachmentMeta(cached, message) };
+        }
+      }
+      const fallback = tryNonE2eOpaqueFallback(message.content);
+      if (fallback) {
+        return { ...message, content: fallback, e2eEncrypted: false };
+      }
       return {
         ...message,
         content: "",
@@ -482,5 +507,16 @@ export class SignalE2EProvider implements IE2EProvider {
     } catch {
       return {};
     }
+  }
+}
+
+function tryNonE2eOpaqueFallback(content: string): string | null {
+  try {
+    const inner = unwrapOpaquePayload(content);
+    if (!inner || inner === content) return null;
+    if (inner.includes('"type"') && inner.includes('"body"')) return null;
+    return inner;
+  } catch {
+    return null;
   }
 }
