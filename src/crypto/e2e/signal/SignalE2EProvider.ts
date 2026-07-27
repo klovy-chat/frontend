@@ -25,6 +25,11 @@ import {
 } from "../sentPlaintextCache";
 import { unwrapOpaquePayload } from "../opaquePayload";
 import {
+  isChannelEnvelopeContent,
+  isE2eCiphertextContent,
+  isSignalEnvelopeContent,
+} from "../../messageContent";
+import {
   decryptDm,
   decryptDistributionPayload,
   encryptDistributionPayload,
@@ -80,7 +85,7 @@ export class SignalE2EProvider implements IE2EProvider {
     ws: WebSocketClient | null,
     cap: E2ECapabilityMap,
   ): Promise<void> {
-    if (!this.isEnabled() || !this.hasKeys) return;
+    if (!this.hasKeys) return;
     const snapshot = this.memberSnapshotKey(memberIds);
     const prev = this.channelMemberSnapshot.get(channelId);
     this.channelMemberSnapshot.set(channelId, snapshot);
@@ -130,6 +135,10 @@ export class SignalE2EProvider implements IE2EProvider {
       if (!this.shouldEncryptDm(target.peerId, target.cap)) return null;
       const wsPayload = await this.encryptOutgoingDm(target.peerId, packed.innerContent);
       return { encryptedFile: packed.encryptedBlob, wsPayload, fileName: file.name };
+    }
+
+    if (!this.shouldEncryptChannel(target.senderId, target.memberIds, target.cap)) {
+      return null;
     }
 
     const wsPayload = await this.encryptOutgoingChannel(
@@ -216,16 +225,25 @@ export class SignalE2EProvider implements IE2EProvider {
     this.capabilityCache.clear();
   }
 
-  /** Prepare local E2E keys when the user opted in — never auto-generates or enables E2E. */
+  /** Prepare local E2E keys when the user opted in — auto-generates keys if enabled server-side. */
   async ensureReady(userId: string): Promise<void> {
     this.setCurrentUserId(userId);
-    if (!(await hasLocalE2eKeys())) {
-      await this.refreshStatus();
-      return;
-    }
-    this.hasKeys = true;
     const status = await getE2eStatus();
     this.enabled = status.enabled;
+
+    if (status.enabled && !(await hasLocalE2eKeys())) {
+      const fingerprint = await generateAndUploadKeyBundle();
+      this.hasKeys = true;
+      this.fingerprint = fingerprint;
+      return;
+    }
+
+    if (!(await hasLocalE2eKeys())) {
+      this.hasKeys = false;
+      return;
+    }
+
+    this.hasKeys = true;
     this.fingerprint = status.fingerprint ?? this.fingerprint;
     if (!status.hasKeys) {
       this.fingerprint = await generateAndUploadKeyBundle();
@@ -283,7 +301,7 @@ export class SignalE2EProvider implements IE2EProvider {
     memberIds: string[],
     ws: WebSocketClient,
   ): Promise<void> {
-    if (!this.isEnabled() || !this.hasKeys) return;
+    if (!this.hasKeys) return;
     const targetUserIds = memberIds.filter((id) => id !== requesterId);
     if (targetUserIds.length === 0) return;
     ws.send(WsType.E2E_SENDER_KEY_REQUEST, {
@@ -333,6 +351,13 @@ export class SignalE2EProvider implements IE2EProvider {
     return this.isEnabled() && this.peerSupportsE2e(cap, peerId);
   }
 
+  shouldEncryptChannel(senderId: string, memberIds: string[], cap: E2ECapabilityMap): boolean {
+    if (!this.isEnabled() || !this.hasKeys) return false;
+    return memberIds.some(
+      (id) => id !== senderId && this.peerSupportsE2e(cap, id),
+    );
+  }
+
   async encryptOutgoingDm(peerId: string, plaintext: string): Promise<E2EEncryptResult> {
     const result = await encryptDm(peerId, plaintext);
     rememberSentE2ePlaintext(result.content, plaintext);
@@ -351,7 +376,7 @@ export class SignalE2EProvider implements IE2EProvider {
     ws: WebSocketClient | null,
     cap: E2ECapabilityMap,
   ): Promise<E2EEncryptResult | null> {
-    if (!this.isEnabled() || !this.hasKeys) return null;
+    if (!this.shouldEncryptChannel(senderId, memberIds, cap)) return null;
     const e2eMembers = memberIds.filter(
       (id) => id !== senderId && this.peerSupportsE2e(cap, id),
     );
@@ -435,48 +460,58 @@ export class SignalE2EProvider implements IE2EProvider {
   }
 
   async decryptMessage(message: Message, currentUserId: string): Promise<Message> {
-    if (!message.e2eEncrypted) return message;
+    const encrypted = looksLikeEncryptedMessage(message);
+    if (!encrypted) return message;
+
+    const normalized = message.e2eEncrypted
+      ? message
+      : { ...message, e2eEncrypted: true };
 
     const senderId =
-      typeof message.sender === "string"
-        ? message.sender
-        : message.sender._id ?? message.sender.id;
-    if (!senderId) return { ...message, content: "[encrypted]" };
+      typeof normalized.sender === "string"
+        ? normalized.sender
+        : normalized.sender._id ?? normalized.sender.id;
+    if (!senderId) return { ...normalized, content: "[encrypted]" };
 
     const isOwn = senderId === currentUserId;
     if (isOwn) {
-      const cached = await resolveSentE2ePlaintext(message._id, message.content);
+      const cached = await resolveSentE2ePlaintext(normalized._id, normalized.content);
       if (cached) {
-        return { ...message, content: cached, ...this.applyAttachmentMeta(cached, message) };
+        return { ...normalized, content: cached, ...this.applyAttachmentMeta(cached, normalized) };
       }
     }
 
     try {
       let plaintext: string;
       if (
-        message.e2eVersion === E2E_VERSION_CHANNEL ||
-        message.channelId ||
-        message.channel
+        normalized.e2eVersion === E2E_VERSION_CHANNEL ||
+        normalized.channelId ||
+        normalized.channel ||
+        isChannelEnvelopeContent(normalized.content)
       ) {
-        const channelId = message.channelId ?? message.channel ?? "";
-        plaintext = await decryptChannelMessage(channelId, senderId, message.content);
+        const channelId = normalized.channelId ?? normalized.channel ?? "";
+        plaintext = await decryptChannelMessage(channelId, senderId, normalized.content);
       } else {
-        plaintext = await decryptDm(senderId, message.content);
-      }
-      return { ...message, content: plaintext, ...this.applyAttachmentMeta(plaintext, message) };
-    } catch {
-      if (isOwn) {
-        const cached = await resolveSentE2ePlaintext(message._id, message.content);
-        if (cached) {
-          return { ...message, content: cached, ...this.applyAttachmentMeta(cached, message) };
-        }
-      }
-      const fallback = tryNonE2eOpaqueFallback(message.content);
-      if (fallback) {
-        return { ...message, content: fallback, e2eEncrypted: false };
+        plaintext = await decryptDm(senderId, normalized.content);
       }
       return {
-        ...message,
+        ...normalized,
+        content: plaintext,
+        ...this.applyAttachmentMeta(plaintext, normalized),
+      };
+    } catch {
+      if (isOwn) {
+        const cached = await resolveSentE2ePlaintext(normalized._id, normalized.content);
+        if (cached) {
+          return { ...normalized, content: cached, ...this.applyAttachmentMeta(cached, normalized) };
+        }
+      }
+      const fallback = tryNonE2eOpaqueFallback(normalized.content);
+      if (fallback) {
+        return { ...normalized, content: fallback, e2eEncrypted: false };
+      }
+      return {
+        ...normalized,
         content: "",
         e2eDecryptFailed: true,
       };
@@ -510,11 +545,17 @@ export class SignalE2EProvider implements IE2EProvider {
   }
 }
 
+function looksLikeEncryptedMessage(message: Message): boolean {
+  return isE2eCiphertextContent(message.content);
+}
+
 function tryNonE2eOpaqueFallback(content: string): string | null {
   try {
     const inner = unwrapOpaquePayload(content);
     if (!inner || inner === content) return null;
-    if (inner.includes('"type"') && inner.includes('"body"')) return null;
+    if (isSignalEnvelopeContent(content) || isChannelEnvelopeContent(content)) {
+      return null;
+    }
     return inner;
   } catch {
     return null;

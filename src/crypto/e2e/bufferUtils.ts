@@ -8,7 +8,11 @@ export function arrayBufferToBase64(buffer: ArrayBuffer): string {
 }
 
 export function base64ToArrayBuffer(base64: string): ArrayBuffer {
-  const binary = atob(base64.trim());
+  const normalized = base64.trim().replace(/\s+/g, "");
+  const mod = normalized.length % 4;
+  const padded =
+    mod === 0 ? normalized : normalized + "=".repeat(4 - mod);
+  const binary = atob(padded);
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i += 1) {
     bytes[i] = binary.charCodeAt(i);

@@ -4,6 +4,14 @@
 import { describe, expect, it } from "vitest";
 import { wrapOpaquePayload, unwrapOpaquePayload } from "./opaquePayload";
 import {
+  isChannelEnvelopeContent,
+  isE2eCiphertextContent,
+  isSignalEnvelopeContent,
+  maskUndecryptableMessage,
+  readableContentForPreview,
+  unwrapIncomingMessage,
+} from "../messageContent";
+import {
   decryptChannelMessage,
   encryptChannelMessage,
 } from "./signal/channelCipher";
@@ -14,6 +22,79 @@ describe("opaque payload wrap", () => {
     const wrapped = wrapOpaquePayload(inner);
     expect(wrapped).not.toContain("{");
     expect(unwrapOpaquePayload(wrapped)).toBe(inner);
+  });
+});
+
+describe("E2E envelope detection", () => {
+  it("detects channel ciphertext envelopes", () => {
+    const wrapped = wrapOpaquePayload(
+      JSON.stringify({ keyId: 123, data: "ciphertext==" }),
+    );
+    expect(isChannelEnvelopeContent(wrapped)).toBe(true);
+    expect(readableContentForPreview(wrapped, true)).toBe("");
+  });
+
+  it("detects signal ciphertext envelopes", () => {
+    const wrapped = wrapOpaquePayload(JSON.stringify({ type: 3, body: "abc" }));
+    expect(isSignalEnvelopeContent(wrapped)).toBe(true);
+  });
+
+  it("masks undecryptable ciphertext instead of showing raw base64", () => {
+    const wrapped = wrapOpaquePayload(
+      JSON.stringify({ keyId: 123, data: "ciphertext==" }),
+    );
+    const masked = maskUndecryptableMessage({
+      _id: "1",
+      content: wrapped,
+      e2eEncrypted: true,
+      sender: "user-a",
+      timestamp: new Date().toISOString(),
+    });
+    expect(masked.content).toBe("");
+    expect(masked.e2eDecryptFailed).toBe(true);
+  });
+
+  it("unwraps opaque transport layer without E2E for display only", () => {
+    const wire = wrapOpaquePayload("co tam");
+    const unwrapped = unwrapIncomingMessage({
+      _id: "2",
+      content: wire,
+      e2eEncrypted: false,
+      sender: "user-a",
+      timestamp: new Date().toISOString(),
+    });
+    expect(unwrapped.content).toBe("co tam");
+    expect(wire).not.toBe("co tam");
+  });
+
+  it("does not treat opaque transport as E2E ciphertext", () => {
+    const wire = wrapOpaquePayload("dupa");
+    expect(isE2eCiphertextContent(wire)).toBe(false);
+    expect(readableContentForPreview(wire, false)).toBe("dupa");
+  });
+
+  it("peels legacy double-wrapped opaque transport", () => {
+    const once = wrapOpaquePayload("noo");
+    const twice = wrapOpaquePayload(once);
+    expect(unwrapIncomingMessage({
+      _id: "3",
+      content: twice,
+      e2eEncrypted: false,
+      sender: "user-a",
+      timestamp: new Date().toISOString(),
+    }).content).toBe("noo");
+  });
+
+  it("unwraps short polish text from single opaque layer", () => {
+    const wire = wrapOpaquePayload("noo");
+    expect(wire).toBe("bm9v");
+    expect(unwrapIncomingMessage({
+      _id: "4",
+      content: wire,
+      e2eEncrypted: false,
+      sender: "user-a",
+      timestamp: new Date().toISOString(),
+    }).content).toBe("noo");
   });
 });
 

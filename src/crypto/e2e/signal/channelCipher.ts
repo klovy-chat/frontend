@@ -3,7 +3,7 @@ import {
   base64ToArrayBuffer,
   utf8ToArrayBuffer,
 } from "../bufferUtils";
-import { unwrapOpaquePayload, wrapOpaquePayload } from "../opaquePayload";
+import { unwrapOpaquePayloadOnce, wrapOpaquePayload } from "../opaquePayload";
 import { E2E_VERSION_CHANNEL } from "../types";
 import {
   clearChannelSenderKeys,
@@ -58,7 +58,7 @@ function parseChannelEnvelope(stored: string): {
   payload: ArrayBuffer;
 } | null {
   try {
-    const inner = unwrapOpaquePayload(stored);
+    const inner = unwrapOpaquePayloadOnce(stored) ?? stored.trim();
     const parsed = JSON.parse(inner) as {
       keyId?: number;
       data?: string;

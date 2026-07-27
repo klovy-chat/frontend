@@ -16,7 +16,7 @@ import {
   base64ToArrayBuffer,
   utf8ToArrayBuffer,
 } from "../bufferUtils";
-import { unwrapOpaquePayload, wrapOpaquePayload } from "../opaquePayload";
+import { unwrapOpaquePayloadOnce, wrapOpaquePayload } from "../opaquePayload";
 import { assertPeerIdentityTrusted } from "./identityTrust";
 import { DEVICE_ID, E2E_VERSION_DM } from "../types";
 import { ensureSignalInit } from "./signalInit";
@@ -133,7 +133,7 @@ function serializeSignalBody(type: number, body: string | ArrayBuffer): string {
 
 function parseSignalPayload(stored: string): { type: number; body: string } | null {
   try {
-    const inner = unwrapOpaquePayload(stored);
+    const inner = unwrapOpaquePayloadOnce(stored) ?? stored.trim();
     const parsed = JSON.parse(inner) as { type?: number; body?: string };
     if (typeof parsed.type !== "number" || typeof parsed.body !== "string") {
       return null;

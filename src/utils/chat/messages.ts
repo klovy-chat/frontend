@@ -11,7 +11,7 @@ import {
 import { isVideoAttachment, isVoiceAttachment } from "../media/attachments";
 import type { Message, MessageUser } from "../../types";
 import {
-  isSignalEnvelopeContent,
+  isE2eCiphertextContent,
   readableContentForPreview,
 } from "../../crypto/messageContent";
 
@@ -51,10 +51,10 @@ export function getMessagePreview(
 ): string {
   if (message.deleted) return i18n.t("messages.deleted");
   if (message.e2eDecryptFailed) return i18n.t("messages.e2e.decryptFailed");
-  if (message.e2eEncrypted && isSignalEnvelopeContent(message.content)) {
-    return i18n.t("messages.e2e.encrypted");
-  }
-  if (message.e2eEncrypted && !message.content.trim()) {
+  if (
+    message.e2eEncrypted ||
+    isE2eCiphertextContent(message.content)
+  ) {
     return i18n.t("messages.e2e.encrypted");
   }
 
@@ -96,7 +96,7 @@ export function getMessagePreview(
 /** Podgląd ostatniej wiadomości z listy kontaktów/kanałów (surowy opaque z API). */
 export function formatListLastMessage(raw?: string): string {
   if (!raw?.trim()) return "";
-  if (isSignalEnvelopeContent(raw)) {
+  if (isE2eCiphertextContent(raw)) {
     return i18n.t("messages.e2e.encrypted");
   }
   const text = stripFormatting(readableContentForPreview(raw)).trim();

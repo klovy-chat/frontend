@@ -32,6 +32,11 @@ export const e2eService = {
     provider.peerSupportsE2e(cap, peerId),
   shouldEncryptDm: (peerId: string, cap: E2ECapabilityMap) =>
     provider.shouldEncryptDm(peerId, cap),
+  shouldEncryptChannel: (
+    senderId: string,
+    memberIds: string[],
+    cap: E2ECapabilityMap,
+  ) => provider.shouldEncryptChannel(senderId, memberIds, cap),
   encryptOutgoingDm: (peerId: string, plaintext: string) =>
     provider.encryptOutgoingDm(peerId, plaintext),
   encryptOutgoingChannel: (

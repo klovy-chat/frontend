@@ -1,4 +1,5 @@
 import { getMessagePreview } from "./messages";
+import { unwrapIncomingMessage } from "../../crypto/messageContent";
 import type { Channel, Contact, Message } from "../../types";
 
 function senderId(msg: Message): string | undefined {
@@ -53,7 +54,7 @@ export function patchContactsFromMessage(
   if (index === -1) return contacts;
 
   return bumpEntry(contacts, index, {
-    lastMessage: getMessagePreview(msg),
+    lastMessage: getMessagePreview(unwrapIncomingMessage(msg)),
     lastMessageTime: messageTime(msg),
   });
 }
@@ -69,7 +70,7 @@ export function patchChannelsFromMessage(
   if (index === -1) return channels;
 
   return bumpEntry(channels, index, {
-    lastMessage: getMessagePreview(msg),
+    lastMessage: getMessagePreview(unwrapIncomingMessage(msg)),
     lastMessageTime: messageTime(msg),
   });
 }

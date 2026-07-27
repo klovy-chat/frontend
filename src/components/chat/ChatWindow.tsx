@@ -57,6 +57,7 @@ import { e2eService, onIdentityChange, onSenderKeyStored } from "../../crypto/e2
 import {
   wrapOutgoingContent,
   unwrapIncomingMessages,
+  maskUndecryptableMessages,
 } from "../../crypto/messageContent";
 import type { E2ECapabilityMap } from "../../crypto/e2e/types";
 import { useToast } from "../../context/ToastContext";
@@ -284,10 +285,12 @@ export function ChatWindow({
       const unwrapped = unwrapIncomingMessages(normalized);
       if (!currentUserId) return unwrapped;
       try {
-        if (!(await e2eService.canDecryptMessages())) return unwrapped;
+        if (!(await e2eService.canDecryptMessages())) {
+          return maskUndecryptableMessages(unwrapped);
+        }
         return await e2eService.decryptMessages(unwrapped, currentUserId);
       } catch {
-        return unwrapped;
+        return maskUndecryptableMessages(unwrapped);
       }
     },
     [currentUserId],
@@ -313,17 +316,24 @@ export function ChatWindow({
   }, [currentUserId, target]);
 
   useEffect(() => {
-    if (!user?.id) {
-      setLocalE2eEnabled(false);
-      return;
-    }
+    if (!user?.id) return;
     e2eService.setCurrentUserId(user.id);
     let cancelled = false;
-    void e2eService.refreshStatus().then(() => {
-      if (!cancelled) {
-        setLocalE2eEnabled(e2eService.isEnabled());
+    void (async () => {
+      try {
+        await e2eService.refreshStatus();
+        if (user.e2eEnabled) {
+          await e2eService.ensureReady(user.id);
+        }
+        if (!cancelled) {
+          setLocalE2eEnabled(e2eService.isEnabled());
+        }
+      } catch {
+        if (!cancelled) {
+          setLocalE2eEnabled(false);
+        }
       }
-    });
+    })();
     return () => {
       cancelled = true;
     };
@@ -382,34 +392,35 @@ export function ChatWindow({
   }, [target, currentUserId, channelMemberIds, localE2eEnabled]);
 
   useEffect(() => {
-    if (!ws || !user?.id || target?.type !== "channel" || !localE2eEnabled) {
+    if (!ws || !user?.id || target?.type !== "channel") {
       return;
     }
-    void e2eService.onChannelMembersChanged(
-      target.channel._id,
-      user.id,
-      channelMemberIds,
-      ws,
-      e2eCapabilities,
-    );
-  }, [ws, user?.id, target, channelMemberIds, e2eCapabilities, localE2eEnabled]);
+    void (async () => {
+      if (!(await e2eService.canDecryptMessages())) return;
+      void e2eService.onChannelMembersChanged(
+        target.channel._id,
+        user.id,
+        channelMemberIds,
+        ws,
+        e2eCapabilities,
+      );
+    })();
+  }, [ws, user?.id, target, channelMemberIds, e2eCapabilities]);
 
   useEffect(() => {
-    if (
-      !ws ||
-      !user?.id ||
-      target?.type !== "channel" ||
-      !e2eConversationActive
-    ) {
+    if (!ws || !user?.id || target?.type !== "channel") {
       return;
     }
-    void e2eService.requestChannelSenderKeys(
-      target.channel._id,
-      user.id,
-      channelMemberIds,
-      ws,
-    );
-  }, [ws, user?.id, target, channelMemberIds, e2eConversationActive]);
+    void (async () => {
+      if (!(await e2eService.canDecryptMessages())) return;
+      void e2eService.requestChannelSenderKeys(
+        target.channel._id,
+        user.id,
+        channelMemberIds,
+        ws,
+      );
+    })();
+  }, [ws, user?.id, target, channelMemberIds]);
 
   useEffect(() => {
     if (target?.type !== "channel") return;
@@ -797,7 +808,10 @@ export function ChatWindow({
           return { content: wrapOutgoingContent(plaintext) };
         }
 
-        if (e2eService.isEnabled() && e2eService.canEncryptOutgoing()) {
+        if (
+          force ||
+          e2eService.shouldEncryptChannel(user.id, channelMemberIds, cap)
+        ) {
           const encrypted = await e2eService.encryptOutgoingChannel(
             target.channel._id,
             user.id,
