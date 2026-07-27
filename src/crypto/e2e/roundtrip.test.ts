@@ -3,6 +3,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { wrapOpaquePayload, unwrapOpaquePayload } from "./opaquePayload";
+import { arrayBufferToBase64 } from "./bufferUtils";
 import {
   isChannelEnvelopeContent,
   isE2eCiphertextContent,
@@ -95,6 +96,31 @@ describe("E2E envelope detection", () => {
       sender: "user-a",
       timestamp: new Date().toISOString(),
     }).content).toBe("noo");
+  });
+
+  it("does not decode binary blobs into replacement-character garbage", () => {
+    // Simulates a server-sealed blob mistaken for client opaque (invalid UTF-8 inner).
+    const fakeOpaque = arrayBufferToBase64(new Uint8Array([0xff, 0xfe, 0xfd, 0x00]).buffer);
+    const result = unwrapIncomingMessage({
+      _id: "5",
+      content: fakeOpaque,
+      e2eEncrypted: false,
+      sender: "user-a",
+      timestamp: new Date().toISOString(),
+    }).content;
+    expect(result).toBe(fakeOpaque);
+    expect(result).not.toContain("\uFFFD");
+  });
+
+  it("does not false-positive unwrap plaintext that merely looks like base64", () => {
+    const plain = "cycki";
+    expect(unwrapIncomingMessage({
+      _id: "6",
+      content: plain,
+      e2eEncrypted: false,
+      sender: "user-a",
+      timestamp: new Date().toISOString(),
+    }).content).toBe(plain);
   });
 });
 

@@ -1,8 +1,8 @@
 import {
   arrayBufferToBase64,
+  arrayBufferToUtf8Strict,
   base64ToArrayBuffer,
   utf8ToArrayBuffer,
-  arrayBufferToUtf8,
 } from "./bufferUtils";
 
 const BASE64_OPAQUE_RE = /^[A-Za-z0-9+/]+={0,2}$/;
@@ -20,6 +20,12 @@ export function normalizeBase64(input: string): string {
   return trimmed + "=".repeat(4 - mod);
 }
 
+function base64NormalizedEqual(a: string, b: string): boolean {
+  return (
+    normalizeBase64(a).replace(/=+$/, "") === normalizeBase64(b).replace(/=+$/, "")
+  );
+}
+
 function isE2eJsonEnvelopeInner(inner: string): boolean {
   if (!inner.startsWith("{")) return false;
   try {
@@ -33,37 +39,41 @@ function isE2eJsonEnvelopeInner(inner: string): boolean {
   }
 }
 
-/** Whether `stored` looks like a transport base64 wrap (not human plaintext). */
+function decodeOpaqueLayer(stored: string): string | null {
+  const normalized = normalizeBase64(stored.trim());
+  if (!BASE64_OPAQUE_RE.test(normalized) || normalized.length < 4) {
+    return null;
+  }
+  try {
+    return arrayBufferToUtf8Strict(base64ToArrayBuffer(normalized));
+  } catch {
+    return null;
+  }
+}
+
+/** Whether `stored` is our transport base64 wrap (strict UTF-8 + roundtrip). */
 export function isLikelyBase64Opaque(stored: string): boolean {
   const trimmed = stored.trim();
   if (!trimmed || trimmed.startsWith("{") || trimmed.startsWith("[")) {
     return false;
   }
-  if (!BASE64_OPAQUE_RE.test(trimmed)) return false;
-  const normalized = normalizeBase64(trimmed);
-  if (normalized.length < 4) return false;
-  try {
-    const decoded = arrayBufferToUtf8(base64ToArrayBuffer(normalized));
-    if (!decoded || decoded === trimmed) return false;
-    if (isE2eJsonEnvelopeInner(decoded)) return true;
-    return decoded.length > 0;
-  } catch {
-    return false;
+  const decoded = decodeOpaqueLayer(trimmed);
+  if (!decoded || decoded === trimmed) return false;
+  if (decoded.includes("\uFFFD")) return false;
+  if (isE2eJsonEnvelopeInner(decoded)) {
+    return base64NormalizedEqual(wrapOpaquePayload(decoded), trimmed);
   }
+  return base64NormalizedEqual(wrapOpaquePayload(decoded), trimmed);
 }
 
-/** Decode a single opaque layer; returns null when input is not transport base64. */
+/** Decode a single opaque layer; returns null when input is not our transport wrap. */
 export function unwrapOpaquePayloadOnce(stored: string): string | null {
   const trimmed = stored.trim();
   if (!trimmed || trimmed.startsWith("{") || trimmed.startsWith("[")) {
     return null;
   }
   if (!isLikelyBase64Opaque(trimmed)) return null;
-  try {
-    return arrayBufferToUtf8(base64ToArrayBuffer(normalizeBase64(trimmed)));
-  } catch {
-    return null;
-  }
+  return decodeOpaqueLayer(trimmed);
 }
 
 /**

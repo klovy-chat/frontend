@@ -27,3 +27,16 @@ export function utf8ToArrayBuffer(text: string): ArrayBuffer {
 export function arrayBufferToUtf8(buffer: ArrayBuffer): string {
   return new TextDecoder().decode(buffer);
 }
+
+/** Returns null when bytes are not valid UTF-8 (avoids U+FFFD replacement chars in UI). */
+export function arrayBufferToUtf8Strict(buffer: ArrayBuffer): string | null {
+  try {
+    return new TextDecoder("utf-8", { fatal: true }).decode(buffer);
+  } catch {
+    return null;
+  }
+}
+
+export function isValidUtf8Buffer(buffer: ArrayBuffer): boolean {
+  return arrayBufferToUtf8Strict(buffer) !== null;
+}
