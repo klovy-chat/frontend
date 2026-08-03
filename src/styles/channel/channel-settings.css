@@ -428,3 +428,8 @@
     display: none;
   }
 }
+
+.cs-member-row .action-menu-trigger {
+  padding: 6px 10px;
+  font-size: 0.68rem;
+}

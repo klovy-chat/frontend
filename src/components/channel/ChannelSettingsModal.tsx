@@ -23,6 +23,8 @@ import {
   type ChannelInvite,
 } from "../../api/invites";
 import { checkFriendship } from "../../api/friends";
+import { ActionMenu, type ActionMenuItem } from "../common/ActionMenu";
+import { Ban, UserMinus, Volume2, VolumeX } from "lucide-react";
 import { ImageCropModal } from "../common/ImageCropModal";
 import { OtherUserProfileModal } from "../profile/OtherUserProfileModal";
 import {
@@ -644,6 +646,76 @@ export function ChannelSettingsModal({
     ...memberContacts.filter((m) => String(m._id) !== String(adminContact._id)),
   ];
 
+  const buildMemberMenuItems = (
+    contact: Contact,
+    options: {
+      showKick?: boolean;
+      showBan?: boolean;
+      showMute?: boolean;
+      showUnban?: boolean;
+      showUnmute?: boolean;
+    },
+  ): ActionMenuItem[] => {
+    const id = contact._id;
+    const busy = Boolean(actionBusy);
+    const items: ActionMenuItem[] = [];
+
+    if (options.showKick) {
+      items.push({
+        key: "kick",
+        label: t("moderation.actions.kick"),
+        icon: <UserMinus size={14} />,
+        disabled: busy,
+        onClick: () => runModAction(`kick-${id}`, () => kickChannelMember(initialChannel._id, id)),
+      });
+    }
+    if (options.showBan) {
+      items.push({
+        key: "ban",
+        label: t("moderation.actions.ban"),
+        icon: <Ban size={14} />,
+        danger: true,
+        disabled: busy,
+        onClick: () => {
+          setModerationDuration(3600);
+          setModerationAction({ type: "ban", user: contact });
+        },
+      });
+    }
+    if (options.showMute) {
+      items.push({
+        key: "mute",
+        label: t("moderation.actions.mute"),
+        icon: <VolumeX size={14} />,
+        disabled: busy,
+        onClick: () => {
+          setModerationDuration(1800);
+          setModerationAction({ type: "mute", user: contact });
+        },
+      });
+    }
+    if (options.showUnban) {
+      items.push({
+        key: "unban",
+        label: t("moderation.actions.unban"),
+        icon: <Ban size={14} />,
+        disabled: busy,
+        onClick: () => runModAction(`unban-${id}`, () => unbanChannelMember(initialChannel._id, id)),
+      });
+    }
+    if (options.showUnmute) {
+      items.push({
+        key: "unmute",
+        label: t("moderation.actions.unmute"),
+        icon: <Volume2 size={14} />,
+        disabled: busy,
+        onClick: () => runModAction(`unmute-${id}`, () => unmuteChannelMember(initialChannel._id, id)),
+      });
+    }
+
+    return items;
+  };
+
   const renderMemberRow = (
     member: Contact,
     options: {
@@ -663,6 +735,7 @@ export function ChannelSettingsModal({
     return (
       <div
         key={id}
+        className="cs-member-row"
         style={{
           display: "flex", alignItems: "center", gap: 12,
           padding: "10px 12px", borderRadius: 8,
@@ -722,64 +795,10 @@ export function ChannelSettingsModal({
           </div>
         </button>
         {isAdmin && !isOwner && (
-          <div style={{ display: "flex", gap: 4, flexWrap: "wrap", justifyContent: "flex-end" }}>
-            {options.showKick && (
-              <HoverBtn
-                type="button"
-                style={{ ...toolbarBtn(false), flex: "none", padding: "6px 10px", fontSize: "0.65rem" }}
-                disabled={!!actionBusy}
-                onClick={() => runModAction(`kick-${id}`, () => kickChannelMember(initialChannel._id, id))}
-              >
-                {t("moderation.actions.kick")}
-              </HoverBtn>
-            )}
-            {options.showBan && (
-              <HoverBtn
-                type="button"
-                style={{ ...toolbarBtn(true), flex: "none", padding: "6px 10px", fontSize: "0.65rem" }}
-                disabled={!!actionBusy}
-                onClick={() => {
-                  setModerationDuration(3600);
-                  setModerationAction({ type: "ban", user: contact });
-                }}
-              >
-                {t("moderation.actions.ban")}
-              </HoverBtn>
-            )}
-            {options.showMute && (
-              <HoverBtn
-                type="button"
-                style={{ ...toolbarBtn(false), flex: "none", padding: "6px 10px", fontSize: "0.65rem" }}
-                disabled={!!actionBusy}
-                onClick={() => {
-                  setModerationDuration(1800);
-                  setModerationAction({ type: "mute", user: contact });
-                }}
-              >
-                {t("moderation.actions.mute")}
-              </HoverBtn>
-            )}
-            {options.showUnban && (
-              <HoverBtn
-                type="button"
-                style={{ ...toolbarBtn(false), flex: "none", padding: "6px 10px", fontSize: "0.65rem" }}
-                disabled={!!actionBusy}
-                onClick={() => runModAction(`unban-${id}`, () => unbanChannelMember(initialChannel._id, id))}
-              >
-                {t("moderation.actions.unban")}
-              </HoverBtn>
-            )}
-            {options.showUnmute && (
-              <HoverBtn
-                type="button"
-                style={{ ...toolbarBtn(false), flex: "none", padding: "6px 10px", fontSize: "0.65rem" }}
-                disabled={!!actionBusy}
-                onClick={() => runModAction(`unmute-${id}`, () => unmuteChannelMember(initialChannel._id, id))}
-              >
-                {t("moderation.actions.unmute")}
-              </HoverBtn>
-            )}
-          </div>
+          <ActionMenu
+            label={t("chat.bubble.options")}
+            items={buildMemberMenuItems(contact, options)}
+          />
         )}
       </div>
     );
