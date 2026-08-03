@@ -20,6 +20,8 @@ interface OtherUserProfileModalProps {
   onClose: () => void;
   user: Contact | null;
   isFriend: boolean;
+  /** Gdy true, nie pokazuj podpowiedzi „dodaj do znajomych” do czasu sprawdzenia statusu. */
+  friendshipLoading?: boolean;
   isBlockedByMe?: boolean;
   onRemove?: () => void;
   onToggleBlock?: () => void | Promise<void>;
@@ -32,6 +34,7 @@ export function OtherUserProfileModal({
   onClose,
   user,
   isFriend,
+  friendshipLoading = false,
   isBlockedByMe = false,
   onRemove,
   onToggleBlock,
@@ -169,7 +172,7 @@ export function OtherUserProfileModal({
 
           <ListeningActivitySection activity={displayedUser.listeningActivity} />
 
-          {!isFriend ? (
+          {!friendshipLoading && !isFriend ? (
             <p className="up-not-friend-hint">
               {t("modals.otherUserProfile.addFriend")}
             </p>

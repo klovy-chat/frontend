@@ -22,6 +22,7 @@ import {
   listChannelInvites,
   type ChannelInvite,
 } from "../../api/invites";
+import { checkFriendship } from "../../api/friends";
 import { ImageCropModal } from "../common/ImageCropModal";
 import { OtherUserProfileModal } from "../profile/OtherUserProfileModal";
 import {
@@ -220,6 +221,10 @@ export function ChannelSettingsModal({
   const [leaveConfirmOpen, setLeaveConfirmOpen] = useState(false);
   const [memberProfile, setMemberProfile] = useState<Contact | null>(null);
   const [memberProfileKey, setMemberProfileKey] = useState(0);
+  const [memberProfileFriendship, setMemberProfileFriendship] = useState<{
+    isFriend: boolean;
+    isBlockedByMe: boolean;
+  } | null>(null);
   const [leaveConfirmClosing, setLeaveConfirmClosing] = useState(false);
   const [avatarLoading, setAvatarLoading] = useState(false);
   const [slowmodeBusy, setSlowmodeBusy] = useState(false);
@@ -230,6 +235,35 @@ export function ChannelSettingsModal({
   } | null>(null);
   const [moderationDuration, setModerationDuration] = useState(3600);
   const avatarFileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!memberProfile?._id) {
+      setMemberProfileFriendship(null);
+      return;
+    }
+
+    let cancelled = false;
+    setMemberProfileFriendship(null);
+
+    void checkFriendship(memberProfile._id)
+      .then((res) => {
+        if (!cancelled) {
+          setMemberProfileFriendship({
+            isFriend: res.isFriend,
+            isBlockedByMe: Boolean(res.isBlockedByMe),
+          });
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setMemberProfileFriendship({ isFriend: false, isBlockedByMe: false });
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [memberProfile?._id, memberProfileKey]);
 
   const slowmodeLabel = (seconds: number): string => {
     if (seconds === 0) return t("moderation.duration.disabled");
@@ -1413,9 +1447,14 @@ export function ChannelSettingsModal({
       <OtherUserProfileModal
         isOpen={Boolean(memberProfile)}
         openKey={memberProfileKey}
-        onClose={() => setMemberProfile(null)}
+        onClose={() => {
+          setMemberProfile(null);
+          setMemberProfileFriendship(null);
+        }}
         user={memberProfile}
-        isFriend={false}
+        isFriend={memberProfileFriendship?.isFriend ?? false}
+        friendshipLoading={Boolean(memberProfile) && memberProfileFriendship === null}
+        isBlockedByMe={memberProfileFriendship?.isBlockedByMe}
       />
     </>
   );
