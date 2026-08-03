@@ -410,8 +410,12 @@
       "unmute": "Unmute",
       "banUser": "Ban user",
       "muteUser": "Mute user",
+      "kickUser": "Kick user",
       "durationLabel": "Duration",
-      "chooseDuration": "Choose how long to apply this action."
+      "chooseDuration": "Choose how long to apply this action.",
+      "confirmKick": "Are you sure you want to kick {{name}} from this channel?",
+      "confirmBan": "Are you sure you want to ban {{name}} on this channel?",
+      "confirmMute": "Are you sure you want to mute {{name}} on this channel?"
     },
     "lists": {
       "banned": "Banned",

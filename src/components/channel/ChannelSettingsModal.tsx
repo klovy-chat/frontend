@@ -232,7 +232,7 @@ export function ChannelSettingsModal({
   const [slowmodeBusy, setSlowmodeBusy] = useState(false);
   const [chatLockBusy, setChatLockBusy] = useState(false);
   const [moderationAction, setModerationAction] = useState<{
-    type: "ban" | "mute";
+    type: "kick" | "ban" | "mute";
     user: Contact;
   } | null>(null);
   const [moderationDuration, setModerationDuration] = useState(3600);
@@ -418,12 +418,19 @@ export function ChannelSettingsModal({
     const actionKey = `${type}-${user._id}`;
     setActionBusy(actionKey);
     try {
-      const result =
-        type === "ban"
-          ? await banChannelMember(initialChannel._id, user._id, duration)
-          : await muteChannelMember(initialChannel._id, user._id, duration);
-      applyBanMuteLists(result);
+      let result: ChannelModerationResponse | { message: string } | void;
+      if (type === "kick") {
+        result = await kickChannelMember(initialChannel._id, user._id);
+      } else if (type === "ban") {
+        result = await banChannelMember(initialChannel._id, user._id, duration);
+      } else {
+        result = await muteChannelMember(initialChannel._id, user._id, duration);
+      }
+      if (result && ("bannedMembers" in result || "mutedMembers" in result)) {
+        applyBanMuteLists(result as ChannelModerationResponse);
+      }
       await loadDetails();
+      await onRefresh();
       setModerationAction(null);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t("modals.channelSettings.toast.operationFailed"));
@@ -431,6 +438,31 @@ export function ChannelSettingsModal({
       setActionBusy(null);
     }
   }
+
+  const moderationConfirmCopy = (type: "kick" | "ban" | "mute", name: string) => {
+    if (type === "kick") {
+      return {
+        title: t("moderation.actions.kickUser"),
+        message: t("moderation.actions.confirmKick", { name }),
+        submit: t("moderation.actions.kick"),
+        danger: true,
+      };
+    }
+    if (type === "ban") {
+      return {
+        title: t("moderation.actions.banUser"),
+        message: t("moderation.actions.confirmBan", { name }),
+        submit: t("moderation.actions.ban"),
+        danger: true,
+      };
+    }
+    return {
+      title: t("moderation.actions.muteUser"),
+      message: t("moderation.actions.confirmMute", { name }),
+      submit: t("moderation.actions.mute"),
+      danger: false,
+    };
+  };
 
   const toolbarBtn = (danger = false, disabled = false, active = false): React.CSSProperties => ({
     flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
@@ -666,7 +698,7 @@ export function ChannelSettingsModal({
         label: t("moderation.actions.kick"),
         icon: <UserMinus size={14} />,
         disabled: busy,
-        onClick: () => runModAction(`kick-${id}`, () => kickChannelMember(initialChannel._id, id)),
+        onClick: () => setModerationAction({ type: "kick", user: contact }),
       });
     }
     if (options.showBan) {
@@ -1128,57 +1160,116 @@ export function ChannelSettingsModal({
           onClick={(e) => {
             if (e.target === e.currentTarget) setModerationAction(null);
           }}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="channel-mod-confirm-title"
         >
           <div
             className="klovy-shell"
-            style={{ ...modalCard, width: 420, padding: 24 }}
+            style={confirmModalCard}
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 style={{ margin: "0 0 8px", color: C.text, fontFamily: "var(--font-sans)" }}>
-              {moderationAction.type === "ban" ? t("moderation.actions.banUser") : t("moderation.actions.muteUser")}
-            </h3>
-            <p style={{ margin: "0 0 16px", fontSize: "0.85rem", color: C.textMuted, fontFamily: "var(--font-sans)" }}>
-              {userLabel(moderationAction.user)} · {t("moderation.actions.chooseDuration")}
-            </p>
-            <label
-              htmlFor="moderation-duration"
-              style={{ display: "block", marginBottom: 8, fontSize: "0.82rem", color: C.textMuted, fontFamily: "var(--font-sans)" }}
-            >
-              {t("moderation.actions.durationLabel")}
-            </label>
-            <select
-              id="moderation-duration"
-              className="cs-select"
-              value={moderationDuration}
-              onChange={(e) => setModerationDuration(Number(e.target.value))}
-            >
-              {CHANNEL_MOD_DURATION_OPTIONS.map((option) => (
-                <option key={option.seconds} value={option.seconds}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 18 }}>
-              <HoverBtn
-                type="button"
-                style={btnSecondary}
-                onClick={() => setModerationAction(null)}
-              >
-                {t("common.cancel")}
-              </HoverBtn>
-              <HoverBtn
-                type="button"
-                style={btnPrimary}
-                disabled={!!actionBusy}
-                onClick={() => void submitModerationAction()}
-              >
-                {actionBusy
-                  ? t("common.saving")
-                  : moderationAction.type === "ban"
-                    ? t("moderation.actions.ban")
-                    : t("moderation.actions.mute")}
-              </HoverBtn>
-            </div>
+            {(() => {
+              const copy = moderationConfirmCopy(
+                moderationAction.type,
+                userLabel(moderationAction.user),
+              );
+              const showDuration =
+                moderationAction.type === "ban" || moderationAction.type === "mute";
+              return (
+                <>
+                  <div style={modalHeader}>
+                    <div>
+                      <p id="channel-mod-confirm-title" style={modalTitle}>
+                        {copy.title}
+                      </p>
+                      <p style={modalSubtitle}>
+                        @{moderationAction.user.username ?? moderationAction.user._id}
+                      </p>
+                    </div>
+                    <HoverBtn
+                      type="button"
+                      style={closeBtnStyle}
+                      hoverStyle={{ background: C.bgHover, color: C.text }}
+                      aria-label={t("common.close")}
+                      disabled={!!actionBusy}
+                      onClick={() => setModerationAction(null)}
+                    >
+                      ×
+                    </HoverBtn>
+                  </div>
+                  <div style={modalBody}>
+                    <div
+                      style={{
+                        background: copy.danger ? C.dangerDim : C.accentDim,
+                        border: `1px solid ${copy.danger ? C.dangerBorder : C.accentBorder}`,
+                        borderRadius: 10,
+                        padding: "14px 16px",
+                        marginBottom: showDuration ? 16 : 0,
+                      }}
+                    >
+                      <p
+                        style={{
+                          margin: 0,
+                          fontSize: "0.84rem",
+                          color: copy.danger ? "#fca5a5" : C.text,
+                          lineHeight: 1.6,
+                          fontFamily: "var(--font-sans)",
+                        }}
+                      >
+                        {copy.message}
+                      </p>
+                    </div>
+                    {showDuration ? (
+                      <>
+                        <label
+                          htmlFor="moderation-duration"
+                          style={{
+                            display: "block",
+                            marginBottom: 8,
+                            fontSize: "0.82rem",
+                            color: C.textMuted,
+                            fontFamily: "var(--font-sans)",
+                          }}
+                        >
+                          {t("moderation.actions.durationLabel")}
+                        </label>
+                        <select
+                          id="moderation-duration"
+                          className="cs-select"
+                          value={moderationDuration}
+                          onChange={(e) => setModerationDuration(Number(e.target.value))}
+                        >
+                          {CHANNEL_MOD_DURATION_OPTIONS.map((option) => (
+                            <option key={option.seconds} value={option.seconds}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                      </>
+                    ) : null}
+                  </div>
+                  <div style={modalFooter}>
+                    <HoverBtn
+                      type="button"
+                      style={btnSecondary}
+                      disabled={!!actionBusy}
+                      onClick={() => setModerationAction(null)}
+                    >
+                      {t("common.cancel")}
+                    </HoverBtn>
+                    <HoverBtn
+                      type="button"
+                      style={copy.danger ? btnDanger : btnPrimary}
+                      disabled={!!actionBusy}
+                      onClick={() => void submitModerationAction()}
+                    >
+                      {actionBusy ? t("common.processing") : copy.submit}
+                    </HoverBtn>
+                  </div>
+                </>
+              );
+            })()}
           </div>
         </div>
       ) : null}

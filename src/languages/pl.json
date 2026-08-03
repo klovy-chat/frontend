@@ -410,8 +410,12 @@
       "unmute": "Odcisz",
       "banUser": "Zbanuj użytkownika",
       "muteUser": "Wycisz użytkownika",
+      "kickUser": "Wyrzuć użytkownika",
       "durationLabel": "Czas trwania",
-      "chooseDuration": "Wybierz na jak długo chcesz zastosować tę akcję."
+      "chooseDuration": "Wybierz na jak długo chcesz zastosować tę akcję.",
+      "confirmKick": "Czy na pewno chcesz wyrzucić {{name}} z kanału?",
+      "confirmBan": "Czy na pewno chcesz zbanować {{name}} na tym kanale?",
+      "confirmMute": "Czy na pewno chcesz wyciszyć {{name}} na tym kanale?"
     },
     "lists": {
       "banned": "Zbanowani",
