@@ -29,6 +29,7 @@ import {
   isE2eCiphertextContent,
   isSignalEnvelopeContent,
 } from "../../messageContent";
+import { fetchMediaResource } from "../../../utils/media/media";
 import {
   decryptDm,
   decryptDistributionPayload,
@@ -157,7 +158,7 @@ export class SignalE2EProvider implements IE2EProvider {
     fileUrl: string,
     meta: E2eAttachmentMeta,
   ): Promise<Blob> {
-    const response = await fetch(fileUrl, { credentials: "include" });
+    const response = await fetchMediaResource(fileUrl);
     if (!response.ok) throw new Error("E2E_ATTACHMENT_FETCH_FAILED");
     const encrypted = await response.arrayBuffer();
     return decryptFileFromE2e(encrypted, meta);

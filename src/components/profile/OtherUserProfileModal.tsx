@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { getContactProfile } from "../../api/contacts";
 import { Avatar } from "../common/Avatar";
 import { userLabel, formatJoinedDate, availabilityStatusLabel } from "../../utils/user/format";
+import { renderFormattedText } from "../../utils/chat/messageFormat";
 import { presenceColor } from "../../utils/user/presence";
 import { useProfileBannerStyle } from "../../hooks/usePublicMediaCacheRevision";
 import { useAnimatedModal } from "../../hooks/useAnimatedModal";
@@ -179,7 +180,7 @@ export function OtherUserProfileModal({
           {bioText ? (
             <section className="up-bio-section">
               <span className="up-section-label">{t("modals.otherUserProfile.about")}</span>
-              <p className="up-bio-text">{bioText}</p>
+              <p className="up-bio-text">{renderFormattedText(bioText)}</p>
             </section>
           ) : null}
 

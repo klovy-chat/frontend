@@ -27,6 +27,9 @@ interface ImageCropModalProps {
 
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 4;
+/** UI slider uses 0…(MAX−MIN) so minimum zoom sits at the track start. */
+const SLIDER_MIN = 0;
+const SLIDER_MAX = MAX_ZOOM - MIN_ZOOM;
 
 /**
  * Lightweight, dependency-free image editor. Lets the user zoom and reposition
@@ -316,13 +319,13 @@ export function ImageCropModal({
           </span>
           <input
             type="range"
-            min={MIN_ZOOM}
-            max={MAX_ZOOM}
+            min={SLIDER_MIN}
+            max={SLIDER_MAX}
             step={0.01}
-            value={zoom}
+            value={zoom - MIN_ZOOM}
             disabled={disabled}
-            onChange={(e) => setZoom(Number(e.target.value))}
-            style={{ flex: 1 }}
+            onChange={(e) => setZoom(MIN_ZOOM + Number(e.target.value))}
+            style={{ flex: 1, accentColor: "var(--accent, #8b5cf6)" }}
           />
         </div>
 

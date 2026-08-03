@@ -9,7 +9,7 @@ import i18n from "../../i18n/config";
  * zewnętrznych, dozwolonych hostów (CDN/GIF) pomija nagłówek (uniknięcie
  * preflightu blokowanego przez CDN) oraz ciasteczka (higiena).
  */
-function fetchMediaResource(url: string): Promise<Response> {
+export function fetchMediaResource(url: string): Promise<Response> {
   const isExternal =
     /^https?:\/\//i.test(url) && isAllowedExternalMediaUrl(url);
   if (isExternal) {

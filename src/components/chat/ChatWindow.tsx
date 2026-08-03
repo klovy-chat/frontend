@@ -24,6 +24,7 @@ import {
   resolveSingleExternalMediaSend,
 } from "../../utils/media/externalMediaLinks";
 import { isAllowedGifMediaUrl } from "../../utils/media/mediaAllowlist";
+import { fetchMediaResource } from "../../utils/media/media";
 import { useProfileSync } from "../../hooks/useProfileSync";
 import { presenceColor } from "../../utils/user/presence";
 import {
@@ -872,7 +873,7 @@ export function ChatWindow({
       }
 
       return {
-        uploadFile: new File([encryptedPack.encryptedFile], `${file.name}.e2e`, {
+        uploadFile: new File([encryptedPack.encryptedFile], file.name, {
           type: "application/octet-stream",
         }),
         e2eFields: encryptedPack.wsPayload,
@@ -916,6 +917,8 @@ export function ChatWindow({
           e2eFields = encrypted.e2eFields;
           displayFileName = encrypted.displayFileName;
           displayFileType = encrypted.displayFileType;
+        } else if (mustEncryptOutgoing()) {
+          throw new Error("E2E_PEER_NOT_READY");
         }
       } catch (error) {
         showE2eSendError(error);
@@ -931,7 +934,7 @@ export function ChatWindow({
         fileUrl: filePath,
         fileName: displayFileName,
         fileType: displayFileType,
-        fileSize: file.size,
+        fileSize: uploadFileObj.size,
         ...(options?.durationMs != null ? { durationMs: options.durationMs } : {}),
         ...quotePayload,
         ...e2eFields,
@@ -951,6 +954,7 @@ export function ChatWindow({
       canSendDm,
       replyingTo,
       prepareEncryptedUpload,
+      mustEncryptOutgoing,
       showE2eSendError,
       toast,
       t,
@@ -966,11 +970,15 @@ export function ChatWindow({
     ) => {
       if (!isAllowedGifMediaUrl(mediaUrl) && !mediaUrl.startsWith("https://")) return;
       try {
-        const response = await fetch(mediaUrl);
+        const response = await fetchMediaResource(mediaUrl);
         if (!response.ok) throw new Error("FETCH_FAILED");
         const blob = await response.blob();
-        const file = new File([blob], title || "media", {
-          type: fileType || blob.type || "application/octet-stream",
+        const baseName = (title || "media").replace(/\.[^.]+$/, "") || "media";
+        const ext =
+          messageType === "STICKER" || fileType.includes("gif") ? "gif" : "webp";
+        const fileName = `${baseName}.${ext}`;
+        const file = new File([blob], fileName, {
+          type: fileType || blob.type || (ext === "gif" ? "image/gif" : "image/webp"),
         });
         await sendFileMessage(file, { messageType, content: title });
       } catch (error) {

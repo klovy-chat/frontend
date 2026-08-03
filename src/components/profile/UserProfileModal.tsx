@@ -8,6 +8,7 @@ import { ProfileBadgesSection } from "./ProfileBadgesSection";
 import { useAuth } from "../../context/AuthContext";
 import { useResolvePresence } from "../../context/PresenceContext";
 import { userLabel, formatJoinedDate, availabilityStatusLabel } from "../../utils/user/format";
+import { renderFormattedText } from "../../utils/chat/messageFormat";
 import { presenceColor } from "../../utils/user/presence";
 import { useProfileBannerStyle } from "../../hooks/usePublicMediaCacheRevision";
 import { useAnimatedModal } from "../../hooks/useAnimatedModal";
@@ -134,7 +135,7 @@ export function UserProfileModal({
           {bioText ? (
             <section className="up-bio-section">
               <span className="up-section-label">{t("modals.userProfile.about")}</span>
-              <p className="up-bio-text">{bioText}</p>
+              <p className="up-bio-text">{renderFormattedText(bioText)}</p>
             </section>
           ) : null}
 

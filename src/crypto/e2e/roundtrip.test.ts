@@ -18,11 +18,18 @@ import {
 } from "./signal/channelCipher";
 
 describe("opaque payload wrap", () => {
-  it("roundtrips JSON envelopes as base64 for server storage", () => {
-    const inner = JSON.stringify({ type: 3, body: "abc123" });
+  it("roundtrips plain text as base64 for server storage", () => {
+    const inner = "Hello, world!";
     const wrapped = wrapOpaquePayload(inner);
     expect(wrapped).not.toContain("{");
     expect(unwrapOpaquePayload(wrapped)).toBe(inner);
+  });
+
+  it("wraps E2E JSON envelopes as base64 without unwrapping on display", () => {
+    const inner = JSON.stringify({ type: 3, body: "abc123" });
+    const wrapped = wrapOpaquePayload(inner);
+    expect(wrapped).not.toContain("{");
+    expect(unwrapOpaquePayload(wrapped)).toBe(wrapped);
   });
 });
 

@@ -683,7 +683,7 @@
       "status": {
         "disabled": "Disabled — new messages are sent as plain text.",
         "generating": "Generating keys…",
-        "active": "Active — new messages to E2E-capable contacts are encrypted."
+        "active": "Active — new messages to E2EE-capable contacts are encrypted."
       },
       "statusShort": {
         "disabled": "Off",
@@ -694,15 +694,15 @@
       "fingerprintHint": "Compare this code with your contact (e.g. over a call) to verify the session is not intercepted.",
       "limitationsTitle": "Limitations",
       "limitations": {
-        "search": "Server-side content search does not include E2E messages.",
-        "preview": "Link previews and mentions for E2E messages require client-side logic (limited in this version).",
+        "search": "Server-side content search does not include E2EE messages.",
+        "preview": "Link previews and mentions for E2EE messages require client-side logic (limited in this version).",
         "attachments": "GIF/sticker pickers and pasted image links are uploaded and encrypted like other attachments.",
-        "metadata": "Who talks to whom and when is still visible to the server (standard E2E metadata limitation).",
-        "deviceLoss": "Losing this device without a key backup means you cannot decrypt old E2E history.",
-        "plaintextHistory": "Messages sent before enabling E2E remain plain text."
+        "metadata": "Who talks to whom and when is still visible to the server (standard E2EE metadata limitation).",
+        "deviceLoss": "Losing this device without a key backup means you cannot decrypt old E2EE history.",
+        "plaintextHistory": "Messages sent before enabling E2EE remain plain text."
       },
       "resetKeys": "Regenerate keys",
-      "resetConfirm": "Old E2E messages will no longer be decryptable after this operation. Continue?",
+      "resetConfirm": "Old E2EE messages will no longer be decryptable after this operation. Continue?",
       "resetConfirmAction": "Yes, regenerate",
       "enabledToast": "End-to-end encryption enabled.",
       "disabledToast": "End-to-end encryption disabled.",
@@ -710,7 +710,7 @@
       "loadFailed": "Could not load encryption settings.",
       "resetDone": "Keys have been reset.",
       "resetFailed": "Could not reset keys.",
-      "clearOnLogout": "Remove E2E keys on logout",
+      "clearOnLogout": "Remove E2EE keys on logout",
       "clearOnLogoutHint": "Private keys are removed from this browser when you log out.",
       "identityChanged": "Your contact's identity key changed. Verify their fingerprint before continuing."
     },
@@ -830,10 +830,10 @@
       "mutedOnChannel": "You are muted on this channel and cannot send messages.",
       "e2eActive": "End-to-end encrypted conversation",
       "e2ePeerFingerprint": "Contact fingerprint: {{fingerprint}}",
-      "e2eFallback": "This contact does not have E2E enabled — you cannot send messages until they enable end-to-end encryption too.",
-      "e2eChannelFallback": "No one on this channel has E2E enabled — messages cannot be sent until at least one member enables end-to-end encryption.",
-      "e2eEncryptFailed": "Could not encrypt this message. Try again or check your E2E keys.",
-      "e2ePeerNotReady": "Cannot send without E2E encryption. Ask the other person to enable E2E in account settings."
+      "e2eFallback": "This contact does not have E2EE enabled — you cannot send messages until they enable end-to-end encryption too.",
+      "e2eChannelFallback": "No one on this channel has E2EE enabled — messages cannot be sent until at least one member enables end-to-end encryption.",
+      "e2eEncryptFailed": "Could not encrypt this message. Try again or check your E2EE keys.",
+      "e2ePeerNotReady": "Cannot send without E2EE encryption. Ask the other person to enable E2EE in account settings."
     },
     "bubble": {
       "edited": "edited",

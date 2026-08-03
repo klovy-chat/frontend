@@ -683,7 +683,7 @@
       "status": {
         "disabled": "Wyłączone — nowe wiadomości wysyłane są jako zwykły tekst.",
         "generating": "Generowanie kluczy…",
-        "active": "Aktywne — nowe wiadomości z kontaktami z E2E są szyfrowane."
+        "active": "Aktywne — nowe wiadomości z kontaktami z E2EE są szyfrowane."
       },
       "statusShort": {
         "disabled": "Wył.",
@@ -694,15 +694,15 @@
       "fingerprintHint": "Porównaj ten kod z rozmówcą (np. na głos), aby upewnić się, że nikt nie podsłuchuje sesji.",
       "limitationsTitle": "Ograniczenia",
       "limitations": {
-        "search": "Wyszukiwanie treści po stronie serwera nie obejmuje wiadomości E2E.",
-        "preview": "Podglądy linków i wzmianki dla wiadomości E2E wymagają logiki po stronie klienta (w tej wersji są ograniczone).",
+        "search": "Wyszukiwanie treści po stronie serwera nie obejmuje wiadomości E2EE.",
+        "preview": "Podglądy linków i wzmianki dla wiadomości E2EE wymagają logiki po stronie klienta (w tej wersji są ograniczone).",
         "attachments": "GIF-y, naklejki i wklejone linki do obrazów są uploadowane i szyfrowane jak pozostałe załączniki.",
-        "metadata": "Kto z kim rozmawia i kiedy nadal jest widoczne dla serwera (typowe ograniczenie E2E).",
-        "deviceLoss": "Utrata urządzenia bez kopii zapasowej kluczy oznacza utratę możliwości odszyfrowania starej historii E2E.",
-        "plaintextHistory": "Wiadomości wysłane przed włączeniem E2E pozostają zwykłym tekstem."
+        "metadata": "Kto z kim rozmawia i kiedy nadal jest widoczne dla serwera (typowe ograniczenie E2EE).",
+        "deviceLoss": "Utrata urządzenia bez kopii zapasowej kluczy oznacza utratę możliwości odszyfrowania starej historii E2EE.",
+        "plaintextHistory": "Wiadomości wysłane przed włączeniem E2EE pozostają zwykłym tekstem."
       },
       "resetKeys": "Wygeneruj klucze ponownie",
-      "resetConfirm": "Stare wiadomości E2E nie będą możliwe do odszyfrowania po tej operacji. Kontynuować?",
+      "resetConfirm": "Stare wiadomości E2EE nie będą możliwe do odszyfrowania po tej operacji. Kontynuować?",
       "resetConfirmAction": "Tak, wygeneruj ponownie",
       "enabledToast": "Szyfrowanie end-to-end włączone.",
       "disabledToast": "Szyfrowanie end-to-end wyłączone.",
@@ -710,7 +710,7 @@
       "loadFailed": "Nie udało się wczytać ustawień szyfrowania.",
       "resetDone": "Klucze zostały zresetowane.",
       "resetFailed": "Nie udało się zresetować kluczy.",
-      "clearOnLogout": "Usuń klucze E2E po wylogowaniu",
+      "clearOnLogout": "Usuń klucze E2EE po wylogowaniu",
       "clearOnLogoutHint": "Po wylogowaniu lokalne klucze prywatne zostaną usunięte z tej przeglądarki.",
       "identityChanged": "Klucz tożsamości rozmówcy uległ zmianie. Zweryfikuj odcisk przed kontynuowaniem rozmowy."
     },
@@ -828,12 +828,12 @@
       "contactProfile": "Profil kontaktu",
       "channelLocked": "Czat na tym kanale jest zablokowany przez administratora.",
       "mutedOnChannel": "Jesteś wyciszony na tym kanale i nie możesz wysyłać wiadomości.",
-      "e2eActive": "Rozmowa z szyfrowaniem E2E",
+      "e2eActive": "Rozmowa z szyfrowaniem E2EE",
       "e2ePeerFingerprint": "Odcisk rozmówcy: {{fingerprint}}",
-      "e2eFallback": "Rozmówca nie ma włączonego E2E — nie możesz wysłać wiadomości, dopóki druga strona też nie włączy szyfrowania end-to-end.",
-      "e2eChannelFallback": "Nikt na tym kanale nie ma włączonego E2E — wiadomości nie zostaną wysłane, dopóki co najmniej jeden członek nie włączy szyfrowania end-to-end.",
-      "e2eEncryptFailed": "Nie udało się zaszyfrować wiadomości. Spróbuj ponownie lub sprawdź klucze E2E.",
-      "e2ePeerNotReady": "Nie można wysłać wiadomości bez szyfrowania E2E. Poproś rozmówcę o włączenie E2E w ustawieniach konta."
+      "e2eFallback": "Rozmówca nie ma włączonego E2EE — nie możesz wysłać wiadomości, dopóki druga strona też nie włączy szyfrowania end-to-end.",
+      "e2eChannelFallback": "Nikt na tym kanale nie ma włączonego E2EE — wiadomości nie zostaną wysłane, dopóki co najmniej jeden członek nie włączy szyfrowania end-to-end.",
+      "e2eEncryptFailed": "Nie udało się zaszyfrować wiadomości. Spróbuj ponownie lub sprawdź klucze E2EE.",
+      "e2ePeerNotReady": "Nie można wysłać wiadomości bez szyfrowania E2EE. Poproś rozmówcę o włączenie E2EE w ustawieniach konta."
     },
     "bubble": {
       "edited": "edytowano",

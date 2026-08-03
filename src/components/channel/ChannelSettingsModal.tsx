@@ -23,6 +23,7 @@ import {
   type ChannelInvite,
 } from "../../api/invites";
 import { ImageCropModal } from "../common/ImageCropModal";
+import { OtherUserProfileModal } from "../profile/OtherUserProfileModal";
 import {
   MAX_AVATAR_SIZE_BYTES,
   MAX_AVATAR_SIZE_LABEL,
@@ -217,6 +218,8 @@ export function ChannelSettingsModal({
   const [actionBusy, setActionBusy] = useState<string | null>(null);
   const [leaveBusy, setLeaveBusy] = useState(false);
   const [leaveConfirmOpen, setLeaveConfirmOpen] = useState(false);
+  const [memberProfile, setMemberProfile] = useState<Contact | null>(null);
+  const [memberProfileKey, setMemberProfileKey] = useState(0);
   const [leaveConfirmClosing, setLeaveConfirmClosing] = useState(false);
   const [avatarLoading, setAvatarLoading] = useState(false);
   const [slowmodeBusy, setSlowmodeBusy] = useState(false);
@@ -615,11 +618,14 @@ export function ChannelSettingsModal({
       showMute?: boolean;
       showUnban?: boolean;
       showUnmute?: boolean;
+      clickable?: boolean;
     },
   ) => {
     const contact = mapChannelUser(member) ?? member;
     const id = contact._id;
     const isOwner = String(id) === String(adminContact._id);
+    const isSelf = String(id) === String(currentUserId);
+    const openProfile = options.clickable && !isSelf;
     return (
       <div
         key={id}
@@ -629,33 +635,58 @@ export function ChannelSettingsModal({
           background: C.bgDeep, marginBottom: 6,
         }}
       >
-        <Avatar
-          displayName={contact.displayName}
-          username={contact.username}
-          image={contact.image}
-          color={contact.color}
-          size={36}
-        />
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: "0.85rem", color: C.text, fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
-            {userLabel(contact)}
-            {isOwner ? (
-              <span style={{ marginLeft: 6, fontSize: "0.7rem", color: C.accent }}>{t("channel.members.ownerBadge")}</span>
+        <button
+          type="button"
+          disabled={!openProfile}
+          onClick={() => {
+            if (!openProfile) return;
+            setMemberProfile(contact);
+            setMemberProfileKey((k) => k + 1);
+          }}
+          style={{
+            flex: 1,
+            minWidth: 0,
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            border: "none",
+            background: "transparent",
+            padding: 0,
+            margin: 0,
+            textAlign: "left",
+            cursor: openProfile ? "pointer" : "default",
+            font: "inherit",
+            color: "inherit",
+          }}
+        >
+          <Avatar
+            displayName={contact.displayName}
+            username={contact.username}
+            image={contact.image}
+            color={contact.color}
+            size={36}
+          />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: "0.85rem", color: C.text, fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
+              {userLabel(contact)}
+              {isOwner ? (
+                <span style={{ marginLeft: 6, fontSize: "0.7rem", color: C.accent }}>{t("channel.members.ownerBadge")}</span>
+              ) : null}
+            </div>
+            {contact.username ? (
+              <div style={{ fontSize: "0.75rem", color: C.textDim }}>@{contact.username}</div>
+            ) : null}
+            {(options.showBan || options.showMute || options.showUnban || options.showUnmute) &&
+            (contact.moderationExpiresAt || contact.moderationPermanent) ? (
+              <div style={{ fontSize: "0.72rem", color: C.textMuted, marginTop: 2, fontFamily: "var(--font-sans)" }}>
+                {formatModerationExpiry(
+                  contact.moderationExpiresAt,
+                  contact.moderationPermanent,
+                )}
+              </div>
             ) : null}
           </div>
-          {contact.username ? (
-            <div style={{ fontSize: "0.75rem", color: C.textDim }}>@{contact.username}</div>
-          ) : null}
-          {(options.showBan || options.showMute || options.showUnban || options.showUnmute) &&
-          (contact.moderationExpiresAt || contact.moderationPermanent) ? (
-            <div style={{ fontSize: "0.72rem", color: C.textMuted, marginTop: 2, fontFamily: "var(--font-sans)" }}>
-              {formatModerationExpiry(
-                contact.moderationExpiresAt,
-                contact.moderationPermanent,
-              )}
-            </div>
-          ) : null}
-        </div>
+        </button>
         {isAdmin && !isOwner && (
           <div style={{ display: "flex", gap: 4, flexWrap: "wrap", justifyContent: "flex-end" }}>
             {options.showKick && (
@@ -914,14 +945,14 @@ export function ChannelSettingsModal({
                 <p className="cs-section-subtitle">
                   {t("modals.channelSettings.membersActionsHint")}
                 </p>
-                {allMembers.map((m) => renderMemberRow(m, { showKick: true, showBan: true, showMute: true }))}
+                {allMembers.map((m) => renderMemberRow(m, { showKick: true, showBan: true, showMute: true, clickable: true }))}
                 <p style={{ margin: "16px 0 8px", fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: C.textDim, fontFamily: "var(--font-sans)" }}>
                   {t("modals.channelSettings.membersAdminTitle")}
                 </p>
                 <p style={{ margin: "0 0 10px", fontSize: "0.8rem", color: C.textMuted, fontFamily: "var(--font-sans)" }}>
                   {t("modals.channelSettings.adminNote")}
                 </p>
-                {renderMemberRow(ch.admin, {})}
+                {renderMemberRow(ch.admin, { clickable: true })}
               </>
             )}
 
@@ -1379,6 +1410,13 @@ export function ChannelSettingsModal({
           </div>
         </div>
       )}
+      <OtherUserProfileModal
+        isOpen={Boolean(memberProfile)}
+        openKey={memberProfileKey}
+        onClose={() => setMemberProfile(null)}
+        user={memberProfile}
+        isFriend={false}
+      />
     </>
   );
 }

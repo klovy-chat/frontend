@@ -39,6 +39,7 @@ export const ALLOWED_ATTACHMENT_EXTENSIONS = [
   "jpeg",
   "png",
   "webp",
+  "gif",
   "docx",
   "xlsx",
   "txt",
@@ -55,10 +56,11 @@ const ALLOWED_ATTACHMENT_MIME_TYPES: Record<
   readonly string[]
 > = {
   pdf: ["application/pdf"],
-  jpg: ["image/jpeg"],
-  jpeg: ["image/jpeg"],
-  png: ["image/png"],
-  webp: ["image/webp"],
+  jpg: ["image/jpeg", "application/octet-stream"],
+  jpeg: ["image/jpeg", "application/octet-stream"],
+  png: ["image/png", "application/octet-stream"],
+  webp: ["image/webp", "application/octet-stream"],
+  gif: ["image/gif", "application/octet-stream"],
   docx: [
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   ],

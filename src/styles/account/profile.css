@@ -286,6 +286,28 @@
   word-break: break-word;
 }
 
+.up-bio-text strong {
+  font-weight: 700;
+}
+
+.up-bio-text .msg-inline-code {
+  font-family: "SFMono-Regular", "Consolas", "Liberation Mono", Menlo, monospace;
+  font-size: 0.86em;
+  padding: 1px 5px;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.up-bio-text .msg-discord-ts {
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  font-variant-numeric: tabular-nums;
+}
+
 /* Shared profile form hints (setup + settings) */
 .profile-field-hint {
   margin: 6px 0 0;
