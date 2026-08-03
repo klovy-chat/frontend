@@ -140,7 +140,7 @@ export async function decryptChannelMessage(
   const envelope = parseChannelEnvelope(content);
   if (!envelope) throw new Error("INVALID_CHANNEL_E2E");
 
-  const maxAttempts = 6;
+  const maxAttempts = 12;
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
     const record = await loadChannelSenderKey(channelId, senderId, envelope.keyId);
     if (record) {
@@ -151,7 +151,7 @@ export async function decryptChannelMessage(
       return new TextDecoder().decode(plaintext);
     }
     if (attempt < maxAttempts - 1) {
-      await new Promise((resolve) => setTimeout(resolve, 150 * (attempt + 1)));
+      await new Promise((resolve) => setTimeout(resolve, 250 * (attempt + 1)));
     }
   }
 

@@ -506,6 +506,11 @@
   opacity: 0.85;
 }
 
+.message-text--e2e-loading {
+  font-style: italic;
+  opacity: 0.65;
+}
+
 /* ── Dots trigger ── */
 .message-dots-wrap {
   position: relative;

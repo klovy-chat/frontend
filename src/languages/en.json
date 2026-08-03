@@ -834,10 +834,10 @@
       "mutedOnChannel": "You are muted on this channel and cannot send messages.",
       "e2eActive": "End-to-end encrypted conversation",
       "e2ePeerFingerprint": "Contact fingerprint: {{fingerprint}}",
-      "e2eFallback": "This contact does not have E2EE enabled — you cannot send messages until they enable end-to-end encryption too.",
-      "e2eChannelFallback": "No one on this channel has E2EE enabled — messages cannot be sent until at least one member enables end-to-end encryption.",
-      "e2eEncryptFailed": "Could not encrypt this message. Try again or check your E2EE keys.",
-      "e2ePeerNotReady": "Cannot send without E2EE encryption. Ask the other person to enable E2EE in account settings."
+      "e2eFallback": "This contact does not have E2EE enabled — messages are sent without extra end-to-end encryption (transport-layer protection still applies).",
+      "e2eChannelFallback": "No other member on this channel has E2EE — messages are sent without extra end-to-end encryption (transport-layer protection still applies).",
+      "e2eEncryptFailed": "Could not encrypt this message with E2EE. Try again or check your E2EE keys.",
+      "e2ePeerNotReady": "Could not encrypt this message with E2EE (the other party does not have keys ready)."
     },
     "bubble": {
       "edited": "edited",

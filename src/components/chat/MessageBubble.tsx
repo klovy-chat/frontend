@@ -107,8 +107,20 @@ export function MessageBubble({
   const reactionEntries = getReactionEntries(message.reactions);
   const showToolbar = canReact || showMenu;
 
-  const e2eAttachmentUrl = useE2eAttachmentBlobUrl(message);
-  const resolvedFileUrl = e2eAttachmentUrl ?? message.fileUrl ?? "";
+  const e2eAttachment = useE2eAttachmentBlobUrl(message);
+  const isE2eAttachment = Boolean(message.e2eAttachment && message.fileUrl);
+  const resolvedFileUrl =
+    e2eAttachment.url ?? (isE2eAttachment ? "" : message.fileUrl ?? "");
+
+  const renderE2eAttachmentFailed = () => (
+    <p className="message-text message-text--e2e-failed">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+      </svg>
+      {t("messages.e2e.decryptFailed")}
+    </p>
+  );
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -400,37 +412,41 @@ export function MessageBubble({
 
             {isFile && message.fileUrl ? (
               <>
+                {isE2eAttachment && e2eAttachment.failed ? renderE2eAttachmentFailed() : null}
+                {isE2eAttachment && e2eAttachment.loading ? (
+                  <p className="message-text message-text--e2e-loading">{t("common.loading")}</p>
+                ) : null}
                 {isSticker ? (
-                  (() => {
-                    return (
+                  !isE2eAttachment || e2eAttachment.url ? (
+                    <MediaImage
+                      fileUrl={isE2eAttachment ? e2eAttachment.url! : message.fileUrl}
+                      alt={message.fileName ?? message.content ?? t("messages.sticker")}
+                      className="message-sticker"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  ) : null
+                ) : message.messageType === "IMAGE" ? (
+                  !isE2eAttachment || e2eAttachment.url ? (
+                    <button
+                      type="button"
+                      className="message-image-container"
+                      onClick={() => onImageClick?.(message)}
+                      aria-label={t("messages.actions.openPreview", { name: message.fileName ?? t("messages.image") })}
+                    >
                       <MediaImage
-                        fileUrl={message.fileUrl}
-                        alt={message.fileName ?? message.content ?? t("messages.sticker")}
-                        className="message-sticker"
-                        loading="lazy"
+                        fileUrl={
+                          isE2eAttachment
+                            ? e2eAttachment.url!
+                            : resolveChatImagePreviewUrl(message.fileUrl)
+                        }
+                        fallbackFileUrl={isE2eAttachment ? undefined : message.fileUrl}
+                        alt={message.fileName ?? t("messages.image")}
+                        className="message-image"
                         decoding="async"
                       />
-                    );
-                  })()
-                ) : message.messageType === "IMAGE" ? (
-                  (() => {
-                    return (
-                      <button
-                        type="button"
-                        className="message-image-container"
-                        onClick={() => onImageClick?.(message)}
-                        aria-label={t("messages.actions.openPreview", { name: message.fileName ?? t("messages.image") })}
-                      >
-                        <MediaImage
-                          fileUrl={resolveChatImagePreviewUrl(message.fileUrl)}
-                          fallbackFileUrl={message.fileUrl}
-                          alt={message.fileName ?? t("messages.image")}
-                          className="message-image"
-                          decoding="async"
-                        />
-                      </button>
-                    );
-                  })()
+                    </button>
+                  ) : null
                 ) : isVideo ? (
                   <VideoMessagePlayer
                     src={resolvedFileUrl}

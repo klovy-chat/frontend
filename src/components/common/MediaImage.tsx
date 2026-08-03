@@ -62,6 +62,10 @@ function buildCandidateUrls(
   const urls: string[] = [];
   const push = (key: string | null | undefined) => {
     if (!key) return;
+    if (key.startsWith("blob:")) {
+      if (!urls.includes(key)) urls.push(key);
+      return;
+    }
     const primary = resolveMediaUrl(key);
     if (primary && !urls.includes(primary)) urls.push(primary);
     const legacy = legacyAttachmentFallbackUrl(key);
