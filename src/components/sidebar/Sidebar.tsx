@@ -898,8 +898,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
   const openChats = useCallback(() => {
     setContactsModalOpen(false);
     setContactsModalClosing(false);
-    setAdminModalOpen(false);
-    setAdminModalClosing(false);
   }, []);
   const totalUnread =
     contacts.reduce((s, c) => s + (c.isMuted ? 0 : (c.unreadCount ?? 0)), 0) +
