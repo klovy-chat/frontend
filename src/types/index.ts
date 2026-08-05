@@ -36,6 +36,7 @@ export interface User {
   twoFactorEnabled?: boolean;
   e2eEnabled?: boolean;
   isPanelAdmin?: boolean;
+  panelRole?: "root" | "admin" | "moderator" | "support" | null;
   isDisabled?: boolean;
   deletionScheduledAt?: string | null;
   badges?: Badge[];

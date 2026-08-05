@@ -78,6 +78,12 @@ export function elevateAdminSession(adminSecret: string) {
   });
 }
 
+export function createPanelHandoff() {
+  return apiRequest<{ handoffToken: string; expiresIn: number }>("/api/admin/panel-handoff", {
+    method: "POST",
+  });
+}
+
 export interface AdminUserStats {
   total: number;
   active: number;

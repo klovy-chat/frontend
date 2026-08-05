@@ -36,7 +36,8 @@ import { useIntegrationListeningPoll } from "../../hooks/useIntegrationListening
 import type { Channel, ChatTarget, Contact, Message } from "../../types";
 import { ChannelSettingsModal } from "../channel/ChannelSettingsModal";
 import { ContactsModal } from "../contacts/ContactsModal";
-import { AdminPanelModal } from "../admin/AdminPanelModal";
+import { createPanelHandoff } from "../../api/admin";
+import { getAdminDashboardBaseUrl, getAdminDashboardHandoffUrl } from "../../utils/env/adminDashboardUrl";
 import { ImageCropModal } from "../common/ImageCropModal";
 import {
   MAX_AVATAR_SIZE_BYTES,
@@ -262,8 +263,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
   const [contactProfileOpenKey, setContactProfileOpenKey] = useState(0);
   const [contactsModalOpen, setContactsModalOpen] = useState(false);
   const [contactsModalClosing, setContactsModalClosing] = useState(false);
-  const [adminModalOpen, setAdminModalOpen] = useState(false);
-  const [adminModalClosing, setAdminModalClosing] = useState(false);
   const [removeContactInfo, setRemoveContactInfo] = useState<Contact | null>(null);
   const [removeContactClosing, setRemoveContactClosing] = useState(false);
   const [removeContactSending, setRemoveContactSending] = useState(false);
@@ -382,15 +381,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
     window.setTimeout(() => {
       setContactsModalOpen(false);
       setContactsModalClosing(false);
-    }, 220);
-  };
-
-  const handleCloseAdminModal = () => {
-    if (adminModalClosing) return;
-    setAdminModalClosing(true);
-    window.setTimeout(() => {
-      setAdminModalOpen(false);
-      setAdminModalClosing(false);
     }, 220);
   };
 
@@ -931,8 +921,13 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
             }}
             onOpenAdmin={() => {
               if (!canOpenAdminPanel) return;
-              setAdminModalClosing(false);
-              setAdminModalOpen(true);
+              void createPanelHandoff()
+                .then(({ handoffToken }) => {
+                  window.open(getAdminDashboardHandoffUrl(handoffToken), "_blank", "noopener,noreferrer");
+                })
+                .catch(() => {
+                  window.open(`${getAdminDashboardBaseUrl()}/admin/login`, "_blank", "noopener,noreferrer");
+                });
             }}
             totalUnread={totalUnread}
           />
@@ -1020,14 +1015,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
             handleCloseContactsModal();
           }}
           onRefreshContacts={refresh}
-        />
-      )}
-
-      {canOpenAdminPanel && (adminModalOpen || adminModalClosing) && (
-        <AdminPanelModal
-          isOpen={adminModalOpen}
-          isClosing={adminModalClosing}
-          onClose={handleCloseAdminModal}
         />
       )}
 
