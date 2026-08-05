@@ -925,6 +925,14 @@
         "confirmWithName": "Czy na pewno chcesz usunąć kanał „{{name}}”?",
         "messagesDeleted": "Wszystkie wiadomości zostaną trwale usunięte.",
         "submit": "Usuń kanał"
+      },
+      "authorizePanel": {
+        "title": "Autoryzacja panelu",
+        "subtitle": "Otworzy się okno dash.klovy.chat z prośbą o potwierdzenie.",
+        "question": "Czy na pewno chcesz autoryzować dostęp do panelu?",
+        "hint": "Po autoryzacji sesja komunikatora zostanie użyta w panelu. Root może zarządzać rolami użytkowników.",
+        "submit": "Autoryzuj i otwórz",
+        "opening": "Otwieranie…"
       }
     }
   },

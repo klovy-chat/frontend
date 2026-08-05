@@ -266,6 +266,9 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
   const [removeContactInfo, setRemoveContactInfo] = useState<Contact | null>(null);
   const [removeContactClosing, setRemoveContactClosing] = useState(false);
   const [removeContactSending, setRemoveContactSending] = useState(false);
+  const [authorizePanelOpen, setAuthorizePanelOpen] = useState(false);
+  const [authorizePanelClosing, setAuthorizePanelClosing] = useState(false);
+  const [authorizePanelSending, setAuthorizePanelSending] = useState(false);
 
   const [mentionSources, setMentionSources] = useState<Set<string>>(new Set());
   const [mentionToast, setMentionToast] = useState<MentionToast | null>(null);
@@ -410,6 +413,33 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
       setRemoveContactInfo(null);
       setRemoveContactClosing(false);
     }, 220);
+  };
+
+  const handleCloseAuthorizePanel = () => {
+    if (authorizePanelClosing || authorizePanelSending) return;
+    setAuthorizePanelClosing(true);
+    window.setTimeout(() => {
+      setAuthorizePanelOpen(false);
+      setAuthorizePanelClosing(false);
+    }, 220);
+  };
+
+  const handleAuthorizePanel = async () => {
+    if (authorizePanelSending) return;
+    setAuthorizePanelSending(true);
+    try {
+      const { handoffToken } = await createPanelHandoff();
+      window.open(getAdminDashboardHandoffUrl(handoffToken), "_blank", "noopener,noreferrer");
+    } catch {
+      window.open(`${getAdminDashboardBaseUrl()}/admin/login`, "_blank", "noopener,noreferrer");
+    } finally {
+      setAuthorizePanelSending(false);
+      setAuthorizePanelClosing(true);
+      window.setTimeout(() => {
+        setAuthorizePanelOpen(false);
+        setAuthorizePanelClosing(false);
+      }, 220);
+    }
   };
 
   const handleCloseDeleteChannel = () => {
@@ -919,13 +949,8 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
             }}
             onOpenAdmin={() => {
               if (!canOpenAdminPanel) return;
-              void createPanelHandoff()
-                .then(({ handoffToken }) => {
-                  window.open(getAdminDashboardHandoffUrl(handoffToken), "_blank", "noopener,noreferrer");
-                })
-                .catch(() => {
-                  window.open(`${getAdminDashboardBaseUrl()}/admin/login`, "_blank", "noopener,noreferrer");
-                });
+              setAuthorizePanelClosing(false);
+              setAuthorizePanelOpen(true);
             }}
             totalUnread={totalUnread}
           />
@@ -1258,6 +1283,40 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
             <div style={modalFooter}>
               <HoverBtn type="button" style={btnSecondary} hoverStyle={{ background: C.bgHover, color: C.text }} onClick={handleCloseRenameChannel}>{t("common.cancel")}</HoverBtn>
               <HoverBtn type="button" style={btnPrimary} hoverStyle={{ background: C.accentHover }} onClick={handleRenameChannel}>{t("sidebar.modals.renameChannel.submit")}</HoverBtn>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════════ AUTHORIZE PANEL CONFIRM ═══════════════ */}
+      {(authorizePanelOpen || authorizePanelClosing) && (
+        <div
+          className={`klovy-backdrop${authorizePanelClosing ? " closing" : ""}`}
+          onClick={(e) => { if (e.target === e.currentTarget) handleCloseAuthorizePanel(); }}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="klovy-shell" style={modalCard}>
+            <div style={modalHeader}>
+              <div>
+                <p style={modalTitle}>{t("sidebar.modals.authorizePanel.title")}</p>
+                <p style={modalSubtitle}>{t("sidebar.modals.authorizePanel.subtitle")}</p>
+              </div>
+              <HoverBtn type="button" style={closeBtn} hoverStyle={{ background: C.bgHover, color: C.text }} aria-label={t("common.close")} onClick={handleCloseAuthorizePanel}>×</HoverBtn>
+            </div>
+            <div style={modalBody}>
+              <p style={{ margin: "0 0 10px", fontSize: "0.92rem", color: C.text, fontWeight: 600, lineHeight: 1.5 }}>
+                {t("sidebar.modals.authorizePanel.question")}
+              </p>
+              <p style={{ margin: 0, fontSize: "0.84rem", color: C.textMuted, lineHeight: 1.6 }}>
+                {t("sidebar.modals.authorizePanel.hint")}
+              </p>
+            </div>
+            <div style={modalFooter}>
+              <HoverBtn type="button" style={btnSecondary} hoverStyle={{ background: C.bgHover, color: C.text }} disabled={authorizePanelSending} onClick={handleCloseAuthorizePanel}>{t("common.cancel")}</HoverBtn>
+              <HoverBtn type="button" style={btnPrimary} hoverStyle={{ background: C.accentHover }} disabled={authorizePanelSending} onClick={() => void handleAuthorizePanel()}>
+                {authorizePanelSending ? t("sidebar.modals.authorizePanel.opening") : t("sidebar.modals.authorizePanel.submit")}
+              </HoverBtn>
             </div>
           </div>
         </div>

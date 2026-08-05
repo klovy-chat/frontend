@@ -925,6 +925,14 @@
         "confirmWithName": "Are you sure you want to delete channel \"{{name}}\"?",
         "messagesDeleted": "All messages will be permanently deleted.",
         "submit": "Delete channel"
+      },
+      "authorizePanel": {
+        "title": "Panel authorization",
+        "subtitle": "A dash.klovy.chat window will open asking you to confirm.",
+        "question": "Do you really want to authorize panel access?",
+        "hint": "After authorization, your messenger session will be used in the panel. Root can manage user roles.",
+        "submit": "Authorize and open",
+        "opening": "Opening…"
       }
     }
   },
