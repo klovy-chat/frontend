@@ -10,7 +10,6 @@ import {
 import * as authApi from "../api/auth";
 import { isTwoFactorLoginResponse } from "../api/auth";
 import { ApiError, clearCsrfToken } from "../api/client";
-import { e2eService } from "../crypto/e2e/e2eService";
 import { clearAutoIdleBrbFlag } from "../hooks/useIdleAvailability";
 import { restoreSession, clearCachedSessionUser } from "../utils/user/sessionRestore";
 import type { User } from "../types";
@@ -88,11 +87,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         };
       }
       setUser(response.user);
-      void e2eService.refreshStatus().then(async () => {
-        if (response.user.e2eEnabled) {
-          await e2eService.ensureReady(response.user.id);
-        }
-      }).catch(() => {});
       return { requiresTwoFactor: false };
     },
     [],
@@ -106,11 +100,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         turnstileToken,
       );
       setUser(loggedIn);
-      void e2eService.refreshStatus().then(async () => {
-        if (loggedIn.e2eEnabled) {
-          await e2eService.ensureReady(loggedIn.id);
-        }
-      }).catch(() => {});
     },
     [],
   );
@@ -139,7 +128,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       if (!(err instanceof ApiError) || err.status !== 401) throw err;
     } finally {
-      await e2eService.clearLocalKeysOnLogout();
       clearCsrfToken();
       clearCachedSessionUser();
       clearAutoIdleBrbFlag();
@@ -151,13 +139,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!user?.id) return;
 
     let cancelled = false;
-    void e2eService.refreshStatus().then(async () => {
-      if (user.e2eEnabled) {
-        await e2eService.ensureReady(user.id);
-      }
-    }).catch(() => {
-      /* retry on next session check */
-    });
 
     let lastCheckAt = 0;
     const MIN_CHECK_INTERVAL_MS = 60_000;

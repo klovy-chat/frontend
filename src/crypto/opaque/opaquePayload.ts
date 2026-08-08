@@ -26,19 +26,6 @@ function base64NormalizedEqual(a: string, b: string): boolean {
   );
 }
 
-function isE2eJsonEnvelopeInner(inner: string): boolean {
-  if (!inner.startsWith("{")) return false;
-  try {
-    const parsed = JSON.parse(inner) as Record<string, unknown>;
-    return (
-      (typeof parsed.type === "number" && typeof parsed.body === "string") ||
-      (typeof parsed.keyId === "number" && typeof parsed.data === "string")
-    );
-  } catch {
-    return false;
-  }
-}
-
 function decodeOpaqueLayer(stored: string): string | null {
   const normalized = normalizeBase64(stored.trim());
   if (!BASE64_OPAQUE_RE.test(normalized) || normalized.length < 4) {
@@ -60,9 +47,6 @@ export function isLikelyBase64Opaque(stored: string): boolean {
   const decoded = decodeOpaqueLayer(trimmed);
   if (!decoded || decoded === trimmed) return false;
   if (decoded.includes("\uFFFD")) return false;
-  if (isE2eJsonEnvelopeInner(decoded)) {
-    return base64NormalizedEqual(wrapOpaquePayload(decoded), trimmed);
-  }
   return base64NormalizedEqual(wrapOpaquePayload(decoded), trimmed);
 }
 
@@ -78,7 +62,7 @@ export function unwrapOpaquePayloadOnce(stored: string): string | null {
 
 /**
  * Unwrap server-stored payload for display.
- * Peels nested transport layers (legacy double-wrap) but stops before E2E JSON envelopes.
+ * Peels nested transport layers (legacy double-wrap).
  */
 export function unwrapOpaquePayload(stored: string): string {
   const trimmed = stored.trim();
@@ -92,7 +76,6 @@ export function unwrapOpaquePayload(stored: string): string {
     if (!isLikelyBase64Opaque(current)) return current;
     const decoded = unwrapOpaquePayloadOnce(current);
     if (!decoded || decoded === current) return current;
-    if (isE2eJsonEnvelopeInner(decoded)) return current;
     if (!isLikelyBase64Opaque(decoded)) return decoded;
     current = decoded;
   }

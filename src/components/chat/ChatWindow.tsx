@@ -54,14 +54,10 @@ import type {
   MessageReactions,
   MessageUser,
 } from "../../types";
-import { e2eService, onIdentityChange, onSenderKeyStored } from "../../crypto/e2e/e2eService";
 import {
   wrapOutgoingContent,
   unwrapIncomingMessages,
-  maskUndecryptableMessages,
 } from "../../crypto/messageContent";
-import type { E2ECapabilityMap } from "../../crypto/e2e/types";
-import { useToast } from "../../context/ToastContext";
 
 type ToolsPanelMode = "pinned" | "search" | null;
 
@@ -152,7 +148,6 @@ export function ChatWindow({
   } = useCall();
   const resolvePresence = useResolvePresence();
   const { seed: seedPresence } = usePresenceStore();
-  const toast = useToast();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
@@ -174,11 +169,6 @@ export function ChatWindow({
   const [toolsPanel, setToolsPanel] = useState<ToolsPanelMode>(null);
   const [highlightMessageId, setHighlightMessageId] = useState<string | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-  const [e2eCapabilities, setE2eCapabilities] = useState<E2ECapabilityMap>({});
-  const [localE2eEnabled, setLocalE2eEnabled] = useState(false);
-  const [e2eConversationActive, setE2eConversationActive] = useState(false);
-  const [e2eCapabilitiesLoading, setE2eCapabilitiesLoading] = useState(false);
-  const [peerFingerprint, setPeerFingerprint] = useState<string | null>(null);
 
   const imageLightboxItems = useMemo<LightboxItem[]>(() => {
     const items: LightboxItem[] = [];
@@ -269,174 +259,13 @@ export function ChatWindow({
 
   const allowMentionEveryone = target?.type === "channel";
 
-  const channelMemberIds = useMemo(() => {
-    if (target?.type !== "channel") return [];
-    const seen = new Set<string>();
-    const add = (id?: string) => {
-      if (id) seen.add(id);
-    };
-    target.channel.members.forEach((member) => add(member._id));
-    add(target.channel.admin?._id);
-    add(currentUserId);
-    return Array.from(seen);
-  }, [target, currentUserId]);
-
-  const decryptForDisplay = useCallback(
-    async (list: Message[]) => {
+  const prepareForDisplay = useCallback(
+    (list: Message[]) => {
       const normalized = list.map(normalizeMessage);
-      const unwrapped = unwrapIncomingMessages(normalized);
-      if (!currentUserId) return unwrapped;
-      try {
-        if (!(await e2eService.canDecryptMessages())) {
-          return maskUndecryptableMessages(unwrapped);
-        }
-        return await e2eService.decryptMessages(unwrapped, currentUserId);
-      } catch {
-        return maskUndecryptableMessages(unwrapped);
-      }
+      return unwrapIncomingMessages(normalized);
     },
-    [currentUserId],
+    [],
   );
-
-  const retryFailedE2eDecrypt = useCallback(async () => {
-    if (!currentUserId || target?.type !== "channel") return;
-    if (!(await e2eService.canDecryptMessages())) return;
-    setMessages((prev) => {
-      const failed = prev.filter((m) => m.e2eEncrypted && m.e2eDecryptFailed);
-      if (failed.length === 0) return prev;
-      void e2eService.decryptMessages(failed, currentUserId).then((decrypted) => {
-        const byId = new Map(decrypted.map((m) => [m._id, m]));
-        setMessages((current) =>
-          current.map((m) => {
-            const next = byId.get(m._id);
-            return next && !next.e2eDecryptFailed ? { ...m, ...next } : m;
-          }),
-        );
-      });
-      return prev;
-    });
-  }, [currentUserId, target]);
-
-  useEffect(() => {
-    if (!user?.id) return;
-    e2eService.setCurrentUserId(user.id);
-    let cancelled = false;
-    void (async () => {
-      try {
-        await e2eService.refreshStatus();
-        if (user.e2eEnabled) {
-          await e2eService.ensureReady(user.id);
-        }
-        if (!cancelled) {
-          setLocalE2eEnabled(e2eService.isEnabled());
-        }
-      } catch {
-        if (!cancelled) {
-          setLocalE2eEnabled(false);
-        }
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [user?.id, user?.e2eEnabled]);
-
-  useEffect(() => {
-    return onIdentityChange(() => {
-      toast.warning(t("settings.encryption.identityChanged"));
-    });
-  }, [t, toast]);
-
-  useEffect(() => {
-    if (!currentUserId || !localE2eEnabled) {
-      setE2eCapabilities({});
-      setE2eConversationActive(false);
-      setE2eCapabilitiesLoading(false);
-      return;
-    }
-
-    let cancelled = false;
-    const loadCaps = async () => {
-      setE2eCapabilitiesLoading(true);
-      try {
-        if (target?.type === "dm") {
-          const cap = await e2eService.loadCapabilities([target.contact._id], {
-            force: true,
-          });
-          if (cancelled) return;
-          setE2eCapabilities(cap);
-          const peerReady = e2eService.peerSupportsE2e(cap, target.contact._id);
-          setE2eConversationActive(peerReady);
-          if (peerReady) {
-            setPeerFingerprint(cap[target.contact._id]?.fingerprint ?? null);
-          } else {
-            setPeerFingerprint(null);
-          }
-        } else if (target?.type === "channel") {
-          const cap = await e2eService.loadCapabilities(channelMemberIds, {
-            force: true,
-          });
-          if (cancelled) return;
-          setE2eCapabilities(cap);
-          const hasE2ePeer = channelMemberIds.some(
-            (id) => id !== currentUserId && e2eService.peerSupportsE2e(cap, id),
-          );
-          setPeerFingerprint(null);
-          setE2eConversationActive(hasE2ePeer);
-        } else {
-          setE2eCapabilities({});
-          setE2eConversationActive(false);
-          setPeerFingerprint(null);
-        }
-      } finally {
-        if (!cancelled) setE2eCapabilitiesLoading(false);
-      }
-    };
-
-    void loadCaps();
-    return () => {
-      cancelled = true;
-    };
-  }, [target, currentUserId, channelMemberIds, localE2eEnabled]);
-
-  useEffect(() => {
-    if (!ws || !user?.id || target?.type !== "channel") {
-      return;
-    }
-    void (async () => {
-      if (!(await e2eService.canDecryptMessages())) return;
-      void e2eService.onChannelMembersChanged(
-        target.channel._id,
-        user.id,
-        channelMemberIds,
-        ws,
-        e2eCapabilities,
-      );
-    })();
-  }, [ws, user?.id, target, channelMemberIds, e2eCapabilities]);
-
-  useEffect(() => {
-    if (!ws || !user?.id || target?.type !== "channel") {
-      return;
-    }
-    void (async () => {
-      if (!(await e2eService.canDecryptMessages())) return;
-      void e2eService.requestChannelSenderKeys(
-        target.channel._id,
-        user.id,
-        channelMemberIds,
-        ws,
-      );
-    })();
-  }, [ws, user?.id, target, channelMemberIds]);
-
-  useEffect(() => {
-    if (target?.type !== "channel") return;
-    return onSenderKeyStored((detail) => {
-      if (target.channel._id !== detail.channelId) return;
-      void retryFailedE2eDecrypt();
-    });
-  }, [target, retryFailedE2eDecrypt]);
 
   const loadMessages = useCallback(async () => {
     if (!target || !currentUserId) return;
@@ -448,7 +277,7 @@ export function ChatWindow({
             target.contact._id,
             { limit: MESSAGE_PAGE_SIZE },
           );
-          setMessages(await decryptForDisplay(list));
+          setMessages(prepareForDisplay(list));
           setHasMore(Boolean(more));
         } catch {
           setMessages([]);
@@ -459,13 +288,13 @@ export function ChatWindow({
           target.channel._id,
           { limit: MESSAGE_PAGE_SIZE },
         );
-        setMessages(await decryptForDisplay(list));
+        setMessages(prepareForDisplay(list));
         setHasMore(Boolean(more));
       }
     } finally {
       setLoading(false);
     }
-  }, [target, currentUserId, decryptForDisplay]);
+  }, [target, currentUserId, prepareForDisplay]);
 
   const loadOlderMessages = useCallback(async () => {
     if (!target || !currentUserId || loadingOlder || !hasMore) return;
@@ -483,7 +312,7 @@ export function ChatWindow({
               before: oldest,
               limit: MESSAGE_PAGE_SIZE,
             });
-      const older = await decryptForDisplay(page.messages);
+      const older = prepareForDisplay(page.messages);
       setMessages((prev) => {
         const existing = new Set(prev.map((m) => m._id));
         const merged = older.filter((m) => !existing.has(m._id));
@@ -495,7 +324,7 @@ export function ChatWindow({
     } finally {
       setLoadingOlder(false);
     }
-  }, [target, currentUserId, messages, hasMore, loadingOlder, decryptForDisplay]);
+  }, [target, currentUserId, messages, hasMore, loadingOlder, prepareForDisplay]);
 
   useEffect(() => {
     setMessages([]);
@@ -584,15 +413,12 @@ export function ChatWindow({
     if (!ws || !target) return;
 
     const appendMessage = (msg: Message) => {
-      void (async () => {
-        const decrypted = await decryptForDisplay([msg]);
-        const next = decrypted[0];
-        if (!next) return;
-        setMessages((prev) => {
-          if (prev.some((m) => m._id === next._id)) return prev;
-          return [...prev, next];
-        });
-      })();
+      const next = prepareForDisplay([msg])[0];
+      if (!next) return;
+      setMessages((prev) => {
+        if (prev.some((m) => m._id === next._id)) return prev;
+        return [...prev, next];
+      });
     };
 
     const onDm = (msg: Message) => {
@@ -633,14 +459,11 @@ export function ChatWindow({
     };
 
     const onEdited = (msg: Message) => {
-      void (async () => {
-        const decrypted = await decryptForDisplay([msg]);
-        const next = decrypted[0];
-        if (!next) return;
-        setMessages((prev) =>
-          prev.map((m) => (m._id === next._id ? { ...m, ...next } : m)),
-        );
-      })();
+      const next = prepareForDisplay([msg])[0];
+      if (!next) return;
+      setMessages((prev) =>
+        prev.map((m) => (m._id === next._id ? { ...m, ...next } : m)),
+      );
     };
 
     const onReaction = (data: {
@@ -698,8 +521,6 @@ export function ChatWindow({
       }
       if (isTyping && userId) {
         setTypingUserId(userId);
-        // Fallback: if the peer's "stopped" event is ever dropped, clear the
-        // indicator automatically so it can never get stuck on-screen.
         typingClearTimeout.current = setTimeout(
           () => setTypingUserId(null),
           6000,
@@ -745,7 +566,7 @@ export function ChatWindow({
     ];
 
     return () => unsubs.forEach((u) => u());
-  }, [ws, target, currentUserId, decryptForDisplay]);
+  }, [ws, target, currentUserId, prepareForDisplay]);
 
   useProfileSync(ws, {
     onInfo: ({ userId, username, displayName, bio, color }) =>
@@ -769,130 +590,6 @@ export function ChatWindow({
       ),
   });
 
-  const shouldUseE2e = useCallback((): boolean => {
-    return localE2eEnabled && e2eConversationActive;
-  }, [localE2eEnabled, e2eConversationActive]);
-
-  const e2eOptionalHint =
-    localE2eEnabled && !e2eCapabilitiesLoading && !e2eConversationActive;
-
-  const showE2eSendError = useCallback(
-    (error: unknown) => {
-      if (error instanceof Error && error.message === "E2E_PEER_NOT_READY") {
-        toast.error(t("chat.window.e2ePeerNotReady"));
-        return;
-      }
-      toast.error(t("chat.window.e2eEncryptFailed"));
-    },
-    [toast, t],
-  );
-
-  const loadE2eCapabilities = useCallback(
-    async (force = false): Promise<E2ECapabilityMap> => {
-      if (!target) return {};
-      if (!force && Object.keys(e2eCapabilities).length > 0) return e2eCapabilities;
-      if (target.type === "dm") {
-        return e2eService.loadCapabilities([target.contact._id], { force });
-      }
-      return e2eService.loadCapabilities(channelMemberIds, { force });
-    },
-    [target, e2eCapabilities, channelMemberIds],
-  );
-
-  const encryptOutgoingText = useCallback(
-    async (
-      plaintext: string,
-      force = false,
-    ): Promise<{ content: string; e2eEncrypted?: boolean; e2eVersion?: number }> => {
-      if (!target || !user) return { content: wrapOutgoingContent(plaintext) };
-      if (e2eService.isEnabled() || force) {
-        await e2eService.ensureReady(user.id);
-      }
-
-      try {
-        const cap = await loadE2eCapabilities(true);
-        if (target.type === "dm") {
-          if (force || e2eService.shouldEncryptDm(target.contact._id, cap)) {
-            return e2eService.encryptOutgoingDm(target.contact._id, plaintext);
-          }
-          if (force) throw new Error("E2E_PEER_NOT_READY");
-          return { content: wrapOutgoingContent(plaintext) };
-        }
-
-        if (
-          force ||
-          e2eService.shouldEncryptChannel(user.id, channelMemberIds, cap)
-        ) {
-          const encrypted = await e2eService.encryptOutgoingChannel(
-            target.channel._id,
-            user.id,
-            plaintext,
-            channelMemberIds,
-            ws,
-            cap,
-          );
-          if (encrypted) return encrypted;
-        }
-        if (force) throw new Error("E2E_PEER_NOT_READY");
-        return { content: wrapOutgoingContent(plaintext) };
-      } catch (error) {
-        if (error instanceof Error && error.message === "E2E_PEER_NOT_READY") {
-          throw error;
-        }
-        throw new Error("E2E_ENCRYPT_FAILED");
-      }
-    },
-    [
-      target,
-      user,
-      ws,
-      channelMemberIds,
-      loadE2eCapabilities,
-      localE2eEnabled,
-    ],
-  );
-
-  const prepareEncryptedUpload = useCallback(
-    async (file: File) => {
-      if (!target || !user || !e2eService.isEnabled()) return null;
-      await e2eService.ensureReady(user.id);
-      if (!e2eService.canEncryptOutgoing()) return null;
-      const cap = await loadE2eCapabilities(true);
-      const encryptedPack =
-        target.type === "dm"
-          ? await e2eService.encryptOutgoingAttachment(
-              { kind: "dm", peerId: target.contact._id, cap },
-              file,
-            )
-          : await e2eService.encryptOutgoingAttachment(
-              {
-                kind: "channel",
-                channelId: target.channel._id,
-                senderId: user.id,
-                memberIds: channelMemberIds,
-                cap,
-                ws,
-              },
-              file,
-            );
-
-      if (!encryptedPack) {
-        if (!e2eService.canEncryptOutgoing()) throw new Error("E2E_PEER_NOT_READY");
-        return null;
-      }
-
-      return {
-        uploadFile: new File([encryptedPack.encryptedFile], file.name, {
-          type: "application/octet-stream",
-        }),
-        e2eFields: encryptedPack.wsPayload,
-        displayFileName: file.name,
-        displayFileType: file.type || "application/octet-stream",
-      };
-    },
-    [target, user, ws, channelMemberIds, loadE2eCapabilities, localE2eEnabled],
-  );
-
   const sendFileMessage = useCallback(
     async (
       file: File,
@@ -914,38 +611,19 @@ export function ChatWindow({
       const quotePayload = quotedMessage ? { quotedMessage } : {};
       const messageType = options?.messageType ?? resolveUploadMessageType(file);
 
-      let e2eFields: { e2eEncrypted?: boolean; e2eVersion?: number } = {};
-      let uploadFileObj = file;
-      let displayFileName = file.name;
-      let displayFileType = file.type || "application/octet-stream";
-
-      try {
-        const encrypted = await prepareEncryptedUpload(file);
-        if (encrypted) {
-          uploadFileObj = encrypted.uploadFile;
-          e2eFields = encrypted.e2eFields;
-          displayFileName = encrypted.displayFileName;
-          displayFileType = encrypted.displayFileType;
-        }
-      } catch (error) {
-        showE2eSendError(error);
-        return;
-      }
-
-      const { filePath } = await uploadFile(uploadFileObj, uploadContext);
+      const { filePath } = await uploadFile(file, uploadContext);
       const rawContent =
-        options?.content ?? (messageType === "AUDIO" ? "" : displayFileName);
+        options?.content ?? (messageType === "AUDIO" ? "" : file.name);
       const payload = {
         sender: user.id,
         content: rawContent ? wrapOutgoingContent(rawContent) : rawContent,
         messageType,
         fileUrl: filePath,
-        fileName: displayFileName,
-        fileType: displayFileType,
-        fileSize: uploadFileObj.size,
+        fileName: file.name,
+        fileType: file.type || "application/octet-stream",
+        fileSize: file.size,
         ...(options?.durationMs != null ? { durationMs: options.durationMs } : {}),
         ...quotePayload,
-        ...e2eFields,
       };
 
       if (target.type === "dm") {
@@ -961,9 +639,6 @@ export function ChatWindow({
       user,
       canSendDm,
       replyingTo,
-      prepareEncryptedUpload,
-      showE2eSendError,
-      toast,
       t,
     ],
   );
@@ -988,34 +663,21 @@ export function ChatWindow({
           type: fileType || blob.type || (ext === "gif" ? "image/gif" : "image/webp"),
         });
         await sendFileMessage(file, { messageType, content: title });
-      } catch (error) {
-        showE2eSendError(error);
+      } catch {
+        /* ignore */
       }
     },
-    [sendFileMessage, showE2eSendError],
+    [sendFileMessage],
   );
 
   const sendMessage = async (content: string) => {
     if (!ws || !target || !user || !canSendDm) return;
     if (editingMessage) {
-      try {
-        const forceEncrypt = Boolean(editingMessage.e2eEncrypted);
-        const encrypted = await encryptOutgoingText(content, forceEncrypt);
-        ws.send(WsType.EDIT_MESSAGE, {
-          messageId: editingMessage._id,
-          content: encrypted.content,
-          userId: user.id,
-          ...(encrypted.e2eEncrypted
-            ? {
-                e2eEncrypted: encrypted.e2eEncrypted,
-                e2eVersion: encrypted.e2eVersion,
-              }
-            : {}),
-        });
-      } catch (error) {
-        showE2eSendError(error);
-        return;
-      }
+      ws.send(WsType.EDIT_MESSAGE, {
+        messageId: editingMessage._id,
+        content: wrapOutgoingContent(content),
+        userId: user.id,
+      });
       setEditingMessage(null);
       return;
     }
@@ -1023,35 +685,6 @@ export function ChatWindow({
     const quotedMessage = replyingTo?._id;
     const quotePayload = quotedMessage ? { quotedMessage } : {};
     const externalMedia = resolveSingleExternalMediaSend(content);
-
-    if (externalMedia && shouldUseE2e()) {
-      await sendRemoteMediaMessage(
-        externalMedia.url,
-        externalMedia.fileName,
-        externalMedia.fileType,
-        "IMAGE",
-      );
-      return;
-    }
-
-    let e2eFields: { e2eEncrypted?: boolean; e2eVersion?: number } = {};
-    let outboundContent = content;
-
-    if (!externalMedia) {
-      try {
-        const encrypted = await encryptOutgoingText(content);
-        outboundContent = encrypted.content;
-        if (encrypted.e2eEncrypted) {
-          e2eFields = {
-            e2eEncrypted: encrypted.e2eEncrypted,
-            e2eVersion: encrypted.e2eVersion,
-          };
-        }
-      } catch (error) {
-        showE2eSendError(error);
-        return;
-      }
-    }
 
     const payload = externalMedia
       ? {
@@ -1065,10 +698,9 @@ export function ChatWindow({
         }
       : {
           sender: user.id,
-          content: outboundContent,
+          content: wrapOutgoingContent(content),
           messageType: "TEXT" as const,
           ...quotePayload,
-          ...e2eFields,
         };
 
     if (target.type === "dm") {
@@ -1277,39 +909,6 @@ export function ChatWindow({
         )}
         <div className="chat-header__info">
           <h3 className="chat-header__name">{title}</h3>
-          {target.type === "dm" && e2eConversationActive ? (
-            <span
-              className="chat-header__desc"
-              title={
-                peerFingerprint
-                  ? t("chat.window.e2ePeerFingerprint", {
-                      fingerprint: peerFingerprint,
-                    })
-                  : t("chat.window.e2eActive")
-              }
-              style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
-            >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-              </svg>
-              {peerFingerprint
-                ? `${t("chat.window.e2eActive")} · ${peerFingerprint.slice(0, 8)}…`
-                : t("chat.window.e2eActive")}
-            </span>
-          ) : target.type === "channel" && e2eConversationActive ? (
-            <span
-              className="chat-header__desc"
-              title={t("chat.window.e2eActive")}
-              style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
-            >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-              </svg>
-              {t("chat.window.e2eActive")}
-            </span>
-          ) : null}
           {target.type === "channel" && target.channel.description && (
             <span className="chat-header__desc">{target.channel.description}</span>
           )}
@@ -1540,25 +1139,6 @@ export function ChatWindow({
           {t("chat.window.mutedOnChannel")}
         </div>
       ) : (
-        <>
-          {e2eOptionalHint ? (
-            <div
-              style={{
-                padding: "10px 18px",
-                borderTop: `1px solid ${C.border}`,
-                background: C.bgPanel,
-                color: C.textMuted,
-                fontSize: "0.78rem",
-                lineHeight: 1.5,
-                textAlign: "center",
-                fontFamily: "var(--font-sans)",
-              }}
-            >
-              {target.type === "dm"
-                ? t("chat.window.e2eFallback")
-                : t("chat.window.e2eChannelFallback")}
-            </div>
-          ) : null}
         <MessageInput
             key={
               target.type === "dm"
@@ -1591,7 +1171,6 @@ export function ChatWindow({
             mentionCandidates={mentionCandidates}
             allowMentionEveryone={allowMentionEveryone}
           />
-        </>
       )}
 
       {target.type === "dm" && (

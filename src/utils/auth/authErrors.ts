@@ -2,13 +2,11 @@ import i18n from "../../i18n/config";
 
 export function normalizeAuthError(
   message: string,
-  context: "login" | "signup" | "admin",
+  context: "login" | "signup",
 ): string {
   const trimmed = message.trim();
   if (!trimmed) {
-    return context === "admin"
-      ? i18n.t("auth.errors.invalidAdminLogin")
-      : i18n.t("auth.errors.invalidLogin");
+    return i18n.t("auth.errors.invalidLogin");
   }
 
   const lower = trimmed.toLowerCase();
@@ -46,9 +44,7 @@ export function normalizeAuthError(
     lower.includes("użytkownik") ||
     lower.includes("nieprawidłow")
   ) {
-    return context === "admin"
-      ? i18n.t("auth.errors.invalidAdminLogin")
-      : i18n.t("auth.errors.invalidLogin");
+    return i18n.t("auth.errors.invalidLogin");
   }
 
   return trimmed;

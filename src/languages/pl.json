@@ -79,7 +79,6 @@
     "closePanel": "Zamknij panel",
     "closeSettings": "Zamknij ustawienia",
     "accountSettings": "Ustawienia konta",
-    "adminPanel": "Panel administratora",
     "checkingPermissions": "Sprawdzanie uprawnień…",
     "goToLogin": "Przejdź do logowania",
     "logout": "Wyloguj się",
@@ -350,10 +349,6 @@
     "file": "Plik: {{name}}",
     "attachment": "Załącznik",
     "default": "Wiadomość",
-    "e2e": {
-      "decryptFailed": "Nie można odszyfrować wiadomości",
-      "encrypted": "Wiadomość szyfrowana end-to-end"
-    },
     "thisMessage": "Ta wiadomość",
     "quote": {
       "jumpTo": "Przejdź do wiadomości"
@@ -470,7 +465,6 @@
     },
     "errors": {
       "invalidLogin": "Nieprawidłowa nazwa użytkownika lub hasło.",
-      "invalidAdminLogin": "Nieprawidłowy login, hasło lub kod uwierzytelniający.",
       "loginFailed": "Błąd logowania",
       "signupFailed": "Błąd rejestracji",
       "twoFactorStartFailed": "Nie udało się rozpocząć weryfikacji 2FA."
@@ -591,7 +585,6 @@
       "profile": "Profil",
       "sessions": "Urządzenia",
       "voice": "Ustawienia głosu",
-      "encryption": "Szyfrowanie",
       "bots": "Boty",
       "integrations": "Integracje",
       "warnings": "Ostrzeżenia",
@@ -645,7 +638,7 @@
       "deletionScheduledBody": "Możesz nadal korzystać z konta do {{date}}. Potem zostanie trwale usunięte. Możesz anulować poniżej.",
       "managementLead": "Wyłączenie konta natychmiast blokuje logowanie. Oznaczenie do usunięcia daje 7 dni na anulowanie — w tym czasie możesz normalnie korzystać z konta.",
       "disableTitle": "Wyłącz konto",
-      "disableDesc": "Natychmiast blokujemy logowanie. Profil, wiadomości i kontakty zostają w systemie — administrator może przywrócić konto w panelu moderacji.",
+      "disableDesc": "Natychmiast blokujemy logowanie. Profil, wiadomości i kontakty zostają w systemie — administrator może przywrócić konto.",
       "deleteTitle": "Oznacz konto do usunięcia",
       "deleteDesc": "Konto zostanie trwale usunięte po 7 dniach. Do tego czasu możesz się normalnie logować i anulować prośbę w ustawieniach.",
       "confirmDisable": "Potwierdź wyłączenie konta",
@@ -677,46 +670,6 @@
     "language": {
       "title": "Język",
       "chooseLanguage": "Wybierz swój język"
-    },
-    "encryption": {
-      "title": "Szyfrowanie end-to-end",
-      "panelLead": "Klucze, odcisk tożsamości i opcje zaawansowane otwierasz w panelu poniżej.",
-      "manage": "Zarządzaj szyfrowaniem",
-      "subtitle": "Treść wiadomości w DM i kanałach może być szyfrowana lokalnie kluczami Signal Protocol. Serwer przechowuje wyłącznie zaszyfrowaną treść i klucze publiczne.",
-      "toggle": "Szyfrowanie end-to-end",
-      "status": {
-        "disabled": "Wyłączone — nowe wiadomości wysyłane są jako zwykły tekst.",
-        "generating": "Generowanie kluczy…",
-        "active": "Aktywne — nowe wiadomości z kontaktami z E2EE są szyfrowane."
-      },
-      "statusShort": {
-        "disabled": "Wył.",
-        "generating": "…",
-        "active": "Wł."
-      },
-      "fingerprintLabel": "Odcisk klucza tożsamości",
-      "fingerprintHint": "Porównaj ten kod z rozmówcą (np. na głos), aby upewnić się, że nikt nie podsłuchuje sesji.",
-      "limitationsTitle": "Ograniczenia",
-      "limitations": {
-        "search": "Wyszukiwanie treści po stronie serwera nie obejmuje wiadomości E2EE.",
-        "preview": "Podglądy linków i wzmianki dla wiadomości E2EE wymagają logiki po stronie klienta (w tej wersji są ograniczone).",
-        "attachments": "GIF-y, naklejki i wklejone linki do obrazów są uploadowane i szyfrowane jak pozostałe załączniki.",
-        "metadata": "Kto z kim rozmawia i kiedy nadal jest widoczne dla serwera (typowe ograniczenie E2EE).",
-        "deviceLoss": "Utrata urządzenia bez kopii zapasowej kluczy oznacza utratę możliwości odszyfrowania starej historii E2EE.",
-        "plaintextHistory": "Wiadomości wysłane przed włączeniem E2EE pozostają zwykłym tekstem."
-      },
-      "resetKeys": "Wygeneruj klucze ponownie",
-      "resetConfirm": "Stare wiadomości E2EE nie będą możliwe do odszyfrowania po tej operacji. Kontynuować?",
-      "resetConfirmAction": "Tak, wygeneruj ponownie",
-      "enabledToast": "Szyfrowanie end-to-end włączone.",
-      "disabledToast": "Szyfrowanie end-to-end wyłączone.",
-      "toggleFailed": "Nie udało się zmienić ustawień szyfrowania.",
-      "loadFailed": "Nie udało się wczytać ustawień szyfrowania.",
-      "resetDone": "Klucze zostały zresetowane.",
-      "resetFailed": "Nie udało się zresetować kluczy.",
-      "clearOnLogout": "Usuń klucze E2EE po wylogowaniu",
-      "clearOnLogoutHint": "Po wylogowaniu lokalne klucze prywatne zostaną usunięte z tej przeglądarki.",
-      "identityChanged": "Klucz tożsamości rozmówcy uległ zmianie. Zweryfikuj odcisk przed kontynuowaniem rozmowy."
     },
     "accountExtra": {
       "authGroup": "Uwierzytelnianie",
@@ -831,13 +784,7 @@
       "closeChat": "Zamknij czat",
       "contactProfile": "Profil kontaktu",
       "channelLocked": "Czat na tym kanale jest zablokowany przez administratora.",
-      "mutedOnChannel": "Jesteś wyciszony na tym kanale i nie możesz wysyłać wiadomości.",
-      "e2eActive": "Rozmowa z szyfrowaniem E2EE",
-      "e2ePeerFingerprint": "Odcisk rozmówcy: {{fingerprint}}",
-      "e2eFallback": "Rozmówca nie ma włączonego E2EE — wiadomości idą bez dodatkowego szyfrowania end-to-end (warstwa transportowa nadal chroni treść).",
-      "e2eChannelFallback": "Na tym kanale nikt oprócz Ciebie nie ma E2EE — wiadomości idą bez dodatkowego szyfrowania end-to-end (warstwa transportowa nadal chroni treść).",
-      "e2eEncryptFailed": "Nie udało się zaszyfrować wiadomości E2EE. Spróbuj ponownie lub sprawdź klucze E2EE.",
-      "e2ePeerNotReady": "Nie udało się zaszyfrować tej wiadomości E2EE (rozmówca nie ma gotowych kluczy)."
+      "mutedOnChannel": "Jesteś wyciszony na tym kanale i nie możesz wysyłać wiadomości."
     },
     "bubble": {
       "edited": "edytowano",
@@ -870,7 +817,6 @@
       "chats": "Czaty",
       "contacts": "Kontakty",
       "settings": "Ustawienia",
-      "admin": "Administracja",
       "viewProfile": "Zobacz profil"
     },
     "mobile": {
@@ -925,14 +871,6 @@
         "confirmWithName": "Czy na pewno chcesz usunąć kanał „{{name}}”?",
         "messagesDeleted": "Wszystkie wiadomości zostaną trwale usunięte.",
         "submit": "Usuń kanał"
-      },
-      "authorizePanel": {
-        "title": "Autoryzacja panelu",
-        "subtitle": "Otworzy się okno dash.klovy.chat z prośbą o potwierdzenie.",
-        "question": "Czy na pewno chcesz autoryzować dostęp do panelu?",
-        "hint": "Po autoryzacji sesja komunikatora zostanie użyta w panelu. Root może zarządzać rolami użytkowników.",
-        "submit": "Autoryzuj i otwórz",
-        "opening": "Otwieranie…"
       }
     }
   },
@@ -982,7 +920,7 @@
         "rejoinHint": "Aby wrócić, musisz otrzymać nowe zaproszenie.",
         "submit": "Opuść kanał"
       },
-      "reportSentAdmin": "Zgłoszenie zostało wysłane do panelu administratora.",
+      "reportSentAdmin": "Zgłoszenie zostało wysłane do administratora.",
       "reportDetailsPlaceholder": "Opisz problem…",
       "inviteModal": {
         "title": "Zaproś na kanał",
@@ -1213,7 +1151,7 @@
         "deletionScheduledBody": "Możesz nadal korzystać z konta do {{date}}. Potem zostanie trwale usunięte. Możesz anulować poniżej.",
         "managementLead": "Wyłączenie konta natychmiast blokuje logowanie. Oznaczenie do usunięcia daje 7 dni na anulowanie — w tym czasie możesz normalnie korzystać z konta.",
         "disableTitle": "Wyłącz konto",
-        "disableDesc": "Natychmiast blokujemy logowanie. Profil, wiadomości i kontakty zostają w systemie — administrator może przywrócić konto w panelu moderacji.",
+        "disableDesc": "Natychmiast blokujemy logowanie. Profil, wiadomości i kontakty zostają w systemie — administrator może przywrócić konto.",
         "deleteTitle": "Oznacz konto do usunięcia",
         "deleteDesc": "Konto zostanie trwale usunięte po 7 dniach. Do tego czasu możesz się normalnie logować i anulować prośbę w ustawieniach.",
         "confirmDisable": "Potwierdź wyłączenie konta",
@@ -1306,216 +1244,6 @@
       "leaveFailed": "Nie udało się opuścić kanału",
       "avatarUploadFailed": "Nie udało się przesłać avatara kanału",
       "avatarRemoveFailed": "Nie udało się usunąć avatara kanału"
-    }
-  },
-  "admin": {
-    "brand": {
-      "title": "Panel moderacji"
-    },
-    "gate": {
-      "notConfigured": "Panel nie jest skonfigurowany",
-      "forbidden": "Brak uprawnień",
-      "loginRequired": "Wymagane logowanie",
-      "notConfiguredMsg": "Administrator nie ustawił ADMIN_USER_IDS w konfiguracji serwera.",
-      "forbiddenMsg": "Konto @{{username}} nie ma dostępu do panelu administratora.",
-      "forbiddenGeneric": "To konto nie ma uprawnień administratora.",
-      "ipNotAllowed": "Dostęp zablokowany",
-      "ipNotAllowedMsg": "Panel administratora jest dostępny tylko z dozwolonych adresów IP skonfigurowanych na serwerze (ADMIN_ALLOWED_IPS).",
-      "elevationRequired": "Wymagane potwierdzenie dostępu",
-      "elevationRequiredMsg": "Jesteś zalogowany jako administrator, ale musisz dodatkowo potwierdzić dostęp sekretem serwera (ADMIN_SECRET). Samo ID użytkownika w ADMIN_USER_IDS nie wystarczy.",
-      "elevationSecretLabel": "Sekret administratora",
-      "elevationSecretPlaceholder": "Wpisz ADMIN_SECRET z konfiguracji serwera",
-      "elevationSecretRequired": "Podaj sekret administratora.",
-      "elevationSubmit": "Potwierdź dostęp",
-      "elevationSubmitting": "Potwierdzanie…",
-      "elevationFailed": "Nie udało się potwierdzić dostępu administratora.",
-      "loginMsg": "Zaloguj się na swoje konto Klovy Chat. Dostęp do panelu mają tylko użytkownicy wskazani w konfiguracji serwera."
-    },
-    "modal": {
-      "ariaLabel": "Panel administratora",
-      "checkingPermissions": "Sprawdzanie uprawnień…"
-    },
-    "tabs": {
-      "users": "Użytkownicy",
-      "channels": "Kanały",
-      "badges": "Odznaki",
-      "announcements": "Ogłoszenia",
-      "reports": "Zgłoszenia",
-      "usersSubtitleWhitelist": "Zatwierdzaj nowe konta na whitelistę, blokuj i usuwaj użytkowników.",
-      "usersSubtitle": "Blokuj, odblokowuj i usuwaj konta użytkowników.",
-      "channelsSubtitle": "Przeglądaj, moderuj i usuwaj kanały tworzone przez użytkowników.",
-      "badgesSubtitle": "Twórz i przypisuj odznaki wyróżniające aktywnych i zaufanych członków.",
-      "announcementsSubtitle": "Publikuj globalne ogłoszenia i changelogi widoczne dla wszystkich użytkowników.",
-      "reportsSubtitle": "Rozpatruj zgłoszenia dotyczące treści i zachowań naruszających regulamin."
-    },
-    "status": {
-      "banned": "ZBANOWANY",
-      "pendingDeletion": "DO USUNIĘCIA",
-      "disabled": "WYŁĄCZONE",
-      "warned": "OSTRZEŻONY",
-      "inactive": "NIEAKTYWNE",
-      "active": "AKTYWNE",
-      "pending": "OCZEKUJE",
-      "reviewed": "ROZPATRZONE",
-      "dismissed": "ODRZUCONE",
-      "approved": "ZATWIERDZONY"
-    },
-    "severity": {
-      "low": "Niski",
-      "medium": "Średni",
-      "high": "Wysoki"
-    },
-    "stats": {
-      "total": "Łącznie",
-      "active": "Aktywni",
-      "banned": "Zbanowani",
-      "pendingWhitelist": "Oczekujący"
-    },
-    "whitelist": {
-      "enabledTitle": "Whitelist włączona",
-      "enabledBody": "Nowe konta wymagają zatwierdzenia. Oczekujących: {{count}}.",
-      "disabledTitle": "Whitelist wyłączona",
-      "disabledBody": "Nowe konta są automatycznie zatwierdzane. Aby włączyć whitelistę, ustaw WHITELIST_ENABLED=true w konfiguracji serwera i zrestartuj backend."
-    },
-    "toolbar": {
-      "searchUser": "twoja_nazwa",
-      "searchChannel": "nazwa_kanału",
-      "searchUserAria": "Szukaj użytkownika",
-      "searchChannelAria": "Szukaj kanału",
-      "whitelistFilter": "Filtr whitelisty",
-      "whitelistAll": "Wszyscy użytkownicy",
-      "whitelistPending": "Oczekujący na zatwierdzenie",
-      "whitelistApproved": "Zatwierdzeni",
-      "results": "Wyników",
-      "createBadge": "Utwórz nową odznakę",
-      "createAnnouncement": "Nowe ogłoszenie",
-      "refresh": "Odśwież"
-    },
-    "empty": {
-      "noUsers": "Brak użytkowników",
-      "noUsersSub": "Zmień filtry lub wyszukaj inną nazwę użytkownika.",
-      "noChannels": "Brak kanałów",
-      "noChannelsSub": "Nie znaleziono kanałów pasujących do wyszukiwania.",
-      "noBadges": "Brak odznak",
-      "noBadgesSub": "Utwórz nową odznakę, aby móc ją przypisywać użytkownikom.",
-      "noAnnouncements": "Brak ogłoszeń",
-      "noAnnouncementsSub": "Opublikuj changelog lub ważną informację dla całej społeczności.",
-      "noReports": "Brak zgłoszeń",
-      "noReportsSub": "Nie ma oczekujących zgłoszeń do rozpatrzenia.",
-      "noWarnings": "Brak ostrzeżeń."
-    },
-    "users": {
-      "joined": "Dołączył",
-      "warnings": "Ostrzeżenia",
-      "deletionScheduled": "Usunięcie zaplanowane: {{date}}",
-      "disabledByUser": "Konto wyłączone przez użytkownika",
-      "approve": "Zatwierdź",
-      "revokeWhitelist": "Cofnij whitelistę",
-      "assignBadge": "Przyznaj odznaką",
-      "warn": "Ostrzeż",
-      "warningsCount": "Ostrzeżenia ({{count}})",
-      "unban": "Odbanuj",
-      "ban": "Ban",
-      "restore": "Przywróć konto",
-      "resetPassword": "Zmień hasło",
-      "defaultBanReason": "Naruszenie regulaminu komunikatora.",
-      "owner": "Właściciel",
-      "members": "Członków",
-      "messages": "Wiadomości",
-      "created": "Utworzono",
-      "reporter": "Zgłaszający",
-      "review": "Rozpatrz",
-      "dismiss": "Odrzuć",
-      "deleteChannel": "Usuń kanał",
-      "deleteReport": "Usuń zgłoszenie",
-      "edit": "Edytuj"
-    },
-    "actions": {
-      "options": "Opcje"
-    },
-    "announcements": {
-      "active": "AKTYWNE",
-      "inactive": "WYŁĄCZONE",
-      "activate": "Aktywuj",
-      "deactivate": "Wyłącz"
-    },
-    "modals": {
-      "ban": {
-        "title": "Ban użytkownika",
-        "body": "Nałóż ban na @{{username}}. Użytkownik nie będzie mógł się zalogować do czasu odbanowania.",
-        "reason": "Powód (opcjonalnie)",
-        "reasonPlaceholder": "Np. naruszenie regulaminu, spam…",
-        "submit": "Nałóż ban"
-      },
-      "resetPassword": {
-        "title": "Reset hasła",
-        "body": "Ustaw nowe hasło dla @{{username}}. Wszystkie aktywne sesje użytkownika zostaną wylogowane.",
-        "password": "Nowe hasło",
-        "passwordPlaceholder": "Min. 8 znaków, wielka/mała litera, cyfra, znak specjalny",
-        "confirm": "Potwierdź hasło",
-        "mismatch": "Hasła nie są takie same.",
-        "submit": "Ustaw hasło",
-        "success": "Hasło zostało zresetowane. Użytkownik musi zalogować się ponownie."
-      },
-      "delete": {
-        "title": "Potwierdź usunięcie",
-        "body": "Czy na pewno chcesz trwale usunąć {{label}}? Tej operacji nie można cofnąć."
-      },
-      "badge": {
-        "createTitle": "Utwórz nową odznakę",
-        "editTitle": "Edytuj odznakę",
-        "name": "Nazwa",
-        "namePlaceholder": "np. Wczesny wspierający",
-        "icon": "Ikona z Lucide",
-        "iconPlaceholder": "np. Star, Shield, Heart, Award",
-        "iconHint": "Nazwy ikon z biblioteki Lucide React",
-        "color": "Kolor (hex)",
-        "colorPlaceholder": "#8b5cf6",
-        "description": "Opis (opcjonalnie)",
-        "descriptionPlaceholder": "Krótki opis odznaki"
-      },
-      "assignBadge": {
-        "title": "Odznaki użytkownika",
-        "hint": "@{{username}} · kliknij odznakę poniżej, aby ją przypisać. Każdy typ odznaki można nadać tylko raz.",
-        "assigned": "Przypisane odznaki",
-        "loading": "Ładowanie odznak użytkownika…",
-        "empty": "Ten użytkownik nie ma jeszcze żadnych odznak.",
-        "add": "Dodaj odznakę",
-        "noBadges": "Brak dostępnych odznak. Utwórz je najpierw w zakładce Odznaki.",
-        "alreadyAssigned": "Już przypisana",
-        "clickToAssign": "Kliknij, aby nadać",
-        "assignedAt": "Nadano {{date}}"
-      },
-      "warn": {
-        "title": "Ostrzeżenie użytkownika",
-        "body": "Wystaw ostrzeżenie dla @{{username}}. Użytkownik zobaczy je w aplikacji i będzie musiał je potwierdzić. Ostrzeżenia służą do reagowania na drobne lub pierwszorazowe naruszenia regulaminu.",
-        "severity": "Waga naruszenia",
-        "severityLow": "Niski — drobne naruszenie",
-        "severityMedium": "Średni — powtarzające się zachowanie",
-        "severityHigh": "Wysoki — poważne naruszenie",
-        "reasonPlaceholder": "Opisz naruszenie, np. spam, obraźliwe treści, nieodpowiednia nazwa…",
-        "submit": "Wystaw ostrzeżenie"
-      },
-      "warnings": {
-        "title": "Ostrzeżenia @{{username}}",
-        "delete": "Usuń ostrzeżenie",
-        "loadFailed": "Nie udało się pobrać ostrzeżeń."
-      },
-      "announcement": {
-        "createTitle": "Nowe ogłoszenie",
-        "editTitle": "Edytuj ogłoszenie",
-        "lead": "Krótka informacja widoczna dla wszystkich użytkowników po zalogowaniu.",
-        "title": "Tytuł",
-        "titlePlaceholder": "np. Aktualizacja v2.1 — nowe funkcje",
-        "body": "Treść",
-        "bodyPlaceholder": "Opisz zmiany, nowości lub ważne informacje…",
-        "active": "Publikuj jako aktywne (widoczne dla użytkowników)",
-        "publish": "Opublikuj"
-      }
-    },
-    "errors": {
-      "loadFailed": "Nie udało się załadować danych.",
-      "operationFailed": "Operacja nie powiodła się."
     }
   },
   "call": {

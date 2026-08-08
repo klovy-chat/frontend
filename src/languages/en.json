@@ -79,7 +79,6 @@
     "closePanel": "Close panel",
     "closeSettings": "Close settings",
     "accountSettings": "Account settings",
-    "adminPanel": "Admin panel",
     "checkingPermissions": "Checking permissions…",
     "goToLogin": "Go to login",
     "logout": "Log out",
@@ -350,10 +349,6 @@
     "file": "File: {{name}}",
     "attachment": "Attachment",
     "default": "Message",
-    "e2e": {
-      "decryptFailed": "Cannot decrypt message",
-      "encrypted": "End-to-end encrypted message"
-    },
     "thisMessage": "This message",
     "quote": {
       "jumpTo": "Jump to message"
@@ -470,7 +465,6 @@
     },
     "errors": {
       "invalidLogin": "Invalid username or password.",
-      "invalidAdminLogin": "Invalid login, password, or authentication code.",
       "loginFailed": "Login error",
       "signupFailed": "Registration error",
       "twoFactorStartFailed": "Could not start 2FA verification."
@@ -591,7 +585,6 @@
       "profile": "Profile",
       "sessions": "Devices",
       "voice": "Voice settings",
-      "encryption": "Encryption",
       "bots": "Bots",
       "integrations": "Integrations",
       "warnings": "Warnings",
@@ -645,7 +638,7 @@
       "deletionScheduledBody": "You can still use your account until {{date}}. It will then be permanently deleted. You can cancel below.",
       "managementLead": "Disabling your account immediately blocks sign-in. Marking for deletion gives you 7 days to cancel — during that time you can use the account normally.",
       "disableTitle": "Disable account",
-      "disableDesc": "We immediately block sign-in. Profile, messages and contacts remain — an administrator can restore the account in the moderation panel.",
+      "disableDesc": "We immediately block sign-in. Profile, messages and contacts remain — an administrator can restore the account.",
       "deleteTitle": "Mark account for deletion",
       "deleteDesc": "The account will be permanently deleted after 7 days. Until then you can sign in normally and cancel the request in settings.",
       "confirmDisable": "Confirm account disable",
@@ -677,46 +670,6 @@
     "language": {
       "title": "Language",
       "chooseLanguage": "Choose your language"
-    },
-    "encryption": {
-      "title": "End-to-end encryption",
-      "panelLead": "Open the panel below for keys, identity fingerprint, and advanced options.",
-      "manage": "Manage encryption",
-      "subtitle": "Message content in DMs and channels can be encrypted locally with Signal Protocol keys. The server only stores ciphertext and public keys.",
-      "toggle": "End-to-end encryption",
-      "status": {
-        "disabled": "Disabled — new messages are sent as plain text.",
-        "generating": "Generating keys…",
-        "active": "Active — new messages to E2EE-capable contacts are encrypted."
-      },
-      "statusShort": {
-        "disabled": "Off",
-        "generating": "…",
-        "active": "On"
-      },
-      "fingerprintLabel": "Identity key fingerprint",
-      "fingerprintHint": "Compare this code with your contact (e.g. over a call) to verify the session is not intercepted.",
-      "limitationsTitle": "Limitations",
-      "limitations": {
-        "search": "Server-side content search does not include E2EE messages.",
-        "preview": "Link previews and mentions for E2EE messages require client-side logic (limited in this version).",
-        "attachments": "GIF/sticker pickers and pasted image links are uploaded and encrypted like other attachments.",
-        "metadata": "Who talks to whom and when is still visible to the server (standard E2EE metadata limitation).",
-        "deviceLoss": "Losing this device without a key backup means you cannot decrypt old E2EE history.",
-        "plaintextHistory": "Messages sent before enabling E2EE remain plain text."
-      },
-      "resetKeys": "Regenerate keys",
-      "resetConfirm": "Old E2EE messages will no longer be decryptable after this operation. Continue?",
-      "resetConfirmAction": "Yes, regenerate",
-      "enabledToast": "End-to-end encryption enabled.",
-      "disabledToast": "End-to-end encryption disabled.",
-      "toggleFailed": "Could not change encryption settings.",
-      "loadFailed": "Could not load encryption settings.",
-      "resetDone": "Keys have been reset.",
-      "resetFailed": "Could not reset keys.",
-      "clearOnLogout": "Remove E2EE keys on logout",
-      "clearOnLogoutHint": "Private keys are removed from this browser when you log out.",
-      "identityChanged": "Your contact's identity key changed. Verify their fingerprint before continuing."
     },
     "accountExtra": {
       "authGroup": "Authentication",
@@ -831,13 +784,7 @@
       "closeChat": "Close chat",
       "contactProfile": "Contact profile",
       "channelLocked": "Chat on this channel is locked by an administrator.",
-      "mutedOnChannel": "You are muted on this channel and cannot send messages.",
-      "e2eActive": "End-to-end encrypted conversation",
-      "e2ePeerFingerprint": "Contact fingerprint: {{fingerprint}}",
-      "e2eFallback": "This contact does not have E2EE enabled — messages are sent without extra end-to-end encryption (transport-layer protection still applies).",
-      "e2eChannelFallback": "No other member on this channel has E2EE — messages are sent without extra end-to-end encryption (transport-layer protection still applies).",
-      "e2eEncryptFailed": "Could not encrypt this message with E2EE. Try again or check your E2EE keys.",
-      "e2ePeerNotReady": "Could not encrypt this message with E2EE (the other party does not have keys ready)."
+      "mutedOnChannel": "You are muted on this channel and cannot send messages."
     },
     "bubble": {
       "edited": "edited",
@@ -870,7 +817,6 @@
       "chats": "Chats",
       "contacts": "Contacts",
       "settings": "Settings",
-      "admin": "Administration",
       "viewProfile": "View profile"
     },
     "mobile": {
@@ -925,14 +871,6 @@
         "confirmWithName": "Are you sure you want to delete channel \"{{name}}\"?",
         "messagesDeleted": "All messages will be permanently deleted.",
         "submit": "Delete channel"
-      },
-      "authorizePanel": {
-        "title": "Panel authorization",
-        "subtitle": "A dash.klovy.chat window will open asking you to confirm.",
-        "question": "Do you really want to authorize panel access?",
-        "hint": "After authorization, your messenger session will be used in the panel. Root can manage user roles.",
-        "submit": "Authorize and open",
-        "opening": "Opening…"
       }
     }
   },
@@ -982,7 +920,7 @@
         "rejoinHint": "To rejoin, you will need a new invite.",
         "submit": "Leave channel"
       },
-      "reportSentAdmin": "Report was sent to the admin panel.",
+      "reportSentAdmin": "Report was sent to an administrator.",
       "reportDetailsPlaceholder": "Describe the issue…",
       "inviteModal": {
         "title": "Invite to channel",
@@ -1213,7 +1151,7 @@
         "deletionScheduledBody": "You can still use your account until {{date}}. It will then be permanently deleted. You can cancel below.",
         "managementLead": "Disabling your account immediately blocks sign-in. Marking for deletion gives you 7 days to cancel — during that time you can use the account normally.",
         "disableTitle": "Disable account",
-        "disableDesc": "We immediately block sign-in. Profile, messages and contacts remain — an administrator can restore the account in the moderation panel.",
+        "disableDesc": "We immediately block sign-in. Profile, messages and contacts remain — an administrator can restore the account.",
         "deleteTitle": "Mark account for deletion",
         "deleteDesc": "The account will be permanently deleted after 7 days. Until then you can sign in normally and cancel the request in settings.",
         "confirmDisable": "Confirm account disable",
@@ -1306,216 +1244,6 @@
       "leaveFailed": "Could not leave channel",
       "avatarUploadFailed": "Could not upload channel avatar",
       "avatarRemoveFailed": "Could not remove channel avatar"
-    }
-  },
-  "admin": {
-    "brand": {
-      "title": "Moderation panel"
-    },
-    "gate": {
-      "notConfigured": "Panel is not configured",
-      "forbidden": "Access denied",
-      "loginRequired": "Sign-in required",
-      "notConfiguredMsg": "The administrator has not set ADMIN_USER_IDS in the server configuration.",
-      "forbiddenMsg": "Account @{{username}} does not have access to the admin panel.",
-      "forbiddenGeneric": "This account does not have administrator permissions.",
-      "ipNotAllowed": "Access blocked",
-      "ipNotAllowedMsg": "The admin panel is only available from IP addresses allowed in the server configuration (ADMIN_ALLOWED_IPS).",
-      "elevationRequired": "Access confirmation required",
-      "elevationRequiredMsg": "You are signed in as an administrator, but you must also confirm access with the server secret (ADMIN_SECRET). Being listed in ADMIN_USER_IDS alone is not enough.",
-      "elevationSecretLabel": "Administrator secret",
-      "elevationSecretPlaceholder": "Enter ADMIN_SECRET from the server configuration",
-      "elevationSecretRequired": "Enter the administrator secret.",
-      "elevationSubmit": "Confirm access",
-      "elevationSubmitting": "Confirming…",
-      "elevationFailed": "Could not confirm administrator access.",
-      "loginMsg": "Sign in to your Klovy Chat account. Only users listed in the server configuration can access the panel."
-    },
-    "modal": {
-      "ariaLabel": "Admin panel",
-      "checkingPermissions": "Checking permissions…"
-    },
-    "tabs": {
-      "users": "Users",
-      "channels": "Channels",
-      "badges": "Badges",
-      "announcements": "Announcements",
-      "reports": "Reports",
-      "usersSubtitleWhitelist": "Approve new accounts to the whitelist, ban and delete users.",
-      "usersSubtitle": "Ban, unban and delete user accounts.",
-      "channelsSubtitle": "Browse, moderate and delete channels created by users.",
-      "badgesSubtitle": "Create and assign badges highlighting active and trusted members.",
-      "announcementsSubtitle": "Publish global changelogs and important updates visible to all users.",
-      "reportsSubtitle": "Review reports about content and behavior that violate the terms."
-    },
-    "status": {
-      "banned": "BANNED",
-      "pendingDeletion": "PENDING DELETION",
-      "disabled": "DISABLED",
-      "warned": "WARNED",
-      "inactive": "INACTIVE",
-      "active": "ACTIVE",
-      "pending": "PENDING",
-      "reviewed": "REVIEWED",
-      "dismissed": "DISMISSED",
-      "approved": "APPROVED"
-    },
-    "severity": {
-      "low": "Low",
-      "medium": "Medium",
-      "high": "High"
-    },
-    "stats": {
-      "total": "Total",
-      "active": "Active",
-      "banned": "Banned",
-      "pendingWhitelist": "Pending"
-    },
-    "whitelist": {
-      "enabledTitle": "Whitelist enabled",
-      "enabledBody": "New accounts require approval. Pending: {{count}}.",
-      "disabledTitle": "Whitelist disabled",
-      "disabledBody": "New accounts are approved automatically. To enable the whitelist, set WHITELIST_ENABLED=true in the server config and restart the backend."
-    },
-    "toolbar": {
-      "searchUser": "your_username",
-      "searchChannel": "channel_name",
-      "searchUserAria": "Search user",
-      "searchChannelAria": "Search channel",
-      "whitelistFilter": "Whitelist filter",
-      "whitelistAll": "All users",
-      "whitelistPending": "Pending approval",
-      "whitelistApproved": "Approved",
-      "results": "Results",
-      "createBadge": "Create new badge",
-      "createAnnouncement": "New announcement",
-      "refresh": "Refresh"
-    },
-    "empty": {
-      "noUsers": "No users",
-      "noUsersSub": "Change filters or search for another username.",
-      "noChannels": "No channels",
-      "noChannelsSub": "No channels matched your search.",
-      "noBadges": "No badges",
-      "noBadgesSub": "Create a new badge to assign it to users.",
-      "noReports": "No reports",
-      "noReportsSub": "There are no pending reports to review.",
-      "noAnnouncements": "No announcements",
-      "noAnnouncementsSub": "Create a new announcement to notify all users about updates or changes.",
-      "noWarnings": "No warnings."
-    },
-    "users": {
-      "joined": "Joined",
-      "warnings": "Warnings",
-      "deletionScheduled": "Deletion scheduled: {{date}}",
-      "disabledByUser": "Account disabled by user",
-      "approve": "Approve",
-      "revokeWhitelist": "Revoke whitelist",
-      "assignBadge": "Assign badge",
-      "warn": "Warn",
-      "warningsCount": "Warnings ({{count}})",
-      "unban": "Unban",
-      "ban": "Ban",
-      "restore": "Restore account",
-      "resetPassword": "Reset password",
-      "defaultBanReason": "Messenger terms of service violation.",
-      "owner": "Owner",
-      "members": "Members",
-      "messages": "Messages",
-      "created": "Created",
-      "reporter": "Reporter",
-      "review": "Review",
-      "dismiss": "Reject",
-      "deleteChannel": "Delete channel",
-      "deleteReport": "Delete report",
-      "edit": "Edit"
-    },
-    "actions": {
-      "options": "Options"
-    },
-    "announcements": {
-      "active": "ACTIVE",
-      "inactive": "DISABLED",
-      "activate": "Activate",
-      "deactivate": "Deactivate"
-    },
-    "modals": {
-      "ban": {
-        "title": "Ban user",
-        "body": "Ban @{{username}}. The user cannot sign in until unbanned.",
-        "reason": "Reason (optional)",
-        "reasonPlaceholder": "E.g. terms violation, spam…",
-        "submit": "Apply ban"
-      },
-      "resetPassword": {
-        "title": "Reset password",
-        "body": "Set a new password for @{{username}}. All of their active sessions will be signed out.",
-        "password": "New password",
-        "passwordPlaceholder": "Min. 8 chars, upper/lower, digit, special character",
-        "confirm": "Confirm password",
-        "mismatch": "Passwords do not match.",
-        "submit": "Set password",
-        "success": "Password was reset. The user must sign in again."
-      },
-      "delete": {
-        "title": "Confirm deletion",
-        "body": "Are you sure you want to permanently delete {{label}}? This cannot be undone."
-      },
-      "badge": {
-        "createTitle": "Create new badge",
-        "editTitle": "Edit badge",
-        "name": "Name",
-        "namePlaceholder": "e.g. Early supporter",
-        "icon": "Lucide icon",
-        "iconPlaceholder": "e.g. Star, Shield, Heart, Award",
-        "iconHint": "Icon names from the Lucide React library",
-        "color": "Color (hex)",
-        "colorPlaceholder": "#8b5cf6",
-        "description": "Description (optional)",
-        "descriptionPlaceholder": "Short badge description"
-      },
-      "assignBadge": {
-        "title": "User badges",
-        "hint": "@{{username}} · click a badge below to assign it. Each badge type can be granted only once.",
-        "assigned": "Assigned badges",
-        "loading": "Loading user badges…",
-        "empty": "This user has no badges yet.",
-        "add": "Add badge",
-        "noBadges": "No badges available. Create them first in the Badges tab.",
-        "alreadyAssigned": "Already assigned",
-        "clickToAssign": "Click to assign",
-        "assignedAt": "Assigned {{date}}"
-      },
-      "warn": {
-        "title": "Warn user",
-        "body": "Issue a warning to @{{username}}. They will see it in the app and must acknowledge it. Warnings address minor or first-time terms violations.",
-        "severity": "Violation severity",
-        "severityLow": "Low — minor violation",
-        "severityMedium": "Medium — repeated behavior",
-        "severityHigh": "High — serious violation",
-        "reasonPlaceholder": "Describe the violation, e.g. spam, offensive content, inappropriate name…",
-        "submit": "Issue warning"
-      },
-      "warnings": {
-        "title": "Warnings for @{{username}}",
-        "delete": "Delete warning",
-        "loadFailed": "Could not load warnings."
-      },
-      "announcement": {
-        "createTitle": "New announcement",
-        "editTitle": "Edit announcement",
-        "lead": "A short notice shown to all users after they sign in.",
-        "title": "Title",
-        "titlePlaceholder": "e.g. Update v2.1 — new features",
-        "body": "Content",
-        "bodyPlaceholder": "Describe changes, new features or important information…",
-        "active": "Publish as active (visible to users)",
-        "publish": "Publish"
-      }
-    },
-    "errors": {
-      "loadFailed": "Could not load data.",
-      "operationFailed": "Operation failed."
     }
   },
   "call": {

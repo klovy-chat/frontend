@@ -151,8 +151,6 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
-      <Route path="/admin/login" element={<Navigate to="/" replace />} />
-      <Route path="/admin" element={<Navigate to="/" replace />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

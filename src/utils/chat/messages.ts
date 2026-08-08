@@ -11,7 +11,6 @@ import {
 import { isVideoAttachment, isVoiceAttachment } from "../media/attachments";
 import type { Message, MessageUser } from "../../types";
 import {
-  isE2eCiphertextContent,
   readableContentForPreview,
 } from "../../crypto/messageContent";
 
@@ -45,23 +44,11 @@ export function getMessagePreview(
     | "fileName"
     | "durationMs"
     | "deleted"
-    | "e2eEncrypted"
-    | "e2eDecryptFailed"
   >,
 ): string {
   if (message.deleted) return i18n.t("messages.deleted");
-  if (message.e2eDecryptFailed) return i18n.t("messages.e2e.decryptFailed");
-  if (
-    message.e2eEncrypted ||
-    isE2eCiphertextContent(message.content)
-  ) {
-    return i18n.t("messages.e2e.encrypted");
-  }
 
-  const readable = readableContentForPreview(
-    message.content,
-    message.e2eEncrypted,
-  );
+  const readable = readableContentForPreview(message.content);
 
   if (isOnlyExternalMediaContent(readable)) {
     const media = extractExternalMediaLinks(readable);
@@ -96,9 +83,6 @@ export function getMessagePreview(
 /** Podgląd ostatniej wiadomości z listy kontaktów/kanałów (surowy opaque z API). */
 export function formatListLastMessage(raw?: string): string {
   if (!raw?.trim()) return "";
-  if (isE2eCiphertextContent(raw)) {
-    return i18n.t("messages.e2e.encrypted");
-  }
   const text = stripFormatting(readableContentForPreview(raw)).trim();
   if (!text) return i18n.t("messages.default");
   return text.length > 120 ? `${text.slice(0, 120)}…` : text;

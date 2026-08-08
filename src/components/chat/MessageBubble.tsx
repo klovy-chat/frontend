@@ -19,7 +19,6 @@ import {
 import { isVideoAttachment, isVoiceAttachment } from "../../utils/media/attachments";
 import { isOnlyInviteLinkContent } from "../../utils/chat/linkEmbeds";
 import type { Message, MessageUser } from "../../types";
-import { useE2eAttachmentBlobUrl } from "../../crypto/e2e/useE2eAttachmentBlobUrl";
 import "../../styles/chat/messagebubble.css";
 
 interface MessageBubbleProps {
@@ -107,20 +106,7 @@ export function MessageBubble({
   const reactionEntries = getReactionEntries(message.reactions);
   const showToolbar = canReact || showMenu;
 
-  const e2eAttachment = useE2eAttachmentBlobUrl(message);
-  const isE2eAttachment = Boolean(message.e2eAttachment && message.fileUrl);
-  const resolvedFileUrl =
-    e2eAttachment.url ?? (isE2eAttachment ? "" : message.fileUrl ?? "");
-
-  const renderE2eAttachmentFailed = () => (
-    <p className="message-text message-text--e2e-failed">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-      </svg>
-      {t("messages.e2e.decryptFailed")}
-    </p>
-  );
+  const resolvedFileUrl = message.fileUrl ?? "";
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -412,41 +398,29 @@ export function MessageBubble({
 
             {isFile && message.fileUrl ? (
               <>
-                {isE2eAttachment && e2eAttachment.failed ? renderE2eAttachmentFailed() : null}
-                {isE2eAttachment && e2eAttachment.loading ? (
-                  <p className="message-text message-text--e2e-loading">{t("common.loading")}</p>
-                ) : null}
                 {isSticker ? (
-                  !isE2eAttachment || e2eAttachment.url ? (
+                  <MediaImage
+                    fileUrl={message.fileUrl}
+                    alt={message.fileName ?? message.content ?? t("messages.sticker")}
+                    className="message-sticker"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                ) : message.messageType === "IMAGE" ? (
+                  <button
+                    type="button"
+                    className="message-image-container"
+                    onClick={() => onImageClick?.(message)}
+                    aria-label={t("messages.actions.openPreview", { name: message.fileName ?? t("messages.image") })}
+                  >
                     <MediaImage
-                      fileUrl={isE2eAttachment ? e2eAttachment.url! : message.fileUrl}
-                      alt={message.fileName ?? message.content ?? t("messages.sticker")}
-                      className="message-sticker"
-                      loading="lazy"
+                      fileUrl={resolveChatImagePreviewUrl(message.fileUrl)}
+                      fallbackFileUrl={message.fileUrl}
+                      alt={message.fileName ?? t("messages.image")}
+                      className="message-image"
                       decoding="async"
                     />
-                  ) : null
-                ) : message.messageType === "IMAGE" ? (
-                  !isE2eAttachment || e2eAttachment.url ? (
-                    <button
-                      type="button"
-                      className="message-image-container"
-                      onClick={() => onImageClick?.(message)}
-                      aria-label={t("messages.actions.openPreview", { name: message.fileName ?? t("messages.image") })}
-                    >
-                      <MediaImage
-                        fileUrl={
-                          isE2eAttachment
-                            ? e2eAttachment.url!
-                            : resolveChatImagePreviewUrl(message.fileUrl)
-                        }
-                        fallbackFileUrl={isE2eAttachment ? undefined : message.fileUrl}
-                        alt={message.fileName ?? t("messages.image")}
-                        className="message-image"
-                        decoding="async"
-                      />
-                    </button>
-                  ) : null
+                  </button>
                 ) : isVideo ? (
                   <VideoMessagePlayer
                     src={resolvedFileUrl}
@@ -481,17 +455,7 @@ export function MessageBubble({
               </>
             ) : (
               <>
-                {message.e2eDecryptFailed ? (
-                  <p className="message-text message-text--e2e-failed">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                    </svg>
-                    {t("messages.e2e.decryptFailed")}
-                  </p>
-                ) : null}
-                {!message.e2eDecryptFailed &&
-                !shouldHideTextForExternalMedia(message.content) &&
+                {!shouldHideTextForExternalMedia(message.content) &&
                   !isOnlyInviteLinkContent(message.content) && (
                   <p className="message-text">
                     {renderFormattedText(message.content, {
@@ -517,18 +481,6 @@ export function MessageBubble({
             )}
 
             <div className="message-meta">
-              {message.e2eEncrypted ? (
-                <span
-                  className="message-e2e-lock"
-                  title={t("messages.e2e.encrypted")}
-                  aria-label={t("messages.e2e.encrypted")}
-                >
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                  </svg>
-                </span>
-              ) : null}
               <span className="message-time">{formatMessageTime(message.timestamp)}</span>
               {message.edited && <span className="message-edited">· {t("chat.bubble.edited")}</span>}
               {isOwn && showReadReceipt && <ReadReceipt read={message.read} />}

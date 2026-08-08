@@ -34,9 +34,6 @@ export interface User {
   isWhitelisted?: boolean;
   isWhitelistEnabled?: boolean;
   twoFactorEnabled?: boolean;
-  e2eEnabled?: boolean;
-  isPanelAdmin?: boolean;
-  panelRole?: "root" | "admin" | "moderator" | "support" | null;
   isDisabled?: boolean;
   deletionScheduledAt?: string | null;
   badges?: Badge[];
@@ -150,16 +147,6 @@ export interface Message {
   quotedMessage?: Message | string | null;
   mentions?: MessageUser[];
   mentionsEveryone?: boolean;
-  e2eEncrypted?: boolean;
-  e2eVersion?: number;
-  e2eDecryptFailed?: boolean;
-  e2eAttachment?: {
-    _e2eAttachment: true;
-    fileName: string;
-    fileType: string;
-    fileKey: string;
-    fileIv: string;
-  };
 }
 
 export type MessageReactions = Record<string, string[]>;
