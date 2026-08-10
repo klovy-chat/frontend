@@ -54,11 +54,21 @@ function backendProxy(
     target,
     changeOrigin: true,
     ws,
-    configure: (proxy) => attachBackendProxyGuard(proxy, label, target),
+    configure: (proxy) => {
+      attachBackendProxyGuard(proxy, label, target);
+      if (!ws) return;
+
+      // Niektóre warstwy pośrednie zdejmują hop-by-hop `Connection` — bez
+      // `upgrade` Axum odrzuca handshake ("Connection header did not include 'upgrade'").
+      proxy.on("proxyReqWs", (proxyReq) => {
+        proxyReq.setHeader("Connection", "Upgrade");
+        proxyReq.setHeader("Upgrade", "websocket");
+      });
+    },
   };
 }
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ mode, command }) => {
   const env = loadEnv(mode, process.cwd(), "");
   const backendUrl = normalizeBackendUrl(env.VITE_BACKEND_URL || "");
 
@@ -82,15 +92,27 @@ export default defineConfig(({ mode }) => {
       if (host === "127.0.0.1" || host === "::1" || host === "[::1]") {
         throw new Error("loopback");
       }
-    } catch {
+      if (parsed.protocol !== "https:") {
+        throw new Error(
+          "VITE_BACKEND_URL must use HTTPS for production builds (cookies/WS require secure origin).",
+        );
+      }
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("HTTPS")) {
+        throw error;
+      }
       throw new Error(
-        "VITE_BACKEND_URL must be a valid public backend URL for production builds.",
+        "VITE_BACKEND_URL must be a valid public HTTPS backend URL for production builds.",
       );
     }
   }
 
   return {
-    plugins: [react(), cloudflare()],
+    // `@cloudflare/vite-plugin` w `vite dev` przejmuje upgrade WebSocket i
+    // kieruje go do Miniflare zamiast do `server.proxy` — przez to backend
+    // dostaje zwykły GET bez `Connection: upgrade`. Plugin zostawiamy na build
+    // (Pages/Workers); lokalny dev idzie na czystym Vite + proxy.
+    plugins: [react(), ...(command === "build" ? [cloudflare()] : [])],
     server: {
       host: "127.0.0.1",
       port: 5173,

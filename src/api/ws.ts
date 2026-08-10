@@ -158,7 +158,23 @@ export class WebSocketClient {
     if (this.closed) return;
 
     this.setStatus("connecting");
-    await this.ensureFrameCrypto();
+    try {
+      await this.ensureFrameCrypto();
+    } catch (err) {
+      // Prod wymaga szyfrowania ramek — chwilowy 502/CSRF na /ws-crypto nie może
+      // zostawić statusu "connecting" bez pętli reconnect.
+      if (import.meta.env.DEV) {
+        console.warn("[ws] Nie udało się pobrać klucza szyfrującego:", err);
+      }
+      this.scheduleReconnect();
+      return;
+    }
+
+    // W produkcji backend odrzuca handshake bez tokenu szyfrowania.
+    if (usesDirectBackendUrl && !this.activeCrypto?.token) {
+      this.scheduleReconnect();
+      return;
+    }
 
     this.ws = new WebSocket(getWsUrl(this.activeCrypto?.token));
     this.ws.binaryType = "arraybuffer";
