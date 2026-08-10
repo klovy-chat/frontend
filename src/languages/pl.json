@@ -586,7 +586,6 @@
       "sessions": "Urządzenia",
       "voice": "Ustawienia głosu",
       "bots": "Boty",
-      "integrations": "Integracje",
       "warnings": "Ostrzeżenia",
       "app": "Ustawienia klienta",
       "logout": "Wyloguj się",
@@ -832,8 +831,7 @@
       "channelRenameFailed": "Nie udało się zmienić nazwy kanału",
       "channelAvatarFailed": "Nie udało się załadować avatara kanału",
       "channelDeleteFailed": "Nie udało się usunąć kanału",
-      "muteFailed": "Nie udało się zmienić wyciszenia",
-      "spotifyFailed": "Logowanie Spotify nie powiodło się."
+      "muteFailed": "Nie udało się zmienić wyciszenia"
     },
     "context": {
       "viewProfile": "Zobacz profil",
@@ -995,42 +993,6 @@
         "unblock": "Odblokuj"
       }
     },
-    "integrations": {
-      "title": "Integracje",
-      "subtitle": "Połącz swoje konta — widoczne w profilu dla znajomych",
-      "connect": "Połącz",
-      "disconnect": "Odłącz",
-      "connected": "Konto {{provider}} połączone.",
-      "disconnected": "Konto odłączone.",
-      "connectFailed": "Nie udało się połączyć konta.",
-      "disconnectFailed": "Nie udało się odłączyć konta.",
-      "loadFailed": "Nie udało się wczytać integracji.",
-      "notConfigured": "Nie skonfigurowano na serwerze (brak kluczy OAuth).",
-      "notConnectedHint": "Połącz konto, aby wyświetlać je w profilu.",
-      "noPublicApi": "Brak publicznego OAuth API dla tej platformy.",
-      "spotify": {
-        "title": "Spotify",
-        "intro": "Połącz konto Spotify, aby znajomi widzieli, czego aktualnie słuchasz w Twoim profilu.",
-        "notConfigured": "Integracja Spotify nie jest skonfigurowana na serwerze (brak zmiennych SPOTIFY_*).",
-        "notConnectedHint": "Połącz konto, aby wyświetlać je w profilu.",
-        "connect": "Połącz",
-        "disconnect": "Odłącz",
-        "shareListening": "Pokazuj znajomym, czego słucham",
-        "toastConnected": "Połączono ze Spotify.",
-        "toastDisconnected": "Odłączono konto Spotify.",
-        "authIncomplete": "Autoryzacja Spotify zakończyła się, ale połączenie nie zostało zapisane. Kliknij „Połącz ze Spotify” ponownie.",
-        "loadFailed": "Nie udało się wczytać statusu.",
-        "loginFailed": "Nie udało się rozpocząć logowania Spotify.",
-        "disconnectFailed": "Nie udało się odłączyć Spotify.",
-        "syncDetected": "Wykryto odtwarzanie: {{track}}{{artist}}. Otwórz swój profil, aby zobaczyć sekcję „Aktualnie słucha”.",
-        "shareRequired": "Włącz „Pokazuj znajomym, czego słucham”, aby udostępnić utwór w profilu.",
-        "noPlayback": "Spotify nie zgłasza aktywnego odtwarzania. Odtwórz muzykę w aplikacji Spotify lub open.spotify.com (nie wystarczy sama zakładka bez play), a potem kliknij „Sprawdź teraz” ponownie.",
-        "syncFailed": "Synchronizacja Spotify nie powiodła się.",
-        "shareOn": "Znajomi będą widzieć, czego słuchasz.",
-        "shareOff": "Ukryto aktywność słuchania przed znajomymi.",
-        "saveFailed": "Nie udało się zapisać ustawień."
-      }
-    },
     "bots": {
       "title": "Boty",
       "guide": {
@@ -1101,7 +1063,6 @@
         "sessions": "Urządzenia",
         "voice": "Ustawienia głosu",
         "bots": "Boty",
-        "integrations": "Integracje",
         "warnings": "Ostrzeżenia",
         "app": "Ustawienia klienta",
         "logout": "Wyloguj się",
@@ -1185,15 +1146,6 @@
   "profile": {
     "badges": {
       "title": "Odznaki"
-    },
-    "listening": {
-      "title": "Aktualnie słucha"
-    },
-    "connectedAccounts": {
-      "title": "Połączone konta",
-      "providers": {
-        "spotify": "Spotify"
-      }
     },
     "form": {
       "displayName": "Główna nazwa",

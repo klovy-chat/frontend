@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { getUserChannels } from "../api/channels";
 import { Sidebar } from "../components/sidebar/Sidebar";
 import { ChatWindow } from "../components/chat/ChatWindow";
@@ -7,7 +7,6 @@ import { WarningModal } from "../components/common/WarningModal";
 import { AnnouncementModal } from "../components/common/AnnouncementModal";
 import { useWebSocket } from "../context/WebSocketContext";
 import { useProfileSync } from "../hooks/useProfileSync";
-import { useListeningSync } from "../hooks/useListeningSync";
 import { useIdleAvailability } from "../hooks/useIdleAvailability";
 import type { ChatTarget, Contact } from "../types";
 import "../styles/chat/chat.css";
@@ -23,13 +22,12 @@ function patchContact(
 export function ChatPage() {
   const [active, setActive] = useState<ChatTarget | null>(null);
   const location = useLocation();
-  const navigate = useNavigate();
   const ws = useWebSocket();
 
   useIdleAvailability();
 
   useProfileSync(ws, {
-    onInfo: ({ userId, username, displayName, bio, color, connectedAccounts }) =>
+    onInfo: ({ userId, username, displayName, bio, color }) =>
       setActive((prev) =>
         prev?.type === "dm" && prev.contact._id === userId
           ? {
@@ -39,7 +37,6 @@ export function ChatPage() {
                 displayName: displayName ?? prev.contact.displayName,
                 bio: bio ?? prev.contact.bio,
                 color: color ?? prev.contact.color,
-                connectedAccounts: connectedAccounts ?? prev.contact.connectedAccounts,
               }),
             }
           : prev,
@@ -57,29 +54,6 @@ export function ChatPage() {
           : prev,
       ),
   });
-
-  useListeningSync(ws, {
-    onListening: ({ userId, listeningActivity }) =>
-      setActive((prev) =>
-        prev?.type === "dm" && prev.contact._id === userId
-          ? { ...prev, contact: patchContact(prev.contact, userId, { listeningActivity }) }
-          : prev,
-      ),
-  });
-
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const spotify = params.get("spotify");
-    const integration = params.get("integration");
-    const status = params.get("status");
-    if (
-      spotify === "connected" ||
-      spotify === "error" ||
-      (integration && (status === "connected" || status === "error"))
-    ) {
-      navigate(`/settings/integrations?${params.toString()}`, { replace: true });
-    }
-  }, [location.search, navigate]);
 
   useEffect(() => {
     const openId = (location.state as { openChannelId?: string } | null)?.openChannelId;

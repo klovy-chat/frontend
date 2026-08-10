@@ -586,7 +586,6 @@
       "sessions": "Devices",
       "voice": "Voice settings",
       "bots": "Bots",
-      "integrations": "Integrations",
       "warnings": "Warnings",
       "app": "Client settings",
       "logout": "Log out",
@@ -832,8 +831,7 @@
       "channelRenameFailed": "Could not rename channel",
       "channelAvatarFailed": "Could not upload channel avatar",
       "channelDeleteFailed": "Could not delete channel",
-      "muteFailed": "Could not change mute setting",
-      "spotifyFailed": "Spotify login failed."
+      "muteFailed": "Could not change mute setting"
     },
     "context": {
       "viewProfile": "View profile",
@@ -995,42 +993,6 @@
         "unblock": "Unblock"
       }
     },
-    "integrations": {
-      "title": "Integrations",
-      "subtitle": "Connect your accounts — shown on your profile for friends",
-      "connect": "Connect",
-      "disconnect": "Disconnect",
-      "connected": "{{provider}} account connected.",
-      "disconnected": "Account disconnected.",
-      "connectFailed": "Could not connect account.",
-      "disconnectFailed": "Could not disconnect account.",
-      "loadFailed": "Could not load integrations.",
-      "notConfigured": "Not configured on the server (missing OAuth keys).",
-      "notConnectedHint": "Connect to show the account on your profile.",
-      "noPublicApi": "No public OAuth API for this platform.",
-      "spotify": {
-        "title": "Spotify",
-        "intro": "Connect Spotify so friends can see what you are listening to on your profile.",
-        "notConfigured": "Spotify integration is not configured on the server (missing SPOTIFY_* variables).",
-        "notConnectedHint": "Connect your account to show it on your profile.",
-        "connect": "Connect",
-        "disconnect": "Disconnect",
-        "shareListening": "Show friends what I'm listening to",
-        "toastConnected": "Connected to Spotify.",
-        "toastDisconnected": "Spotify account disconnected.",
-        "authIncomplete": "Spotify authorization finished but the connection was not saved. Click \"Connect Spotify\" again.",
-        "loadFailed": "Could not load status.",
-        "loginFailed": "Could not start Spotify login.",
-        "disconnectFailed": "Could not disconnect Spotify.",
-        "syncDetected": "Playback detected: {{track}}{{artist}}. Open your profile to see the \"Currently listening\" section.",
-        "shareRequired": "Enable \"Show friends what I'm listening to\" to share the track on your profile.",
-        "noPlayback": "Spotify reports no active playback. Play music in the Spotify app or open.spotify.com (a tab alone is not enough), then click \"Check now\" again.",
-        "syncFailed": "Spotify sync failed.",
-        "shareOn": "Friends will see what you are listening to.",
-        "shareOff": "Listening activity hidden from friends.",
-        "saveFailed": "Could not save settings."
-      }
-    },
     "bots": {
       "title": "Bots",
       "guide": {
@@ -1101,7 +1063,6 @@
         "sessions": "Devices",
         "voice": "Voice settings",
         "bots": "Bots",
-        "integrations": "Integrations",
         "warnings": "Warnings",
         "app": "Client settings",
         "logout": "Log out",
@@ -1185,15 +1146,6 @@
   "profile": {
     "badges": {
       "title": "Badges"
-    },
-    "listening": {
-      "title": "Currently listening"
-    },
-    "connectedAccounts": {
-      "title": "Connected accounts",
-      "providers": {
-        "spotify": "Spotify"
-      }
     },
     "form": {
       "displayName": "Display name",

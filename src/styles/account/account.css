@@ -1802,53 +1802,6 @@
   background: transparent;
 }
 
-/* ── Integrations ── */
-.as-integration-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.as-integration-row {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 12px 14px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--bg-card);
-}
-
-.as-integration-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  flex-shrink: 0;
-}
-
-.as-integration-icon svg {
-  width: 22px;
-  height: 22px;
-}
-
-.as-integration-copy {
-  flex: 1;
-  min-width: 0;
-}
-
-.as-integration-copy strong {
-  display: block;
-  font-size: 0.92rem;
-  margin-bottom: 2px;
-}
-
-.as-integration-copy .as-hint {
-  margin: 0;
-}
-
 /* Custom checkbox — matches auth login */
 .al-checkbox-wrap {
   display: flex;
@@ -1897,13 +1850,4 @@
   font-size: 0.88rem;
   color: var(--text);
   line-height: 1.55;
-}
-
-.as-integration-share-toggle {
-  margin-top: 14px;
-}
-
-.as-integration-share-toggle input[type="checkbox"]:disabled + .al-checkbox-box {
-  opacity: 0.45;
-  cursor: not-allowed;
 }

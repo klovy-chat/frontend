@@ -31,8 +31,6 @@ import {
   patchContactsFromMessage,
 } from "../../utils/chat/listPreview";
 import { useProfileSync } from "../../hooks/useProfileSync";
-import { useListeningSync } from "../../hooks/useListeningSync";
-import { useIntegrationListeningPoll } from "../../hooks/useIntegrationListeningPoll";
 import type { Channel, ChatTarget, Contact, Message } from "../../types";
 import { ChannelSettingsModal } from "../channel/ChannelSettingsModal";
 import { ContactsModal } from "../contacts/ContactsModal";
@@ -585,7 +583,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
   }, [mentionToast, contacts, channels, onSelect, clearMention]);
 
   useProfileSync(ws, {
-    onInfo: ({ userId, username, displayName, bio, color, connectedAccounts }) => {
+    onInfo: ({ userId, username, displayName, bio, color }) => {
       setContacts((prev) =>
         prev.map((c) =>
           c._id === userId
@@ -595,7 +593,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
                 displayName: displayName ?? c.displayName,
                 bio: bio ?? c.bio,
                 color: color ?? c.color,
-                connectedAccounts: connectedAccounts ?? c.connectedAccounts,
               }
             : c,
         ),
@@ -608,7 +605,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
               displayName: displayName ?? prev.displayName,
               bio: bio ?? prev.bio,
               color: color ?? prev.color,
-              connectedAccounts: connectedAccounts ?? prev.connectedAccounts,
             }
           : prev,
       );
@@ -621,19 +617,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
       setContacts((prev) =>
         prev.map((c) => (c._id === userId ? { ...c, banner } : c)),
       ),
-  });
-
-  useListeningSync(ws, {
-    onListening: ({ userId, listeningActivity }) => {
-      setContacts((prev) =>
-        prev.map((c) =>
-          c._id === userId ? { ...c, listeningActivity } : c,
-        ),
-      );
-      setContactProfile((prev) =>
-        prev && prev._id === userId ? { ...prev, listeningActivity } : prev,
-      );
-    },
   });
 
   useEffect(() => {
@@ -660,8 +643,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
     ];
     return () => unsubs.forEach((unsub) => unsub());
   }, [ws, active, onSelect]);
-
-  useIntegrationListeningPoll();
 
   useEffect(() => {
     if (showNewChannel || renameChannelInfo)

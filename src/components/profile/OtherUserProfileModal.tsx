@@ -8,8 +8,6 @@ import { renderFormattedText } from "../../utils/chat/messageFormat";
 import { presenceColor } from "../../utils/user/presence";
 import { useProfileBannerStyle } from "../../hooks/usePublicMediaCacheRevision";
 import { useAnimatedModal } from "../../hooks/useAnimatedModal";
-import { ConnectedAccountsSection } from "./ConnectedAccountsSection";
-import { ListeningActivitySection } from "./ListeningActivitySection";
 import { ProfileBadgesSection } from "./ProfileBadgesSection";
 import type { Contact } from "../../types";
 import "../../styles/account/profile.css";
@@ -170,8 +168,6 @@ export function OtherUserProfileModal({
             </div>
           </div>
 
-          <ListeningActivitySection activity={displayedUser.listeningActivity} />
-
           {!friendshipLoading && !isFriend ? (
             <p className="up-not-friend-hint">
               {t("modals.otherUserProfile.addFriend")}
@@ -186,8 +182,6 @@ export function OtherUserProfileModal({
               <p className="up-bio-text">{renderFormattedText(bioText)}</p>
             </section>
           ) : null}
-
-          <ConnectedAccountsSection accounts={displayedUser.connectedAccounts} />
 
           <div className="up-divider" />
 

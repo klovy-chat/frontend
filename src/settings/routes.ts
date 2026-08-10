@@ -4,7 +4,6 @@ export type SettingsSection =
   | "sesje"
   | "glos"
   | "jezyk"
-  | "integracje"
   | "ostrzezenia";
 
 export const SECTION_SLUGS: Record<SettingsSection, string> = {
@@ -13,7 +12,6 @@ export const SECTION_SLUGS: Record<SettingsSection, string> = {
   sesje: "sessions",
   glos: "voice",
   jezyk: "language",
-  integracje: "integrations",
   ostrzezenia: "warnings",
 };
 

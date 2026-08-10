@@ -1,19 +1,3 @@
-export interface ListeningActivity {
-  platform: "spotify";
-  trackTitle: string;
-  artist?: string;
-  albumArt?: string;
-  externalUrl?: string;
-  isPlaying: boolean;
-  updatedAt?: string;
-}
-
-export interface ConnectedAccount {
-  provider: "spotify" | (string & {});
-  accountName: string;
-  profileUrl: string;
-}
-
 export interface User {
   id: string;
   username: string;
@@ -26,10 +10,6 @@ export interface User {
   isOnline?: boolean;
   lastSeen?: string | null;
   availabilityStatus?: "online" | "away" | "brb" | "dnd";
-  listeningActivity?: ListeningActivity | null;
-  connectedAccounts?: ConnectedAccount[];
-  shareListening?: boolean;
-  spotifyConnected?: boolean;
   createdAt?: string;
   isWhitelisted?: boolean;
   isWhitelistEnabled?: boolean;
@@ -66,8 +46,6 @@ export interface Contact {
   isOnline?: boolean;
   lastSeen?: string | null;
   availabilityStatus?: "online" | "away" | "brb" | "dnd";
-  listeningActivity?: ListeningActivity | null;
-  connectedAccounts?: ConnectedAccount[];
   createdAt?: string;
   lastMessageTime?: string;
   lastMessage?: string;

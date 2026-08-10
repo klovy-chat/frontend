@@ -62,33 +62,6 @@ function isAllowedExternalMediaLink(url: string): boolean {
   }
 }
 
-function listeningHostAllowed(hostname: string): boolean {
-  const host = hostname.toLowerCase();
-  return (
-    host === "open.spotify.com" ||
-    host === "spotify.com" ||
-    host.endsWith(".spotify.com") ||
-    host === "i.scdn.co" ||
-    host === "mosaic.scdn.co" ||
-    host.endsWith(".scdn.co")
-  );
-}
-
-export function isAllowedListeningUrl(url: string): boolean {
-  const trimmed = url.trim();
-  if (!/^https:\/\//i.test(trimmed)) {
-    return false;
-  }
-  if (trimmed.includes("..") || trimmed.includes("\\") || trimmed.includes("@")) {
-    return false;
-  }
-  try {
-    return listeningHostAllowed(new URL(trimmed).hostname);
-  } catch {
-    return false;
-  }
-}
-
 function normalizeRelativePath(path: string): string | null {
   const normalized = path.trim().replace(/^\/+/, "").replace(/\\/g, "/");
   if (!normalized || normalized.includes("..")) {

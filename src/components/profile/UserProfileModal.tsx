@@ -2,8 +2,6 @@ import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { Avatar } from "../common/Avatar";
-import { ConnectedAccountsSection } from "./ConnectedAccountsSection";
-import { ListeningActivitySection } from "./ListeningActivitySection";
 import { ProfileBadgesSection } from "./ProfileBadgesSection";
 import { useAuth } from "../../context/AuthContext";
 import { useResolvePresence } from "../../context/PresenceContext";
@@ -128,8 +126,6 @@ export function UserProfileModal({
             <p className="up-profile-handle">@{user.username}</p>
           </div>
 
-          <ListeningActivitySection activity={user.listeningActivity} />
-
           <ProfileBadgesSection badges={user.badges} />
 
           {bioText ? (
@@ -138,8 +134,6 @@ export function UserProfileModal({
               <p className="up-bio-text">{renderFormattedText(bioText)}</p>
             </section>
           ) : null}
-
-          <ConnectedAccountsSection accounts={user.connectedAccounts} />
 
           <div className="up-divider" />
 

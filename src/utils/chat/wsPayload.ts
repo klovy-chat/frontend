@@ -1,6 +1,5 @@
 import { MAX_MESSAGE_LENGTH } from "../../constants/messages";
 import { resolveMediaUrl } from "../media/media";
-import { isAllowedListeningUrl } from "../media/mediaAllowlist";
 
 const OBJECT_ID = /^[a-f0-9]{24}$/i;
 const MAX_GENERIC_STRING = 2048;
@@ -88,51 +87,6 @@ export function sanitizeWsPayload(type: string, payload: unknown): unknown {
           ? record.userId
           : "";
       return userId ? { ...record, userId } : null;
-    }
-    case "user-listening-changed": {
-      const userId =
-        typeof record.userId === "string" && OBJECT_ID.test(record.userId)
-          ? record.userId
-          : "";
-      if (!userId) return null;
-      const raw = record.listeningActivity;
-      if (raw === null) {
-        return { userId, listeningActivity: null };
-      }
-      if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
-      const activity = raw as Record<string, unknown>;
-      const trackTitle =
-        typeof activity.trackTitle === "string"
-          ? activity.trackTitle.slice(0, 512)
-          : "";
-      const platform = activity.platform === "spotify" ? "spotify" : null;
-      if (!platform || !trackTitle) return { userId, listeningActivity: null };
-      return {
-        userId,
-        listeningActivity: {
-          platform,
-          trackTitle,
-          artist:
-            typeof activity.artist === "string"
-              ? activity.artist.slice(0, 256)
-              : undefined,
-          albumArt:
-            typeof activity.albumArt === "string" &&
-            isAllowedListeningUrl(activity.albumArt)
-              ? activity.albumArt
-              : undefined,
-          externalUrl:
-            typeof activity.externalUrl === "string" &&
-            isAllowedListeningUrl(activity.externalUrl)
-              ? activity.externalUrl
-              : undefined,
-          isPlaying: activity.isPlaying !== false,
-          updatedAt:
-            typeof activity.updatedAt === "string"
-              ? activity.updatedAt.slice(0, 64)
-              : undefined,
-        },
-      };
     }
     case "session:revoked":
       return {};

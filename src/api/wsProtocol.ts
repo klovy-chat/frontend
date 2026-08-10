@@ -36,7 +36,6 @@ export const WsType = {
   DM_ERROR: "dm-error",
   UNREAD_UPDATED: "unread-updated",
   USER_STATUS_CHANGED: "user-status-changed",
-  USER_LISTENING_CHANGED: "user-listening-changed",
   MESSAGE_MENTION: "message-mention",
   PROFILE_UPDATED: "profile-updated",
   CONTACT_PROFILE_UPDATED: "contact-profile-updated",

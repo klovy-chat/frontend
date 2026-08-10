@@ -32,7 +32,6 @@ import {
   MAX_BANNER_SIZE_LABEL,
 } from "../constants/upload";
 import { TwoFactorSetupModal } from "../components/auth/TwoFactorSetupModal";
-import { IntegrationsPanel } from "../components/integrations/IntegrationsPanel";
 import { VoiceSettingsPanel } from "../components/account/VoiceSettingsPanel";
 import { LanguageSettingsPanel } from "../components/account/LanguageSettingsPanel";
 import { UserProfileModal } from "../components/profile/UserProfileModal";
@@ -78,20 +77,12 @@ interface SettingsViewProps {
   section: SettingsSection;
   onSectionChange: (section: SettingsSection) => void;
   onClose: () => void;
-  integrationOauthProvider?: string | null;
-  integrationOauthStatus?: "connected" | "error" | null;
-  integrationOauthError?: string | null;
-  onIntegrationOauthHandled?: () => void;
 }
 
 export function SettingsView({
   section,
   onSectionChange,
   onClose,
-  integrationOauthProvider = null,
-  integrationOauthStatus = null,
-  integrationOauthError = null,
-  onIntegrationOauthHandled,
 }: SettingsViewProps) {
   const { t } = useTranslation();
   const { dateLocale } = useLocale();
@@ -719,18 +710,6 @@ export function SettingsView({
           <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
         </svg>
         {t("settings.language.title")}
-      </button>
-
-      <button
-        className={`as-nav-item${section === "integracje" ? " active" : ""}`}
-        onClick={() => onSectionChange("integracje")}
-      >
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 2v4"/><path d="M12 18v4"/>
-          <path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/>
-          <path d="M2 12h4"/><path d="M18 12h4"/>
-        </svg>
-        {t("settings.nav.integrations")}
       </button>
 
       <button
@@ -1375,15 +1354,6 @@ export function SettingsView({
           {section === "jezyk" && <LanguageSettingsPanel />}
 
           {section === "glos" && <VoiceSettingsPanel />}
-
-          {section === "integracje" && (
-            <IntegrationsPanel
-              integrationOauthProvider={integrationOauthProvider}
-              integrationOauthStatus={integrationOauthStatus}
-              integrationOauthError={integrationOauthError}
-              onOauthHandled={onIntegrationOauthHandled}
-            />
-          )}
 
           {section === "ostrzezenia" && (
             <>
