@@ -61,6 +61,20 @@ import {
 
 type ToolsPanelMode = "pinned" | "search" | null;
 
+type MessagePageCacheEntry = {
+  messages: Message[];
+  hasMore: boolean;
+};
+
+/** Stale-while-revalidate cache so switching chats does not flash an empty list. */
+const messagePageCache = new Map<string, MessagePageCacheEntry>();
+
+function chatCacheKey(target: ChatTarget): string {
+  return target.type === "dm"
+    ? `dm:${target.contact._id}`
+    : `ch:${target.channel._id}`;
+}
+
 /** Aktualizuje pola nadawcy wiadomości, gdy jego profil zmieni się na żywo. */
 function patchMessageSender(
   message: Message,
@@ -269,7 +283,15 @@ export function ChatWindow({
 
   const loadMessages = useCallback(async () => {
     if (!target || !currentUserId) return;
-    setLoading(true);
+    const cacheKey = chatCacheKey(target);
+    const cached = messagePageCache.get(cacheKey);
+    if (cached) {
+      setMessages(cached.messages);
+      setHasMore(cached.hasMore);
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
     try {
       if (target.type === "dm") {
         try {
@@ -277,19 +299,33 @@ export function ChatWindow({
             target.contact._id,
             { limit: MESSAGE_PAGE_SIZE },
           );
-          setMessages(prepareForDisplay(list));
-          setHasMore(Boolean(more));
+          const prepared = prepareForDisplay(list);
+          const hasMorePage = Boolean(more);
+          messagePageCache.set(cacheKey, {
+            messages: prepared,
+            hasMore: hasMorePage,
+          });
+          setMessages(prepared);
+          setHasMore(hasMorePage);
         } catch {
-          setMessages([]);
-          setHasMore(false);
+          if (!cached) {
+            setMessages([]);
+            setHasMore(false);
+          }
         }
       } else {
         const { messages: list, hasMore: more } = await getChannelMessages(
           target.channel._id,
           { limit: MESSAGE_PAGE_SIZE },
         );
-        setMessages(prepareForDisplay(list));
-        setHasMore(Boolean(more));
+        const prepared = prepareForDisplay(list);
+        const hasMorePage = Boolean(more);
+        messagePageCache.set(cacheKey, {
+          messages: prepared,
+          hasMore: hasMorePage,
+        });
+        setMessages(prepared);
+        setHasMore(hasMorePage);
       }
     } finally {
       setLoading(false);
@@ -327,8 +363,15 @@ export function ChatWindow({
   }, [target, currentUserId, messages, hasMore, loadingOlder, prepareForDisplay]);
 
   useEffect(() => {
-    setMessages([]);
-    setHasMore(false);
+    const cached = target ? messagePageCache.get(chatCacheKey(target)) : undefined;
+    if (cached) {
+      setMessages(cached.messages);
+      setHasMore(cached.hasMore);
+      setLoading(false);
+    } else {
+      setMessages([]);
+      setHasMore(false);
+    }
     setLoadingOlder(false);
     setTypingUserId(null);
     if (typingClearTimeout.current) {
@@ -342,7 +385,7 @@ export function ChatWindow({
     setEditingMessage(null);
     setReplyingTo(null);
     loadMessages();
-  }, [loadMessages]);
+  }, [loadMessages, target]);
 
   useEffect(() => {
     if (target?.type !== "channel") return;
