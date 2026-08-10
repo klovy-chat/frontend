@@ -2,8 +2,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Avatar } from "../common/Avatar";
 import { getPinnedMessages, searchMessages } from "../../api/messages";
+import { unwrapIncomingMessages } from "../../crypto/messageContent";
+import { getMessagePreview } from "../../utils/chat/messages";
 import { formatMessageTime, userLabel } from "../../utils/user/format";
-import { stripFormatting } from "../../utils/chat/messageFormat";
 import type { ChatTarget, Message } from "../../types";
 import "../../styles/chat/chattools.css";
 
@@ -34,15 +35,9 @@ export function ChatToolsPanel({
   const [searchError, setSearchError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
 
-  const messagePreview = useCallback(
-    (message: Message): string => {
-      if (message.messageType && message.messageType !== "TEXT") {
-        return message.fileName ?? t("messages.attachment");
-      }
-      return stripFormatting(message.content);
-    },
-    [t],
-  );
+  const messagePreview = useCallback((message: Message): string => {
+    return getMessagePreview(message);
+  }, []);
 
   const contextParams = useMemo(
     () =>
@@ -56,7 +51,7 @@ export function ChatToolsPanel({
     setLoading(true);
     try {
       const { messages } = await getPinnedMessages(contextParams);
-      setPinned(messages);
+      setPinned(unwrapIncomingMessages(messages));
     } catch {
       setPinned([]);
     } finally {
@@ -91,7 +86,7 @@ export function ChatToolsPanel({
       setSearchError(null);
       try {
         const { messages } = await searchMessages({ query: q, ...contextParams });
-        setSearchResults(messages);
+        setSearchResults(unwrapIncomingMessages(messages));
         setHasSearched(true);
       } catch (err: unknown) {
         setSearchResults([]);

@@ -24,7 +24,6 @@ import {
   resolveSingleExternalMediaSend,
 } from "../../utils/media/externalMediaLinks";
 import { isAllowedGifMediaUrl } from "../../utils/media/mediaAllowlist";
-import { fetchMediaResource } from "../../utils/media/media";
 import { useProfileSync } from "../../hooks/useProfileSync";
 import { presenceColor } from "../../utils/user/presence";
 import {
@@ -56,6 +55,7 @@ import type {
 } from "../../types";
 import {
   wrapOutgoingContent,
+  unwrapIncomingMessage,
   unwrapIncomingMessages,
 } from "../../crypto/messageContent";
 
@@ -644,30 +644,42 @@ export function ChatWindow({
   );
 
   const sendRemoteMediaMessage = useCallback(
-    async (
+    (
       mediaUrl: string,
       title: string,
       fileType: string,
       messageType: "IMAGE" | "STICKER",
     ) => {
-      if (!isAllowedGifMediaUrl(mediaUrl) && !mediaUrl.startsWith("https://")) return;
-      try {
-        const response = await fetchMediaResource(mediaUrl);
-        if (!response.ok) throw new Error("FETCH_FAILED");
-        const blob = await response.blob();
-        const baseName = (title || "media").replace(/\.[^.]+$/, "") || "media";
-        const ext =
-          messageType === "STICKER" || fileType.includes("gif") ? "gif" : "webp";
-        const fileName = `${baseName}.${ext}`;
-        const file = new File([blob], fileName, {
-          type: fileType || blob.type || (ext === "gif" ? "image/gif" : "image/webp"),
+      if (!ws || !target || !user || !canSendDm) return;
+      if (!isAllowedGifMediaUrl(mediaUrl)) return;
+
+      // Send Giphy URL as external media (same path as paste). Do not re-fetch/upload —
+      // browser CORS/CSP often blocks Giphy fetch, and backend upload rejects .gif.
+      const quotedMessage = replyingTo?._id;
+      const quotePayload = quotedMessage ? { quotedMessage } : {};
+      const fileName =
+        (title || "media").replace(/\.[^.]+$/, "").trim() || "media";
+      const payload = {
+        sender: user.id,
+        content: wrapOutgoingContent(fileName),
+        messageType,
+        fileUrl: mediaUrl,
+        fileName: `${fileName}.gif`,
+        fileType: fileType || "image/gif",
+        ...quotePayload,
+      };
+
+      if (target.type === "dm") {
+        ws.send(WsType.SEND_MESSAGE, { ...payload, recipient: target.contact._id });
+      } else {
+        ws.send(WsType.SEND_CHANNEL_MESSAGE, {
+          ...payload,
+          channelId: target.channel._id,
         });
-        await sendFileMessage(file, { messageType, content: title });
-      } catch {
-        /* ignore */
       }
+      setReplyingTo(null);
     },
-    [sendFileMessage],
+    [ws, target, user, canSendDm, replyingTo],
   );
 
   const sendMessage = async (content: string) => {
@@ -735,14 +747,12 @@ export function ChatWindow({
     await sendFileMessage(file, { messageType: "AUDIO", content: "", durationMs });
   };
 
-  const handleGif = async (gifUrl: string, gifTitle: string) => {
-    if (!ws || !target || !user || !canSendDm) return;
-    await sendRemoteMediaMessage(gifUrl, gifTitle, "image/gif", "IMAGE");
+  const handleGif = (gifUrl: string, gifTitle: string) => {
+    sendRemoteMediaMessage(gifUrl, gifTitle, "image/gif", "IMAGE");
   };
 
-  const handleSticker = async (stickerUrl: string, stickerTitle: string) => {
-    if (!ws || !target || !user || !canSendDm) return;
-    await sendRemoteMediaMessage(stickerUrl, stickerTitle, "image/gif", "STICKER");
+  const handleSticker = (stickerUrl: string, stickerTitle: string) => {
+    sendRemoteMediaMessage(stickerUrl, stickerTitle, "image/gif", "STICKER");
   };
 
   const handleReaction = (messageId: string, emoji: string) => {
@@ -821,9 +831,10 @@ export function ChatWindow({
   };
 
   const applyMessageUpdate = (updated: Message) => {
+    const display = unwrapIncomingMessage(normalizeMessage(updated));
     setMessages((prev) =>
       prev.map((m) =>
-        m._id === updated._id ? normalizeMessage({ ...m, ...updated }) : m,
+        m._id === display._id ? normalizeMessage({ ...m, ...display }) : m,
       ),
     );
   };
