@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useLayoutEffect } from "react";
+import { useState, useRef, useEffect, useLayoutEffect, memo } from "react";
 import { useTranslation } from "react-i18next";
 import { Avatar } from "../common/Avatar";
 import { ReactionPicker } from "./pickers/ReactionPicker";
@@ -55,7 +55,7 @@ function formatCallDuration(totalSecs: number): string {
     : `${minutes}:${pad(seconds)}`;
 }
 
-export function MessageBubble({
+export const MessageBubble = memo(function MessageBubble({
   message,
   currentUserId,
   highlighted = false,
@@ -511,4 +511,4 @@ export function MessageBubble({
       </div>
     </div>
   );
-}
+});

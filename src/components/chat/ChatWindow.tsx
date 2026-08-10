@@ -544,14 +544,27 @@ export function ChatWindow({
     };
 
     const onMessagesRead = (data: {
-      messageIds: string[];
+      messageIds?: string[];
       read: boolean;
       readerId: string;
+      conversationRead?: boolean;
     }) => {
       if (target.type !== "dm") return;
       if (data.readerId !== target.contact._id) return;
 
-      const ids = new Set(data.messageIds);
+      if (data.conversationRead) {
+        // Large unread batch: mark every message I sent in this DM as read.
+        setMessages((prev) =>
+          prev.map((m) => {
+            const senderId =
+              typeof m.sender === "object" ? m.sender._id ?? m.sender.id : m.sender;
+            return senderId === currentUserId ? { ...m, read: data.read } : m;
+          }),
+        );
+        return;
+      }
+
+      const ids = new Set(data.messageIds ?? []);
       setMessages((prev) =>
         prev.map((m) => (ids.has(m._id) ? { ...m, read: data.read } : m)),
       );

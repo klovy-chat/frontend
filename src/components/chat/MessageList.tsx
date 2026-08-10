@@ -1,5 +1,13 @@
-import { useCallback, useLayoutEffect, useRef } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useTranslation } from "react-i18next";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { MessageBubble } from "./MessageBubble";
 import type { Message } from "../../types";
 
@@ -27,6 +35,10 @@ interface MessageListProps {
 
 const NEAR_BOTTOM_THRESHOLD_PX = 96;
 const LOAD_OLDER_THRESHOLD_PX = 80;
+const ESTIMATED_MESSAGE_HEIGHT_PX = 88;
+/** Below this count, keep the simple flex layout (spacer pins short chats to bottom). */
+const VIRTUALIZE_AFTER = 40;
+const OVERSCAN = 8;
 
 function isNearBottom(el: HTMLElement): boolean {
   return el.scrollHeight - el.scrollTop - el.clientHeight <= NEAR_BOTTOM_THRESHOLD_PX;
@@ -55,11 +67,35 @@ export function MessageList({
 }: MessageListProps) {
   const { t } = useTranslation();
   const listRef = useRef<HTMLDivElement>(null);
+  const virtualListRef = useRef<HTMLDivElement>(null);
   const isNearBottomRef = useRef(true);
   const prevCountRef = useRef(0);
   const prevFirstIdRef = useRef<string | null>(null);
   const anchorHeightRef = useRef(0);
   const anchorTopRef = useRef(0);
+  const [scrollMargin, setScrollMargin] = useState(0);
+
+  const useVirtual = messages.length >= VIRTUALIZE_AFTER;
+
+  const virtualizer = useVirtualizer({
+    count: useVirtual ? messages.length : 0,
+    getScrollElement: () => listRef.current,
+    estimateSize: () => ESTIMATED_MESSAGE_HEIGHT_PX,
+    overscan: OVERSCAN,
+    getItemKey: (index) => messages[index]?._id ?? index,
+    scrollMargin,
+  });
+
+  useLayoutEffect(() => {
+    if (!useVirtual) {
+      setScrollMargin(0);
+      return;
+    }
+    const list = listRef.current;
+    const virt = virtualListRef.current;
+    if (!list || !virt) return;
+    setScrollMargin(virt.offsetTop);
+  }, [useVirtual, hasMore, loadingOlder, messages.length, typingUserId]);
 
   const scrollToBottom = useCallback((behavior: ScrollBehavior = "auto") => {
     const el = listRef.current;
@@ -119,10 +155,55 @@ export function MessageList({
     }
   }, [messages, typingUserId, scrollToBottom]);
 
+  useEffect(() => {
+    if (!highlightMessageId || !useVirtual) return;
+    const index = messages.findIndex((m) => m._id === highlightMessageId);
+    if (index >= 0) {
+      virtualizer.scrollToIndex(index, { align: "center", behavior: "smooth" });
+    }
+  }, [highlightMessageId, messages, useVirtual, virtualizer]);
+
   const hasContent = messages.length > 0 || Boolean(typingUserId);
 
+  const bubbleProps = useMemo(
+    () => ({
+      currentUserId,
+      canReact,
+      onReact,
+      canReply,
+      onReply,
+      onJumpToMessage,
+      onImageClick,
+      showReadReceipt,
+      onEdit,
+      onDelete,
+      canPin,
+      onPin,
+      onUnpin,
+    }),
+    [
+      currentUserId,
+      canReact,
+      onReact,
+      canReply,
+      onReply,
+      onJumpToMessage,
+      onImageClick,
+      showReadReceipt,
+      onEdit,
+      onDelete,
+      canPin,
+      onPin,
+      onUnpin,
+    ],
+  );
+
   return (
-    <div ref={listRef} className="message-list" onScroll={handleScroll}>
+    <div
+      ref={listRef}
+      className={`message-list${useVirtual ? " message-list--virtual" : ""}`}
+      onScroll={handleScroll}
+    >
       {hasMore && (
         <div className="message-list-load-older">
           <button
@@ -138,31 +219,60 @@ export function MessageList({
       {hasContent && (
         <div className="message-list-date">{t("common.today")}</div>
       )}
-      {hasContent && <div className="message-list-spacer" aria-hidden />}
+      {hasContent && !useVirtual && (
+        <div className="message-list-spacer" aria-hidden />
+      )}
+
       {messages.length === 0 && !typingUserId ? (
         <p className="empty-chat"></p>
+      ) : useVirtual ? (
+        <div
+          ref={virtualListRef}
+          className="message-list-virtual"
+          style={{
+            height: Math.max(0, virtualizer.getTotalSize() - scrollMargin),
+            width: "100%",
+            position: "relative",
+            flexShrink: 0,
+          }}
+        >
+          {virtualizer.getVirtualItems().map((item) => {
+            const msg = messages[item.index];
+            if (!msg) return null;
+            return (
+              <div
+                key={item.key}
+                data-index={item.index}
+                ref={virtualizer.measureElement}
+                className="message-list-virtual-item"
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  transform: `translateY(${item.start - scrollMargin}px)`,
+                }}
+              >
+                <MessageBubble
+                  message={msg}
+                  highlighted={highlightMessageId === msg._id}
+                  {...bubbleProps}
+                />
+              </div>
+            );
+          })}
+        </div>
       ) : (
         messages.map((msg) => (
           <MessageBubble
             key={msg._id}
             message={msg}
-            currentUserId={currentUserId}
             highlighted={highlightMessageId === msg._id}
-            canReact={canReact}
-            onReact={onReact}
-            canReply={canReply}
-            onReply={onReply}
-            onJumpToMessage={onJumpToMessage}
-            onImageClick={onImageClick}
-            showReadReceipt={showReadReceipt}
-            onEdit={onEdit}
-            onDelete={onDelete}
-            canPin={canPin}
-            onPin={onPin}
-            onUnpin={onUnpin}
+            {...bubbleProps}
           />
         ))
       )}
+
       {typingUserId && typingUserId !== currentUserId && (
         <p className="typing-indicator">{t("chat.typing")}</p>
       )}

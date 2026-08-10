@@ -297,6 +297,21 @@
   scrollbar-color: rgba(124, 92, 255, 0.45) transparent;
 }
 
+.message-list--virtual {
+  /* Virtual rows own their vertical spacing via item padding. */
+  gap: 0;
+}
+
+.message-list--virtual .message-list-load-older,
+.message-list--virtual .message-list-date {
+  margin-bottom: 0.65rem;
+}
+
+.message-list-virtual-item {
+  padding-bottom: 0.65rem;
+  box-sizing: border-box;
+}
+
 .message-list::-webkit-scrollbar {
   width: 8px;
 }
