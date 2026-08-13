@@ -10,6 +10,7 @@ import { useTranslation } from "react-i18next";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { MessageBubble } from "./MessageBubble";
 import type { Message } from "../../types";
+import { formatMessageDateSeparator, isSameLocalDay } from "../../utils/user/format";
 
 interface MessageListProps {
   messages: Message[];
@@ -216,9 +217,6 @@ export function MessageList({
           </button>
         </div>
       )}
-      {hasContent && (
-        <div className="message-list-date">{t("common.today")}</div>
-      )}
       {hasContent && !useVirtual && (
         <div className="message-list-spacer" aria-hidden />
       )}
@@ -239,6 +237,10 @@ export function MessageList({
           {virtualizer.getVirtualItems().map((item) => {
             const msg = messages[item.index];
             if (!msg) return null;
+            const prev = messages[item.index - 1];
+            const showSep =
+              item.index === 0 ||
+              (prev && !isSameLocalDay(msg.timestamp, prev.timestamp));
             return (
               <div
                 key={item.key}
@@ -253,6 +255,11 @@ export function MessageList({
                   transform: `translateY(${item.start - scrollMargin}px)`,
                 }}
               >
+                {showSep && (
+                  <div className="message-list-date">
+                    {formatMessageDateSeparator(msg.timestamp)}
+                  </div>
+                )}
                 <MessageBubble
                   message={msg}
                   highlighted={highlightMessageId === msg._id}
@@ -263,14 +270,25 @@ export function MessageList({
           })}
         </div>
       ) : (
-        messages.map((msg) => (
-          <MessageBubble
-            key={msg._id}
-            message={msg}
-            highlighted={highlightMessageId === msg._id}
-            {...bubbleProps}
-          />
-        ))
+        messages.map((msg, idx) => {
+          const prev = messages[idx - 1];
+          const showSep =
+            idx === 0 || (prev && !isSameLocalDay(msg.timestamp, prev.timestamp));
+          return (
+            <div key={msg._id}>
+              {showSep && (
+                <div className="message-list-date">
+                  {formatMessageDateSeparator(msg.timestamp)}
+                </div>
+              )}
+              <MessageBubble
+                message={msg}
+                highlighted={highlightMessageId === msg._id}
+                {...bubbleProps}
+              />
+            </div>
+          );
+        })
       )}
 
       {typingUserId && typingUserId !== currentUserId && (
