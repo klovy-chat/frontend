@@ -17,7 +17,7 @@ const C = {
 export function IncomingCallModal() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { state, mode, peer, acceptCall, rejectCall } = useCall();
+  const { state, mode, peer, acceptCall, rejectCall, acceptInFlight } = useCall();
   const isDnd = user?.availabilityStatus === "dnd";
 
   useEffect(() => {
@@ -32,6 +32,7 @@ export function IncomingCallModal() {
 
   const name = userLabel(peer);
   const modeLabel = mode === "video" ? t("call.mode.video") : t("call.mode.audio");
+  const busy = acceptInFlight;
 
   return (
     <>
@@ -94,13 +95,16 @@ export function IncomingCallModal() {
               marginBottom: 26,
             }}
           >
-            {t("call.status.ringing", { mode: modeLabel })}
+            {busy
+              ? t("call.status.connecting")
+              : t("call.status.ringing", { mode: modeLabel })}
           </div>
 
           <div style={{ display: "flex", gap: 36 }}>
             <button
               type="button"
               onClick={rejectCall}
+              disabled={busy}
               title={t("call.controls.reject")}
               style={{
                 width: 58,
@@ -109,13 +113,17 @@ export function IncomingCallModal() {
                 border: "none",
                 background: "#ef4444",
                 color: "white",
-                cursor: "pointer",
+                cursor: busy ? "not-allowed" : "pointer",
+                opacity: busy ? 0.55 : 1,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                transition: "transform 0.12s, filter 0.12s",
+                transition: "transform 0.12s, filter 0.12s, opacity 0.12s",
               }}
-              onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.94)")}
+              onMouseDown={(e) => {
+                if (busy) return;
+                e.currentTarget.style.transform = "scale(0.94)";
+              }}
               onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
               onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
             >
@@ -127,6 +135,7 @@ export function IncomingCallModal() {
             <button
               type="button"
               onClick={acceptCall}
+              disabled={busy}
               title={t("call.controls.accept")}
               style={{
                 width: 58,
@@ -135,13 +144,17 @@ export function IncomingCallModal() {
                 border: "none",
                 background: "#22c55e",
                 color: "white",
-                cursor: "pointer",
+                cursor: busy ? "not-allowed" : "pointer",
+                opacity: busy ? 0.55 : 1,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                transition: "transform 0.12s",
+                transition: "transform 0.12s, opacity 0.12s",
               }}
-              onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.94)")}
+              onMouseDown={(e) => {
+                if (busy) return;
+                e.currentTarget.style.transform = "scale(0.94)";
+              }}
               onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
               onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
             >

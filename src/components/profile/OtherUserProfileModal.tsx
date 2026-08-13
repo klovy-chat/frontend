@@ -9,6 +9,7 @@ import { presenceColor } from "../../utils/user/presence";
 import { useProfileBannerStyle } from "../../hooks/usePublicMediaCacheRevision";
 import { useAnimatedModal } from "../../hooks/useAnimatedModal";
 import { ProfileBadgesSection } from "./ProfileBadgesSection";
+import { useUserPresence } from "../../context/PresenceContext";
 import type { Contact } from "../../types";
 import "../../styles/account/profile.css";
 import "../common/badge.css";
@@ -41,6 +42,7 @@ export function OtherUserProfileModal({
   const { t } = useTranslation();
   const displayedUserRef = useRef<Contact | null>(null);
   const [loadedProfile, setLoadedProfile] = useState<Contact | null>(null);
+  const live = useUserPresence(user?._id);
 
   if (user) {
     displayedUserRef.current = user;
@@ -70,7 +72,16 @@ export function OtherUserProfileModal({
     };
   }, [visible, user?._id, isFriend, openKey]);
 
-  const displayedUser = loadedProfile ?? user ?? displayedUserRef.current;
+  const base = loadedProfile ?? user ?? displayedUserRef.current;
+  const displayedUser = base
+    ? {
+        ...base,
+        isOnline: live?.isOnline ?? base.isOnline,
+        availabilityStatus:
+          live?.availabilityStatus ?? base.availabilityStatus,
+        lastSeen: live?.lastSeen ?? base.lastSeen,
+      }
+    : null;
   const bannerStyle = useProfileBannerStyle(
     displayedUser?.banner,
     displayedUser?.color,

@@ -10,15 +10,67 @@ import {
   cancelFriendRequest,
 } from "../../api/friends";
 import { getBlockedContacts, toggleContactBlock } from "../../api/contacts";
+import { invalidateFriendshipCache } from "../../utils/chat/friendshipCache";
 import { Avatar } from "../common/Avatar";
 import { useToast } from "../../context/ToastContext";
 import {
-  usePresenceStore,
-  useResolvePresence,
+  usePresenceSeed,
+  useUserPresence,
 } from "../../context/PresenceContext";
 import { userLabel, availabilityStatusLabel } from "../../utils/user/format";
+import { getEffectiveStatus } from "../../utils/user/presence";
 import type { Contact, FriendRequestItem } from "../../types";
 import "../../styles/contacts/contacts-modal.css";
+
+function FriendPresenceRow({
+  friend,
+  index,
+  onSelect,
+  onClose,
+}: {
+  friend: Contact;
+  index: number;
+  onSelect: (c: Contact) => void;
+  onClose: () => void;
+}) {
+  const { t } = useTranslation();
+  const live = useUserPresence(friend._id);
+  const status = getEffectiveStatus({ ...friend, ...(live ?? {}) });
+  return (
+    <div className="contacts-modal__row" style={{ animationDelay: `${index * 35}ms` }}>
+      <div className="contacts-modal__avatar-wrap">
+        <Avatar
+          displayName={friend.displayName}
+          username={friend.username}
+          image={friend.image}
+          color={friend.color}
+          size={38}
+        />
+        <span className={`contacts-modal__status-dot contacts-modal__status-dot--${status}`} />
+      </div>
+      <div className="contacts-modal__info">
+        <div className="contacts-modal__name">{userLabel(friend)}</div>
+        <div className="contacts-modal__meta">
+          {friend.username ? `@${friend.username}` : t("common.contact")}
+          {" · "}
+          {availabilityStatusLabel(status)}
+        </div>
+      </div>
+      <div className="contacts-modal__actions">
+        <button
+          type="button"
+          className="contacts-modal__pill-btn"
+          onClick={() => {
+            onSelect(friend);
+            onClose();
+          }}
+        >
+          {t("modals.contacts.invite.write")}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export type ContactsTab = "invite" | "myContacts" | "sent" | "blocked";
 
@@ -79,11 +131,6 @@ const ICONS = {
   ),
 };
 
-function contactStatus(contact: Contact): "online" | "away" | "brb" | "dnd" | "offline" {
-  if (!contact.isOnline) return "offline";
-  return contact.availabilityStatus ?? "online";
-}
-
 export function ContactsModal({
   isOpen,
   isClosing,
@@ -104,8 +151,7 @@ export function ContactsModal({
   const [sentRequests, setSentRequests] = useState<FriendRequestItem[]>([]);
   const [friendsList, setFriendsList] = useState<Contact[]>([]);
   const [blockedList, setBlockedList] = useState<Contact[]>([]);
-  const resolvePresence = useResolvePresence();
-  const { seed: seedPresence } = usePresenceStore();
+  const seedPresence = usePresenceSeed();
 
   const tabsRef = useRef<HTMLDivElement>(null);
   const indicatorRef = useRef<HTMLDivElement>(null);
@@ -203,6 +249,7 @@ export function ContactsModal({
       await onRefreshContacts();
       setTimeout(() => setInviteSentPulse(false), 1800);
       if (res.autoAccepted && res.friend) {
+        if (res.friend._id) invalidateFriendshipCache(res.friend._id);
         onSelectContact(res.friend);
         onClose();
       }
@@ -219,6 +266,7 @@ export function ContactsModal({
   const handleAccept = async (requestId: string) => {
     try {
       const res = await acceptFriendRequest(requestId);
+      if (res.friend?._id) invalidateFriendshipCache(res.friend._id);
       await loadData();
       await onRefreshContacts();
       onSelectContact(res.friend);
@@ -346,43 +394,15 @@ export function ContactsModal({
             />
           ) : (
             <div className="contacts-modal__list">
-              {filteredFriends.map((f, i) => {
-                const status = contactStatus(resolvePresence(f));
-                return (
-                  <div key={f._id} className="contacts-modal__row" style={{ animationDelay: `${i * 35}ms` }}>
-                    <div className="contacts-modal__avatar-wrap">
-                      <Avatar
-                        displayName={f.displayName}
-                        username={f.username}
-                        image={f.image}
-                        color={f.color}
-                        size={38}
-                      />
-                      <span className={`contacts-modal__status-dot contacts-modal__status-dot--${status}`} />
-                    </div>
-                    <div className="contacts-modal__info">
-                      <div className="contacts-modal__name">{userLabel(f)}</div>
-                      <div className="contacts-modal__meta">
-                        {f.username ? `@${f.username}` : t("common.contact")}
-                        {" · "}
-                        {availabilityStatusLabel(status)}
-                      </div>
-                    </div>
-                    <div className="contacts-modal__actions">
-                      <button
-                        type="button"
-                        className="contacts-modal__pill-btn"
-                        onClick={() => {
-                          onSelectContact(f);
-                          onClose();
-                        }}
-                      >
-                        {t("modals.contacts.invite.write")}
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
+              {filteredFriends.map((f, i) => (
+                <FriendPresenceRow
+                  key={f._id}
+                  friend={f}
+                  index={i}
+                  onSelect={onSelectContact}
+                  onClose={onClose}
+                />
+              ))}
             </div>
           )}
         </>
@@ -464,7 +484,13 @@ export function ContactsModal({
                 <button
                   type="button"
                   className="contacts-modal__pill-btn"
-                  onClick={() => void toggleContactBlock(contact._id).then(() => loadData())}
+                  onClick={() =>
+                    void toggleContactBlock(contact._id).then(() => {
+                      invalidateFriendshipCache(contact._id);
+                      void loadData();
+                      void onRefreshContacts();
+                    })
+                  }
                 >
                   {t("modals.contacts.blocked.unblock")}
                 </button>

@@ -376,7 +376,8 @@
     "errors": {
       "tooLong": "Wiadomość jest za długa. Maksymalnie {{max}} znaków.",
       "cannotSendFile": "Nie można teraz wysłać pliku.",
-      "cannotSendVoice": "Nie można teraz wysłać wiadomości głosowej."
+      "cannotSendVoice": "Nie można teraz wysłać wiadomości głosowej.",
+      "cannotSend": "Nie można teraz wysłać wiadomości."
     }
   },
   "moderation": {

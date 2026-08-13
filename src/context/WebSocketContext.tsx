@@ -152,8 +152,14 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
       );
       unsubs.push(
         instance.subscribe(WsType.SESSION_REVOKED, () => {
-          instance?.close();
-          void logoutRef.current();
+          // Logout first so CallProvider unmount hangup can still use an open socket.
+          void (async () => {
+            try {
+              await logoutRef.current();
+            } finally {
+              instance?.close();
+            }
+          })();
         }),
       );
 

@@ -24,6 +24,7 @@ import { isAllowedGifMediaUrl } from "../../utils/media/mediaAllowlist";
 import {
   formatVoiceDuration,
   useVoiceRecorder,
+  type VoiceRecordingResult,
 } from "../../hooks/useVoiceRecorder";
 import { useLocale } from "../../context/LocaleContext";
 import "../../styles/chat/messageinput.css";
@@ -114,6 +115,10 @@ export function MessageInput({
   const lastTypingSent = useRef(0);
   const pickerOpenRef = useRef(false);
   pickerOpenRef.current = showEmojiPicker || showGifPicker || showStickerPicker;
+  const finishVoiceRecordingRef = useRef<
+    (result?: VoiceRecordingResult | null) => Promise<void>
+  >(async () => {});
+
   const {
     isRecording,
     durationMs: recordingDurationMs,
@@ -122,7 +127,9 @@ export function MessageInput({
     stop: stopRecording,
     cancel: cancelRecording,
     setError: setVoiceError,
-  } = useVoiceRecorder();
+  } = useVoiceRecorder(undefined, (result) => {
+    void finishVoiceRecordingRef.current(result);
+  });
 
   const mentionItems = useMemo<MentionItem[]>(() => {
     if (!mention) return [];
@@ -502,15 +509,20 @@ export function MessageInput({
 
   const handleSendRecording = async () => {
     if (!onVoiceNote || !isRecording || uploading) return;
+    await finishVoiceRecordingRef.current();
+  };
+
+  finishVoiceRecordingRef.current = async (result) => {
+    if (!onVoiceNote || uploading) return;
     setUploading(true);
     setUploadError(null);
     try {
-      const result = await stopRecording();
-      if (!result) {
+      const recording = result === undefined ? await stopRecording() : result;
+      if (!recording) {
         setUploadError(t("voice.tooShort"));
         return;
       }
-      if (result.file.size > MAX_ATTACHMENT_SIZE_BYTES) {
+      if (recording.file.size > MAX_ATTACHMENT_SIZE_BYTES) {
         setUploadError(
           t("voice.tooLarge", {
             limit: formatUploadLimitMb(MAX_ATTACHMENT_SIZE_BYTES),
@@ -518,7 +530,7 @@ export function MessageInput({
         );
         return;
       }
-      await onVoiceNote(result.file, result.durationMs);
+      await onVoiceNote(recording.file, recording.durationMs);
     } catch (error) {
       setUploadError(formatChatUploadError(error));
     } finally {

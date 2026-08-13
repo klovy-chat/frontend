@@ -1,10 +1,17 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { useEffect } from "react";
 import { useAuth } from "./context/AuthContext";
 import { WebSocketProvider } from "./context/WebSocketContext";
 import { PresenceProvider } from "./context/PresenceContext";
 import { CallProvider } from "./context/CallContext";
 import { CallOverlay } from "./components/call/CallOverlay";
+import { MessageCacheBridge } from "./components/chat/MessageCacheBridge";
+import { FriendshipCacheBridge } from "./components/chat/FriendshipCacheBridge";
+import { UnreadBadgeBridge } from "./components/chat/UnreadBadgeBridge";
+import { MentionSourcesBridge } from "./components/chat/MentionSourcesBridge";
+import { WarningModal } from "./components/common/WarningModal";
+import { AnnouncementModal } from "./components/common/AnnouncementModal";
+import { useIdleAvailability } from "./hooks/useIdleAvailability";
 import { LoginPage } from "./pages/LoginPage";
 import { SignupPage } from "./pages/SignupPage";
 import { ProfileSetupPage } from "./pages/ProfileSetupPage";
@@ -79,6 +86,28 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+/** Layout route: CallProvider survives Chat ↔ Settings ↔ Invite navigation. */
+function AuthenticatedShell() {
+  useIdleAvailability();
+  return (
+    <ProtectedRoute>
+      <WebSocketProvider>
+        <PresenceProvider>
+          <CallProvider>
+            <MessageCacheBridge />
+            <FriendshipCacheBridge />
+            <UnreadBadgeBridge />
+            <MentionSourcesBridge />
+            <Outlet />
+            <CallOverlay />
+            <WarningModal />
+            <AnnouncementModal />
+          </CallProvider>
+        </PresenceProvider>
+      </WebSocketProvider>
+    </ProtectedRoute>
+  );
+}
 
 function AppRoutes() {
   return (
@@ -116,41 +145,11 @@ function AppRoutes() {
           </WhitelistRoute>
         }
       />
-      <Route
-        path="/invite/:inviteId"
-        element={
-          <ProtectedRoute>
-            <InvitePage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/settings/:section?"
-        element={
-          <ProtectedRoute>
-            <WebSocketProvider>
-              <PresenceProvider>
-                <SettingsPage />
-              </PresenceProvider>
-            </WebSocketProvider>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <WebSocketProvider>
-              <PresenceProvider>
-                <CallProvider>
-                  <ChatPage />
-                  <CallOverlay />
-                </CallProvider>
-              </PresenceProvider>
-            </WebSocketProvider>
-          </ProtectedRoute>
-        }
-      />
+      <Route element={<AuthenticatedShell />}>
+        <Route path="/" element={<ChatPage />} />
+        <Route path="/settings/:section?" element={<SettingsPage />} />
+        <Route path="/invite/:inviteId" element={<InvitePage />} />
+      </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

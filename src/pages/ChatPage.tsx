@@ -3,11 +3,11 @@ import { useLocation } from "react-router-dom";
 import { getUserChannels } from "../api/channels";
 import { Sidebar } from "../components/sidebar/Sidebar";
 import { ChatWindow } from "../components/chat/ChatWindow";
-import { WarningModal } from "../components/common/WarningModal";
-import { AnnouncementModal } from "../components/common/AnnouncementModal";
 import { useWebSocket } from "../context/WebSocketContext";
 import { useProfileSync } from "../hooks/useProfileSync";
-import { useIdleAvailability } from "../hooks/useIdleAvailability";
+import { setActiveConversationKey } from "../utils/sync/activeConversation";
+import { markChatPageMounted } from "../utils/sync/chatPageMounted";
+import { isConversationMuted } from "../utils/sync/mutedConversations";
 import type { ChatTarget, Contact } from "../types";
 import "../styles/chat/chat.css";
 
@@ -24,7 +24,23 @@ export function ChatPage() {
   const location = useLocation();
   const ws = useWebSocket();
 
-  useIdleAvailability();
+  useEffect(() => markChatPageMounted(), []);
+
+  // Set key synchronously on change — never null the active key on switch
+  // (cleanup→null→set gap made MentionSources/UnreadBadge see "not viewing").
+  useEffect(() => {
+    if (!active) {
+      setActiveConversationKey(null);
+      return;
+    }
+    setActiveConversationKey(
+      active.type === "dm"
+        ? `dm:${active.contact._id}`
+        : `channel:${active.channel._id}`,
+    );
+  }, [active]);
+
+  useEffect(() => () => setActiveConversationKey(null), []);
 
   useProfileSync(ws, {
     onInfo: ({ userId, username, displayName, bio, color }) =>
@@ -61,21 +77,27 @@ export function ChatPage() {
     getUserChannels()
       .then(({ channels }) => {
         const ch = channels.find((c) => c._id === openId);
-        if (ch) setActive({ type: "channel", channel: ch });
+        if (ch) {
+          setActive({
+            type: "channel",
+            channel: {
+              ...ch,
+              isMuted: isConversationMuted("channel", ch._id),
+              // Viewing-zero — nav totalUnread sums roster; title excludes active.
+              unreadCount: 0,
+            },
+          });
+        }
       })
       .catch(() => { /**/ });
   }, [location.state]);
 
   return (
-    <>
-      <Sidebar active={active} onSelect={setActive}>
-        <ChatWindow
-          target={active}
-          onClose={() => setActive(null)}
-        />
-      </Sidebar>
-      <WarningModal />
-      <AnnouncementModal />
-    </>
+    <Sidebar active={active} onSelect={setActive}>
+      <ChatWindow
+        target={active}
+        onClose={() => setActive(null)}
+      />
+    </Sidebar>
   );
 }

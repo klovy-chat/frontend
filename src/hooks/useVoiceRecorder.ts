@@ -37,7 +37,10 @@ export interface VoiceRecordingResult {
   durationMs: number;
 }
 
-export function useVoiceRecorder(maxDurationMs = MAX_VOICE_DURATION_MS) {
+export function useVoiceRecorder(
+  maxDurationMs = MAX_VOICE_DURATION_MS,
+  onAutoStop?: (result: VoiceRecordingResult | null) => void,
+) {
   const { t } = useTranslation();
   const [isRecording, setIsRecording] = useState(false);
   const [durationMs, setDurationMs] = useState(0);
@@ -52,6 +55,9 @@ export function useVoiceRecorder(maxDurationMs = MAX_VOICE_DURATION_MS) {
   const stopResolveRef = useRef<
     ((value: VoiceRecordingResult | null) => void) | null
   >(null);
+  const onAutoStopRef = useRef(onAutoStop);
+  onAutoStopRef.current = onAutoStop;
+  const autoStoppingRef = useRef(false);
 
   const cleanupStream = useCallback(() => {
     streamRef.current?.getTracks().forEach((track) => track.stop());
@@ -169,6 +175,7 @@ export function useVoiceRecorder(maxDurationMs = MAX_VOICE_DURATION_MS) {
       };
 
       startedAtRef.current = Date.now();
+      autoStoppingRef.current = false;
       recorder.start(250);
       setIsRecording(true);
       setDurationMs(0);
@@ -176,8 +183,11 @@ export function useVoiceRecorder(maxDurationMs = MAX_VOICE_DURATION_MS) {
       timerRef.current = setInterval(() => {
         const elapsed = Date.now() - startedAtRef.current;
         setDurationMs(elapsed);
-        if (elapsed >= maxDurationMs) {
-          void stop();
+        if (elapsed >= maxDurationMs && !autoStoppingRef.current) {
+          autoStoppingRef.current = true;
+          void stop().then((result) => {
+            onAutoStopRef.current?.(result);
+          });
         }
       }, 200);
 

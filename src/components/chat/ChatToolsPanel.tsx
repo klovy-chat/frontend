@@ -2,8 +2,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Avatar } from "../common/Avatar";
 import { getPinnedMessages, searchMessages } from "../../api/messages";
-import { unwrapIncomingMessages } from "../../crypto/messageContent";
-import { getMessagePreview } from "../../utils/chat/messages";
+import { WsType } from "../../api/wsProtocol";
+import { useWebSocket } from "../../context/WebSocketContext";
+import { unwrapIncomingMessage, unwrapIncomingMessages } from "../../crypto/messageContent";
+import { getMessagePreview, normalizeMessage } from "../../utils/chat/messages";
+import { mergeMessagePatch } from "../../utils/chat/mergeMessage";
 import { formatMessageTime, userLabel } from "../../utils/user/format";
 import type { ChatTarget, Message } from "../../types";
 import "../../styles/chat/chattools.css";
@@ -28,6 +31,7 @@ export function ChatToolsPanel({
   onJumpToMessage,
 }: ChatToolsPanelProps) {
   const { t } = useTranslation();
+  const ws = useWebSocket();
   const [filter, setFilter] = useState("");
   const [pinned, setPinned] = useState<Message[]>([]);
   const [searchResults, setSearchResults] = useState<Message[]>([]);
@@ -70,6 +74,66 @@ export function ChatToolsPanel({
       setSearchError(null);
     }
   }, [mode, loadPinned]);
+
+  useEffect(() => {
+    if (!ws || (mode !== "pinned" && mode !== "search")) return;
+
+    const belongsHere = (msg: Message) => {
+      if (target.type === "dm") {
+        const senderId =
+          typeof msg.sender === "object" ? msg.sender._id ?? msg.sender.id : msg.sender;
+        const recipientId =
+          typeof msg.recipient === "object"
+            ? msg.recipient?._id ?? msg.recipient?.id
+            : msg.recipient;
+        const peer = target.contact._id;
+        return senderId === peer || recipientId === peer;
+      }
+      const chId = msg.channelId ?? msg.channel;
+      return typeof chId === "string" && chId === target.channel._id;
+    };
+
+    const onEdited = (raw: Message) => {
+      const msg = unwrapIncomingMessage(normalizeMessage(raw));
+      if (!belongsHere(msg)) return;
+      setPinned((prev) => {
+        const existing = prev.find((m) => m._id === msg._id);
+        if (msg.pinned === true) {
+          const without = prev.filter((m) => m._id !== msg._id);
+          const next = existing ? mergeMessagePatch(existing, msg) : msg;
+          return [next, ...without];
+        }
+        if (msg.pinned === false) {
+          return prev.filter((m) => m._id !== msg._id);
+        }
+        // Content edit without explicit pin flag — update in place if present.
+        if (!existing) return prev;
+        return prev.map((m) =>
+          m._id === msg._id ? mergeMessagePatch(m, msg) : m,
+        );
+      });
+      if (mode === "search") {
+        setSearchResults((prev) =>
+          prev.map((m) => (m._id === msg._id ? mergeMessagePatch(m, msg) : m)),
+        );
+      }
+    };
+    const onDeleted = (data: { _id: string }) => {
+      setPinned((prev) => prev.filter((m) => m._id !== data._id));
+      setSearchResults((prev) => prev.filter((m) => m._id !== data._id));
+    };
+
+    const unsubs = [
+      ws.subscribe(WsType.MESSAGE_EDITED, onEdited),
+      ws.subscribe(WsType.MESSAGE_DELETED, onDeleted),
+    ];
+    return () => unsubs.forEach((u) => u());
+  }, [
+    ws,
+    mode,
+    target.type === "dm" ? target.contact._id : target.channel._id,
+    target.type,
+  ]);
 
   useEffect(() => {
     if (mode !== "search") return;

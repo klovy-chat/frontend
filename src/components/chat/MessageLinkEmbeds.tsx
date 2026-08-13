@@ -122,17 +122,14 @@ export function MessageLinkEmbeds({ content }: MessageLinkEmbedsProps) {
     setCards([]);
 
     void (async () => {
-      const loaded: LinkPreviewCard[] = [];
-      for (const url of cardUrls) {
-        const preview = await loadPreview(url);
-        if (cancelled) return;
-        if (preview && (preview.title || preview.description || preview.image)) {
-          loaded.push(preview);
-        }
-      }
-      if (!cancelled) {
-        setCards(loaded);
-      }
+      const results = await Promise.all(cardUrls.map((url) => loadPreview(url)));
+      if (cancelled) return;
+      setCards(
+        results.filter(
+          (preview): preview is LinkPreviewCard =>
+            Boolean(preview && (preview.title || preview.description || preview.image)),
+        ),
+      );
     })();
 
     return () => {

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 import {
   getMessages,
@@ -6,7 +6,7 @@ import {
   pinMessageHttp,
   unpinMessageHttp,
 } from "../../api/messages";
-import { getChannelMessages } from "../../api/channels";
+import { getChannelMessages, getChannelDetails } from "../../api/channels";
 import { checkFriendship } from "../../api/friends";
 import { toggleContactBlock } from "../../api/contacts";
 import { useAuth } from "../../context/AuthContext";
@@ -27,9 +27,40 @@ import { isAllowedGifMediaUrl } from "../../utils/media/mediaAllowlist";
 import { useProfileSync } from "../../hooks/useProfileSync";
 import { presenceColor } from "../../utils/user/presence";
 import {
-  usePresenceStore,
-  useResolvePresence,
+  usePresenceSeed,
+  useUserPresence,
 } from "../../context/PresenceContext";
+import {
+  chatCacheKey,
+  findPendingReplaceIndex,
+  getMessagePageCache,
+  isMessageCacheFresh,
+  PENDING_MESSAGE_TTL_MS,
+  setMessagePageCache,
+  dropPendingNonceFromCache,
+  ensureOptimisticInCache,
+  patchMessagePageCacheLive as patchCacheLive,
+  patchCachedMessageEverywhere,
+  subscribePendingDrop,
+} from "../../utils/chat/messagePageCache";
+import { isPendingAged } from "../../utils/chat/resendPendingOnReconnect";
+import {
+  publishSidebarTipFromMessage,
+  publishSidebarTipRevert,
+} from "../../utils/chat/listPreview";
+import {
+  getPendingMarkReadGeneration,
+  queuePendingMarkRead,
+  queuePendingMarkReadSync,
+  trackMarkReadInFlight,
+} from "../../utils/sync/pendingMarkRead";
+import {
+  getCachedFriendship,
+  getFriendshipEpoch,
+  setCachedFriendship,
+  subscribeFriendshipInvalidation,
+} from "../../utils/chat/friendshipCache";
+import { mergeMessagePatch, mergePreferReactions } from "../../utils/chat/mergeMessage";
 import {
   normalizeMessage,
 } from "../../utils/chat/messages";
@@ -61,18 +92,97 @@ import {
 
 type ToolsPanelMode = "pinned" | "search" | null;
 
-type MessagePageCacheEntry = {
-  messages: Message[];
-  hasMore: boolean;
-};
+function writeMessagePageCache(
+  target: ChatTarget,
+  messages: Message[],
+  hasMore?: boolean,
+) {
+  // Default: live patch — HTTP loaders call writeCacheEntry / setMessagePageCache directly.
+  patchCacheLive(chatCacheKey(target), messages, hasMore);
+}
 
-/** Stale-while-revalidate cache so switching chats does not flash an empty list. */
-const messagePageCache = new Map<string, MessagePageCacheEntry>();
+/** Merge HTTP page with live WS messages so revalidate does not drop newer frames. */
+function mergeHttpWithLive(
+  http: Message[],
+  live: Message[],
+  currentUserId: string,
+): Message[] {
+  const map = new Map<string, Message>();
+  for (const m of http) map.set(m._id, m);
+  for (const m of live) {
+    if (m.pending) {
+      const serverList = [...map.values(), ...live.filter((x) => !x.pending)];
+      const acked = serverList.some(
+        (x) => findPendingReplaceIndex([m], x, currentUserId) === 0,
+      );
+      if (acked) continue;
+      map.set(m._id, m);
+      continue;
+    }
+    const cur = map.get(m._id);
+    if (!cur) {
+      map.set(m._id, m);
+      continue;
+    }
+    map.set(m._id, {
+      ...cur,
+      ...m,
+      // Prefer whichever side has the edit, keep newer content accordingly.
+      content: m.edited || cur.edited
+        ? m.edited
+          ? m.content
+          : cur.content
+        : m.content ?? cur.content,
+      edited: Boolean(cur.edited || m.edited),
+      editedAt: m.editedAt ?? cur.editedAt,
+      read: Boolean(cur.read || m.read),
+      // Empty `{}` from live must not wipe richer HTTP reactions during revalidate.
+      reactions: mergePreferReactions(m.reactions, cur.reactions),
+      pending: false,
+      pinned: m.pinned ?? cur.pinned,
+      pinnedAt: m.pinnedAt ?? cur.pinnedAt,
+    });
+  }
+  return Array.from(map.values()).sort((a, b) => {
+    const ta = new Date(a.timestamp).getTime();
+    const tb = new Date(b.timestamp).getTime();
+    if (ta !== tb) return ta - tb;
+    return a._id.localeCompare(b._id);
+  });
+}
 
-function chatCacheKey(target: ChatTarget): string {
-  return target.type === "dm"
-    ? `dm:${target.contact._id}`
-    : `ch:${target.channel._id}`;
+function messageSenderId(msg: Message): string | undefined {
+  const sender = msg.sender;
+  if (!sender) return undefined;
+  return typeof sender === "string" ? sender : sender._id ?? sender.id;
+}
+
+function replacePendingWithServer(prev: Message[], next: Message, userId: string): Message[] {
+  // Drop any optimistic that matches this server row (nonce or content/file).
+  const withoutMatchedPending = prev.filter((m) => {
+    if (!m.pending || messageSenderId(m) !== userId) return true;
+    if (m._id === next._id) return true;
+    return findPendingReplaceIndex([m], next, userId) !== 0;
+  });
+  if (withoutMatchedPending.some((m) => m._id === next._id)) {
+    return withoutMatchedPending.map((m) =>
+      m._id === next._id
+        ? { ...mergeMessagePatch(m, next), pending: false }
+        : m,
+    );
+  }
+  if (messageSenderId(next) === userId) {
+    const pendingIdx = findPendingReplaceIndex(withoutMatchedPending, next, userId);
+    if (pendingIdx >= 0) {
+      const copy = withoutMatchedPending.slice();
+      copy[pendingIdx] = {
+        ...mergeMessagePatch(copy[pendingIdx], next),
+        pending: false,
+      };
+      return copy;
+    }
+  }
+  return [...withoutMatchedPending, next];
 }
 
 /** Aktualizuje pola nadawcy wiadomości, gdy jego profil zmieni się na żywo. */
@@ -160,29 +270,69 @@ export function ChatWindow({
     isChannelVoiceActive,
     requestChannelVoiceState,
   } = useCall();
-  const resolvePresence = useResolvePresence();
-  const { seed: seedPresence } = usePresenceStore();
+  const seedPresence = usePresenceSeed();
+  const dmPresence = useUserPresence(
+    target?.type === "dm" ? target.contact._id : undefined,
+  );
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [loadingOlder, setLoadingOlder] = useState(false);
   const [typingUserId, setTypingUserId] = useState<string | null>(null);
   const typingClearTimeout = useRef<ReturnType<typeof setTimeout>>();
+  /** clientNonce → originating chat key — scopes WS ERROR scrub across concurrent sends. */
+  const pendingSendKeysRef = useRef<Map<string, string>>(new Map());
+  /** Fallback when error has no nonce (legacy). */
+  const lastSendChatKeyRef = useRef<string | null>(null);
+  /** Currently open chat key — guards async send cleanup against chat switches. */
+  const activeChatKeyRef = useRef<string | null>(null);
+  /** Throttle per-message mark-channel-read so busy channels do not hit WS RL. */
+  const lastChannelMarkReadAtRef = useRef(0);
+  const channelMarkReadTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const [editingMessage, setEditingMessage] = useState<Message | null>(null);
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{
     messageId: string;
     preview: string;
   } | null>(null);
-  const [isFriend, setIsFriend] = useState(true);
+  const [isFriend, setIsFriend] = useState(false);
   const [isBlockedByMe, setIsBlockedByMe] = useState(false);
   const [isBlockedByOther, setIsBlockedByOther] = useState(false);
+  const isFriendRef = useRef(isFriend);
+  isFriendRef.current = isFriend;
+  const isBlockedByMeRef = useRef(isBlockedByMe);
+  isBlockedByMeRef.current = isBlockedByMe;
+  const isBlockedByOtherRef = useRef(isBlockedByOther);
+  isBlockedByOtherRef.current = isBlockedByOther;
   const [friendshipLoading, setFriendshipLoading] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [dmError, setDmError] = useState<string | null>(null);
   const [toolsPanel, setToolsPanel] = useState<ToolsPanelMode>(null);
   const [highlightMessageId, setHighlightMessageId] = useState<string | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const loadGenRef = useRef(0);
+  const [channelRoster, setChannelRoster] = useState<Contact[]>([]);
+  const friendshipEpoch = useSyncExternalStore(
+    subscribeFriendshipInvalidation,
+    getFriendshipEpoch,
+    getFriendshipEpoch,
+  );
+  activeChatKeyRef.current = target ? chatCacheKey(target) : null;
+  const targetRef = useRef(target);
+  targetRef.current = target;
+  const messagesRef = useRef(messages);
+  messagesRef.current = messages;
+  const userIdRef = useRef(user?.id);
+  userIdRef.current = user?.id;
+  /** Bumped by clearPendingMarkReads on logout — gate mark-read re-queue. */
+  const markSessionGenRef = useRef(getPendingMarkReadGeneration());
+  useEffect(() => {
+    if (user?.id) {
+      markSessionGenRef.current = getPendingMarkReadGeneration();
+    }
+  }, [user?.id]);
+  const wsRef = useRef(ws);
+  wsRef.current = ws;
 
   const imageLightboxItems = useMemo<LightboxItem[]>(() => {
     const items: LightboxItem[] = [];
@@ -266,10 +416,56 @@ export function ChatWindow({
       seen.add(candidate.id);
       out.push(candidate);
     };
-    target.channel.members.forEach(add);
+    const members =
+      target.channel.members.length > 0 ? target.channel.members : channelRoster;
+    members.forEach(add);
     add(target.channel.admin);
     return out;
-  }, [target, currentUserId]);
+  }, [target, currentUserId, channelRoster]);
+
+  useEffect(() => {
+    if (target?.type !== "channel") {
+      setChannelRoster([]);
+      return;
+    }
+    // Prefer live members from Sidebar WS patches (join/leave) without HTTP.
+    if (target.channel.members.length > 0) {
+      setChannelRoster(target.channel.members);
+    }
+  }, [
+    target?.type === "channel" ? target.channel._id : null,
+    target?.type === "channel"
+      ? target.channel.members.map((m) => m._id).join(",")
+      : "",
+  ]);
+
+  useEffect(() => {
+    if (target?.type !== "channel") return;
+    const channelId = target.channel._id;
+    // Skip HTTP when Sidebar already seeded a live roster.
+    if (target.channel.members.length > 0) {
+      setChannelRoster(target.channel.members);
+      return;
+    }
+    let cancelled = false;
+    getChannelDetails(channelId)
+      .then((res) => {
+        if (cancelled) return;
+        setChannelRoster(res.channel.members ?? []);
+      })
+      .catch(() => {
+        /* keep seeded roster */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    target?.type === "channel" ? target.channel._id : null,
+    target?.type === "channel" ? target.channel.members.length : 0,
+    target?.type === "channel"
+      ? target.channel.members.map((m) => m._id).join(",")
+      : "",
+  ]);
 
   const allowMentionEveryone = target?.type === "channel";
 
@@ -283,12 +479,14 @@ export function ChatWindow({
 
   const loadMessages = useCallback(async () => {
     if (!target || !currentUserId) return;
+    const gen = ++loadGenRef.current;
     const cacheKey = chatCacheKey(target);
-    const cached = messagePageCache.get(cacheKey);
+    const cached = getMessagePageCache(cacheKey);
     if (cached) {
       setMessages(cached.messages);
       setHasMore(cached.hasMore);
       setLoading(false);
+      if (isMessageCacheFresh(cached)) return;
     } else {
       setLoading(true);
     }
@@ -299,71 +497,92 @@ export function ChatWindow({
             target.contact._id,
             { limit: MESSAGE_PAGE_SIZE },
           );
+          if (gen !== loadGenRef.current) return;
           const prepared = prepareForDisplay(list);
           const hasMorePage = Boolean(more);
-          messagePageCache.set(cacheKey, {
-            messages: prepared,
-            hasMore: hasMorePage,
+          setMessages((prev) => {
+            const merged = mergeHttpWithLive(prepared, prev, currentUserId);
+            setMessagePageCache(cacheKey, merged, hasMorePage);
+            return merged;
           });
-          setMessages(prepared);
           setHasMore(hasMorePage);
         } catch {
+          if (gen !== loadGenRef.current) return;
           if (!cached) {
             setMessages([]);
             setHasMore(false);
           }
         }
       } else {
-        const { messages: list, hasMore: more } = await getChannelMessages(
-          target.channel._id,
-          { limit: MESSAGE_PAGE_SIZE },
-        );
-        const prepared = prepareForDisplay(list);
-        const hasMorePage = Boolean(more);
-        messagePageCache.set(cacheKey, {
-          messages: prepared,
-          hasMore: hasMorePage,
-        });
-        setMessages(prepared);
-        setHasMore(hasMorePage);
+        try {
+          const { messages: list, hasMore: more } = await getChannelMessages(
+            target.channel._id,
+            { limit: MESSAGE_PAGE_SIZE },
+          );
+          if (gen !== loadGenRef.current) return;
+          const prepared = prepareForDisplay(list);
+          const hasMorePage = Boolean(more);
+          setMessages((prev) => {
+            const merged = mergeHttpWithLive(prepared, prev, currentUserId);
+            setMessagePageCache(cacheKey, merged, hasMorePage);
+            return merged;
+          });
+          setHasMore(hasMorePage);
+        } catch {
+          if (gen !== loadGenRef.current) return;
+          if (!cached) {
+            setMessages([]);
+            setHasMore(false);
+          }
+        }
       }
     } finally {
-      setLoading(false);
+      if (gen === loadGenRef.current) setLoading(false);
     }
   }, [target, currentUserId, prepareForDisplay]);
 
   const loadOlderMessages = useCallback(async () => {
     if (!target || !currentUserId || loadingOlder || !hasMore) return;
-    const oldest = messages[0]?._id;
+    const gen = loadGenRef.current;
+    const oldest = messagesRef.current[0]?._id;
     if (!oldest) return;
+    const targetSnapshot = target;
     setLoadingOlder(true);
     try {
       const page =
-        target.type === "dm"
-          ? await getMessages(target.contact._id, {
+        targetSnapshot.type === "dm"
+          ? await getMessages(targetSnapshot.contact._id, {
               before: oldest,
               limit: MESSAGE_PAGE_SIZE,
             })
-          : await getChannelMessages(target.channel._id, {
+          : await getChannelMessages(targetSnapshot.channel._id, {
               before: oldest,
               limit: MESSAGE_PAGE_SIZE,
             });
+      if (gen !== loadGenRef.current) return;
       const older = prepareForDisplay(page.messages);
+      const hasMorePage = Boolean(page.hasMore);
       setMessages((prev) => {
         const existing = new Set(prev.map((m) => m._id));
         const merged = older.filter((m) => !existing.has(m._id));
-        return merged.length > 0 ? [...merged, ...prev] : prev;
+        const next = merged.length > 0 ? [...merged, ...prev] : prev;
+        writeMessagePageCache(targetSnapshot, next, hasMorePage);
+        return next;
       });
-      setHasMore(Boolean(page.hasMore));
+      setHasMore(hasMorePage);
     } catch {
       // Zostaw hasMore bez zmian — użytkownik może ponowić próbę.
     } finally {
-      setLoadingOlder(false);
+      if (gen === loadGenRef.current) setLoadingOlder(false);
     }
-  }, [target, currentUserId, messages, hasMore, loadingOlder, prepareForDisplay]);
+  }, [target, currentUserId, hasMore, loadingOlder, prepareForDisplay]);
+
+  const targetKey = target ? chatCacheKey(target) : null;
+  const loadMessagesRef = useRef(loadMessages);
+  loadMessagesRef.current = loadMessages;
 
   useEffect(() => {
-    const cached = target ? messagePageCache.get(chatCacheKey(target)) : undefined;
+    const cached = targetKey ? getMessagePageCache(targetKey) : undefined;
     if (cached) {
       setMessages(cached.messages);
       setHasMore(cached.hasMore);
@@ -380,12 +599,126 @@ export function ChatWindow({
     }
     setDmError(null);
     if (target?.type === "dm") seedPresence([target.contact]);
+    if (target?.type === "channel") {
+      const channel = target.channel;
+      seedPresence([
+        channel.admin,
+        ...(channel.members ?? []).filter((m) => m._id !== channel.admin?._id),
+      ]);
+    }
     setToolsPanel(null);
     setHighlightMessageId(null);
     setEditingMessage(null);
     setReplyingTo(null);
-    loadMessages();
-  }, [loadMessages, target]);
+    setDeleteConfirm(null);
+    void loadMessagesRef.current();
+    // Identity only — do not depend on loadMessages (it closes over full `target`).
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- targetKey gates remount
+  }, [targetKey, seedPresence]);
+
+  // Field patches (name/avatar/members) refresh presence without wiping composer.
+  useEffect(() => {
+    if (!target) return;
+    if (target.type === "dm") seedPresence([target.contact]);
+    else {
+      seedPresence([
+        target.channel.admin,
+        ...(target.channel.members ?? []).filter(
+          (m) => m._id !== target.channel.admin?._id,
+        ),
+      ]);
+    }
+    // Identity / roster signature only — mute/name patches must not spam seed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- targetKey + member ids
+  }, [
+    targetKey,
+    target?.type === "dm" ? target.contact._id : null,
+    target?.type === "channel"
+      ? [
+          target.channel.admin?._id,
+          ...(target.channel.members ?? []).map((m) => m._id),
+        ].join(",")
+      : "",
+    seedPresence,
+  ]);
+
+  useEffect(() => {
+    if (!dmError) return;
+    if (target?.type === "dm" && !canSendDm) return;
+    const id = window.setTimeout(() => setDmError(null), 5_000);
+    return () => window.clearTimeout(id);
+  }, [dmError, target, canSendDm]);
+
+  const wsWasConnectedRef = useRef(wsConnected);
+  useEffect(() => {
+    const was = wsWasConnectedRef.current;
+    wsWasConnectedRef.current = wsConnected;
+    if (!wsConnected || was) return;
+    // Shell MessageCacheBridge owns cache scrub/resend — here only UI + revalidate.
+    const now = Date.now();
+    setMessages((prev) => {
+      const dropped = prev.filter((m) => isPendingAged(m, now));
+      if (dropped.length === 0) return prev;
+      for (const m of dropped) {
+        if (m.clientNonce) pendingSendKeysRef.current.delete(m.clientNonce);
+      }
+      setDmError(t("messages.errors.cannotSend"));
+      const dropIds = new Set(dropped.map((m) => m._id));
+      const next = prev.filter((m) => !dropIds.has(m._id));
+      if (targetRef.current) writeMessagePageCache(targetRef.current, next);
+      return next;
+    });
+    void loadMessages();
+    const current = targetRef.current;
+    if (current?.type === "channel") {
+      const channel = current.channel;
+      seedPresence([
+        channel.admin,
+        ...(channel.members ?? []).filter((m) => m._id !== channel.admin?._id),
+      ]);
+      requestChannelVoiceState(channel._id);
+    } else if (current?.type === "dm") {
+      seedPresence([current.contact]);
+    }
+  }, [wsConnected, loadMessages, targetKey, seedPresence, requestChannelVoiceState, t]);
+
+  // Bridge / cache drops failed resend nonces — keep open chat UI in sync.
+  useEffect(() => {
+    return subscribePendingDrop((key, clientNonce) => {
+      pendingSendKeysRef.current.delete(clientNonce);
+      if (activeChatKeyRef.current !== key) return;
+      setMessages((prev) => {
+        const next = prev.filter((m) => m.clientNonce !== clientNonce);
+        return next.length === prev.length ? prev : next;
+      });
+    });
+  }, []);
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setMessages((prev) => {
+        const now = Date.now();
+        const dropped: string[] = [];
+        const next = prev.filter((m) => {
+          if (!m.pending) return true;
+          const age = now - new Date(m.timestamp).getTime();
+          if (age < PENDING_MESSAGE_TTL_MS) return true;
+          if (m.clientNonce) dropped.push(m.clientNonce);
+          return false;
+        });
+        if (next.length === prev.length) return prev;
+        for (const nonce of dropped) {
+          pendingSendKeysRef.current.delete(nonce);
+        }
+        if (dropped.length > 0) {
+          setDmError(t("messages.errors.cannotSend"));
+        }
+        if (target) writeMessagePageCache(target, next);
+        return next;
+      });
+    }, 5_000);
+    return () => window.clearInterval(id);
+  }, [target, t]);
 
   useEffect(() => {
     if (target?.type !== "channel") return;
@@ -400,19 +733,62 @@ export function ChatWindow({
       return;
     }
 
+    const contactId = target.contact._id;
     setIsBlockedByMe(Boolean(target.contact.isBlockedByMe));
-    let cancelled = false;
-    setFriendshipLoading(true);
-    checkFriendship(target.contact._id)
-      .then((res) => {
-        if (!cancelled) {
+
+    const cached = getCachedFriendship(contactId);
+    if (cached) {
+      setIsFriend(cached.isFriend);
+      setIsBlockedByMe(cached.isBlockedByMe);
+      setIsBlockedByOther(cached.isBlockedByOther);
+      setFriendshipLoading(false);
+      // Warm cache — still refresh in background (stale friend gate ≤ TTL).
+      let cancelled = false;
+      checkFriendship(contactId)
+        .then((res) => {
+          if (cancelled) return;
+          setCachedFriendship(contactId, {
+            isFriend: res.isFriend,
+            isBlockedByMe: Boolean(res.isBlockedByMe),
+            isBlockedByOther: Boolean(res.isBlockedByOther),
+          });
           setIsFriend(res.isFriend);
           setIsBlockedByMe(Boolean(res.isBlockedByMe));
           setIsBlockedByOther(Boolean(res.isBlockedByOther));
-        }
+        })
+        .catch(() => {});
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    let cancelled = false;
+    setFriendshipLoading(true);
+    setIsFriend(false);
+    setIsBlockedByOther(false);
+    checkFriendship(contactId)
+      .then((res) => {
+        if (cancelled) return;
+        setCachedFriendship(contactId, {
+          isFriend: res.isFriend,
+          isBlockedByMe: Boolean(res.isBlockedByMe),
+          isBlockedByOther: Boolean(res.isBlockedByOther),
+        });
+        setIsFriend(res.isFriend);
+        setIsBlockedByMe(Boolean(res.isBlockedByMe));
+        setIsBlockedByOther(Boolean(res.isBlockedByOther));
       })
       .catch(() => {
-        if (!cancelled) setIsFriend(false);
+        // Network failure — keep last cached friendship; only default-true with no cache.
+        if (cancelled) return;
+        const cached = getCachedFriendship(contactId);
+        if (cached) {
+          setIsFriend(cached.isFriend);
+          setIsBlockedByMe(Boolean(cached.isBlockedByMe));
+          setIsBlockedByOther(Boolean(cached.isBlockedByOther));
+        } else {
+          setIsFriend(false);
+        }
       })
       .finally(() => {
         if (!cancelled) setFriendshipLoading(false);
@@ -421,51 +797,205 @@ export function ChatWindow({
     return () => {
       cancelled = true;
     };
+  }, [target?.type === "dm" ? target.contact._id : null, friendshipEpoch]);
+
+  // Re-check when friendship TTL expires while the same DM stays open.
+  useEffect(() => {
+    if (!target || target.type !== "dm") return;
+    const contactId = target.contact._id;
+    let cancelled = false;
+    const id = window.setInterval(() => {
+      if (getCachedFriendship(contactId)) return;
+      // Background only — do not flip friendshipLoading (avoids composer flicker).
+      checkFriendship(contactId)
+        .then((res) => {
+          if (cancelled || activeChatKeyRef.current !== `dm:${contactId}`) return;
+          setCachedFriendship(contactId, {
+            isFriend: res.isFriend,
+            isBlockedByMe: Boolean(res.isBlockedByMe),
+            isBlockedByOther: Boolean(res.isBlockedByOther),
+          });
+          setIsFriend(res.isFriend);
+          setIsBlockedByMe(Boolean(res.isBlockedByMe));
+          setIsBlockedByOther(Boolean(res.isBlockedByOther));
+        })
+        .catch(() => {});
+    }, 20_000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
   }, [target?.type === "dm" ? target.contact._id : null]);
 
   useEffect(() => {
-    if (!ws || !user || target?.type !== "dm" || loading || !canSendDm) return;
+    if (!user?.id || target?.type !== "dm") return;
 
-    ws.send(WsType.MARK_CONVERSATION_READ, {
-      userId: user.id,
-      contactId: target.contact._id,
-    });
+    const contactId = target.contact._id;
+    const userId = user.id;
+    const mark = { kind: "dm" as const, userId, contactId };
+    // Logout bumps generation — cleanup must not re-queue after clearPendingMarkReads.
+    const sessionGen = getPendingMarkReadGeneration();
+    const armOffline = () => {
+      if (getPendingMarkReadGeneration() !== sessionGen) return;
+      const g = getPendingMarkReadGeneration();
+      trackMarkReadInFlight(mark);
+      queuePendingMarkRead(mark, g);
+    };
+    const sendMark = () => {
+      if (getPendingMarkReadGeneration() !== sessionGen) return;
+      if (!ws || !wsConnected) {
+        armOffline();
+        return;
+      }
+      const g = getPendingMarkReadGeneration();
+      trackMarkReadInFlight(mark);
+      void ws
+        .send(WsType.MARK_CONVERSATION_READ, { userId, contactId })
+        .then((ok) => {
+          // Wire ack ≠ server absolute — keep inFlight until UNREAD absolute.
+          if (getPendingMarkReadGeneration() !== sessionGen) return;
+          if (!ok) queuePendingMarkRead(mark, g);
+        })
+        .catch(() => {
+          if (getPendingMarkReadGeneration() !== sessionGen) return;
+          queuePendingMarkRead(mark, g);
+        });
+    };
+    // Mark on open immediately (not only post-load) + again on leave.
+    // Offline: still track+queue so Bridge heal pendingZero / reconnect flush.
+    sendMark();
+    return () => {
+      sendMark();
+    };
   }, [
     ws,
-    user,
+    user?.id,
     target?.type === "dm" ? target.contact._id : null,
-    loading,
-    canSendDm,
+    wsConnected,
   ]);
 
+  // Mark channel read when opening; flush again on leave/switch/unmount so
+  // throttled per-message marks cannot leave phantom unread after Settings/nav.
   useEffect(() => {
-    if (!ws || !user || target?.type !== "channel" || loading) return;
-
-    ws.send(WsType.MARK_CHANNEL_READ, {
-      userId: user.id,
-      channelId: target.channel._id,
-    });
+    if (!user?.id || target?.type !== "channel") {
+      return;
+    }
+    const channelId = target.channel._id;
+    const userId = user.id;
+    const mark = { kind: "channel" as const, userId, channelId };
+    // Logout bumps generation — cleanup must not re-queue after clearPendingMarkReads.
+    const sessionGen = getPendingMarkReadGeneration();
+    const armOffline = () => {
+      if (getPendingMarkReadGeneration() !== sessionGen) return;
+      const g = getPendingMarkReadGeneration();
+      trackMarkReadInFlight(mark);
+      queuePendingMarkRead(mark, g);
+    };
+    const sendMark = () => {
+      if (getPendingMarkReadGeneration() !== sessionGen) return;
+      if (!ws || !wsConnected) {
+        armOffline();
+        return;
+      }
+      const g = getPendingMarkReadGeneration();
+      trackMarkReadInFlight(mark);
+      lastChannelMarkReadAtRef.current = Date.now();
+      void ws
+        .send(WsType.MARK_CHANNEL_READ, { userId, channelId })
+        .then((ok) => {
+          if (getPendingMarkReadGeneration() !== sessionGen) return;
+          if (!ok) queuePendingMarkRead(mark, g);
+        })
+        .catch(() => {
+          if (getPendingMarkReadGeneration() !== sessionGen) return;
+          queuePendingMarkRead(mark, g);
+        });
+    };
+    sendMark();
+    return () => {
+      sendMark();
+    };
   }, [
     ws,
-    user,
+    user?.id,
     target?.type === "channel" ? target.channel._id : null,
-    loading,
+    wsConnected,
   ]);
 
+  // Flush is owned by UnreadBadgeBridge (shell) so Chat→Settings still drains.
+  // Do not takePendingMarkReads here — dual take races Bridge on visibility.
+
+  // Clear trailing channel mark timer on unmount (avoid stray send after leave).
   useEffect(() => {
-    if (!ws || !target) return;
+    return () => {
+      if (channelMarkReadTimerRef.current) {
+        clearTimeout(channelMarkReadTimerRef.current);
+        channelMarkReadTimerRef.current = undefined;
+      }
+    };
+  }, []);
+
+  // pagehide / visibility=hidden: mark current chat read (same as open/leave).
+  useEffect(() => {
+    const markCurrentRead = () => {
+      const current = targetRef.current;
+      const userId = userIdRef.current;
+      const socket = wsRef.current;
+      // Queue even without socket (provider teardown / pre-connect) — Bridge flush.
+      if (!current || !userId) return;
+      // Logout clearPendingMarkReads bumps generation — do not re-arm pending.
+      if (getPendingMarkReadGeneration() !== markSessionGenRef.current) return;
+      if (current.type === "dm") {
+        const contactId = current.contact._id;
+        const mark = { kind: "dm" as const, userId, contactId };
+        // Queue sync first — unload often kills async encrypt before send completes.
+        queuePendingMarkReadSync(mark);
+        trackMarkReadInFlight(mark);
+        // Keep pending/inFlight until absolute — unload often kills encrypt before apply.
+        if (socket) {
+          void socket.send(WsType.MARK_CONVERSATION_READ, { userId, contactId });
+        }
+        return;
+      }
+      const channelId = current.channel._id;
+      const mark = { kind: "channel" as const, userId, channelId };
+      queuePendingMarkReadSync(mark);
+      trackMarkReadInFlight(mark);
+      if (socket) {
+        void socket.send(WsType.MARK_CHANNEL_READ, { userId, channelId });
+      }
+    };
+    const onPageHide = () => markCurrentRead();
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") markCurrentRead();
+    };
+    window.addEventListener("pagehide", onPageHide);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("pagehide", onPageHide);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!ws) return;
 
     const appendMessage = (msg: Message) => {
+      const current = targetRef.current;
+      if (!current) return;
       const next = prepareForDisplay([msg])[0];
       if (!next) return;
+      if (next.clientNonce) pendingSendKeysRef.current.delete(next.clientNonce);
       setMessages((prev) => {
-        if (prev.some((m) => m._id === next._id)) return prev;
-        return [...prev, next];
+        const merged = replacePendingWithServer(prev, next, currentUserId);
+        writeMessagePageCache(current, merged);
+        return merged;
       });
     };
 
     const onDm = (msg: Message) => {
-      if (target.type !== "dm") return;
+      const target = targetRef.current;
+      if (!target || target.type !== "dm") return;
       const contactId = target.contact._id;
       const senderId =
         typeof msg.sender === "object" ? msg.sender._id ?? msg.sender.id : msg.sender;
@@ -480,32 +1010,105 @@ export function ChatWindow({
         appendMessage(msg);
 
         if (recipientId === currentUserId && senderId === contactId) {
-          ws.send(WsType.MARK_MESSAGE_READ, {
-            messageId: msg._id,
+          if (getPendingMarkReadGeneration() !== markSessionGenRef.current) return;
+          const mark = {
+            kind: "dm" as const,
             userId: currentUserId,
-          });
+            contactId,
+          };
+          const g = getPendingMarkReadGeneration();
+          trackMarkReadInFlight(mark);
+          void ws
+            .send(WsType.MARK_MESSAGE_READ, {
+              messageId: msg._id,
+              userId: currentUserId,
+            })
+            .then((ok) => {
+              if (getPendingMarkReadGeneration() !== markSessionGenRef.current) return;
+              if (!ok) queuePendingMarkRead(mark, g);
+            })
+            .catch(() => {
+              if (getPendingMarkReadGeneration() !== markSessionGenRef.current) return;
+              queuePendingMarkRead(mark, g);
+            });
         }
       }
     };
 
     const onChannel = (msg: Message & { channelId?: string }) => {
-      if (target.type !== "channel") return;
+      const target = targetRef.current;
+      if (!target || target.type !== "channel") return;
       const chId = msg.channelId ?? msg.channel;
       if (chId === target.channel._id) {
         appendMessage(msg);
 
-        ws.send(WsType.MARK_CHANNEL_READ, {
-          userId: currentUserId,
-          channelId: target.channel._id,
-        });
+        const channelId = target.channel._id;
+        const sendMark = () => {
+          if (getPendingMarkReadGeneration() !== markSessionGenRef.current) return;
+          lastChannelMarkReadAtRef.current = Date.now();
+          const mark = {
+            kind: "channel" as const,
+            userId: currentUserId,
+            channelId,
+          };
+          const g = getPendingMarkReadGeneration();
+          trackMarkReadInFlight(mark);
+          void ws
+            .send(WsType.MARK_CHANNEL_READ, {
+              userId: currentUserId,
+              channelId,
+            })
+            .then((ok) => {
+              if (getPendingMarkReadGeneration() !== markSessionGenRef.current) return;
+              if (!ok) queuePendingMarkRead(mark, g);
+            })
+            .catch(() => {
+              if (getPendingMarkReadGeneration() !== markSessionGenRef.current) return;
+              queuePendingMarkRead(mark, g);
+            });
+        };
+        const now = Date.now();
+        if (now - lastChannelMarkReadAtRef.current >= 1_000) {
+          if (channelMarkReadTimerRef.current) {
+            clearTimeout(channelMarkReadTimerRef.current);
+            channelMarkReadTimerRef.current = undefined;
+          }
+          sendMark();
+        } else if (!channelMarkReadTimerRef.current) {
+          // Trailing flush after burst so parked channel does not keep phantom unread.
+          channelMarkReadTimerRef.current = setTimeout(() => {
+            channelMarkReadTimerRef.current = undefined;
+            if (activeChatKeyRef.current === `ch:${channelId}`) sendMark();
+          }, 400);
+        }
       }
     };
 
     const onEdited = (msg: Message) => {
+      const target = targetRef.current;
       const next = prepareForDisplay([msg])[0];
       if (!next) return;
-      setMessages((prev) =>
-        prev.map((m) => (m._id === next._id ? { ...m, ...next } : m)),
+      const patchQuotes = (m: Message): Message => {
+        const base = m._id === next._id ? mergeMessagePatch(m, next) : m;
+        const q = base.quotedMessage;
+        if (q && typeof q === "object" && q._id === next._id) {
+          return {
+            ...base,
+            quotedMessage: mergeMessagePatch(q, next),
+          };
+        }
+        return base;
+      };
+      setMessages((prev) => {
+        const updated = prev.map(patchQuotes);
+        if (target) writeMessagePageCache(target, updated);
+        return updated;
+      });
+      setEditingMessage((cur) =>
+        cur && cur._id === next._id ? mergeMessagePatch(cur, next) : cur,
+      );
+      setReplyingTo((cur) =>
+        cur && cur._id === next._id ? mergeMessagePatch(cur, next) : cur,
       );
     };
 
@@ -514,7 +1117,8 @@ export function ChatWindow({
       reactions: MessageReactions;
       channelId?: string;
     }) => {
-      if (target.type === "channel") {
+      const target = targetRef.current;
+      if (target?.type === "channel") {
         if (data.channelId && data.channelId !== target.channel._id) return;
       }
 
@@ -522,25 +1126,53 @@ export function ChatWindow({
         const exists = prev.some((m) => m._id === data.messageId);
         if (!exists) return prev;
 
-        return prev.map((m) =>
+        const updated = prev.map((m) =>
           m._id === data.messageId
             ? { ...m, reactions: normalizeReactions(data.reactions) }
             : m,
         );
+        if (target) writeMessagePageCache(target, updated);
+        return updated;
       });
     };
 
     const onDeleted = (data: { _id: string }) => {
-      setMessages((prev) => prev.filter((m) => m._id !== data._id));
+      const target = targetRef.current;
+      setMessages((prev) => {
+        const updated = prev
+          .map((m) => {
+            if (m._id === data._id) return null;
+            const q = m.quotedMessage;
+            if (q && typeof q === "object" && q._id === data._id) {
+              return { ...m, quotedMessage: { ...q, deleted: true } };
+            }
+            return m;
+          })
+          .filter((m): m is Message => m != null);
+        if (target) writeMessagePageCache(target, updated);
+        return updated;
+      });
+      setEditingMessage((cur) => (cur?._id === data._id ? null : cur));
+      setReplyingTo((cur) => (cur?._id === data._id ? null : cur));
+      setDeleteConfirm((cur) => (cur?.messageId === data._id ? null : cur));
     };
 
-    const onMessageRead = (data: { messageId: string; read: boolean }) => {
-      if (target.type !== "dm") return;
-      setMessages((prev) =>
-        prev.map((m) =>
-          m._id === data.messageId ? { ...m, read: data.read } : m,
-        ),
-      );
+    const onMessageRead = (data: {
+      messageId?: string;
+      _id?: string;
+      read: boolean;
+    }) => {
+      const target = targetRef.current;
+      if (!target || target.type !== "dm") return;
+      const id = data.messageId ?? data._id;
+      if (!id) return;
+      setMessages((prev) => {
+        const updated = prev.map((m) =>
+          m._id === id ? { ...m, read: data.read } : m,
+        );
+        writeMessagePageCache(target, updated);
+        return updated;
+      });
     };
 
     const onMessagesRead = (data: {
@@ -549,25 +1181,31 @@ export function ChatWindow({
       readerId: string;
       conversationRead?: boolean;
     }) => {
-      if (target.type !== "dm") return;
+      const target = targetRef.current;
+      if (!target || target.type !== "dm") return;
       if (data.readerId !== target.contact._id) return;
 
       if (data.conversationRead) {
-        // Large unread batch: mark every message I sent in this DM as read.
-        setMessages((prev) =>
-          prev.map((m) => {
+        setMessages((prev) => {
+          const updated = prev.map((m) => {
             const senderId =
               typeof m.sender === "object" ? m.sender._id ?? m.sender.id : m.sender;
             return senderId === currentUserId ? { ...m, read: data.read } : m;
-          }),
-        );
+          });
+          writeMessagePageCache(target, updated);
+          return updated;
+        });
         return;
       }
 
       const ids = new Set(data.messageIds ?? []);
-      setMessages((prev) =>
-        prev.map((m) => (ids.has(m._id) ? { ...m, read: data.read } : m)),
-      );
+      setMessages((prev) => {
+        const updated = prev.map((m) =>
+          ids.has(m._id) ? { ...m, read: data.read } : m,
+        );
+        writeMessagePageCache(target, updated);
+        return updated;
+      });
     };
 
     const applyTyping = (userId: string | null, isTyping: boolean) => {
@@ -579,17 +1217,27 @@ export function ChatWindow({
         setTypingUserId(userId);
         typingClearTimeout.current = setTimeout(
           () => setTypingUserId(null),
-          6000,
+          4000,
         );
       } else {
         setTypingUserId(null);
       }
     };
 
-    const onTyping = (data: { chatId: string; userId: string; isTyping: boolean }) => {
+    const onTyping = (data: {
+      chatId: string;
+      userId: string;
+      isTyping: boolean;
+    }) => {
+      const target = targetRef.current;
+      if (!target) return;
       if (target.type === "dm") {
-        if (data.userId === target.contact._id)
+        if (
+          data.userId === target.contact._id &&
+          data.chatId === currentUserId
+        ) {
           applyTyping(data.userId, data.isTyping);
+        }
       } else if (
         data.chatId === `channel_${target.channel._id}` &&
         data.userId !== currentUserId
@@ -598,15 +1246,144 @@ export function ChatWindow({
       }
     };
 
-    const onDmError = (data: { code?: string; message?: string }) => {
+    const onDmError = (data: {
+      code?: string;
+      message?: string;
+      clientNonce?: string;
+    }) => {
+      const target = targetRef.current;
+      const sendKey = data.clientNonce
+        ? pendingSendKeysRef.current.get(data.clientNonce) ??
+          lastSendChatKeyRef.current
+        : lastSendChatKeyRef.current;
+      if (data.clientNonce) pendingSendKeysRef.current.delete(data.clientNonce);
+      const dropPending = (msgs: Message[]) => {
+        if (data.clientNonce) {
+          return msgs.filter((m) => m.clientNonce !== data.clientNonce);
+        }
+        // No nonce — drop only the last pending (never wipe concurrent optimistics).
+        let last = -1;
+        for (let i = msgs.length - 1; i >= 0; i--) {
+          if (msgs[i].pending) {
+            last = i;
+            break;
+          }
+        }
+        return last < 0 ? msgs : msgs.filter((_, i) => i !== last);
+      };
+
+      if (data.clientNonce) {
+        publishSidebarTipRevert({
+          _id: `temp-${data.clientNonce}`,
+          clientNonce: data.clientNonce,
+        } as Message);
+      }
+      if (sendKey && (!target || chatCacheKey(target) !== sendKey)) {
+        const cached = getMessagePageCache(sendKey);
+        if (cached) {
+          patchCacheLive(sendKey, dropPending(cached.messages), cached.hasMore);
+        }
+      } else if (target?.type === "dm") {
+        setMessages((prev) => {
+          const next = dropPending(prev);
+          if (next.length !== prev.length) writeMessagePageCache(target, next);
+          return next;
+        });
+      }
+
+      if (!target || target.type !== "dm") return;
+      const contactId = target.contact._id;
+      if (sendKey && sendKey !== `dm:${contactId}`) return;
+
       if (data.code === "NOT_FRIENDS" && data.message) {
-        setDmError(data.message);
+        if (activeChatKeyRef.current === sendKey) setDmError(data.message);
         setIsFriend(false);
+        setCachedFriendship(contactId, {
+          isFriend: false,
+          isBlockedByMe: isBlockedByMeRef.current,
+          isBlockedByOther: isBlockedByOtherRef.current,
+        });
       }
       if (data.code === "USER_BLOCKED" && data.message) {
-        setDmError(data.message);
-        setIsBlockedByMe(true);
+        if (activeChatKeyRef.current === sendKey) setDmError(data.message);
+        const byMe =
+          typeof (data as { blockedByMe?: boolean }).blockedByMe === "boolean"
+            ? Boolean((data as { blockedByMe?: boolean }).blockedByMe)
+            : isBlockedByMeRef.current;
+        const byOther =
+          typeof (data as { blockedByOther?: boolean }).blockedByOther ===
+          "boolean"
+            ? Boolean((data as { blockedByOther?: boolean }).blockedByOther)
+            : true;
+        setIsBlockedByMe(byMe);
+        setIsBlockedByOther(byOther);
+        setCachedFriendship(contactId, {
+          isFriend: isFriendRef.current,
+          isBlockedByMe: byMe,
+          isBlockedByOther: byOther,
+        });
       }
+    };
+
+    const onWsError = (data: {
+      code?: string;
+      message?: string;
+      clientNonce?: string;
+    }) => {
+      const target = targetRef.current;
+      const sendRelated =
+        data.code === "QUEUE_FULL" ||
+        data.code === "SEND_FAILED" ||
+        data.code === "INVALID_FILE" ||
+        data.code === "CONTENT_TOO_LONG" ||
+        data.code === "RATE_LIMITED" ||
+        data.code === "FORBIDDEN" ||
+        data.code === "CHAT_LOCKED" ||
+        data.code === "SLOWMODE";
+      if (!sendRelated) return;
+      const sendKey = data.clientNonce
+        ? pendingSendKeysRef.current.get(data.clientNonce) ??
+          lastSendChatKeyRef.current
+        : lastSendChatKeyRef.current;
+      if (!sendKey) return;
+      if (data.clientNonce) {
+        pendingSendKeysRef.current.delete(data.clientNonce);
+        publishSidebarTipRevert({
+          _id: `temp-${data.clientNonce}`,
+          clientNonce: data.clientNonce,
+        } as Message);
+      }
+
+      const dropPending = (msgs: Message[]) => {
+        if (!msgs.some((m) => m.pending)) return msgs;
+        if (data.clientNonce) {
+          return msgs.filter((m) => m.clientNonce !== data.clientNonce);
+        }
+        if (data.code === "QUEUE_FULL") return msgs.filter((m) => !m.pending);
+        let last = -1;
+        for (let i = msgs.length - 1; i >= 0; i--) {
+          if (msgs[i].pending) {
+            last = i;
+            break;
+          }
+        }
+        return last < 0 ? msgs : msgs.filter((_, i) => i !== last);
+      };
+
+      if (!target || chatCacheKey(target) !== sendKey) {
+        const cached = getMessagePageCache(sendKey);
+        if (cached) {
+          patchCacheLive(sendKey, dropPending(cached.messages), cached.hasMore);
+        }
+        return;
+      }
+      setMessages((prev) => {
+        const next = dropPending(prev);
+        if (next === prev) return prev;
+        writeMessagePageCache(target, next);
+        return next;
+      });
+      if (data.message && activeChatKeyRef.current === sendKey) setDmError(data.message);
     };
 
     const unsubs = [
@@ -619,32 +1396,92 @@ export function ChatWindow({
       ws.subscribe(WsType.MESSAGES_READ, onMessagesRead),
       ws.subscribe(WsType.TYPING, onTyping),
       ws.subscribe(WsType.DM_ERROR, onDmError),
+      ws.subscribe(WsType.ERROR, onWsError),
     ];
 
     return () => unsubs.forEach((u) => u());
-  }, [ws, target, currentUserId, prepareForDisplay]);
+  }, [ws, target?.type === "dm" ? target.contact._id : target?.type === "channel" ? target.channel._id : null, currentUserId, prepareForDisplay]);
 
   useProfileSync(ws, {
     onInfo: ({ userId, username, displayName, bio, color }) =>
-      setMessages((prev) =>
-        prev.map((m) =>
+      setMessages((prev) => {
+        const updated = prev.map((m) =>
           patchMessageSender(m, userId, {
             username: username ?? undefined,
             displayName: displayName ?? undefined,
             bio: bio ?? undefined,
             color: color ?? undefined,
           }),
-        ),
-      ),
+        );
+        if (target) writeMessagePageCache(target, updated);
+        return updated;
+      }),
     onImage: ({ userId, image }) =>
-      setMessages((prev) =>
-        prev.map((m) => patchMessageSender(m, userId, { image })),
-      ),
+      setMessages((prev) => {
+        const updated = prev.map((m) =>
+          patchMessageSender(m, userId, { image }),
+        );
+        if (target) writeMessagePageCache(target, updated);
+        return updated;
+      }),
     onBanner: ({ userId, banner }) =>
-      setMessages((prev) =>
-        prev.map((m) => patchMessageSender(m, userId, { banner })),
-      ),
+      setMessages((prev) => {
+        const updated = prev.map((m) =>
+          patchMessageSender(m, userId, { banner }),
+        );
+        if (target) writeMessagePageCache(target, updated);
+        return updated;
+      }),
   });
+
+  const pushOptimistic = useCallback(
+    (partial: Omit<Message, "_id" | "timestamp" | "sender" | "pending"> & {
+      content: string;
+    }): string | null => {
+      if (!user || !target) return null;
+      const clientNonce = crypto.randomUUID();
+      const sendKey = chatCacheKey(target);
+      lastSendChatKeyRef.current = sendKey;
+      pendingSendKeysRef.current.set(clientNonce, sendKey);
+      const optimistic: Message = {
+        _id: `temp-${clientNonce}`,
+        sender: {
+          _id: user.id,
+          username: user.username,
+          displayName: user.displayName,
+          image: user.image,
+          color: user.color ?? undefined,
+        },
+        timestamp: new Date().toISOString(),
+        pending: true,
+        clientNonce,
+        read: false,
+        ...partial,
+        ...(target.type === "dm"
+          ? {
+              recipient: {
+                _id: target.contact._id,
+                username: target.contact.username,
+                displayName: target.contact.displayName,
+                image: target.contact.image,
+                color: target.contact.color,
+              },
+            }
+          : {
+              channelId: target.channel._id,
+              channel: target.channel._id,
+            }),
+      };
+      setMessages((prev) => {
+        const next = [...prev, optimistic];
+        writeMessagePageCache(target, next);
+        return next;
+      });
+      publishSidebarTipFromMessage(optimistic);
+      return clientNonce;
+    },
+    [user, target],
+  );
 
   const sendFileMessage = useCallback(
     async (
@@ -668,6 +1505,9 @@ export function ChatWindow({
       const messageType = options?.messageType ?? resolveUploadMessageType(file);
 
       const { filePath } = await uploadFile(file, uploadContext);
+      const sendKey = chatCacheKey(target);
+      // User may have switched chats during upload — still send, but don't touch wrong UI.
+      const stillActive = activeChatKeyRef.current === sendKey;
       const rawContent =
         options?.content ?? (messageType === "AUDIO" ? "" : file.name);
       const payload = {
@@ -682,12 +1522,82 @@ export function ChatWindow({
         ...quotePayload,
       };
 
-      if (target.type === "dm") {
-        ws.send(WsType.SEND_MESSAGE, { ...payload, recipient: target.contact._id });
-      } else {
-        ws.send(WsType.SEND_CHANNEL_MESSAGE, { ...payload, channelId: target.channel._id });
+      const clientNonce = stillActive
+        ? pushOptimistic({
+            content: rawContent,
+            messageType,
+            fileUrl: filePath,
+            fileName: file.name,
+            fileType: file.type || "application/octet-stream",
+            ...(options?.durationMs != null ? { durationMs: options.durationMs } : {}),
+            ...(replyingTo ? { quotedMessage: replyingTo } : {}),
+          })
+        : crypto.randomUUID();
+      if (!stillActive && clientNonce && user) {
+        lastSendChatKeyRef.current = sendKey;
+        pendingSendKeysRef.current.set(clientNonce, sendKey);
+        // Keep optimistic in inactive cache so reconnect/resend can find it.
+        ensureOptimisticInCache(sendKey, {
+          _id: `temp-${clientNonce}`,
+          sender: {
+            _id: user.id,
+            username: user.username,
+            displayName: user.displayName,
+            image: user.image,
+            color: user.color ?? undefined,
+          },
+          timestamp: new Date().toISOString(),
+          pending: true,
+          clientNonce,
+          read: false,
+          content: rawContent,
+          messageType,
+          fileUrl: filePath,
+          fileName: file.name,
+          fileType: file.type || "application/octet-stream",
+          ...(options?.durationMs != null ? { durationMs: options.durationMs } : {}),
+          ...(replyingTo ? { quotedMessage: replyingTo } : {}),
+          ...(target.type === "dm"
+            ? {
+                recipient: {
+                  _id: target.contact._id,
+                  username: target.contact.username,
+                  displayName: target.contact.displayName,
+                  image: target.contact.image,
+                  color: target.contact.color,
+                },
+              }
+            : {
+                channelId: target.channel._id,
+                channel: target.channel._id,
+              }),
+        });
       }
-      setReplyingTo(null);
+
+      const wire = { ...payload, clientNonce };
+      const sent =
+        target.type === "dm"
+          ? await ws.send(WsType.SEND_MESSAGE, {
+              ...wire,
+              recipient: target.contact._id,
+            })
+          : await ws.send(WsType.SEND_CHANNEL_MESSAGE, {
+              ...wire,
+              channelId: target.channel._id,
+            });
+      if (!sent && clientNonce) {
+        const dropped = {
+          _id: `temp-${clientNonce}`,
+          clientNonce,
+        } as Message;
+        dropPendingNonceFromCache(sendKey, clientNonce);
+        publishSidebarTipRevert(dropped);
+        if (activeChatKeyRef.current === sendKey) {
+          setMessages((prev) => prev.filter((m) => m.clientNonce !== clientNonce));
+        }
+        if (stillActive) setDmError(t("messages.errors.cannotSendFile"));
+      }
+      if (stillActive) setReplyingTo(null);
     },
     [
       ws,
@@ -696,6 +1606,7 @@ export function ChatWindow({
       canSendDm,
       replyingTo,
       t,
+      pushOptimistic,
     ],
   );
 
@@ -725,28 +1636,59 @@ export function ChatWindow({
         ...quotePayload,
       };
 
-      if (target.type === "dm") {
-        ws.send(WsType.SEND_MESSAGE, { ...payload, recipient: target.contact._id });
-      } else {
-        ws.send(WsType.SEND_CHANNEL_MESSAGE, {
-          ...payload,
-          channelId: target.channel._id,
-        });
-      }
+      const clientNonce = pushOptimistic({
+        content: fileName,
+        messageType,
+        fileUrl: mediaUrl,
+        fileName: `${fileName}.gif`,
+        fileType: fileType || "image/gif",
+        ...(replyingTo ? { quotedMessage: replyingTo } : {}),
+      });
+
+      const wire = { ...payload, clientNonce };
+      void (async () => {
+        const sent =
+          target.type === "dm"
+            ? await ws.send(WsType.SEND_MESSAGE, {
+                ...wire,
+                recipient: target.contact._id,
+              })
+            : await ws.send(WsType.SEND_CHANNEL_MESSAGE, {
+                ...wire,
+                channelId: target.channel._id,
+              });
+        if (!sent && clientNonce) {
+          const key = chatCacheKey(target);
+          dropPendingNonceFromCache(key, clientNonce);
+          publishSidebarTipRevert({
+            _id: `temp-${clientNonce}`,
+            clientNonce,
+          } as Message);
+          if (activeChatKeyRef.current === key) {
+            setMessages((prev) => prev.filter((m) => m.clientNonce !== clientNonce));
+            setDmError(t("messages.errors.cannotSend"));
+          }
+        }
+      })();
       setReplyingTo(null);
     },
-    [ws, target, user, canSendDm, replyingTo],
+    [ws, target, user, canSendDm, replyingTo, pushOptimistic, t],
   );
 
   const sendMessage = async (content: string) => {
     if (!ws || !target || !user || !canSendDm) return;
     if (editingMessage) {
-      ws.send(WsType.EDIT_MESSAGE, {
-        messageId: editingMessage._id,
+      const editingId = editingMessage._id;
+      const sent = await ws.send(WsType.EDIT_MESSAGE, {
+        messageId: editingId,
         content: wrapOutgoingContent(content),
         userId: user.id,
       });
-      setEditingMessage(null);
+      if (sent) {
+        setEditingMessage(null);
+      } else if (activeChatKeyRef.current === chatCacheKey(target)) {
+        setDmError(t("messages.errors.cannotSend"));
+      }
       return;
     }
 
@@ -771,17 +1713,48 @@ export function ChatWindow({
           ...quotePayload,
         };
 
-    if (target.type === "dm") {
-      ws.send(WsType.SEND_MESSAGE, {
-        ...payload,
-        recipient: target.contact._id,
-      });
-    } else {
-      ws.send(WsType.SEND_CHANNEL_MESSAGE, {
-        ...payload,
-        channelId: target.channel._id,
-      });
-    }
+    const clientNonce = pushOptimistic(
+      externalMedia
+        ? {
+            content: externalMedia.fileName,
+            messageType: "IMAGE",
+            fileUrl: externalMedia.url,
+            fileName: externalMedia.fileName,
+            fileType: externalMedia.fileType,
+            ...(replyingTo ? { quotedMessage: replyingTo } : {}),
+          }
+        : {
+            content,
+            messageType: "TEXT",
+            ...(replyingTo ? { quotedMessage: replyingTo } : {}),
+          },
+    );
+
+    const wire = { ...payload, clientNonce };
+    void (async () => {
+      const sent =
+        target.type === "dm"
+          ? await ws.send(WsType.SEND_MESSAGE, {
+              ...wire,
+              recipient: target.contact._id,
+            })
+          : await ws.send(WsType.SEND_CHANNEL_MESSAGE, {
+              ...wire,
+              channelId: target.channel._id,
+            });
+      if (!sent && clientNonce) {
+        const key = chatCacheKey(target);
+        dropPendingNonceFromCache(key, clientNonce);
+        publishSidebarTipRevert({
+          _id: `temp-${clientNonce}`,
+          clientNonce,
+        } as Message);
+        if (activeChatKeyRef.current === key) {
+          setMessages((prev) => prev.filter((m) => m.clientNonce !== clientNonce));
+          setDmError(t("messages.errors.cannotSend"));
+        }
+      }
+    })();
 
     setReplyingTo(null);
   };
@@ -812,26 +1785,56 @@ export function ChatWindow({
   };
 
   const handleReaction = (messageId: string, emoji: string) => {
-    if (!ws || !currentUserId || !canReact) return;
+    if (!ws || !currentUserId || !canReact || !target) return;
+    if (messageId.startsWith("temp-")) return;
 
-    setMessages((prev) =>
-      prev.map((m) =>
+    const key = chatCacheKey(target);
+    setMessages((prev) => {
+      const updated = prev.map((m) =>
         m._id === messageId
           ? {
               ...m,
               reactions: toggleReactionLocal(m.reactions, emoji, currentUserId),
             }
           : m,
-      ),
-    );
-
-    ws.send(WsType.MESSAGE_REACTION, {
-      messageId,
-      emoji,
+      );
+      writeMessagePageCache(target, updated);
+      return updated;
     });
+
+    void (async () => {
+      const sent = await ws.send(WsType.MESSAGE_REACTION, {
+        messageId,
+        emoji,
+      });
+      if (!sent) {
+        // Toggle again to undo — preserves concurrent WS updates on other fields.
+        patchCachedMessageEverywhere(messageId, (m) => ({
+          ...m,
+          reactions: toggleReactionLocal(m.reactions, emoji, currentUserId),
+        }));
+        if (activeChatKeyRef.current === key) {
+          setMessages((prev) =>
+            prev.map((m) =>
+              m._id === messageId
+                ? {
+                    ...m,
+                    reactions: toggleReactionLocal(
+                      m.reactions,
+                      emoji,
+                      currentUserId,
+                    ),
+                  }
+                : m,
+            ),
+          );
+        }
+      }
+    })();
   };
 
   const handleDelete = (message: Message) => {
+    if (message.pending) return;
     const isFile = message.messageType && message.messageType !== "TEXT";
     const preview = isFile
       ? isVoiceAttachment(message)
@@ -847,11 +1850,13 @@ export function ChatWindow({
   };
 
   const handleEdit = (message: Message) => {
+    if (message.pending) return;
     setReplyingTo(null);
     setEditingMessage(message);
   };
 
   const handleReply = (message: Message) => {
+    if (message.pending) return;
     setEditingMessage(null);
     setReplyingTo(message);
   };
@@ -879,49 +1884,124 @@ export function ChatWindow({
   );
 
   const handleConfirmDelete = () => {
-    if (!deleteConfirm) return;
-    ws?.send(WsType.DELETE_MESSAGE, {
-      messageId: deleteConfirm.messageId,
-      userId: currentUserId,
+    if (!deleteConfirm || !ws) return;
+    const messageId = deleteConfirm.messageId;
+    void (async () => {
+      const sent = await ws.send(WsType.DELETE_MESSAGE, {
+        messageId,
+        userId: currentUserId,
+      });
+      if (sent) setDeleteConfirm(null);
+    })();
+  };
+
+  const applyMessageUpdate = (updated: Message, expectedKey?: string | null) => {
+    const display = unwrapIncomingMessage(normalizeMessage(updated));
+    patchCachedMessageEverywhere(display._id, (m) =>
+      normalizeMessage(mergeMessagePatch(m, display)),
+    );
+    const key = expectedKey ?? (target ? chatCacheKey(target) : null);
+    if (!key || activeChatKeyRef.current !== key || !target) return;
+    setMessages((prev) => {
+      const next = prev.map((m) =>
+        m._id === display._id
+          ? normalizeMessage(mergeMessagePatch(m, display))
+          : m,
+      );
+      writeMessagePageCache(target, next);
+      return next;
     });
   };
 
-  const applyMessageUpdate = (updated: Message) => {
-    const display = unwrapIncomingMessage(normalizeMessage(updated));
-    setMessages((prev) =>
-      prev.map((m) =>
-        m._id === display._id ? normalizeMessage({ ...m, ...display }) : m,
-      ),
-    );
-  };
-
   const handlePin = async (message: Message) => {
+    if (!target || message.pending) return;
+    const key = chatCacheKey(target);
     try {
       const { message: updated } = await pinMessageHttp(message._id);
-      applyMessageUpdate(updated);
+      applyMessageUpdate(updated, key);
     } catch {
-      /* ignore */
+      if (activeChatKeyRef.current === key) {
+        setDmError(t("messages.errors.cannotSend"));
+      }
     }
   };
 
   const handleUnpin = async (message: Message) => {
+    if (!target || message.pending) return;
+    const key = chatCacheKey(target);
     try {
       const { message: updated } = await unpinMessageHttp(message._id);
-      applyMessageUpdate(updated);
+      applyMessageUpdate(updated, key);
     } catch {
-      /* ignore */
+      if (activeChatKeyRef.current === key) {
+        setDmError(t("messages.errors.cannotSend"));
+      }
     }
   };
 
   const handleJumpToMessage = (messageId: string) => {
     setToolsPanel(null);
     setHighlightMessageId(messageId);
-    requestAnimationFrame(() => {
+    const tryScroll = () => {
       const el = document.querySelector(
         `.message-list [data-message-id="${messageId}"]`,
       );
-      el?.scrollIntoView({ behavior: "smooth", block: "center" });
-    });
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        return true;
+      }
+      return false;
+    };
+    void (async () => {
+      if (tryScroll()) return;
+      if (!target || !currentUserId) return;
+      const gen = loadGenRef.current;
+      const targetSnapshot = target;
+      let working = messages;
+      let more = hasMore;
+      for (let page = 0; page < 25; page++) {
+        if (working.some((m) => m._id === messageId)) {
+          if (gen !== loadGenRef.current) return;
+          // Merge with live state so WS frames during pagination are kept.
+          setMessages((prev) => {
+            const merged = mergeHttpWithLive(working, prev, currentUserId);
+            writeMessagePageCache(targetSnapshot, merged, more);
+            return merged;
+          });
+          setHasMore(more);
+          requestAnimationFrame(() => {
+            tryScroll();
+          });
+          return;
+        }
+        if (!more || working.length === 0) break;
+        const oldest = working[0]._id;
+        try {
+          const next =
+            targetSnapshot.type === "dm"
+              ? await getMessages(targetSnapshot.contact._id, {
+                  before: oldest,
+                  limit: MESSAGE_PAGE_SIZE,
+                })
+              : await getChannelMessages(targetSnapshot.channel._id, {
+                  before: oldest,
+                  limit: MESSAGE_PAGE_SIZE,
+                });
+          if (gen !== loadGenRef.current) return;
+          const older = prepareForDisplay(next.messages);
+          const existing = new Set(working.map((m) => m._id));
+          const merged = older.filter((m) => !existing.has(m._id));
+          if (merged.length === 0) break;
+          working = [...merged, ...working];
+          more = Boolean(next.hasMore);
+        } catch {
+          break;
+        }
+      }
+      requestAnimationFrame(() => {
+        tryScroll();
+      });
+    })();
     window.setTimeout(() => setHighlightMessageId(null), 2500);
   };
 
@@ -936,7 +2016,9 @@ export function ChatWindow({
 
   /* ── Active chat ─────────────────────────────────────────────────────── */
   const dmContact =
-    target.type === "dm" ? resolvePresence(target.contact) : null;
+    target.type === "dm"
+      ? { ...target.contact, ...(dmPresence ?? {}) }
+      : null;
   const title =
     target.type === "dm"
       ? userLabel(target.contact)
@@ -987,7 +2069,7 @@ export function ChatWindow({
           {/* grouped pill toolbar */}
           <div className="chat-header__toolbar">
             {/* Phone (DM ze znajomym) */}
-            {target.type === "dm" && canSendDm && (
+            {target.type === "dm" && !friendshipLoading && canSendDm && (
               <IconBtn
                 title={t("chat.window.call")}
                 onClick={() =>
@@ -1028,7 +2110,7 @@ export function ChatWindow({
             )}
 
             {/* Video (tylko DM ze znajomym) */}
-            {target.type === "dm" && canSendDm && (
+            {target.type === "dm" && !friendshipLoading && canSendDm && (
               <IconBtn
                 title={t("chat.window.videoCall")}
                 onClick={() =>
@@ -1175,69 +2257,98 @@ export function ChatWindow({
                 : t("chat.input.blockedByThem")
               : t("chat.input.notFriends"))}
         </div>
-      ) : target.type === "channel" && isChannelChatLocked ? (
-        <div
-          style={{
-            padding: "14px 18px",
-            borderTop: `1px solid ${C.border}`,
-            background: C.bgPanel,
-            color: C.textMuted,
-            fontSize: "0.85rem",
-            lineHeight: 1.5,
-            textAlign: "center",
-            fontFamily: "var(--font-sans)",
-          }}
-        >
-          {t("chat.window.channelLocked")}
-        </div>
-      ) : target.type === "channel" && isChannelMuted ? (
-        <div
-          style={{
-            padding: "14px 18px",
-            borderTop: `1px solid ${C.border}`,
-            background: C.bgPanel,
-            color: C.textMuted,
-            fontSize: "0.85rem",
-            lineHeight: 1.5,
-            textAlign: "center",
-            fontFamily: "var(--font-sans)",
-          }}
-        >
-          {t("chat.window.mutedOnChannel")}
-        </div>
       ) : (
-        <MessageInput
-            key={
-              target.type === "dm"
-                ? target.contact._id
-                : `channel_${target.channel._id}`
-            }
-            onSend={sendMessage}
-            onTyping={handleTyping}
-            onFile={handleFile}
-            onVoiceNote={handleVoiceNote}
-            onGif={handleGif}
-            onSticker={handleSticker}
-            disabled={!canSendChannel || !wsConnected}
-            placeholder={
-              editingMessage
-                ? t("chat.input.editPlaceholder")
-                : replyingTo
-                  ? t("chat.input.replyPlaceholder")
-                : friendshipLoading
-                  ? t("chat.input.checkingPermissions")
-                  : target.type === "channel"
-                    ? t("chat.input.channelPlaceholder", { channel: target.channel.name })
-                    : t("chat.input.dmPlaceholder", { name: userLabel(target.contact) })
-            }
-            initialText={editingMessage?.content ?? ""}
-            isEditing={Boolean(editingMessage)}
-            onCancelEdit={handleCancelEdit}
-            replyTo={replyingTo}
-            onCancelReply={handleCancelReply}
-            mentionCandidates={mentionCandidates}
-            allowMentionEveryone={allowMentionEveryone}
-          />
+        <>
+          {dmError ? (
+            <div
+              role="alert"
+              style={{
+                padding: "10px 18px",
+                borderTop: `1px solid ${C.border}`,
+                background: C.bgPanel,
+                color: C.textMuted,
+                fontSize: "0.85rem",
+                lineHeight: 1.45,
+                textAlign: "center",
+                fontFamily: "var(--font-sans)",
+              }}
+            >
+              {dmError}
+            </div>
+          ) : null}
+          {target.type === "channel" && isChannelChatLocked ? (
+            <div
+              style={{
+                padding: "14px 18px",
+                borderTop: `1px solid ${C.border}`,
+                background: C.bgPanel,
+                color: C.textMuted,
+                fontSize: "0.85rem",
+                lineHeight: 1.5,
+                textAlign: "center",
+                fontFamily: "var(--font-sans)",
+              }}
+            >
+              {t("chat.window.channelLocked")}
+            </div>
+          ) : target.type === "channel" && isChannelMuted ? (
+            <div
+              style={{
+                padding: "14px 18px",
+                borderTop: `1px solid ${C.border}`,
+                background: C.bgPanel,
+                color: C.textMuted,
+                fontSize: "0.85rem",
+                lineHeight: 1.5,
+                textAlign: "center",
+                fontFamily: "var(--font-sans)",
+              }}
+            >
+              {t("chat.window.mutedOnChannel")}
+            </div>
+          ) : (
+            <MessageInput
+              key={
+                target.type === "dm"
+                  ? target.contact._id
+                  : `channel_${target.channel._id}`
+              }
+              onSend={sendMessage}
+              onTyping={handleTyping}
+              onFile={handleFile}
+              onVoiceNote={handleVoiceNote}
+              onGif={handleGif}
+              onSticker={handleSticker}
+              disabled={
+                !canSendChannel ||
+                !wsConnected ||
+                (target.type === "dm" && (friendshipLoading || !canSendDm))
+              }
+              placeholder={
+                editingMessage
+                  ? t("chat.input.editPlaceholder")
+                  : replyingTo
+                    ? t("chat.input.replyPlaceholder")
+                    : friendshipLoading
+                      ? t("chat.input.checkingPermissions")
+                      : target.type === "channel"
+                        ? t("chat.input.channelPlaceholder", {
+                            channel: target.channel.name,
+                          })
+                        : t("chat.input.dmPlaceholder", {
+                            name: userLabel(target.contact),
+                          })
+              }
+              initialText={editingMessage?.content ?? ""}
+              isEditing={Boolean(editingMessage)}
+              onCancelEdit={handleCancelEdit}
+              replyTo={replyingTo}
+              onCancelReply={handleCancelReply}
+              mentionCandidates={mentionCandidates}
+              allowMentionEveryone={allowMentionEveryone}
+            />
+          )}
+        </>
       )}
 
       {target.type === "dm" && (
@@ -1252,6 +2363,11 @@ export function ChatWindow({
               ? async () => {
                   const res = await toggleContactBlock(target.contact._id);
                   setIsBlockedByMe(res.isBlocked);
+                  setCachedFriendship(target.contact._id, {
+                    isFriend: true,
+                    isBlockedByMe: res.isBlocked,
+                    isBlockedByOther,
+                  });
                   setDmError(null);
                 }
               : undefined

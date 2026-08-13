@@ -376,7 +376,8 @@
     "errors": {
       "tooLong": "Message is too long. Maximum {{max}} characters.",
       "cannotSendFile": "Cannot send file right now.",
-      "cannotSendVoice": "Cannot send voice message right now."
+      "cannotSendVoice": "Cannot send voice message right now.",
+      "cannotSend": "Cannot send message right now."
     }
   },
   "moderation": {

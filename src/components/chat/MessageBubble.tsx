@@ -99,12 +99,14 @@ export const MessageBubble = memo(function MessageBubble({
   const isFile = message.messageType && message.messageType !== "TEXT";
   const senderName = userLabel(sender);
   const showSenderName = !isOwn && senderName !== t("format.userLabel");
-  const canPinAction = canPin && (onPin || onUnpin);
-  const hasActions = (isOwn && (onEdit || onDelete)) || canPinAction;
-  const canReplyAction = canReply && Boolean(onReply);
+  const canPinAction = !message.pending && canPin && (onPin || onUnpin);
+  const hasActions =
+    !message.pending && ((isOwn && (onEdit || onDelete)) || canPinAction);
+  const canReplyAction = !message.pending && canReply && Boolean(onReply);
   const showMenu = hasActions || canReplyAction;
   const reactionEntries = getReactionEntries(message.reactions);
-  const showToolbar = canReact || showMenu;
+  const canReactLive = !message.pending && canReact;
+  const showToolbar = canReactLive || showMenu;
 
   const resolvedFileUrl = message.fileUrl ?? "";
 
@@ -203,12 +205,13 @@ export const MessageBubble = memo(function MessageBubble({
   }, [reactionPickerOpen, isOwn]);
 
   const handleReactionSelect = (emoji: string) => {
+    if (message.pending) return;
     onReact?.(message._id, emoji);
     setReactionPickerOpen(false);
   };
 
   const handleReactionChipClick = (emoji: string) => {
-    if (!canReact) return;
+    if (!canReactLive) return;
     onReact?.(message._id, emoji);
   };
 
@@ -261,7 +264,7 @@ export const MessageBubble = memo(function MessageBubble({
             <div
               className={`message-toolbar${isOwn ? " message-toolbar--own" : ""}`}
             >
-              {canReact && onReact && (
+              {canReactLive && onReact && (
                 <div className="message-react-wrap">
                   <button
                     ref={reactButtonRef}
@@ -498,7 +501,7 @@ export const MessageBubble = memo(function MessageBubble({
                   type="button"
                   className={`message-reaction-chip${isActive ? " message-reaction-chip--active" : ""}`}
                   onClick={() => handleReactionChipClick(emoji)}
-                  disabled={!canReact}
+                  disabled={!canReactLive}
                   title={`${emoji} · ${users.length}`}
                 >
                   <span className="message-reaction-emoji">{emoji}</span>

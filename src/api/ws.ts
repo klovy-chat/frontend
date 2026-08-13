@@ -255,15 +255,21 @@ export class WebSocketClient {
     }, delay);
   }
 
-  private async sendFrame(frame: WsFrame) {
-    if (this.ws?.readyState !== WebSocket.OPEN) return;
-    const raw = JSON.stringify(frame);
-    if (this.frameCrypto) {
-      const encrypted = await this.frameCrypto.encrypt(raw);
-      this.ws.send(encrypted);
-      return;
+  private async sendFrame(frame: WsFrame): Promise<boolean> {
+    if (this.ws?.readyState !== WebSocket.OPEN) return false;
+    try {
+      const raw = JSON.stringify(frame);
+      if (this.frameCrypto) {
+        const encrypted = await this.frameCrypto.encrypt(raw);
+        if (this.ws?.readyState !== WebSocket.OPEN) return false;
+        this.ws.send(encrypted);
+        return true;
+      }
+      this.ws.send(raw);
+      return true;
+    } catch {
+      return false;
     }
-    this.ws.send(raw);
   }
 
   private dispatch(type: string, payload: unknown) {
@@ -280,9 +286,9 @@ export class WebSocketClient {
     }
   }
 
-  /** Wyślij wiadomość do serwera. */
-  send(type: string, payload?: unknown) {
-    void this.sendFrame({ type, payload: payload ?? {} });
+  /** Wyślij wiadomość do serwera. Zwraca Promise — false gdy socket nie OPEN / encrypt fail. */
+  async send(type: string, payload?: unknown): Promise<boolean> {
+    return this.sendFrame({ type, payload: payload ?? {} });
   }
 
   /** Subskrybuj typ wiadomości z serwera. Zwraca funkcję rezygnacji. */

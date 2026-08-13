@@ -1,8 +1,6 @@
 import { useEffect, useRef } from "react";
 import { updateAvailabilityStatus } from "../api/auth";
 import { useAuth } from "../context/AuthContext";
-import { useWebSocket } from "../context/WebSocketContext";
-import { WsType } from "../api/wsProtocol";
 
 const IDLE_MS = 5 * 60 * 1000;
 const AUTO_IDLE_BRB_KEY = "klovy:autoIdleBrb";
@@ -41,7 +39,6 @@ function isMarkedAutoIdleBrb(userId: string): boolean {
  */
 export function useIdleAvailability(): void {
   const { user, updateUser } = useAuth();
-  const ws = useWebSocket();
   const statusRef = useRef(user?.availabilityStatus ?? "online");
   statusRef.current = user?.availabilityStatus ?? "online";
 
@@ -58,9 +55,9 @@ export function useIdleAvailability(): void {
       if (switchingRef.current) return;
       switchingRef.current = true;
       try {
+        // HTTP already fans out user-status-changed — skip duplicate WS SET_STATUS.
         const updated = await updateAvailabilityStatus(status);
         updateUser(updated);
-        ws?.send(WsType.SET_STATUS, { availabilityStatus: status });
       } catch {
         /* ignore transient failures */
       } finally {
@@ -144,5 +141,5 @@ export function useIdleAvailability(): void {
       window.removeEventListener("scroll", onActivity);
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [user?.id, user?.availabilityStatus, ws, updateUser]);
+  }, [user?.id, user?.availabilityStatus, updateUser]);
 }

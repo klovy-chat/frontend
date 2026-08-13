@@ -50,7 +50,7 @@ export function WarningModal() {
 
   useEffect(() => {
     if (!ws) return;
-    const unsub = ws.subscribe(
+    const unsubWarned = ws.subscribe(
       WsType.USER_WARNED,
       (data: { warning?: OwnWarning }) => {
         const warning = data?.warning;
@@ -61,8 +61,26 @@ export function WarningModal() {
         setOpen(true);
       },
     );
-    return unsub;
-  }, [ws]);
+    const unsubRevoked = ws.subscribe(
+      WsType.USER_WARNING_REVOKED,
+      (data: { warningId?: string; id?: string }) => {
+        const id = data?.warningId ?? data?.id;
+        if (!id) {
+          void load();
+          return;
+        }
+        setWarnings((prev) => {
+          const next = prev.filter((w) => w.id !== id);
+          if (next.length === 0) setOpen(false);
+          return next;
+        });
+      },
+    );
+    return () => {
+      unsubWarned();
+      unsubRevoked();
+    };
+  }, [ws, load]);
 
   const acknowledge = async () => {
     setSubmitting(true);

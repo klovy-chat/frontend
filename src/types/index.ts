@@ -49,6 +49,8 @@ export interface Contact {
   createdAt?: string;
   lastMessageTime?: string;
   lastMessage?: string;
+  /** Client-side tip id for edit/delete list preview patches. */
+  lastMessageId?: string;
   unreadCount?: number;
   isMuted?: boolean;
   isBlockedByMe?: boolean;
@@ -75,11 +77,16 @@ export interface Channel {
   description?: string;
   lastMessageTime?: string;
   lastMessage?: string;
+  /** Client-side tip id for edit/delete list preview patches. */
+  lastMessageId?: string;
   unreadCount?: number;
   isMuted?: boolean;
   rateLimitPerUser?: number;
   chatLocked?: boolean;
   isMutedHere?: boolean;
+  /** ISO expiry for timed channel mute; null/omitted = permanent or not muted. */
+  mutedHereExpiresAt?: string | null;
+  memberCount?: number;
 }
 
 export interface ChannelDetails extends Channel {
@@ -125,6 +132,10 @@ export interface Message {
   quotedMessage?: Message | string | null;
   mentions?: MessageUser[];
   mentionsEveryone?: boolean;
+  /** Client-only: optimistic send not yet acked by server. */
+  pending?: boolean;
+  /** Client-only: correlates optimistic row with server echo. */
+  clientNonce?: string;
 }
 
 export type MessageReactions = Record<string, string[]>;

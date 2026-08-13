@@ -1,9 +1,13 @@
-import { useTranslation } from "react-i18next";
+﻿import { useTranslation } from "react-i18next";
 import { Avatar } from "../common/Avatar";
 import { UnreadBadge } from "../common/UnreadBadge";
 import { userLabel, formatTime } from "../../utils/user/format";
 import { formatListLastMessage } from "../../utils/chat/messages";
-import { PRESENCE_COLORS } from "../../utils/user/presence";
+import {
+  getEffectiveStatus,
+  PRESENCE_COLORS,
+} from "../../utils/user/presence";
+import { useUserPresence } from "../../context/PresenceContext";
 import type { Channel, ChatTarget, Contact } from "../../types";
 import "../../styles/chat/chat-list.css";
 
@@ -24,7 +28,88 @@ interface ChatListPaneProps {
   onContactContextMenu: (e: React.MouseEvent, contact: Contact) => void;
   onChannelContextMenu: (e: React.MouseEvent, channel: Channel) => void;
   onNewChannel: () => void;
-  getEffectiveStatus: (c: Contact) => "online" | "away" | "brb" | "dnd" | "offline";
+  /** Kept optional for call-site compat; presence is resolved per-row. */
+  getEffectiveStatus?: (c: Contact) => "online" | "away" | "brb" | "dnd" | "offline";
+}
+
+function ContactRow({
+  c,
+  active,
+  mentionSources,
+  onSelectContact,
+  onContactContextMenu,
+}: {
+  c: Contact;
+  active: boolean;
+  mentionSources: Set<string>;
+  onSelectContact: (contact: Contact) => void;
+  onContactContextMenu: (e: React.MouseEvent, contact: Contact) => void;
+}) {
+  const { t } = useTranslation();
+  const live = useUserPresence(c._id);
+  const status = getEffectiveStatus({ ...c, ...(live ?? {}) });
+  const muted = !!c.isMuted;
+  const unread = active ? 0 : (c.unreadCount ?? 0);
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      className={`chat-list-item${active ? " active" : ""}${!muted && unread > 0 ? " has-unread" : ""}${muted ? " is-muted" : ""}`}
+      onClick={() => onSelectContact(c)}
+      onContextMenu={(e) => onContactContextMenu(e, c)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onSelectContact(c);
+        }
+      }}
+    >
+      <div style={{ position: "relative", display: "inline-flex" }}>
+        <Avatar
+          displayName={c.displayName}
+          username={c.username}
+          image={c.image}
+          color={c.color}
+        />
+        <span
+          className="presence-dot"
+          style={{ background: PRESENCE_COLORS[status] }}
+        />
+      </div>
+      <div className="chat-list-item__inner">
+        <span className="chat-list-item__name">{userLabel(c)}</span>
+        {c.lastMessage && (
+          <span className="chat-list-item__preview">
+            {formatListLastMessage(c.lastMessage)}
+          </span>
+        )}
+      </div>
+      {(c.lastMessageTime || muted || unread > 0 || (!active && mentionSources.has(c._id))) && (
+        <div className="chat-list-item__meta">
+          {c.lastMessageTime && (
+            <span className="chat-list-item__time">{formatTime(c.lastMessageTime)}</span>
+          )}
+          {muted ? (
+            <span className="chat-list-item__mute-icon" title={t("chat.list.muted")}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="1" y1="1" x2="23" y2="23" />
+                <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6" />
+                <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23" />
+              </svg>
+            </span>
+          ) : (
+            <>
+              {!active && mentionSources.has(c._id) && (
+                <span className="chat-list-item__mention" title={t("chat.list.mention")}>@</span>
+              )}
+              <UnreadBadge count={unread} />
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function ChatListPane({
@@ -42,7 +127,6 @@ export function ChatListPane({
   onContactContextMenu,
   onChannelContextMenu,
   onNewChannel,
-  getEffectiveStatus,
 }: ChatListPaneProps) {
   const { t } = useTranslation();
   const isActiveDm = (id: string) => active?.type === "dm" && active.contact._id === id;
@@ -52,71 +136,16 @@ export function ChatListPane({
   const filteredChannels = activeTab === "dm" ? [] : channels;
   const showSearch = searchTerm.trim().length > 0;
 
-  const renderContact = (c: Contact) => {
-    const a = isActiveDm(c._id);
-    const muted = !!c.isMuted;
-    const unread = a ? 0 : (c.unreadCount ?? 0);
-    return (
-      <div
-        key={c._id}
-        role="button"
-        tabIndex={0}
-        className={`chat-list-item${a ? " active" : ""}${!muted && unread > 0 ? " has-unread" : ""}${muted ? " is-muted" : ""}`}
-        onClick={() => onSelectContact(c)}
-        onContextMenu={(e) => onContactContextMenu(e, c)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            onSelectContact(c);
-          }
-        }}
-      >
-        <div style={{ position: "relative", display: "inline-flex" }}>
-          <Avatar
-            displayName={c.displayName}
-            username={c.username}
-            image={c.image}
-            color={c.color}
-          />
-          <span
-            className="presence-dot"
-            style={{ background: PRESENCE_COLORS[getEffectiveStatus(c)] }}
-          />
-        </div>
-        <div className="chat-list-item__inner">
-          <span className="chat-list-item__name">{userLabel(c)}</span>
-          {c.lastMessage && (
-            <span className="chat-list-item__preview">
-              {formatListLastMessage(c.lastMessage)}
-            </span>
-          )}
-        </div>
-        {(c.lastMessageTime || muted || unread > 0 || (!a && mentionSources.has(c._id))) && (
-          <div className="chat-list-item__meta">
-            {c.lastMessageTime && (
-              <span className="chat-list-item__time">{formatTime(c.lastMessageTime)}</span>
-            )}
-            {muted ? (
-              <span className="chat-list-item__mute-icon" title={t("chat.list.muted")}>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="1" y1="1" x2="23" y2="23" />
-                  <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6" />
-                  <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23" />
-                </svg>
-              </span>
-            ) : (
-              <>
-                {!a && mentionSources.has(c._id) && (
-                  <span className="chat-list-item__mention" title={t("chat.list.mention")}>@</span>
-                )}
-                <UnreadBadge count={unread} />
-              </>
-            )}
-          </div>
-        )}
-      </div>
-    );
-  };
+  const renderContact = (c: Contact) => (
+    <ContactRow
+      key={c._id}
+      c={c}
+      active={isActiveDm(c._id)}
+      mentionSources={mentionSources}
+      onSelectContact={onSelectContact}
+      onContactContextMenu={onContactContextMenu}
+    />
+  );
 
   const renderChannel = (ch: Channel) => {
     const a = isActiveChannel(ch._id);
@@ -148,6 +177,8 @@ export function ChatListPane({
               <span className="chat-list-item__mute-icon" title={t("chat.list.muted")}>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <line x1="1" y1="1" x2="23" y2="23" />
+                  <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6" />
+                  <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23" />
                 </svg>
               </span>
             ) : (

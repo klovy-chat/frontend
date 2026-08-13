@@ -5,11 +5,11 @@ import {
   useEffect,
   useMemo,
   useRef,
-  useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 import { useAuth } from "./AuthContext";
-import { useWebSocket } from "./WebSocketContext";
+import { useWebSocket, useWebSocketConnected } from "./WebSocketContext";
 import { WsType } from "../api/wsProtocol";
 import type { User } from "../types";
 
@@ -21,8 +21,44 @@ export interface Presence {
   lastSeen?: string | null;
 }
 
-interface PresenceContextValue {
-  presence: Record<string, Presence>;
+type PresenceMap = Record<string, Presence>;
+
+let presenceSnapshot: PresenceMap = {};
+const globalListeners = new Set<() => void>();
+const userListeners = new Map<string, Set<() => void>>();
+
+function emitPresence(userId?: string) {
+  if (userId) {
+    userListeners.get(userId)?.forEach((l) => l());
+  }
+  globalListeners.forEach((l) => l());
+}
+
+function setPresenceMap(updater: (prev: PresenceMap) => PresenceMap) {
+  const next = updater(presenceSnapshot);
+  if (next === presenceSnapshot) return;
+  const prev = presenceSnapshot;
+  presenceSnapshot = next;
+  const changedIds = new Set<string>();
+  for (const id of Object.keys(next)) {
+    if (prev[id] !== next[id]) changedIds.add(id);
+  }
+  for (const id of Object.keys(prev)) {
+    if (!(id in next)) changedIds.add(id);
+  }
+  for (const id of changedIds) emitPresence(id);
+  if (changedIds.size === 0) emitPresence();
+}
+
+/** Drop module snapshot on logout / account switch. */
+export function clearPresenceSnapshot() {
+  if (Object.keys(presenceSnapshot).length === 0) return;
+  presenceSnapshot = {};
+  userListeners.forEach((set) => set.forEach((l) => l()));
+  globalListeners.forEach((l) => l());
+}
+
+interface PresenceApi {
   /** Seed presence from an HTTP snapshot (e.g. contacts/friends list). */
   seed: (
     users: Array<{
@@ -35,7 +71,7 @@ interface PresenceContextValue {
   ) => void;
 }
 
-const PresenceContext = createContext<PresenceContextValue | null>(null);
+const PresenceApiContext = createContext<PresenceApi | null>(null);
 
 interface StatusChangedPayload {
   userId: string;
@@ -47,12 +83,13 @@ interface StatusChangedPayload {
 }
 
 /**
- * Central, WebSocket-driven presence store. Every consumer (sidebar, contacts
- * modal, chat header, profile modals) reads from the same map so online/offline
- * and availability status update instantly and consistently everywhere.
+ * Central, WebSocket-driven presence store. Consumers that only need `seed`
+ * do not re-render on status changes; `useUserPresence(id)` re-renders only
+ * when that user's presence changes.
  */
 export function PresenceProvider({ children }: { children: ReactNode }) {
   const ws = useWebSocket();
+  const wsConnected = useWebSocketConnected();
   const { user, updateUser } = useAuth();
   const userIdRef = useRef(user?.id);
   const userRef = useRef(user);
@@ -60,13 +97,49 @@ export function PresenceProvider({ children }: { children: ReactNode }) {
   userRef.current = user;
   const updateUserRef = useRef(updateUser);
   updateUserRef.current = updateUser;
-  const [presence, setPresence] = useState<Record<string, Presence>>({});
+  const wasConnectedRef = useRef(wsConnected);
+  const disconnectOfflineTimerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => {
+    const was = wasConnectedRef.current;
+    wasConnectedRef.current = wsConnected;
+    // Keep last presence across short WS blips — only force offline after a
+    // short delay, and cancel if we reconnect (seeds/WS will refresh).
+    if (disconnectOfflineTimerRef.current) {
+      clearTimeout(disconnectOfflineTimerRef.current);
+      disconnectOfflineTimerRef.current = undefined;
+    }
+    if (!was || wsConnected) return;
+    disconnectOfflineTimerRef.current = setTimeout(() => {
+      disconnectOfflineTimerRef.current = undefined;
+      if (wasConnectedRef.current) return;
+      setPresenceMap((prev) => {
+        const next: PresenceMap = {};
+        let changed = false;
+        for (const [id, p] of Object.entries(prev)) {
+          if (p.isOnline) {
+            next[id] = { ...p, isOnline: false };
+            changed = true;
+          } else {
+            next[id] = p;
+          }
+        }
+        return changed ? next : prev;
+      });
+    }, 2_500);
+    return () => {
+      if (disconnectOfflineTimerRef.current) {
+        clearTimeout(disconnectOfflineTimerRef.current);
+        disconnectOfflineTimerRef.current = undefined;
+      }
+    };
+  }, [wsConnected]);
 
   useEffect(() => {
     if (!ws) return;
     const onStatusChanged = (payload: StatusChangedPayload) => {
       if (!payload?.userId) return;
-      setPresence((prev) => {
+      setPresenceMap((prev) => {
         const previous = prev[payload.userId] ?? {};
         return {
           ...prev,
@@ -84,7 +157,6 @@ export function PresenceProvider({ children }: { children: ReactNode }) {
         };
       });
 
-      // Keep own nav-rail / idle hook in sync across tabs and WS paths.
       if (
         payload.userId === userIdRef.current &&
         payload.status.availabilityStatus
@@ -99,7 +171,23 @@ export function PresenceProvider({ children }: { children: ReactNode }) {
       }
     };
     const unsub = ws.subscribe(WsType.USER_STATUS_CHANGED, onStatusChanged);
-    return () => unsub();
+    const unsubFriend = ws.subscribe(
+      WsType.FRIENDSHIP_REMOVED,
+      (e: { userId?: string }) => {
+        const id = e.userId?.trim();
+        if (!id) return;
+        setPresenceMap((prev) => {
+          if (!(id in prev)) return prev;
+          const next = { ...prev };
+          delete next[id];
+          return next;
+        });
+      },
+    );
+    return () => {
+      unsub();
+      unsubFriend();
+    };
   }, [ws]);
 
   const seed = useCallback(
@@ -112,21 +200,54 @@ export function PresenceProvider({ children }: { children: ReactNode }) {
         lastSeen?: string | null;
       }>,
     ) => {
-      setPresence((prev) => {
+      setPresenceMap((prev) => {
         const next = { ...prev };
         let changed = false;
         for (const u of users) {
           const id = u._id ?? u.id;
           if (!id) continue;
-          // Do not overwrite fresher live data if we already have it.
-          if (next[id]) continue;
-          next[id] = {
+          const incoming = {
             isOnline: u.isOnline,
             availabilityStatus:
               (u.availabilityStatus as AvailabilityStatus | undefined) ??
               "online",
             lastSeen: u.lastSeen ?? null,
           };
+          const prevEntry = next[id];
+          if (
+            prevEntry &&
+            prevEntry.isOnline === incoming.isOnline &&
+            prevEntry.availabilityStatus === incoming.availabilityStatus &&
+            prevEntry.lastSeen === incoming.lastSeen
+          ) {
+            continue;
+          }
+          // Don't let a stale HTTP seed downgrade a live WS online presence,
+          // and keep live availability while both sides report online.
+          if (prevEntry?.isOnline === true && incoming.isOnline === false) {
+            next[id] = {
+              isOnline: true,
+              availabilityStatus: prevEntry.availabilityStatus,
+              lastSeen: incoming.lastSeen ?? prevEntry.lastSeen,
+            };
+            changed = true;
+            continue;
+          }
+          if (prevEntry?.isOnline === true && incoming.isOnline === true) {
+            // Prefer HTTP availability when both report online (missed WS flip).
+            next[id] = {
+              isOnline: true,
+              availabilityStatus:
+                incoming.availabilityStatus ?? prevEntry.availabilityStatus,
+              lastSeen: incoming.lastSeen ?? prevEntry.lastSeen,
+            };
+            changed =
+              changed ||
+              prevEntry.lastSeen !== next[id].lastSeen ||
+              prevEntry.availabilityStatus !== next[id].availabilityStatus;
+            continue;
+          }
+          next[id] = incoming;
           changed = true;
         }
         return changed ? next : prev;
@@ -135,36 +256,83 @@ export function PresenceProvider({ children }: { children: ReactNode }) {
     [],
   );
 
-  const value = useMemo(() => ({ presence, seed }), [presence, seed]);
+  const api = useMemo(() => ({ seed }), [seed]);
 
   return (
-    <PresenceContext.Provider value={value}>
+    <PresenceApiContext.Provider value={api}>
       {children}
-    </PresenceContext.Provider>
+    </PresenceApiContext.Provider>
   );
 }
 
-export function usePresenceStore(): PresenceContextValue {
-  return (
-    useContext(PresenceContext) ?? {
-      presence: {},
-      seed: () => {},
-    }
+/** Stable API — does not re-render when presence map changes. */
+export function usePresenceStore(): PresenceApi & { presence: PresenceMap } {
+  const api = useContext(PresenceApiContext) ?? { seed: () => {} };
+  const presence = useSyncExternalStore(
+    (onStoreChange) => {
+      globalListeners.add(onStoreChange);
+      return () => {
+        globalListeners.delete(onStoreChange);
+      };
+    },
+    () => presenceSnapshot,
+    () => presenceSnapshot,
   );
+  return { presence, seed: api.seed };
+}
+
+/** Seed-only hook — no re-render on status updates. */
+export function usePresenceSeed(): PresenceApi["seed"] {
+  return useContext(PresenceApiContext)?.seed ?? (() => {});
+}
+
+/** Subscribe to a single user's presence. */
+export function useUserPresence(userId: string | undefined): Presence | undefined {
+  return useSyncExternalStore(
+    (onStoreChange) => {
+      if (!userId) return () => {};
+      let set = userListeners.get(userId);
+      if (!set) {
+        set = new Set();
+        userListeners.set(userId, set);
+      }
+      set.add(onStoreChange);
+      return () => {
+        set!.delete(onStoreChange);
+        if (set!.size === 0) userListeners.delete(userId);
+      };
+    },
+    () => (userId ? presenceSnapshot[userId] : undefined),
+    () => undefined,
+  );
+}
+
+/** Non-reactive snapshot for one-off reads (context menus, etc.). */
+export function getPresenceSnapshot(userId: string | undefined): Presence | undefined {
+  return userId ? presenceSnapshot[userId] : undefined;
 }
 
 /**
- * Returns a user-like object merged with the latest live presence, so callers
- * can render `isOnline` / `availabilityStatus` without wiring WS themselves.
+ * Returns a user-like object merged with the latest live presence.
+ * Prefer `useUserPresence` in list rows to avoid full-map subscriptions.
  */
 export function useResolvePresence() {
-  const { presence } = usePresenceStore();
+  const presence = useSyncExternalStore(
+    (onStoreChange) => {
+      globalListeners.add(onStoreChange);
+      return () => {
+        globalListeners.delete(onStoreChange);
+      };
+    },
+    () => presenceSnapshot,
+    () => presenceSnapshot,
+  );
   const presenceRef = useRef(presence);
   presenceRef.current = presence;
   return useCallback(
     <T extends { _id?: string; id?: string }>(user: T): T & Presence => {
       const id = user._id ?? user.id;
-      const live = id ? presence[id] : undefined;
+      const live = id ? presenceRef.current[id] : undefined;
       if (!live) return user as T & Presence;
       return { ...user, ...live };
     },

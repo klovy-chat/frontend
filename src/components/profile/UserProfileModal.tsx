@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Avatar } from "../common/Avatar";
 import { ProfileBadgesSection } from "./ProfileBadgesSection";
 import { useAuth } from "../../context/AuthContext";
-import { useResolvePresence } from "../../context/PresenceContext";
+import { useUserPresence } from "../../context/PresenceContext";
 import { userLabel, formatJoinedDate, availabilityStatusLabel } from "../../utils/user/format";
 import { renderFormattedText } from "../../utils/chat/messageFormat";
 import { presenceColor } from "../../utils/user/presence";
@@ -30,12 +30,20 @@ export function UserProfileModal({
 }: UserProfileModalProps) {
   const { t } = useTranslation();
   const { user: authUser } = useAuth();
-  const resolvePresence = useResolvePresence();
   const baseUser =
     authUser && previewOverride
       ? { ...authUser, ...previewOverride }
       : authUser;
-  const resolved = baseUser ? resolvePresence(baseUser) : null;
+  const live = useUserPresence(baseUser?.id);
+  const resolved = baseUser
+    ? {
+        ...baseUser,
+        isOnline: live?.isOnline ?? baseUser.isOnline,
+        availabilityStatus:
+          live?.availabilityStatus ?? baseUser.availabilityStatus,
+        lastSeen: live?.lastSeen ?? baseUser.lastSeen,
+      }
+    : null;
   // Logged-in user is online in this session; match nav-rail behavior.
   const user = resolved
     ? { ...resolved, isOnline: resolved.isOnline ?? true }

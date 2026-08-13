@@ -18,7 +18,7 @@ import {
   type RemoteTrackPublication,
   type RemoteParticipant,
 } from "livekit-client";
-import { useWebSocket } from "./WebSocketContext";
+import { useWebSocket, useWebSocketConnected } from "./WebSocketContext";
 import { WsType } from "../api/wsProtocol";
 import { useAuth } from "./AuthContext";
 import { isAllowedLiveKitUrl } from "../utils/env/livekitAllowlist";
@@ -30,6 +30,13 @@ import {
   loadPersistedCall,
   savePersistedCall,
 } from "../utils/call/callPersistence";
+import {
+  clearMatchingHangup,
+  getPendingHangupGeneration,
+  peekAllPendingHangups,
+  queuePendingHangupSync,
+  type PendingHangup,
+} from "../utils/sync/pendingHangup";
 import { buildScreenShareCaptureOptions } from "../utils/call/screenShareQuality";
 import {
   readLocalCameraTrack,
@@ -39,6 +46,76 @@ import {
 } from "../utils/call/callMediaTracks";
 
 export type CallMode = "audio" | "video";
+
+/** Stable per-tab id — only one tab's Accept claim wins across multi-tab races. */
+const CALL_TAB_ID =
+  typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : `tab-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+function dmAcceptClaimKey(peerId: string): string {
+  return `klovy:dm-call-accept:${peerId}`;
+}
+
+async function claimDmAcceptAsync(peerId: string): Promise<boolean> {
+  const key = dmAcceptClaimKey(peerId);
+  const payload = `${CALL_TAB_ID}:${Date.now()}`;
+  const run = (): boolean => {
+    try {
+      const existing = localStorage.getItem(key);
+      if (existing) {
+        const [tab, atRaw] = existing.split(":");
+        const at = Number(atRaw) || 0;
+        if (tab && tab !== CALL_TAB_ID && Date.now() - at < 15_000) {
+          return false;
+        }
+      }
+      localStorage.setItem(key, payload);
+      return Boolean(localStorage.getItem(key)?.startsWith(`${CALL_TAB_ID}:`));
+    } catch {
+      return true;
+    }
+  };
+  const locks = typeof navigator !== "undefined" ? navigator.locks : undefined;
+  if (locks?.request) {
+    try {
+      const result = await locks.request(
+        key,
+        { ifAvailable: true },
+        async (lock) => {
+          if (!lock) return false;
+          return run();
+        },
+      );
+      // ifAvailable + null lock → undefined/false
+      return result === true;
+    } catch {
+      return run();
+    }
+  }
+  return run();
+}
+
+function thisTabOwnsDmAccept(peerId: string): boolean {
+  try {
+    return Boolean(
+      localStorage.getItem(dmAcceptClaimKey(peerId))?.startsWith(`${CALL_TAB_ID}:`),
+    );
+  } catch {
+    return true;
+  }
+}
+
+function clearDmAcceptClaim(peerId: string): void {
+  try {
+    const key = dmAcceptClaimKey(peerId);
+    if (localStorage.getItem(key)?.startsWith(`${CALL_TAB_ID}:`)) {
+      localStorage.removeItem(key);
+    }
+  } catch {
+    /* ignore */
+  }
+}
 
 export type CallKind = "dm" | "channel";
 
@@ -102,6 +179,8 @@ interface CallContextValue {
   isInChannelVoice: (channelId: string) => boolean;
   /** Odbiera połączenie przychodzące. */
   acceptCall: () => void;
+  /** Accept claim / CALL_ACCEPT in flight — Incoming UI should disable actions. */
+  acceptInFlight: boolean;
   /** Odrzuca połączenie przychodzące. */
   rejectCall: () => void;
   /** Anuluje połączenie wychodzące zanim zostanie odebrane. */
@@ -122,6 +201,7 @@ const CallContext = createContext<CallContextValue | null>(null);
 export function CallProvider({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
   const ws = useWebSocket();
+  const wsConnected = useWebSocketConnected();
   const { user } = useAuth();
   const myId = user?.id ?? "";
 
@@ -147,19 +227,38 @@ export function CallProvider({ children }: { children: ReactNode }) {
   const [remoteScreenShareTrack, setRemoteScreenShareTrack] = useState<Track | null>(null);
 
   const roomRef = useRef<Room | null>(null);
-  const stateRef = useRef<CallState>(state);
-  stateRef.current = state;
-  const callKindRef = useRef<CallKind>(callKind);
-  callKindRef.current = callKind;
-  const peerRef = useRef<CallPeer | null>(peer);
-  peerRef.current = peer;
-  const channelRef = useRef<CallChannel | null>(channel);
-  channelRef.current = channel;
+  const stateRef = useRef<CallState>("idle");
+  const callKindRef = useRef<CallKind>("dm");
+  const peerRef = useRef<CallPeer | null>(null);
+  const channelRef = useRef<CallChannel | null>(null);
+  /** Guards overlapping LiveKit connects (double ACCEPT before paint). */
+  const connectInFlightRef = useRef(false);
+  /** True only in the tab that clicked Accept — other ringing tabs must not join LiveKit. */
+  const acceptedHereRef = useRef(false);
+  /** Blocks double-click Accept before claim/async resolves. */
+  const acceptInFlightRef = useRef(false);
+  const [acceptInFlight, setAcceptInFlight] = useState(false);
+  const setAcceptInFlightBoth = useCallback((v: boolean) => {
+    acceptInFlightRef.current = v;
+    setAcceptInFlight(v);
+  }, []);
   const speakerVolumeRef = useRef(1);
   const micVolumeRef = useRef(1);
+  const muteGenRef = useRef(0);
+  const cameraGenRef = useRef(0);
+  const screenShareGenRef = useRef(0);
+  /** Invalidates in-flight CHANNEL_VOICE_LEAVE when re-joining. */
+  const voiceOpGenRef = useRef(0);
   const pushToTalkActiveRef = useRef(false);
   const pushToTalkMutedBeforeRef = useRef(true);
+  const pushToTalkGenRef = useRef(0);
   const ringTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  /** Watchdog after CALL_ACCEPT until CALL_ACCEPTED — must CALL_END if stuck. */
+  const acceptTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  /** Bumped on pagehide/reset so in-flight acceptCall cannot CALL_ACCEPT after hangup. */
+  const acceptAbortGenRef = useRef(0);
+  /** Bumped on reset so connectToRoom cannot setState(active) after hangup. */
+  const connectGenRef = useRef(0);
   // Ukryte elementy <audio> dla zdalnych ścieżek dźwięku.
   const audioElsRef = useRef<HTMLAudioElement[]>([]);
 
@@ -167,6 +266,13 @@ export function CallProvider({ children }: { children: ReactNode }) {
     if (ringTimeoutRef.current) {
       clearTimeout(ringTimeoutRef.current);
       ringTimeoutRef.current = undefined;
+    }
+  }, []);
+
+  const clearAcceptTimeout = useCallback(() => {
+    if (acceptTimeoutRef.current) {
+      clearTimeout(acceptTimeoutRef.current);
+      acceptTimeoutRef.current = undefined;
     }
   }, []);
 
@@ -210,8 +316,21 @@ export function CallProvider({ children }: { children: ReactNode }) {
 
   const resetCall = useCallback(() => {
     clearRingTimeout();
+    clearAcceptTimeout();
+    acceptAbortGenRef.current += 1;
+    connectGenRef.current += 1;
+    connectInFlightRef.current = false;
     cleanupRoom();
     clearPersistedCall();
+    const peerId = peerRef.current?._id;
+    if (peerId) clearDmAcceptClaim(peerId);
+    acceptedHereRef.current = false;
+    setAcceptInFlightBoth(false);
+    // Sync refs immediately so cancel/end before next paint still see idle.
+    stateRef.current = "idle";
+    callKindRef.current = "dm";
+    peerRef.current = null;
+    channelRef.current = null;
     setState("idle");
     setCallKind("dm");
     setPeer(null);
@@ -219,15 +338,19 @@ export function CallProvider({ children }: { children: ReactNode }) {
     setParticipantCount(1);
     setMode("audio");
     setIsMuted(false);
+    muteGenRef.current += 1;
+    cameraGenRef.current += 1;
+    screenShareGenRef.current += 1;
     setIsCameraOn(false);
     setIsScreenSharing(false);
     setIsPushToTalkActive(false);
     pushToTalkActiveRef.current = false;
+    pushToTalkGenRef.current += 1;
     setSpeakerVolumeState(1);
     speakerVolumeRef.current = 1;
     micVolumeRef.current = 1;
     setStartedAt(null);
-  }, [cleanupRoom, clearRingTimeout]);
+  }, [cleanupRoom, clearRingTimeout, clearAcceptTimeout, setAcceptInFlightBoth]);
 
   const refreshLocalMediaTracks = useCallback(() => {
     const room = roomRef.current;
@@ -277,17 +400,14 @@ export function CallProvider({ children }: { children: ReactNode }) {
   );
 
   const detachRemoteTrack = useCallback(
-    (track: RemoteTrack, publication: RemoteTrackPublication) => {
+    (track: RemoteTrack, _publication: RemoteTrackPublication) => {
       if (track.kind === Track.Kind.Video) {
-        if (publication.source === Track.Source.ScreenShare) {
-          setRemoteScreenShareTrack(null);
-        } else {
-          setRemoteVideoTrack(null);
-        }
         track.detach().forEach((el) => {
           (el as HTMLMediaElement).srcObject = null;
           el.remove();
         });
+        // Another participant may still have camera/screenshare — rescan.
+        refreshRemoteMediaTracks();
         return;
       }
       if (track.kind === Track.Kind.Audio) {
@@ -300,7 +420,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
         );
       }
     },
-    [],
+    [refreshRemoteMediaTracks],
   );
 
   const updateParticipantCount = useCallback(() => {
@@ -318,18 +438,26 @@ export function CallProvider({ children }: { children: ReactNode }) {
       callMode: CallMode,
       options?: { startedAt?: number; isRestore?: boolean },
     ) => {
+      const connectGen = connectGenRef.current;
+      if (connectInFlightRef.current || roomRef.current) {
+        return;
+      }
+      connectInFlightRef.current = true;
       try {
+        stateRef.current = "connecting";
         setState("connecting");
         const tokenParams =
           target.kind === "dm"
             ? { peerId: target.peerId }
             : { channelId: target.channelId };
         const { token, url } = await requestVoiceToken(tokenParams);
+        if (connectGen !== connectGenRef.current) return;
         if (!isAllowedLiveKitUrl(url)) {
           throw new Error(t("call.invalidServerUrl"));
         }
 
         const room = new Room({ adaptiveStream: true, dynacast: true });
+        if (connectGen !== connectGenRef.current) return;
         roomRef.current = room;
 
         room.on(
@@ -358,16 +486,58 @@ export function CallProvider({ children }: { children: ReactNode }) {
           },
         );
         room.on(RoomEvent.Disconnected, () => {
-          if (stateRef.current === "active") {
-            resetCall();
+          const state = stateRef.current;
+          if (state !== "active" && state !== "connecting") return;
+          // Signal peers before resetCall bumps connectGen (which would skip catch hangup).
+          const kind = callKindRef.current;
+          const target = peerRef.current;
+          const activeChannel = channelRef.current;
+          if (ws && myId) {
+            if (kind === "channel" && activeChannel) {
+              const hangup = {
+                kind: "channel_leave" as const,
+                channelId: activeChannel._id,
+              };
+              queuePendingHangupSync(hangup);
+              void ws
+                .send(WsType.CHANNEL_VOICE_LEAVE, {
+                  channelId: activeChannel._id,
+                })
+                .then((ok) => {
+                  if (ok) clearMatchingHangup(hangup);
+                });
+            } else if (target) {
+              const hangup = {
+                kind: "call_end" as const,
+                from: myId,
+                to: target._id,
+              };
+              queuePendingHangupSync(hangup);
+              void ws
+                .send(WsType.CALL_END, { from: myId, to: target._id })
+                .then((ok) => {
+                  if (ok) clearMatchingHangup(hangup);
+                });
+            }
           }
+          resetCall();
         });
         room.on(RoomEvent.ParticipantConnected, updateParticipantCount);
         room.on(RoomEvent.ParticipantDisconnected, updateParticipantCount);
 
         await room.connect(url, token);
+        if (connectGen !== connectGenRef.current || roomRef.current !== room) {
+          room.removeAllListeners();
+          room.disconnect();
+          return;
+        }
 
         await room.localParticipant.setMicrophoneEnabled(true);
+        if (connectGen !== connectGenRef.current || roomRef.current !== room) {
+          room.removeAllListeners();
+          room.disconnect();
+          return;
+        }
         applyMicVolume(micVolumeRef.current);
         const { inputDeviceId, outputDeviceId } = loadVoiceSettings();
         if (inputDeviceId) {
@@ -376,9 +546,19 @@ export function CallProvider({ children }: { children: ReactNode }) {
         if (outputDeviceId) {
           await room.switchActiveDevice("audiooutput", outputDeviceId).catch(() => {});
         }
+        if (connectGen !== connectGenRef.current || roomRef.current !== room) {
+          room.removeAllListeners();
+          room.disconnect();
+          return;
+        }
         try {
           if (callMode === "video") {
             await room.localParticipant.setCameraEnabled(true);
+            if (connectGen !== connectGenRef.current || roomRef.current !== room) {
+              room.removeAllListeners();
+              room.disconnect();
+              return;
+            }
             setIsCameraOn(true);
           } else {
             setIsCameraOn(false);
@@ -390,10 +570,23 @@ export function CallProvider({ children }: { children: ReactNode }) {
           setIsCameraOn(false);
           setError(t("call.cameraFailed"));
         }
+        if (connectGen !== connectGenRef.current || roomRef.current !== room) {
+          room.removeAllListeners();
+          room.disconnect();
+          return;
+        }
         // Track may publish slightly after setCameraEnabled resolves.
         refreshLocalMediaTracks();
-        window.setTimeout(() => refreshLocalMediaTracks(), 250);
-        window.setTimeout(() => refreshLocalMediaTracks(), 800);
+        window.setTimeout(() => {
+          if (connectGen === connectGenRef.current && roomRef.current === room) {
+            refreshLocalMediaTracks();
+          }
+        }, 250);
+        window.setTimeout(() => {
+          if (connectGen === connectGenRef.current && roomRef.current === room) {
+            refreshLocalMediaTracks();
+          }
+        }, 800);
 
         room.remoteParticipants.forEach((participant) => {
           participant.trackPublications.forEach((pub) => {
@@ -407,8 +600,10 @@ export function CallProvider({ children }: { children: ReactNode }) {
 
         setIsMuted(false);
         setStartedAt(options?.startedAt ?? Date.now());
+        stateRef.current = "active";
         setState("active");
       } catch (err) {
+        if (connectGen !== connectGenRef.current) return;
         if (import.meta.env.DEV) {
           console.error("Failed to connect to call room:", err);
         }
@@ -434,6 +629,8 @@ export function CallProvider({ children }: { children: ReactNode }) {
           ws.send(WsType.CHANNEL_VOICE_LEAVE, { channelId: activeChannel._id });
         }
         resetCall();
+      } finally {
+        connectInFlightRef.current = false;
       }
     },
     [
@@ -455,55 +652,198 @@ export function CallProvider({ children }: { children: ReactNode }) {
   const startCall = useCallback(
     (target: CallPeer, callMode: CallMode) => {
       if (!ws || !myId || stateRef.current !== "idle") return;
+      // Clear only hangup for this peer — never drop unrelated channel_leave.
+      for (const pending of peekAllPendingHangups()) {
+        if (
+          pending.kind !== "channel_leave" &&
+          (pending.to === target._id || pending.from === target._id)
+        ) {
+          clearMatchingHangup(pending);
+        }
+      }
       setError(null);
+      callKindRef.current = "dm";
+      channelRef.current = null;
+      peerRef.current = target;
+      stateRef.current = "outgoing";
       setCallKind("dm");
       setChannel(null);
       setPeer(target);
       setMode(callMode);
       setState("outgoing");
-      ws.send(WsType.CALL_INVITE, {
-        from: myId,
-        to: target._id,
-        mode: callMode,
-      });
-      clearRingTimeout();
-      // Match server RINGING_TTL (60s) — unanswered → missed call log.
-      ringTimeoutRef.current = setTimeout(() => {
-        if (stateRef.current !== "outgoing") return;
-        const peerId = peerRef.current?._id;
-        if (ws && myId && peerId) {
-          ws.send(WsType.CALL_TIMEOUT, { from: myId, to: peerId });
+      void (async () => {
+        try {
+          const ok = await ws.send(WsType.CALL_INVITE, {
+            from: myId,
+            to: target._id,
+            mode: callMode,
+          });
+          if (!ok) {
+            if (
+              stateRef.current === "outgoing" &&
+              peerRef.current?._id === target._id
+            ) {
+              setError(t("call.connectFailed"));
+              resetCall();
+            }
+            return;
+          }
+          if (
+            stateRef.current !== "outgoing" ||
+            peerRef.current?._id !== target._id
+          ) {
+            // Local hangup won the race — compensate so peer does not keep ringing.
+            queuePendingHangupSync({
+              kind: "call_cancel",
+              from: myId,
+              to: target._id,
+            });
+            void ws
+              .send(WsType.CALL_CANCEL, {
+                from: myId,
+                to: target._id,
+              })
+              .then((ok) => {
+                if (ok) {
+                  clearMatchingHangup({
+                    kind: "call_cancel",
+                    from: myId,
+                    to: target._id,
+                  });
+                }
+              });
+            return;
+          }
+          clearRingTimeout();
+          // Match server RINGING_TTL (60s) — unanswered → missed call log.
+          ringTimeoutRef.current = setTimeout(() => {
+            if (stateRef.current !== "outgoing") return;
+            const peerId = peerRef.current?._id;
+            if (ws && myId && peerId) {
+              // Queue as timeout so flush retry keeps missed-call semantics.
+              const hangup = {
+                kind: "call_timeout" as const,
+                from: myId,
+                to: peerId,
+              };
+              queuePendingHangupSync(hangup);
+              void ws
+                .send(WsType.CALL_TIMEOUT, { from: myId, to: peerId })
+                .then((ok) => {
+                  if (ok) clearMatchingHangup(hangup);
+                });
+            }
+            resetCall();
+          }, 60_000);
+        } catch {
+          if (
+            stateRef.current === "outgoing" &&
+            peerRef.current?._id === target._id
+          ) {
+            setError(t("call.connectFailed"));
+            resetCall();
+          }
         }
-        resetCall();
-      }, 60_000);
+      })();
     },
-    [ws, myId, clearRingTimeout, resetCall],
+    [ws, myId, clearRingTimeout, resetCall, t],
   );
 
   const joinChannelVoice = useCallback(
     (targetChannel: CallChannel, callMode: CallMode = "audio") => {
       if (!ws || !myId || stateRef.current !== "idle") return;
+      voiceOpGenRef.current += 1;
+      // Clear only leave for THIS channel (rejoin) — keep other channel leaves queued.
+      for (const pending of peekAllPendingHangups()) {
+        if (
+          pending.kind === "channel_leave" &&
+          pending.channelId === targetChannel._id
+        ) {
+          clearMatchingHangup(pending);
+        }
+      }
       setError(null);
+      callKindRef.current = "channel";
+      channelRef.current = targetChannel;
+      peerRef.current = null;
+      stateRef.current = "connecting";
+      setState("connecting");
       setCallKind("channel");
       setChannel(targetChannel);
       setPeer(null);
       setMode(callMode);
-      ws.send(WsType.CHANNEL_VOICE_JOIN, { channelId: targetChannel._id });
-      void connectToRoom(
-        { kind: "channel", channelId: targetChannel._id },
-        callMode,
-      );
+      void (async () => {
+        try {
+          const ok = await ws.send(WsType.CHANNEL_VOICE_JOIN, {
+            channelId: targetChannel._id,
+          });
+          if (!ok) {
+            if (
+              callKindRef.current === "channel" &&
+              channelRef.current?._id === targetChannel._id
+            ) {
+              setError(t("call.connectFailed"));
+              resetCall();
+            }
+            return;
+          }
+          if (
+            callKindRef.current !== "channel" ||
+            channelRef.current?._id !== targetChannel._id
+          ) {
+            const hangup = {
+              kind: "channel_leave" as const,
+              channelId: targetChannel._id,
+            };
+            queuePendingHangupSync(hangup);
+            void ws
+              .send(WsType.CHANNEL_VOICE_LEAVE, {
+                channelId: targetChannel._id,
+              })
+              .then((ok) => {
+                if (ok) clearMatchingHangup(hangup);
+              });
+            return;
+          }
+          void connectToRoom(
+            { kind: "channel", channelId: targetChannel._id },
+            callMode,
+          );
+        } catch {
+          if (
+            callKindRef.current === "channel" &&
+            channelRef.current?._id === targetChannel._id
+          ) {
+            setError(t("call.connectFailed"));
+            resetCall();
+          }
+        }
+      })();
     },
-    [ws, myId, connectToRoom],
+    [ws, myId, connectToRoom, resetCall, t],
   );
 
   const leaveChannelVoice = useCallback(() => {
     const activeChannel = channelRef.current;
+    const opGen = ++voiceOpGenRef.current;
     if (ws && myId && activeChannel && callKindRef.current === "channel") {
-      ws.send(WsType.CHANNEL_VOICE_LEAVE, { channelId: activeChannel._id });
+      const hangup = {
+        kind: "channel_leave" as const,
+        channelId: activeChannel._id,
+      };
+      queuePendingHangupSync(hangup);
+      const hangupGen = getPendingHangupGeneration();
+      void ws
+        .send(WsType.CHANNEL_VOICE_LEAVE, { channelId: activeChannel._id })
+        .then((ok) => {
+          if (opGen !== voiceOpGenRef.current) return;
+          if (hangupGen !== getPendingHangupGeneration()) return;
+          if (ok) clearMatchingHangup(hangup);
+          else setError(t("call.connectFailed"));
+        });
     }
     resetCall();
-  }, [ws, myId, resetCall]);
+  }, [ws, myId, resetCall, t]);
 
   const toggleChannelVoice = useCallback(
     (targetChannel: CallChannel, callMode: CallMode = "audio") => {
@@ -546,58 +886,194 @@ export function CallProvider({ children }: { children: ReactNode }) {
   const acceptCall = useCallback(() => {
     const target = peerRef.current;
     if (!ws || !myId || !target || stateRef.current !== "incoming") return;
-    ws.send(WsType.CALL_ACCEPT, { from: myId, to: target._id });
-  }, [ws, myId]);
+    if (acceptInFlightRef.current || acceptedHereRef.current) return;
+    setAcceptInFlightBoth(true);
+    const peerId = target._id;
+    const abortGen = acceptAbortGenRef.current;
+    void (async () => {
+      const ok = await claimDmAcceptAsync(peerId);
+      if (abortGen !== acceptAbortGenRef.current) {
+        if (ok) clearDmAcceptClaim(peerId);
+        setAcceptInFlightBoth(false);
+        return;
+      }
+      if (!ok) {
+        // Other tab / stale claim — keep Incoming UI; do not resetCall.
+        setAcceptInFlightBoth(false);
+        return;
+      }
+      if (stateRef.current !== "incoming" || peerRef.current?._id !== peerId) {
+        clearDmAcceptClaim(peerId);
+        setAcceptInFlightBoth(false);
+        return;
+      }
+      acceptedHereRef.current = true;
+      const sent = await ws.send(WsType.CALL_ACCEPT, { from: myId, to: peerId });
+      if (abortGen !== acceptAbortGenRef.current) {
+        clearDmAcceptClaim(peerId);
+        setAcceptInFlightBoth(false);
+        acceptedHereRef.current = false;
+        if (sent) {
+          const hangup = {
+            kind: "call_end" as const,
+            from: myId,
+            to: peerId,
+          };
+          queuePendingHangupSync(hangup);
+          void ws.send(WsType.CALL_END, { from: myId, to: peerId }).then((ok) => {
+            if (ok) clearMatchingHangup(hangup);
+          });
+        }
+        return;
+      }
+      if (!sent) {
+        clearDmAcceptClaim(peerId);
+        setAcceptInFlightBoth(false);
+        acceptedHereRef.current = false;
+        return;
+      }
+      // If CALL_ACCEPTED never arrives, hang up so peer is not stuck ringing.
+      clearAcceptTimeout();
+      acceptTimeoutRef.current = setTimeout(() => {
+        acceptTimeoutRef.current = undefined;
+        if (
+          stateRef.current === "incoming" &&
+          peerRef.current?._id === peerId &&
+          (acceptInFlightRef.current || acceptedHereRef.current)
+        ) {
+          if (ws && myId) {
+            const hangup = {
+              kind: "call_end" as const,
+              from: myId,
+              to: peerId,
+            };
+            queuePendingHangupSync(hangup);
+            void ws.send(WsType.CALL_END, { from: myId, to: peerId }).then((ok) => {
+              if (ok) clearMatchingHangup(hangup);
+            });
+          }
+          clearDmAcceptClaim(peerId);
+          resetCall();
+        }
+      }, 15_000);
+    })();
+  }, [ws, myId, resetCall, clearAcceptTimeout, setAcceptInFlightBoth]);
 
   const rejectCall = useCallback(() => {
     const target = peerRef.current;
     if (ws && myId && target) {
-      ws.send(WsType.CALL_REJECT, { from: myId, to: target._id });
+      const hangup = {
+        kind: "call_reject" as const,
+        from: myId,
+        to: target._id,
+      };
+      queuePendingHangupSync(hangup);
+      const hangupGen = getPendingHangupGeneration();
+      void ws.send(WsType.CALL_REJECT, { from: myId, to: target._id }).then(
+        (ok) => {
+          if (hangupGen !== getPendingHangupGeneration()) return;
+          if (ok) clearMatchingHangup(hangup);
+          else setError(t("call.connectFailed"));
+        },
+      );
     }
     resetCall();
-  }, [ws, myId, resetCall]);
+  }, [ws, myId, resetCall, t]);
 
   const cancelCall = useCallback(() => {
     const target = peerRef.current;
     if (ws && myId && target) {
-      ws.send(WsType.CALL_CANCEL, { from: myId, to: target._id });
+      const hangup = {
+        kind: "call_cancel" as const,
+        from: myId,
+        to: target._id,
+      };
+      queuePendingHangupSync(hangup);
+      const hangupGen = getPendingHangupGeneration();
+      void ws.send(WsType.CALL_CANCEL, { from: myId, to: target._id }).then(
+        (ok) => {
+          if (hangupGen !== getPendingHangupGeneration()) return;
+          if (ok) clearMatchingHangup(hangup);
+          else setError(t("call.connectFailed"));
+        },
+      );
     }
     resetCall();
-  }, [ws, myId, resetCall]);
+  }, [ws, myId, resetCall, t]);
 
   const endCall = useCallback(() => {
     const target = peerRef.current;
     const activeChannel = channelRef.current;
     if (ws && myId) {
       if (callKindRef.current === "channel" && activeChannel) {
-        ws.send(WsType.CHANNEL_VOICE_LEAVE, { channelId: activeChannel._id });
+        const opGen = ++voiceOpGenRef.current;
+        const hangup = {
+          kind: "channel_leave" as const,
+          channelId: activeChannel._id,
+        };
+        queuePendingHangupSync(hangup);
+        const hangupGen = getPendingHangupGeneration();
+        void ws
+          .send(WsType.CHANNEL_VOICE_LEAVE, {
+            channelId: activeChannel._id,
+          })
+          .then((ok) => {
+            if (opGen !== voiceOpGenRef.current) return;
+            if (hangupGen !== getPendingHangupGeneration()) return;
+            if (ok) clearMatchingHangup(hangup);
+            else setError(t("call.connectFailed"));
+          });
       } else if (target) {
-        ws.send(WsType.CALL_END, { from: myId, to: target._id });
+        const hangup = {
+          kind: "call_end" as const,
+          from: myId,
+          to: target._id,
+        };
+        queuePendingHangupSync(hangup);
+        const hangupGen = getPendingHangupGeneration();
+        void ws.send(WsType.CALL_END, { from: myId, to: target._id }).then(
+          (ok) => {
+            if (hangupGen !== getPendingHangupGeneration()) return;
+            if (ok) clearMatchingHangup(hangup);
+            else setError(t("call.connectFailed"));
+          },
+        );
       }
     }
     resetCall();
-  }, [ws, myId, resetCall]);
+  }, [ws, myId, resetCall, t]);
 
   const toggleMute = useCallback(() => {
     const room = roomRef.current;
     if (!room) return;
+    const gen = ++muteGenRef.current;
     const next = !isMuted;
-    void room.localParticipant.setMicrophoneEnabled(!next).then(() => {
-      if (!next) applyMicVolume(micVolumeRef.current);
-    });
     setIsMuted(next);
+    void room.localParticipant.setMicrophoneEnabled(!next).then(
+      () => {
+        if (gen !== muteGenRef.current) return;
+        if (!next) applyMicVolume(micVolumeRef.current);
+      },
+      () => {
+        if (gen !== muteGenRef.current) return;
+        setIsMuted(!next);
+      },
+    );
   }, [isMuted, applyMicVolume]);
 
   const toggleCamera = useCallback(async () => {
     const room = roomRef.current;
     if (!room) return;
+    const gen = ++cameraGenRef.current;
     const next = !isCameraOn;
     try {
       await room.localParticipant.setCameraEnabled(next);
+      if (gen !== cameraGenRef.current) return;
       setIsCameraOn(next);
       refreshLocalMediaTracks();
       window.setTimeout(() => refreshLocalMediaTracks(), 300);
     } catch (err) {
+      if (gen !== cameraGenRef.current) return;
       if (import.meta.env.DEV) {
         console.error("toggleCamera failed:", err);
       }
@@ -608,6 +1084,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
   const toggleScreenShare = useCallback(async () => {
     const room = roomRef.current;
     if (!room) return;
+    const gen = ++screenShareGenRef.current;
     const next = !isScreenSharing;
     try {
       await room.localParticipant.setScreenShareEnabled(
@@ -616,10 +1093,12 @@ export function CallProvider({ children }: { children: ReactNode }) {
           ? buildScreenShareCaptureOptions(loadVoiceSettings().screenShareQuality)
           : undefined,
       );
+      if (gen !== screenShareGenRef.current) return;
       setIsScreenSharing(next);
       refreshLocalMediaTracks();
       window.setTimeout(() => refreshLocalMediaTracks(), 300);
     } catch (err) {
+      if (gen !== screenShareGenRef.current) return;
       if (import.meta.env.DEV) {
         console.error("toggleScreenShare failed:", err);
       }
@@ -631,23 +1110,49 @@ export function CallProvider({ children }: { children: ReactNode }) {
     const room = roomRef.current;
     if (!room || pushToTalkActiveRef.current) return;
     pushToTalkActiveRef.current = true;
+    const gen = ++pushToTalkGenRef.current;
     pushToTalkMutedBeforeRef.current = isMuted;
     setIsPushToTalkActive(true);
-    void room.localParticipant.setMicrophoneEnabled(true).then(() => {
-      setIsMuted(false);
-    });
+    void room.localParticipant.setMicrophoneEnabled(true).then(
+      () => {
+        // Stop may have raced — only unmute UI if this start is still active.
+        if (
+          gen !== pushToTalkGenRef.current ||
+          !pushToTalkActiveRef.current
+        ) {
+          return;
+        }
+        setIsMuted(false);
+      },
+      () => {
+        if (gen !== pushToTalkGenRef.current) return;
+        pushToTalkActiveRef.current = false;
+        setIsPushToTalkActive(false);
+      },
+    );
   }, [isMuted]);
 
   const stopPushToTalk = useCallback(() => {
     const room = roomRef.current;
     if (!room || !pushToTalkActiveRef.current) return;
     pushToTalkActiveRef.current = false;
+    pushToTalkGenRef.current += 1;
     setIsPushToTalkActive(false);
     const restoreMuted = pushToTalkMutedBeforeRef.current;
-    void room.localParticipant.setMicrophoneEnabled(!restoreMuted).then(() => {
-      setIsMuted(restoreMuted);
-    });
-  }, []);
+    void room.localParticipant.setMicrophoneEnabled(!restoreMuted).then(
+      () => {
+        setIsMuted(restoreMuted);
+      },
+      () => {
+        // Keep UI honest with actual track if restore fails.
+        const pub = room.localParticipant.getTrackPublication(
+          Track.Source.Microphone,
+        );
+        setIsMuted(!(pub?.isMuted === false));
+        setError(t("call.connectFailed"));
+      },
+    );
+  }, [t]);
 
   const setSpeakerVolume = useCallback(
     (value: number) => {
@@ -696,9 +1201,8 @@ export function CallProvider({ children }: { children: ReactNode }) {
     if (!ws || !myId || restoreAttemptedRef.current) return;
     if (stateRef.current !== "idle") return;
 
-    restoreAttemptedRef.current = true;
-
     void (async () => {
+      restoreAttemptedRef.current = true;
       const saved = loadPersistedCall();
       let peerId: string | null = null;
       let callMode: CallMode = "audio";
@@ -714,12 +1218,17 @@ export function CallProvider({ children }: { children: ReactNode }) {
         if (saved) clearPersistedCall();
         try {
           const active = await fetchActiveCall();
-          if (!active.active || !active.peerId) return;
+          if (!active.active || !active.peerId) {
+            restoreAttemptedRef.current = false;
+            return;
+          }
+          if (stateRef.current !== "idle") return;
           peerId = active.peerId;
           callMode = active.mode === "video" ? "video" : "audio";
           restorePeer = { _id: peerId };
           try {
             const { friends } = await getFriends();
+            if (stateRef.current !== "idle") return;
             const friend = friends.find((f) => f._id === peerId);
             if (friend) {
               restorePeer = {
@@ -734,10 +1243,19 @@ export function CallProvider({ children }: { children: ReactNode }) {
             // Profil peera opcjonalny — wystarczy samo ID.
           }
         } catch {
+          restoreAttemptedRef.current = false;
           return;
         }
       }
 
+      if (stateRef.current !== "idle" || !peerId || !restorePeer) {
+        if (stateRef.current === "idle") restoreAttemptedRef.current = false;
+        return;
+      }
+
+      peerRef.current = restorePeer;
+      callKindRef.current = "dm";
+      channelRef.current = null;
       setPeer(restorePeer);
       setCallKind("dm");
       setChannel(null);
@@ -746,10 +1264,25 @@ export function CallProvider({ children }: { children: ReactNode }) {
         startedAt: restoreStartedAt,
         isRestore: true,
       });
+      // Failed restore leaves idle — allow one more attempt on next effect cycle.
+      if (stateRef.current === "idle") {
+        restoreAttemptedRef.current = false;
+      }
     })();
   }, [ws, myId, connectToRoom]);
 
   /* ── Nasłuch sygnalizacji WebSocket ──────────────────────────────── */
+
+  const modeRef = useRef(mode);
+  modeRef.current = mode;
+  const connectToRoomRef = useRef(connectToRoom);
+  connectToRoomRef.current = connectToRoom;
+  const resetCallRef = useRef(resetCall);
+  resetCallRef.current = resetCall;
+  const clearRingTimeoutRef = useRef(clearRingTimeout);
+  clearRingTimeoutRef.current = clearRingTimeout;
+  const tRef = useRef(t);
+  tRef.current = t;
 
   useEffect(() => {
     if (!ws) return;
@@ -760,13 +1293,30 @@ export function CallProvider({ children }: { children: ReactNode }) {
       caller?: CallPeer;
     }) => {
       if (stateRef.current !== "idle") {
-        ws.send(WsType.CALL_REJECT, { from: myId, to: data.from });
+        if (myId) {
+          const hangup = {
+            kind: "call_reject" as const,
+            from: myId,
+            to: data.from,
+          };
+          queuePendingHangupSync(hangup);
+          void ws
+            .send(WsType.CALL_REJECT, { from: myId, to: data.from })
+            .then((ok) => {
+              if (ok) clearMatchingHangup(hangup);
+            });
+        }
         return;
       }
       setError(null);
+      const nextPeer = data.caller ?? { _id: data.from };
+      callKindRef.current = "dm";
+      channelRef.current = null;
+      peerRef.current = nextPeer;
+      stateRef.current = "incoming";
       setCallKind("dm");
       setChannel(null);
-      setPeer(data.caller ?? { _id: data.from });
+      setPeer(nextPeer);
       setMode(data.mode === "video" ? "video" : "audio");
       setState("incoming");
     };
@@ -775,57 +1325,133 @@ export function CallProvider({ children }: { children: ReactNode }) {
       const target = peerRef.current;
       if (!target) return;
       const peerId = target._id;
-      clearRingTimeout();
+      clearRingTimeoutRef.current();
+      clearAcceptTimeout();
 
       if (stateRef.current === "outgoing" && data.from === peerId) {
-        connectToRoom({ kind: "dm", peerId }, mode);
+        connectToRoomRef.current({ kind: "dm", peerId }, modeRef.current);
         return;
       }
       if (stateRef.current === "incoming" && data.from === myId) {
-        connectToRoom({ kind: "dm", peerId }, mode);
+        // Only the accepting tab joins; other ringing tabs clear Incoming UI.
+        const mine =
+          acceptedHereRef.current && thisTabOwnsDmAccept(peerId);
+        acceptedHereRef.current = false;
+        setAcceptInFlightBoth(false);
+        if (mine) {
+          clearDmAcceptClaim(peerId);
+          connectToRoomRef.current({ kind: "dm", peerId }, modeRef.current);
+        } else {
+          resetCallRef.current();
+        }
       }
     };
 
     const onRejected = (data: { from: string }) => {
       const target = peerRef.current;
+      if (!target) return;
+      // Caller: peer declined. Callee other tabs: we declined elsewhere.
       if (
-        stateRef.current === "outgoing" &&
-        target &&
-        data.from === target._id
+        (stateRef.current === "outgoing" && data.from === target._id) ||
+        (stateRef.current === "incoming" && data.from === myId)
       ) {
-        setError(t("call.rejected"));
-        resetCall();
+        if (stateRef.current === "outgoing") {
+          setError(tRef.current("call.rejected"));
+        }
+        resetCallRef.current();
       }
     };
 
     const onCancelled = (data: { from: string }) => {
       const target = peerRef.current;
+      const state = stateRef.current;
+      if (!target) return;
+      // Caller (outgoing) or callee (incoming) — block/timeout ends ringing for both.
       if (
-        stateRef.current === "incoming" &&
-        target &&
-        data.from === target._id
+        (state === "incoming" || state === "outgoing") &&
+        (data.from === target._id || data.from === myId)
       ) {
-        resetCall();
+        resetCallRef.current();
       }
     };
 
     const onEnded = (data: { from: string }) => {
+      // Channel voice has peer=null — must not tear down LiveKit on DM call:ended.
+      if (callKindRef.current === "channel") return;
       const target = peerRef.current;
       if (!target || data.from === myId || data.from === target._id) {
-        resetCall();
+        resetCallRef.current();
       }
     };
 
     const onUnavailable = (data: { reason?: string }) => {
-      if (stateRef.current === "outgoing") {
+      const state = stateRef.current;
+      if (state === "outgoing") {
         setError(
           data.reason === "BUSY"
-            ? t("call.peerBusy")
+            ? tRef.current("call.peerBusy")
             : data.reason === "NOT_FRIENDS"
-              ? t("call.unavailable")
-              : t("call.unavailable"),
+              ? tRef.current("call.unavailable")
+              : tRef.current("call.unavailable"),
         );
-        resetCall();
+        resetCallRef.current();
+        return;
+      }
+      // Accept/cancel/end terminal failures — clear stuck UI; signal if still live.
+      if (
+        state === "incoming" ||
+        state === "connecting" ||
+        state === "active"
+      ) {
+        const kind = callKindRef.current;
+        const target = peerRef.current;
+        const activeChannel = channelRef.current;
+        if (ws && myId) {
+          if (kind === "channel" && activeChannel) {
+            const hangup = {
+              kind: "channel_leave" as const,
+              channelId: activeChannel._id,
+            };
+            queuePendingHangupSync(hangup);
+            void ws
+              .send(WsType.CHANNEL_VOICE_LEAVE, {
+                channelId: activeChannel._id,
+              })
+              .then((ok) => {
+                if (ok) clearMatchingHangup(hangup);
+              });
+          } else if (target) {
+            if (state === "incoming" && !acceptedHereRef.current) {
+              const hangup = {
+                kind: "call_reject" as const,
+                from: myId,
+                to: target._id,
+              };
+              queuePendingHangupSync(hangup);
+              void ws
+                .send(WsType.CALL_REJECT, {
+                  from: myId,
+                  to: target._id,
+                })
+                .then((ok) => {
+                  if (ok) clearMatchingHangup(hangup);
+                });
+            } else {
+              const hangup = {
+                kind: "call_end" as const,
+                from: myId,
+                to: target._id,
+              };
+              queuePendingHangupSync(hangup);
+              void ws
+                .send(WsType.CALL_END, { from: myId, to: target._id })
+                .then((ok) => {
+                  if (ok) clearMatchingHangup(hangup);
+                });
+            }
+          }
+        }
+        resetCallRef.current();
       }
     };
 
@@ -839,7 +1465,167 @@ export function CallProvider({ children }: { children: ReactNode }) {
     ];
 
     return () => unsubs.forEach((u) => u());
-  }, [ws, myId, mode, connectToRoom, resetCall, clearRingTimeout, t]);
+  }, [ws, myId, clearAcceptTimeout, setAcceptInFlightBoth]);
+
+  useEffect(() => {
+    if (!ws) return;
+    const leaveIfActiveChannel = (channelId?: string) => {
+      if (!channelId) return;
+      if (
+        callKindRef.current === "channel" &&
+        channelRef.current?._id === channelId &&
+        stateRef.current !== "idle"
+      ) {
+        leaveChannelVoice();
+      }
+      setChannelVoiceParticipants((prev) => {
+        if (!(channelId in prev)) return prev;
+        const next = { ...prev };
+        delete next[channelId];
+        return next;
+      });
+    };
+    const unsubs = [
+      ws.subscribe(WsType.CHANNEL_DELETED, (e: { channelId?: string }) =>
+        leaveIfActiveChannel(e.channelId),
+      ),
+      ws.subscribe(WsType.CHANNEL_LEFT, (e: { channelId?: string }) =>
+        leaveIfActiveChannel(e.channelId),
+      ),
+      ws.subscribe(
+        WsType.CHANNEL_MEMBER_LEFT,
+        (e: { channelId?: string; userId?: string }) => {
+          if (!e.channelId) return;
+          // Kick/ban/purge for me — same as CHANNEL_LEFT for voice.
+          if (e.userId && myId && e.userId === myId) {
+            leaveIfActiveChannel(e.channelId);
+            return;
+          }
+          // Peer left: drop them from local voice roster maps.
+          setChannelVoiceParticipants((prev) => {
+            const list = prev[e.channelId!];
+            if (!list || !e.userId) return prev;
+            const nextList = list.filter((id) => id !== e.userId);
+            if (nextList.length === list.length) return prev;
+            return { ...prev, [e.channelId!]: nextList };
+          });
+        },
+      ),
+      ws.subscribe(WsType.FRIENDSHIP_REMOVED, (e: { userId?: string }) => {
+        const peerId = e.userId;
+        if (!peerId) return;
+        if (
+          callKindRef.current !== "dm" ||
+          peerRef.current?._id !== peerId ||
+          stateRef.current === "idle"
+        ) {
+          return;
+        }
+        const state = stateRef.current;
+        if (ws && myId) {
+          if (state === "outgoing") {
+            const hangup = {
+              kind: "call_cancel" as const,
+              from: myId,
+              to: peerId,
+            };
+            queuePendingHangupSync(hangup);
+            void ws
+              .send(WsType.CALL_CANCEL, { from: myId, to: peerId })
+              .then((ok) => {
+                if (ok) clearMatchingHangup(hangup);
+              });
+          } else if (
+            state === "incoming" &&
+            !acceptedHereRef.current &&
+            !acceptInFlightRef.current
+          ) {
+            const hangup = {
+              kind: "call_reject" as const,
+              from: myId,
+              to: peerId,
+            };
+            queuePendingHangupSync(hangup);
+            void ws
+              .send(WsType.CALL_REJECT, { from: myId, to: peerId })
+              .then((ok) => {
+                if (ok) clearMatchingHangup(hangup);
+              });
+          } else {
+            const hangup = {
+              kind: "call_end" as const,
+              from: myId,
+              to: peerId,
+            };
+            queuePendingHangupSync(hangup);
+            void ws
+              .send(WsType.CALL_END, { from: myId, to: peerId })
+              .then((ok) => {
+                if (ok) clearMatchingHangup(hangup);
+              });
+          }
+        }
+        resetCall();
+      }),
+      ws.subscribe(WsType.CONVERSATION_DELETED, (e: { contactId?: string }) => {
+        const peerId = e.contactId;
+        if (!peerId) return;
+        if (
+          callKindRef.current !== "dm" ||
+          peerRef.current?._id !== peerId ||
+          stateRef.current === "idle"
+        ) {
+          return;
+        }
+        const state = stateRef.current;
+        if (ws && myId) {
+          if (state === "outgoing") {
+            const hangup = {
+              kind: "call_cancel" as const,
+              from: myId,
+              to: peerId,
+            };
+            queuePendingHangupSync(hangup);
+            void ws
+              .send(WsType.CALL_CANCEL, { from: myId, to: peerId })
+              .then((ok) => {
+                if (ok) clearMatchingHangup(hangup);
+              });
+          } else if (
+            state === "incoming" &&
+            !acceptedHereRef.current &&
+            !acceptInFlightRef.current
+          ) {
+            const hangup = {
+              kind: "call_reject" as const,
+              from: myId,
+              to: peerId,
+            };
+            queuePendingHangupSync(hangup);
+            void ws
+              .send(WsType.CALL_REJECT, { from: myId, to: peerId })
+              .then((ok) => {
+                if (ok) clearMatchingHangup(hangup);
+              });
+          } else {
+            const hangup = {
+              kind: "call_end" as const,
+              from: myId,
+              to: peerId,
+            };
+            queuePendingHangupSync(hangup);
+            void ws
+              .send(WsType.CALL_END, { from: myId, to: peerId })
+              .then((ok) => {
+                if (ok) clearMatchingHangup(hangup);
+              });
+          }
+        }
+        resetCall();
+      }),
+    ];
+    return () => unsubs.forEach((u) => u());
+  }, [ws, leaveChannelVoice, myId, resetCall]);
 
   useEffect(() => {
     if (!ws) return;
@@ -856,10 +1642,196 @@ export function CallProvider({ children }: { children: ReactNode }) {
     );
   }, [ws]);
 
-  // Sprzątanie przy odmontowaniu (np. wylogowanie).
+  // Flush hangups queued during pagehide (encrypt often dies on unload).
   useEffect(() => {
-    return () => cleanupRoom();
-  }, [cleanupRoom]);
+    if (!ws || !wsConnected) return;
+    let cancelled = false;
+    let attempt = 0;
+    const flushOne = async (hangup: PendingHangup) => {
+      if (hangup.kind === "channel_leave") {
+        return ws.send(WsType.CHANNEL_VOICE_LEAVE, {
+          channelId: hangup.channelId,
+        });
+      }
+      if (hangup.kind === "call_cancel") {
+        return ws.send(WsType.CALL_CANCEL, {
+          from: hangup.from,
+          to: hangup.to,
+        });
+      }
+      if (hangup.kind === "call_timeout") {
+        return ws.send(WsType.CALL_TIMEOUT, {
+          from: hangup.from,
+          to: hangup.to,
+        });
+      }
+      if (hangup.kind === "call_reject") {
+        return ws.send(WsType.CALL_REJECT, {
+          from: hangup.from,
+          to: hangup.to,
+        });
+      }
+      return ws.send(WsType.CALL_END, {
+        from: hangup.from,
+        to: hangup.to,
+      });
+    };
+    const flush = () => {
+      if (cancelled) return;
+      void (async () => {
+        let anyFail = false;
+        // Re-peek each iteration so queue bumps / clears do not abort siblings.
+        while (!cancelled) {
+          const pending = peekAllPendingHangups();
+          if (pending.length === 0) break;
+          const hangup = pending[0];
+          const ok = await flushOne(hangup);
+          if (cancelled) return;
+          if (ok) {
+            clearMatchingHangup(hangup);
+          } else {
+            anyFail = true;
+            break;
+          }
+        }
+        if (anyFail) {
+          attempt += 1;
+          if (attempt <= 5) {
+            window.setTimeout(flush, Math.min(8_000, 500 * 2 ** (attempt - 1)));
+          }
+        }
+      })();
+    };
+    flush();
+    const onVisible = () => {
+      if (document.visibilityState === "visible") {
+        attempt = 0;
+        flush();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      cancelled = true;
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [ws, wsConnected]);
+
+  // After WS reconnect, re-announce channel voice membership + refresh active state.
+  const voiceWasConnectedRef = useRef(wsConnected);
+  useEffect(() => {
+    const was = voiceWasConnectedRef.current;
+    voiceWasConnectedRef.current = wsConnected;
+    if (!ws || !wsConnected || was) return;
+    const activeChannelId = channelRef.current?._id;
+    const inChannelVoice =
+      callKindRef.current === "channel" &&
+      activeChannelId &&
+      stateRef.current !== "idle";
+    if (inChannelVoice && activeChannelId) {
+      ws.send(WsType.CHANNEL_VOICE_JOIN, { channelId: activeChannelId });
+      ws.send(WsType.CHANNEL_VOICE_STATE, { channelId: activeChannelId });
+    }
+  }, [ws, wsConnected]);
+
+  // Hang up only on real tab close/hide — not on React remount or SPA route changes.
+  // Incoming ring is not bound to this tab: rejecting here would kill the session for other
+  // callee tabs. Last WS disconnect / server TTL clears unanswered ringing.
+  useEffect(() => {
+    const hangUpFromRefs = () => {
+      const state = stateRef.current;
+      if (!ws || !myId || state === "idle") return;
+      const kind = callKindRef.current;
+      const target = peerRef.current;
+      const activeChannel = channelRef.current;
+      clearPersistedCall();
+
+      // Accept claimed but still "incoming" until CALL_ACCEPTED — hang up + drop claim
+      // so reload cannot orphan the session / lock other tabs for 15s.
+      if (state === "incoming") {
+        if (acceptedHereRef.current || acceptInFlightRef.current) {
+          if (target) {
+            clearDmAcceptClaim(target._id);
+            const hangup = {
+              kind: "call_end" as const,
+              from: myId,
+              to: target._id,
+            };
+            queuePendingHangupSync(hangup);
+            void ws
+              .send(WsType.CALL_END, { from: myId, to: target._id })
+              .then((ok) => {
+                if (ok) clearMatchingHangup(hangup);
+              });
+          }
+          resetCall();
+        }
+        return;
+      }
+
+      if (kind === "channel" && activeChannel) {
+        const hangup = {
+          kind: "channel_leave" as const,
+          channelId: activeChannel._id,
+        };
+        queuePendingHangupSync(hangup);
+        void ws
+          .send(WsType.CHANNEL_VOICE_LEAVE, {
+            channelId: activeChannel._id,
+          })
+          .then((ok) => {
+            if (ok) clearMatchingHangup(hangup);
+          });
+        resetCall();
+        return;
+      }
+      if (!target) {
+        resetCall();
+        return;
+      }
+      if (state === "outgoing") {
+        const hangup = {
+          kind: "call_cancel" as const,
+          from: myId,
+          to: target._id,
+        };
+        queuePendingHangupSync(hangup);
+        void ws
+          .send(WsType.CALL_CANCEL, { from: myId, to: target._id })
+          .then((ok) => {
+            if (ok) clearMatchingHangup(hangup);
+          });
+      } else if (state === "connecting" || state === "active") {
+        const hangup = {
+          kind: "call_end" as const,
+          from: myId,
+          to: target._id,
+        };
+        queuePendingHangupSync(hangup);
+        void ws
+          .send(WsType.CALL_END, { from: myId, to: target._id })
+          .then((ok) => {
+            if (ok) clearMatchingHangup(hangup);
+          });
+      }
+      resetCall();
+    };
+    const hangUpOnUnload = () => {
+      hangUpFromRefs();
+    };
+    window.addEventListener("pagehide", hangUpOnUnload);
+    const unsubRevoked = ws
+      ? ws.subscribe(WsType.SESSION_REVOKED, () => {
+          hangUpFromRefs();
+        })
+      : () => {};
+    return () => {
+      window.removeEventListener("pagehide", hangUpOnUnload);
+      unsubRevoked();
+      // Logout / shell unmount — signal while WS may still be open.
+      hangUpFromRefs();
+      cleanupRoom();
+    };
+  }, [ws, myId, cleanupRoom, resetCall]);
 
   const value = useMemo<CallContextValue>(
     () => ({
@@ -889,6 +1861,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
       isChannelVoiceActive,
       isInChannelVoice,
       acceptCall,
+      acceptInFlight,
       rejectCall,
       cancelCall,
       endCall,
@@ -927,6 +1900,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
       isChannelVoiceActive,
       isInChannelVoice,
       acceptCall,
+      acceptInFlight,
       rejectCall,
       cancelCall,
       endCall,

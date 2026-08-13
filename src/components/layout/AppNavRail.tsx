@@ -3,8 +3,6 @@ import { useTranslation } from "react-i18next";
 import { updateAvailabilityStatus } from "../../api/auth";
 import { clearAutoIdleBrbFlag } from "../../hooks/useIdleAvailability";
 import { useAuth } from "../../context/AuthContext";
-import { useWebSocket } from "../../context/WebSocketContext";
-import { WsType } from "../../api/wsProtocol";
 import { Avatar } from "../common/Avatar";
 import { userLabel, formatLiveDateTime, availabilityStatusLabel } from "../../utils/user/format";
 import { LOGO_NONE_URL } from "../../constants/branding";
@@ -30,7 +28,6 @@ export function AppNavRail({
 }: AppNavRailProps) {
   const { t } = useTranslation();
   const { user, logout, updateUser } = useAuth();
-  const ws = useWebSocket();
   const [statusMenuOpen, setStatusMenuOpen] = useState(false);
   const [now, setNow] = useState(() => new Date());
   const statusMenuRef = useRef<HTMLDivElement>(null);
@@ -56,9 +53,10 @@ export function AppNavRail({
     if (!user) return;
     try {
       clearAutoIdleBrbFlag();
+      // HTTP persists + emits user-status-changed to friends. Do not also send
+      // SET_STATUS over WS — that duplicated Mongo writes and friend fan-out.
       const updated = await updateAvailabilityStatus(status);
       updateUser(updated);
-      ws?.send(WsType.SET_STATUS, { availabilityStatus: status });
     } catch {
       /**/
     }
