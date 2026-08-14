@@ -151,6 +151,8 @@ type BridgeHealRefs = {
   prevMutedKeysRef: { current: Set<string> };
   /** Left/deleted/unfriended — reject UNREAD invent until heal reseeds. */
   droppedKeysRef: { current: Set<string> };
+  /** DM wipe without absolute — reject stale wire until HTTP heal. */
+  wipedKeysRef: { current: Set<string> };
 };
 
 /** Settings heal with retry — keep ∞ + exclude until success (no title inflate). */
@@ -179,8 +181,9 @@ function beginBridgeHeal(
         refs.ignoreDeltasUntilRef.current = Date.now() + IGNORE_DELTAS_MS;
         refs.seededRef.current = true;
         refs.prevMutedKeysRef.current = new Set(getMutedConversationKeys());
-        // HTTP roster is SoT — clear leave/delete tombstones.
+        // HTTP roster is SoT — clear leave/delete/wipe tombstones.
         refs.droppedKeysRef.current.clear();
+        refs.wipedKeysRef.current.clear();
       } else {
         // Keep ∞ and prior exclude; retry shortly.
         window.setTimeout(() => {
@@ -220,6 +223,27 @@ export function UnreadBadgeBridge() {
   const prevMutedKeysRef = useRef<Set<string>>(new Set());
   /** Leave/delete/unfriend tombstones until heal confirms roster. */
   const droppedKeysRef = useRef<Set<string>>(new Set());
+  /** DM wipe without absolute — reject stale wire until HTTP heal. */
+  const wipedKeysRef = useRef<Set<string>>(new Set());
+  const sessionUserIdRef = useRef<string | undefined>(user?.id);
+
+  // Account switch / logout — drop stale baselines (tombstones, preferLive maps).
+  useEffect(() => {
+    const next = user?.id;
+    if (sessionUserIdRef.current === next) return;
+    sessionUserIdRef.current = next;
+    healGenRef.current += 1;
+    countsRef.current.clear();
+    generationRef.current.clear();
+    revisionRef.current.clear();
+    dirtyDuringHealRef.current.clear();
+    droppedKeysRef.current.clear();
+    wipedKeysRef.current.clear();
+    prevMutedKeysRef.current.clear();
+    seededRef.current = false;
+    healInFlightRef.current = false;
+    ignoreDeltasUntilRef.current = 0;
+  }, [user?.id]);
 
   // Drain pending mark-reads while shell is mounted (Chat→Settings keeps socket).
   useEffect(() => {
@@ -282,6 +306,7 @@ export function UnreadBadgeBridge() {
     seededRef,
     prevMutedKeysRef,
     droppedKeysRef,
+    wipedKeysRef,
   });
 
   useEffect(() => subscribeChatPageMounted(() => {
@@ -368,6 +393,7 @@ export function UnreadBadgeBridge() {
         }
         return;
       }
+      if (wipedKeysRef.current.has(key)) return;
       const gen = raw.generation ?? 0;
       const lastGen = generationRef.current.get(key) ?? 0;
       const isAbsolute = typeof raw.unreadCount === "number";
@@ -522,8 +548,13 @@ export function UnreadBadgeBridge() {
         if (!e.contactId) return;
         const key = `dm:${e.contactId}`;
         ackPendingMarkReadByKey(key);
+        wipedKeysRef.current.add(key);
         countsRef.current.set(key, 0);
         dirtyDuringHealRef.current.delete(key);
+        // Fence same-gen stale absolute when server skipped emit (sync fail).
+        const prevGen = generationRef.current.get(key) ?? 0;
+        generationRef.current.set(key, prevGen + 1);
+        revisionRef.current.delete(key);
         if (!chatMountedRef.current && seededRef.current) {
           unreadSync.setCount(sumCountsForTitle(countsRef.current));
         }

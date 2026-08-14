@@ -340,6 +340,8 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
   /** Contacts/channels snapshot for tip preferLive across refresh. */
   const contactsSnapshotRef = useRef<Contact[]>([]);
   const channelsSnapshotRef = useRef<Channel[]>([]);
+  /** DM wipe without absolute — reject stale wire until HTTP reseed. */
+  const wipedUnreadKeysRef = useRef(new Set<string>());
 
   /* data */
   const refresh = useCallback(async () => {
@@ -524,6 +526,9 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
           }),
         );
         rawUnreadRef.current = nextRaw;
+        for (const c of contactsRes.contacts ?? []) {
+          wipedUnreadKeysRef.current.delete(`dm:${c._id}`);
+        }
         seedPresence(contactsRes.contacts);
 
         // Close ghost chats; patch open chat fields without remounting ChatWindow
@@ -819,6 +824,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
       generation?: number;
     }) => {
       const key = `${payload.type}:${payload.id}`;
+      if (wipedUnreadKeysRef.current.has(key)) return;
       const rejectOffRoster = (): boolean => {
         const inRoster =
           payload.type === "dm"
@@ -900,6 +906,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
           if (typeof payload.delta === "number") {
             // No invent-0 for unknown keys during ∞ refresh — HTTP seed is SoT.
             if (!rawUnreadRef.current.has(key)) return;
+            if (rejectOffRoster()) return;
             const muted = isConversationMuted("dm", payload.id);
             const prev = rawUnreadRef.current.get(key) ?? 0;
             rawUnreadRef.current.set(
@@ -955,6 +962,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
         if (typeof payload.delta === "number") {
           // No invent-0 for unknown keys during ∞ refresh — HTTP seed is SoT.
           if (!rawUnreadRef.current.has(key)) return;
+          if (rejectOffRoster()) return;
           const muted = isConversationMuted("channel", payload.id);
           const prev = rawUnreadRef.current.get(key) ?? 0;
           rawUnreadRef.current.set(
@@ -1307,10 +1315,15 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
       const key = `dm:${contactId}`;
       ackPendingMarkReadByKey(key);
       removeMessagePageCache(dmCacheKey(contactId));
+      wipedUnreadKeysRef.current.add(key);
       rawUnreadRef.current.set(key, 0);
       dirtyUnreadDuringRefreshRef.current.delete(key);
-      setContacts((prev) =>
-        prev.map((c) =>
+      // Wipe may arrive without absolute (server sync fail) — fence same-gen stale wire.
+      const prevGen = unreadGenerationRef.current.get(key) ?? 0;
+      unreadGenerationRef.current.set(key, prevGen + 1);
+      unreadRevisionRef.current.delete(key);
+      setContacts((prev) => {
+        const next = prev.map((c) =>
           c._id === contactId
             ? {
                 ...c,
@@ -1320,8 +1333,10 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
                 unreadCount: 0,
               }
             : c,
-        ),
-      );
+        );
+        contactsSnapshotRef.current = next;
+        return next;
+      });
       if (activeRef.current?.type === "dm" && activeRef.current.contact._id === contactId) {
         onSelectRef.current(null);
       }
