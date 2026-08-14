@@ -819,6 +819,18 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
       generation?: number;
     }) => {
       const key = `${payload.type}:${payload.id}`;
+      const rejectOffRoster = (): boolean => {
+        const inRoster =
+          payload.type === "dm"
+            ? contactsSnapshotRef.current.some((c) => c._id === payload.id)
+            : channelsSnapshotRef.current.some((ch) => ch._id === payload.id);
+        if (inRoster) return false;
+        rawUnreadRef.current.delete(key);
+        dirtyUnreadDuringRefreshRef.current.delete(key);
+        rosterDirtyDuringRefreshRef.current = true;
+        scheduleRefreshRef.current();
+        return true;
+      };
       const gen = payload.generation ?? 0;
       const lastGen = unreadGenerationRef.current.get(key) ?? 0;
       const isAbsolute = typeof payload.unreadCount === "number";
@@ -897,6 +909,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
             if (!muted) dirtyUnreadDuringRefreshRef.current.add(key);
           } else if (typeof payload.unreadCount === "number") {
             // Absolute during ∞ — write raw so preferLive cannot keep stale high.
+            if (rejectOffRoster()) return;
             const muted = isConversationMuted("dm", payload.id);
             rawUnreadRef.current.set(
               key,
@@ -926,15 +939,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
         } else {
           raw = rawUnreadRef.current.get(key) ?? 0;
         }
-        const inRoster = contactsSnapshotRef.current.some((c) => c._id === payload.id);
-        if (!inRoster) {
-          // Leave→absolute must not ghost-inflate raw/title before refresh.
-          rawUnreadRef.current.delete(key);
-          dirtyUnreadDuringRefreshRef.current.delete(key);
-          rosterDirtyDuringRefreshRef.current = true;
-          scheduleRefreshRef.current();
-          return;
-        }
+        if (rejectOffRoster()) return;
         rawUnreadRef.current.set(key, raw);
         setContacts((prev) =>
           prev.map((c) => {
@@ -959,6 +964,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
           if (!muted) dirtyUnreadDuringRefreshRef.current.add(key);
         } else if (typeof payload.unreadCount === "number") {
           // Absolute during ∞ — write raw so preferLive cannot keep stale high.
+          if (rejectOffRoster()) return;
           const muted = isConversationMuted("channel", payload.id);
           rawUnreadRef.current.set(
             key,
@@ -990,16 +996,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
         } else {
           raw = rawUnreadRef.current.get(key) ?? 0;
         }
-        const inRoster = channelsSnapshotRef.current.some(
-          (ch) => ch._id === payload.id,
-        );
-        if (!inRoster) {
-          rawUnreadRef.current.delete(key);
-          dirtyUnreadDuringRefreshRef.current.delete(key);
-          rosterDirtyDuringRefreshRef.current = true;
-          scheduleRefreshRef.current();
-          return;
-        }
+        if (rejectOffRoster()) return;
         rawUnreadRef.current.set(key, raw);
         setChannels((prev) =>
           prev.map((ch) => {
@@ -1090,6 +1087,9 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
     };
     const onDeleted = (e: { channelId: string }) => {
       ackPendingMarkReadByKey(`channel:${e.channelId}`);
+      channelsSnapshotRef.current = channelsSnapshotRef.current.filter(
+        (ch) => ch._id !== e.channelId,
+      );
       setChannels((p) => p.filter((ch) => ch._id !== e.channelId));
       rawUnreadRef.current.delete(`channel:${e.channelId}`);
       removeMessagePageCache(channelCacheKey(e.channelId));
@@ -1160,7 +1160,9 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
         rawUnreadRef.current.set(key, unread);
         setChannels((prev) => {
           if (prev.some((c) => c._id === ch._id)) return prev;
-          return [{ ...ch, isMuted: muted, unreadCount: unread }, ...prev];
+          const next = [{ ...ch, isMuted: muted, unreadCount: unread }, ...prev];
+          channelsSnapshotRef.current = next;
+          return next;
         });
         return;
       }
@@ -1169,6 +1171,9 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
     const onChannelLeft = (e: { channelId: string }) => {
       const key = `channel:${e.channelId}`;
       ackPendingMarkReadByKey(key);
+      channelsSnapshotRef.current = channelsSnapshotRef.current.filter(
+        (ch) => ch._id !== e.channelId,
+      );
       setChannels((p) => p.filter((ch) => ch._id !== e.channelId));
       rawUnreadRef.current.delete(key);
       removeMessagePageCache(channelCacheKey(e.channelId));
@@ -1186,6 +1191,9 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
       // Kick/ban/purge may only emit member-left — treat self as leave.
       if (e.userId && userIdRef.current && e.userId === userIdRef.current) {
         ackPendingMarkReadByKey(`channel:${e.channelId}`);
+        channelsSnapshotRef.current = channelsSnapshotRef.current.filter(
+          (ch) => ch._id !== e.channelId,
+        );
         setChannels((p) => p.filter((ch) => ch._id !== e.channelId));
         rawUnreadRef.current.delete(`channel:${e.channelId}`);
         removeMessagePageCache(channelCacheKey(e.channelId));
@@ -1325,6 +1333,9 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
       invalidateFriendshipCache(peerId);
       removeMessagePageCache(dmCacheKey(peerId));
       rawUnreadRef.current.delete(`dm:${peerId}`);
+      contactsSnapshotRef.current = contactsSnapshotRef.current.filter(
+        (c) => c._id !== peerId,
+      );
       setContacts((prev) => prev.filter((c) => c._id !== peerId));
       if (activeRef.current?.type === "dm" && activeRef.current.contact._id === peerId) {
         onSelectRef.current(null);
@@ -1352,13 +1363,17 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
       rawUnreadRef.current.set(key, unread);
       setContacts((prev) => {
         if (prev.some((c) => c._id === contact._id)) {
-          return prev.map((c) =>
+          const next = prev.map((c) =>
             c._id === contact._id
               ? { ...c, ...contact, isMuted: muted, unreadCount: unread }
               : c,
           );
+          contactsSnapshotRef.current = next;
+          return next;
         }
-        return [{ ...contact, isMuted: muted, unreadCount: unread }, ...prev];
+        const next = [{ ...contact, isMuted: muted, unreadCount: unread }, ...prev];
+        contactsSnapshotRef.current = next;
+        return next;
       });
       seedPresence([contact]);
     };
