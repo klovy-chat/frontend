@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useLayoutEffect, memo } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { Avatar } from "../common/Avatar";
 import { ReactionPicker } from "./pickers/ReactionPicker";
@@ -80,8 +81,14 @@ export const MessageBubble = memo(function MessageBubble({
   const menuRef = useRef<HTMLDivElement>(null);
   const reactButtonRef = useRef<HTMLButtonElement>(null);
   const dotsButtonRef = useRef<HTMLButtonElement>(null);
-  const [dropdownStyles, setDropdownStyles] = useState<React.CSSProperties>({});
-  const [reactionPickerStyles, setReactionPickerStyles] = useState<React.CSSProperties>({});
+  const [dropdownStyles, setDropdownStyles] = useState<React.CSSProperties>({
+    position: "fixed",
+    visibility: "hidden",
+  });
+  const [reactionPickerStyles, setReactionPickerStyles] = useState<React.CSSProperties>({
+    position: "fixed",
+    visibility: "hidden",
+  });
   const [dropdownPlacement, setDropdownPlacement] = useState<"left" | "right">("right");
   const sender = resolveSender(message.sender);
   const senderId = getUserId(sender);
@@ -159,6 +166,8 @@ export const MessageBubble = memo(function MessageBubble({
         bottom: openBelow ? undefined : viewportHeight - buttonRect.top + 8,
         minWidth: menuRect.width,
         maxWidth: viewportWidth - 24,
+        zIndex: 1200,
+        visibility: "visible",
       });
     };
 
@@ -189,9 +198,12 @@ export const MessageBubble = memo(function MessageBubble({
         buttonRect.top - pickerHeight - 12 > 0;
 
       setReactionPickerStyles({
+        position: "fixed",
         left,
         top: openAbove ? undefined : buttonRect.bottom + 8,
         bottom: openAbove ? viewportHeight - buttonRect.top + 8 : undefined,
+        zIndex: 1300,
+        visibility: "visible",
       });
     };
 
@@ -272,6 +284,7 @@ export const MessageBubble = memo(function MessageBubble({
                     className={`message-react-btn${hovered || reactionPickerOpen ? " message-react-btn--visible" : ""}${reactionPickerOpen ? " message-react-btn--active" : ""}`}
                     onClick={() => {
                       setMenuOpen(false);
+                      setReactionPickerStyles({ position: "fixed", visibility: "hidden" });
                       setReactionPickerOpen((value) => !value);
                     }}
                     title={t("messages.actions.addReaction")}
@@ -285,13 +298,15 @@ export const MessageBubble = memo(function MessageBubble({
                     </svg>
                   </button>
 
-                  {reactionPickerOpen && (
-                    <ReactionPicker
-                      onSelect={handleReactionSelect}
-                      onClose={() => setReactionPickerOpen(false)}
-                      style={reactionPickerStyles}
-                    />
-                  )}
+                  {reactionPickerOpen &&
+                    createPortal(
+                      <ReactionPicker
+                        onSelect={handleReactionSelect}
+                        onClose={() => setReactionPickerOpen(false)}
+                        style={reactionPickerStyles}
+                      />,
+                      document.body,
+                    )}
                 </div>
               )}
 
@@ -306,6 +321,7 @@ export const MessageBubble = memo(function MessageBubble({
                     className={`message-dots-btn${hovered || menuOpen ? " message-dots-btn--visible" : ""}`}
                     onClick={() => {
                       setReactionPickerOpen(false);
+                      setDropdownStyles({ position: "fixed", visibility: "hidden" });
                       setMenuOpen((value) => !value);
                     }}
                     title={t("chat.bubble.options")}
@@ -315,78 +331,80 @@ export const MessageBubble = memo(function MessageBubble({
                     <span />
                   </button>
 
-                  {menuOpen && (
-                    <div
-                      ref={menuRef}
-                      className={`message-dropdown message-dropdown--${dropdownPlacement}`}
-                      style={dropdownStyles}
-                    >
-                      {canReplyAction && (
-                        <button
-                          type="button"
-                          className="message-dropdown-item"
-                          onClick={() => {
-                            onReply?.(message);
-                            setMenuOpen(false);
-                          }}
-                        >
-                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="9 17 4 12 9 7" />
-                            <path d="M20 18v-2a4 4 0 0 0-4-4H4" />
-                          </svg>
-                          {t("messages.actions.reply")}
-                        </button>
-                      )}
-                      {isOwn && onEdit && !isVoice && (
-                        <button
-                          type="button"
-                          className="message-dropdown-item"
-                          onClick={() => { onEdit(message); setMenuOpen(false); }}
-                        >
-                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
-                            <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
-                          </svg>
-                          {t("messages.actions.edit")}
-                        </button>
-                      )}
-                      {isOwn && onDelete && (
-                        <button
-                          type="button"
-                          className="message-dropdown-item message-dropdown-item--danger"
-                          onClick={() => { onDelete(message); setMenuOpen(false); }}
-                        >
-                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="3 6 5 6 21 6" />
-                            <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
-                            <path d="M10 11v6M14 11v6" />
-                            <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
-                          </svg>
-                          {t("messages.actions.delete")}
-                        </button>
-                      )}
-                      {canPinAction && (
-                        <button
-                          type="button"
-                          className="message-dropdown-item"
-                          onClick={() => {
-                            if (message.pinned) {
-                              onUnpin?.(message);
-                            } else {
-                              onPin?.(message);
-                            }
-                            setMenuOpen(false);
-                          }}
-                        >
-                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="12" y1="17" x2="12" y2="22" />
-                            <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V17z" />
-                          </svg>
-                          {message.pinned ? t("messages.actions.unpin") : t("messages.actions.pin")}
-                        </button>
-                      )}
-                    </div>
-                  )}
+                  {menuOpen &&
+                    createPortal(
+                      <div
+                        ref={menuRef}
+                        className={`message-dropdown message-dropdown--${dropdownPlacement}`}
+                        style={dropdownStyles}
+                      >
+                        {canReplyAction && (
+                          <button
+                            type="button"
+                            className="message-dropdown-item"
+                            onClick={() => {
+                              onReply?.(message);
+                              setMenuOpen(false);
+                            }}
+                          >
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="9 17 4 12 9 7" />
+                              <path d="M20 18v-2a4 4 0 0 0-4-4H4" />
+                            </svg>
+                            {t("messages.actions.reply")}
+                          </button>
+                        )}
+                        {isOwn && onEdit && !isVoice && (
+                          <button
+                            type="button"
+                            className="message-dropdown-item"
+                            onClick={() => { onEdit(message); setMenuOpen(false); }}
+                          >
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                              <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                            </svg>
+                            {t("messages.actions.edit")}
+                          </button>
+                        )}
+                        {isOwn && onDelete && (
+                          <button
+                            type="button"
+                            className="message-dropdown-item message-dropdown-item--danger"
+                            onClick={() => { onDelete(message); setMenuOpen(false); }}
+                          >
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="3 6 5 6 21 6" />
+                              <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+                              <path d="M10 11v6M14 11v6" />
+                              <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
+                            </svg>
+                            {t("messages.actions.delete")}
+                          </button>
+                        )}
+                        {canPinAction && (
+                          <button
+                            type="button"
+                            className="message-dropdown-item"
+                            onClick={() => {
+                              if (message.pinned) {
+                                onUnpin?.(message);
+                              } else {
+                                onPin?.(message);
+                              }
+                              setMenuOpen(false);
+                            }}
+                          >
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <line x1="12" y1="17" x2="12" y2="22" />
+                              <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V17z" />
+                            </svg>
+                            {message.pinned ? t("messages.actions.unpin") : t("messages.actions.pin")}
+                          </button>
+                        )}
+                      </div>,
+                      document.body,
+                    )}
                 </div>
               )}
             </div>
