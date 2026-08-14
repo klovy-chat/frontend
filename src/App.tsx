@@ -20,6 +20,7 @@ import { ChatPage } from "./pages/ChatPage";
 import { InvitePage } from "./pages/InvitePage";
 import { SettingsPage } from "./settings/SettingsPage";
 import { isPendingWhitelist } from "./utils/auth/whitelist";
+import { setNativeUnreadBadge } from "./utils/device/nativeUnreadBadge";
 import { ToastProvider } from "./context/ToastContext";
 import type { User } from "./types";
 
@@ -164,6 +165,7 @@ export default function App() {
       const mod = await import("./utils/sync/unreadSync");
       unsub = mod.default.onChange((n: number) => {
         document.title = n > 0 ? `(${n}) ${baseTitle}` : baseTitle;
+        setNativeUnreadBadge(n);
       });
     })();
     return () => { if (unsub) unsub(); };
