@@ -1,7 +1,7 @@
 import { unwrapOpaquePayload, wrapOpaquePayload } from "./opaque/opaquePayload";
 import type { Message } from "../types";
 
-/** Human-readable body for UI previews (list, quotes) — API may still return opaque. */
+/** Human-readable body for UI — API returns plaintext; peel legacy opaque wraps. */
 export function readableContentForPreview(content: string): string {
   if (!content.trim()) return content;
   return unwrapOpaquePayload(content);

@@ -80,7 +80,7 @@ export function getMessagePreview(
   return text.length > 120 ? `${text.slice(0, 120)}…` : text;
 }
 
-/** Podgląd ostatniej wiadomości z listy kontaktów/kanałów (surowy opaque z API). */
+/** Podgląd ostatniej wiadomości z listy kontaktów/kanałów (legacy opaque tolerated). */
 export function formatListLastMessage(raw?: string): string {
   if (!raw?.trim()) return "";
   const text = stripFormatting(readableContentForPreview(raw)).trim();
@@ -98,18 +98,20 @@ function normalizeQuotedMessageField(
   quoted: Message["quotedMessage"],
 ): Message["quotedMessage"] {
   if (!quoted || typeof quoted === "string") return quoted;
+  const raw = typeof quoted.content === "string" ? quoted.content : "";
   return {
     ...quoted,
-    content: capContent(quoted.content),
+    content: capContent(readableContentForPreview(raw)),
     fileUrl: safeFileUrl(quoted.fileUrl),
     reactions: normalizeReactions(quoted.reactions),
   };
 }
 
 export function normalizeMessage(message: Message): Message {
+  const raw = typeof message.content === "string" ? message.content : "";
   return {
     ...message,
-    content: capContent(message.content),
+    content: capContent(readableContentForPreview(raw)),
     fileUrl: safeFileUrl(message.fileUrl),
     reactions: normalizeReactions(message.reactions),
     quotedMessage: normalizeQuotedMessageField(message.quotedMessage),
