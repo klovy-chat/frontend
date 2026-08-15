@@ -149,7 +149,6 @@ type BridgeHealRefs = {
   healGenRef: { current: number };
   seededRef: { current: boolean };
   prevMutedKeysRef: { current: Set<string> };
-  /** Left/deleted/unfriended — reject UNREAD invent until heal reseeds. */
   droppedKeysRef: { current: Set<string> };
   /** DM wipe without absolute — reject stale wire until HTTP heal. */
   wipedKeysRef: { current: Set<string> };
@@ -261,7 +260,6 @@ export function UnreadBadgeBridge() {
               contactId: mark.contactId,
             })
             .then((ok) => {
-              // Wire ack ≠ server absolute — keep inFlight until UNREAD absolute.
               if (!ok) queuePendingMarkRead(mark, generation);
             })
             .catch(() => {
@@ -386,7 +384,6 @@ export function UnreadBadgeBridge() {
       if (!kind || !id || (kind !== "dm" && kind !== "channel")) return;
 
       const key = `${kind}:${id}`;
-      // Left/deleted/unfriended — do not invent key back from late absolute.
       if (droppedKeysRef.current.has(key)) {
         if (seededRef.current && !chatMountedRef.current) {
           beginBridgeHeal(healRefs());
@@ -431,7 +428,6 @@ export function UnreadBadgeBridge() {
       // Finite post-heal grace no longer drops deltas — gen/rev already filter delayed.
       // During in-flight heal (∞): accumulate baselines for preferLive only.
       if (ignoring && httpInFlight && typeof raw.delta === "number") {
-        // No invent-0 baseline for unknown keys — wait for heal seed.
         if (!countsRef.current.has(key)) return;
         const muted = isConversationMuted(kind as "dm" | "channel", id);
         const prev = countsRef.current.get(key) ?? 0;
@@ -447,7 +443,6 @@ export function UnreadBadgeBridge() {
 
       if (chatMountedRef.current) {
         if (typeof raw.delta === "number") {
-          // Bridge is not HTTP-seeded while Chat owns roster — no invent-0.
           if (prev === undefined) return;
           countsRef.current.set(
             key,
@@ -467,7 +462,6 @@ export function UnreadBadgeBridge() {
       }
 
       if (typeof raw.delta === "number") {
-        // Seeded Settings: unknown key → heal (no invent-0), muted or not.
         if (prev === undefined) {
           if (seededRef.current) beginBridgeHeal(healRefs());
           return;
@@ -489,7 +483,6 @@ export function UnreadBadgeBridge() {
       }
       if (typeof raw.unreadCount === "number") {
         // Absolute from server — clear mark-read zero-guard for this key.
-        // Unknown key while seeded: heal (CHANNEL_ADDED / leave race) — no invent.
         if (prev === undefined) {
           ackPendingMarkReadByKey(key);
           if (seededRef.current) beginBridgeHeal(healRefs());

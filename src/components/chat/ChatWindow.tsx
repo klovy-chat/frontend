@@ -852,7 +852,6 @@ export function ChatWindow({
       void ws
         .send(WsType.MARK_CONVERSATION_READ, { userId, contactId })
         .then((ok) => {
-          // Wire ack ≠ server absolute — keep inFlight until UNREAD absolute.
           if (getPendingMarkReadGeneration() !== sessionGen) return;
           if (!ok) queuePendingMarkRead(mark, g);
         })

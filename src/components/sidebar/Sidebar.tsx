@@ -904,7 +904,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
       if (payload.type === "dm") {
         if (applyRawOnly) {
           if (typeof payload.delta === "number") {
-            // No invent-0 for unknown keys during ∞ refresh — HTTP seed is SoT.
             if (!rawUnreadRef.current.has(key)) return;
             if (rejectOffRoster()) return;
             const muted = isConversationMuted("dm", payload.id);
@@ -931,7 +930,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
         if (muted) {
           raw = 0;
         } else if (typeof payload.delta === "number") {
-          // No invent-0 baseline — reseed if key never HTTP/WS seeded.
           if (!rawUnreadRef.current.has(key)) {
             rosterDirtyDuringRefreshRef.current = true;
             scheduleRefreshRef.current();
@@ -960,7 +958,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
 
       if (applyRawOnly) {
         if (typeof payload.delta === "number") {
-          // No invent-0 for unknown keys during ∞ refresh — HTTP seed is SoT.
           if (!rawUnreadRef.current.has(key)) return;
           if (rejectOffRoster()) return;
           const muted = isConversationMuted("channel", payload.id);
@@ -989,7 +986,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
         if (muted) {
           raw = 0;
         } else if (typeof payload.delta === "number") {
-          // No invent-0 baseline — reseed if key never HTTP/WS seeded.
           if (!rawUnreadRef.current.has(key)) {
             rosterDirtyDuringRefreshRef.current = true;
             scheduleRefreshRef.current();
@@ -1163,7 +1159,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
         const key = `channel:${ch._id}`;
         // Mute store is SoT — do not trust WS isMuted alone.
         const muted = isConversationMuted("channel", ch._id);
-        // Server slim is SoT on join — stale leave pendingZero must not invent 0.
         const unread = muted ? 0 : Math.max(0, ch.unreadCount ?? 0);
         rawUnreadRef.current.set(key, unread);
         setChannels((prev) => {
@@ -1373,7 +1368,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
       // Mute store is SoT — do not trust WS isMuted alone.
       const muted = isConversationMuted("dm", contact._id);
       const key = `dm:${contact._id}`;
-      // Server slim is SoT on add — stale unfriend pendingZero must not invent 0.
       const unread = muted ? 0 : Math.max(0, contact.unreadCount ?? 0);
       rawUnreadRef.current.set(key, unread);
       setContacts((prev) => {
