@@ -21,6 +21,7 @@ import { InvitePage } from "./pages/InvitePage";
 import { SettingsPage } from "./settings/SettingsPage";
 import { isPendingWhitelist } from "./utils/auth/whitelist";
 import { setNativeUnreadBadge } from "./utils/device/nativeUnreadBadge";
+import { DesktopUpdateNotice } from "./components/common/DesktopUpdateNotice";
 import { ToastProvider } from "./context/ToastContext";
 import type { User } from "./types";
 
@@ -173,6 +174,7 @@ export default function App() {
   return (
     <ToastProvider>
       <AppRoutes />
+      <DesktopUpdateNotice />
     </ToastProvider>
   );
 }

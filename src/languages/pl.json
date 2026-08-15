@@ -1279,6 +1279,12 @@
     "dismissOne": "Zamknij ogłoszenie",
     "dismissFailed": "Nie udało się zamknąć ogłoszenia. Spróbuj ponownie."
   },
+  "desktopUpdate": {
+    "title": "Nowa wersja aplikacji",
+    "body": "Korzystasz ze starej wersji desktop, która nie aktualizuje się sama. Pobierz najnowszą z GitHub — kolejne aktualizacje będą już automatyczne.",
+    "download": "Pobierz",
+    "later": "Później"
+  },
   "api": {
     "networkError": "Brak połączenia z serwerem.",
     "csrfMissing": "Brak tokenu CSRF. Wyloguj się i zaloguj ponownie."

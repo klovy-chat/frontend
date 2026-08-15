@@ -1279,6 +1279,12 @@
     "dismissOne": "Dismiss announcement",
     "dismissFailed": "Could not dismiss announcement. Try again."
   },
+  "desktopUpdate": {
+    "title": "New desktop app",
+    "body": "You’re on an older desktop build that cannot auto-update. Download the latest from GitHub — later updates will install themselves.",
+    "download": "Download",
+    "later": "Later"
+  },
   "api": {
     "networkError": "No connection to the server.",
     "csrfMissing": "Missing CSRF token. Log out and sign in again."
