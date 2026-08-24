@@ -9,6 +9,8 @@ import {
   type TurnstileWidgetHandle,
 } from "../components/auth/TurnstileWidget";
 import { AuthPageLayout } from "../components/auth/AuthPageLayout";
+import { AuthCarousel, useAuthSlides } from "../components/auth/AuthCarousel";
+import { LOGO_COLOUR_URL } from "../constants/branding";
 import {
   normalizeUsernameInput,
   sanitizeUsernameInput,
@@ -38,6 +40,7 @@ export function SignupPage() {
   const [accepted, setAccepted] = useState(false);
   const [registrationOpen, setRegistrationOpen] = useState<boolean | null>(null);
   const turnstileRef = useRef<TurnstileWidgetHandle>(null);
+  const slides = useAuthSlides();
 
   useEffect(() => {
     getRegistrationStatus()
@@ -106,8 +109,17 @@ export function SignupPage() {
 
   return (
     <AuthPageLayout>
-      <div className="al-card al-card--solo">
+      <div className="al-card">
         <div className="al-left">
+          <div className="al-brand">
+            <div className="al-logo">
+              <img src={LOGO_COLOUR_URL} alt="" />
+            </div>
+            <div>
+              <strong>Klovy Chat</strong>
+              <span>{t("auth.brand.tagline")}</span>
+            </div>
+          </div>
           <h1 className="al-title">{t("auth.signup.title")}</h1>
 
           {registrationOpen === false ? (
@@ -295,6 +307,7 @@ export function SignupPage() {
             </Link>
           </p>
         </div>
+        <AuthCarousel slides={slides} />
       </div>
     </AuthPageLayout>
   );

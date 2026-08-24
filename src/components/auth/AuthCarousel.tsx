@@ -1,4 +1,6 @@
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Lock, MessageCircle, Phone, Shield } from "lucide-react";
 
 export interface AuthSlide {
   tag: string;
@@ -7,7 +9,41 @@ export interface AuthSlide {
   icon: ReactNode;
 }
 
+export function useAuthSlides(): AuthSlide[] {
+  const { t } = useTranslation();
+  return useMemo(
+    () => [
+      {
+        tag: t("auth.carousel.privacy.tag"),
+        title: t("auth.carousel.privacy.title"),
+        desc: t("auth.carousel.privacy.desc"),
+        icon: <Shield size={22} strokeWidth={2} />,
+      },
+      {
+        tag: t("auth.carousel.encryption.tag"),
+        title: t("auth.carousel.encryption.title"),
+        desc: t("auth.carousel.encryption.desc"),
+        icon: <Lock size={22} strokeWidth={2} />,
+      },
+      {
+        tag: t("auth.carousel.calls.tag"),
+        title: t("auth.carousel.calls.title"),
+        desc: t("auth.carousel.calls.desc"),
+        icon: <Phone size={22} strokeWidth={2} />,
+      },
+      {
+        tag: t("auth.carousel.community.tag"),
+        title: t("auth.carousel.community.title"),
+        desc: t("auth.carousel.community.desc"),
+        icon: <MessageCircle size={22} strokeWidth={2} />,
+      },
+    ],
+    [t],
+  );
+}
+
 export function AuthCarousel({ slides }: { slides: AuthSlide[] }) {
+  const { t } = useTranslation();
   const [current, setCurrent] = useState(0);
   const [exiting, setExiting] = useState<number | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -20,6 +56,7 @@ export function AuthCarousel({ slides }: { slides: AuthSlide[] }) {
   };
 
   useEffect(() => {
+    if (slides.length < 2) return;
     timerRef.current = setInterval(() => {
       setCurrent((c) => {
         const next = (c + 1) % slides.length;
@@ -57,7 +94,7 @@ export function AuthCarousel({ slides }: { slides: AuthSlide[] }) {
             key={i}
             className={["al-dot", i === current ? "active" : ""].filter(Boolean).join(" ")}
             onClick={() => goTo(i)}
-            aria-label={`Slajd ${i + 1}`}
+            aria-label={t("auth.carousel.slideAria", { n: i + 1 })}
           />
         ))}
       </div>

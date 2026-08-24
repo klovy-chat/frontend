@@ -135,11 +135,6 @@
     "displayName": {
       "required": "Display name is required."
     },
-    "badge": {
-      "nameIconRequired": "Name and icon are required.",
-      "invalidIcon": "Invalid icon (Lucide icon name, e.g. Star).",
-      "invalidColor": "Invalid color (format #RRGGBB)."
-    },
     "warn": {
       "reasonRequired": "Warning reason is required."
     },
@@ -206,6 +201,8 @@
     "yearsAgo_many": "{{count}} years ago",
     "yearsAgo_other": "{{count}} years ago",
     "createdAt": "Created {{time}}",
+    "createdAtAbsolute": "{{time}}",
+    "userAgent": "Browser: {{ua}}",
     "lastActivity": "Last activity: {{time}}",
     "thisDevice": "(this device)",
     "thisDeviceLabel": "This device",
@@ -236,10 +233,6 @@
     "channelMember_few": "{{count}} members",
     "channelMember_many": "{{count}} members",
     "channelMember_other": "{{count}} members",
-    "badge_one": "badge",
-    "badge_few": "badges",
-    "badge_many": "badges",
-    "badge_other": "badges",
     "warning_one": "Warning",
     "warning_few": "Warnings total",
     "warning_many": "Warnings total",
@@ -445,6 +438,32 @@
     }
   },
   "auth": {
+    "brand": {
+      "tagline": "Secure conversations"
+    },
+    "carousel": {
+      "slideAria": "Slide {{n}}",
+      "privacy": {
+        "tag": "Privacy",
+        "title": "Your chats stay with you",
+        "desc": "Messages are protected on the server and only reach the people you talk to."
+      },
+      "encryption": {
+        "tag": "Security",
+        "title": "2FA login and password protection",
+        "desc": "Two-factor authentication, device sessions, and leaked-password blocking."
+      },
+      "calls": {
+        "tag": "Calls",
+        "title": "Voice, video, and channels",
+        "desc": "Call friends or join a voice channel in one click."
+      },
+      "community": {
+        "tag": "Community",
+        "title": "Channels, invites, friends",
+        "desc": "Create spaces, invite people, and keep contacts in one place."
+      }
+    },
     "password": {
       "minLength": "Password must be at least 8 characters.",
       "lowercase": "Password must contain a lowercase letter.",
@@ -586,7 +605,6 @@
       "profile": "Profile",
       "sessions": "Devices",
       "voice": "Voice settings",
-      "bots": "Bots",
       "warnings": "Warnings",
       "app": "Client settings",
       "logout": "Log out",
@@ -704,7 +722,8 @@
       "mention": "Mention",
       "searchEmpty": "No results.\nEnter an exact @username.",
       "emptyDm": "No direct messages.",
-      "emptyChannels": "No channels."
+      "emptyChannels": "No channels.",
+      "onlineCount": "{{count}} online"
     },
     "input": {
       "defaultPlaceholder": "Write a message…",
@@ -881,8 +900,7 @@
       "tabs": {
         "general": "General",
         "members": "Members",
-        "moderation": "Moderation",
-        "bots": "Bots"
+        "moderation": "Moderation"
       },
       "avatarClick": "Click to add/change channel avatar",
       "removeAvatar": "Remove avatar",
@@ -902,14 +920,6 @@
       "chatLockHint": "When locked, only you can write on the channel. Other members see the chat but cannot send messages.",
       "chatLockStatusLocked": "Locked",
       "chatLockStatusActive": "Active",
-      "botsTitle": "Bots",
-      "botsHint": "Bots can send messages on this channel via API.",
-      "botsExtendedHint": "Bots send messages to the channel via API. You can only add your own bots from Account Settings.",
-      "botsInChannel": "In channel",
-      "botsAvailable": "Available to add",
-      "botsEmpty": "No bots on this channel.",
-      "botsNoAvailable": "No bots available. Create a bot in Account Settings.",
-      "addBot": "Add",
       "footerClose": "CLOSE",
       "footerLeave": "LEAVE",
       "leaveConfirm": {
@@ -938,8 +948,6 @@
         "usesLimited": "{{count}} / {{max}} joined"
       },
       "toast": {
-        "addBotFailed": "Could not add bot",
-        "removeBotFailed": "Could not remove bot",
         "leaveFailed": "Could not leave channel",
         "avatarUploadFailed": "Could not upload channel avatar",
         "avatarRemoveFailed": "Could not remove channel avatar",
@@ -994,54 +1002,8 @@
         "unblock": "Unblock"
       }
     },
-    "bots": {
-      "title": "Bots",
-      "guide": {
-        "title": "How to build a bot",
-        "intro": "Bots work like Discord bots: create one here, copy the token once, then call the HTTP API from any language that can send requests. You do not need the browser custom client header — that header is only for the official web app (DDoS filter).",
-        "step1": "1. Create a bot below and copy the token (shown only once).",
-        "step2": "2. In Channel settings → Bots, add the bot to the channel you want it to post in.",
-        "step3": "3. Send requests with Authorization: Bearer <token> to https://api.klovy.chat",
-        "endpointsTitle": "Useful endpoints",
-        "me": "GET /api/bot/me — who am I",
-        "send": "POST /api/bot/channels/{channelId}/messages — body { \"content\": \"Hello\" }",
-        "examplesTitle": "Quick examples"
-      },
-      "create": {
-        "title": "Create bot",
-        "hint": "After creation copy the token — it is shown only once. Keep it secret like a password.",
-        "apiHint": "Send messages via POST {{endpoint}} with Authorization: Bearer <token>.",
-        "username": "Bot username",
-        "usernamePlaceholder": "e.g. my_bot",
-        "displayName": "Display name (optional)",
-        "displayNamePlaceholder": "e.g. My Bot",
-        "submit": "Create bot",
-        "tokenHint": "Copy the token now — it is shown only once and cannot be viewed again.",
-        "tokenRevealHint": "Copy the token now — you will only see it once. Store it securely; anyone with it can send messages as this bot.",
-        "botBadge": "Bot",
-        "usernameHint": "3–32 characters, lowercase letters, digits and underscore only.",
-        "creating": "Creating…"
-      },
-      "list": {
-        "title": "Your bots",
-        "empty": "You do not have any bots yet.",
-        "lastUsed": " · last used {{date}}",
-        "tokenUnused": " · token unused",
-        "editUsername": "Username (@)",
-        "editDisplayName": "Display name",
-        "newToken": "New token"
-      },
-      "deleteConfirm": "Delete bot @{{username}}? The token will stop working and the bot will be removed from channels.",
-      "errors": {
-        "createFailed": "Could not create bot.",
-        "tokenFailed": "Could not generate token.",
-        "saveFailed": "Could not save changes.",
-        "deleteFailed": "Could not delete bot."
-      }
-    },
     "otherUserProfile": {
       "ariaLabel": "User profile",
-      "botBadge": "Bot",
       "addFriend": "Add this person as a friend to chat.",
       "about": "About me",
       "joined": "Joined",
@@ -1063,7 +1025,6 @@
         "profile": "Profile",
         "sessions": "Devices",
         "voice": "Voice settings",
-        "bots": "Bots",
         "warnings": "Warnings",
         "app": "Client settings",
         "logout": "Log out",
@@ -1145,9 +1106,6 @@
     }
   },
   "profile": {
-    "badges": {
-      "title": "Badges"
-    },
     "form": {
       "displayName": "Display name",
       "displayNameRequired": "Display name *",
@@ -1192,8 +1150,6 @@
       "admin": "Administrator"
     },
     "toast": {
-      "addBotFailed": "Could not add bot",
-      "removeBotFailed": "Could not remove bot",
       "leaveFailed": "Could not leave channel",
       "avatarUploadFailed": "Could not upload channel avatar",
       "avatarRemoveFailed": "Could not remove channel avatar"
@@ -1247,19 +1203,6 @@
     },
     "incoming": {
       "ariaLabel": "Incoming call"
-    }
-  },
-  "badges": {
-    "received": {
-      "titleSelf": "You received a badge!",
-      "titleOther": "{{name}} received a badge",
-      "leadSelf": "An administrator awarded you a badge. You can also see it on your profile.",
-      "leadOther": "Your contact just received a new badge.",
-      "dismiss": "Nice!",
-      "remaining_one": "{{count}} more badge in queue",
-      "remaining_few": "{{count}} more badges in queue",
-      "remaining_many": "{{count}} more badges in queue",
-      "remaining_other": "{{count}} more badges in queue"
     }
   },
   "warnings": {

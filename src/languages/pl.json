@@ -135,11 +135,6 @@
     "displayName": {
       "required": "Główna nazwa jest wymagana."
     },
-    "badge": {
-      "nameIconRequired": "Nazwa i ikona są wymagane.",
-      "invalidIcon": "Nieprawidłowa ikona (nazwa ikony Lucide, np. Star).",
-      "invalidColor": "Nieprawidłowy kolor (format #RRGGBB)."
-    },
     "warn": {
       "reasonRequired": "Powód ostrzeżenia jest wymagany."
     },
@@ -206,6 +201,8 @@
     "yearsAgo_many": "{{count}} lat temu",
     "yearsAgo_other": "{{count}} lat temu",
     "createdAt": "Utworzono {{time}}",
+    "createdAtAbsolute": "{{time}}",
+    "userAgent": "Przeglądarka: {{ua}}",
     "lastActivity": "Ostatnia aktywność: {{time}}",
     "thisDevice": "(to urządzenie)",
     "thisDeviceLabel": "To urządzenie",
@@ -236,10 +233,6 @@
     "channelMember_few": "{{count}} członków",
     "channelMember_many": "{{count}} członków",
     "channelMember_other": "{{count}} członków",
-    "badge_one": "odznaka",
-    "badge_few": "odznaki",
-    "badge_many": "odznak",
-    "badge_other": "odznak",
     "warning_one": "Ostrzeżenie",
     "warning_few": "Ostrzeżeń łącznie",
     "warning_many": "Ostrzeżeń łącznie",
@@ -445,6 +438,32 @@
     }
   },
   "auth": {
+    "brand": {
+      "tagline": "Bezpieczne rozmowy"
+    },
+    "carousel": {
+      "slideAria": "Slajd {{n}}",
+      "privacy": {
+        "tag": "Prywatność",
+        "title": "Twoje rozmowy zostają u Ciebie",
+        "desc": "Wiadomości są chronione na serwerze i trafiają tylko do osób, z którymi rozmawiasz."
+      },
+      "encryption": {
+        "tag": "Bezpieczeństwo",
+        "title": "Logowanie z 2FA i ochroną haseł",
+        "desc": "Dwuskładnikowe uwierzytelnianie, sesje urządzeń i blokada wycieków haseł."
+      },
+      "calls": {
+        "tag": "Rozmowy",
+        "title": "Głos, wideo i kanały",
+        "desc": "Dzwoń do znajomych albo dołącz do kanału głosowego jednym kliknięciem."
+      },
+      "community": {
+        "tag": "Społeczność",
+        "title": "Kanały, zaproszenia, znajomi",
+        "desc": "Twórz przestrzenie, zapraszaj ludzi i trzymaj kontakty w jednym miejscu."
+      }
+    },
     "password": {
       "minLength": "Hasło musi mieć co najmniej 8 znaków.",
       "lowercase": "Hasło musi zawierać małą literę.",
@@ -586,7 +605,6 @@
       "profile": "Profil",
       "sessions": "Urządzenia",
       "voice": "Ustawienia głosu",
-      "bots": "Boty",
       "warnings": "Ostrzeżenia",
       "app": "Ustawienia klienta",
       "logout": "Wyloguj się",
@@ -704,7 +722,8 @@
       "mention": "Wzmianka",
       "searchEmpty": "Brak wyników.\nWpisz dokładną nazwę po @.",
       "emptyDm": "Brak wiadomości bezpośrednich.",
-      "emptyChannels": "Brak kanałów."
+      "emptyChannels": "Brak kanałów.",
+      "onlineCount": "{{count}} online"
     },
     "input": {
       "defaultPlaceholder": "Napisz wiadomość…",
@@ -881,8 +900,7 @@
       "tabs": {
         "general": "Ogólne",
         "members": "Członkowie",
-        "moderation": "Moderacja",
-        "bots": "Boty"
+        "moderation": "Moderacja"
       },
       "avatarClick": "Kliknij, aby dodać/zmienić avatar kanału",
       "removeAvatar": "Usuń avatar",
@@ -902,14 +920,6 @@
       "chatLockHint": "Po zablokowaniu tylko Ty możesz pisać na kanale. Pozostali członkowie widzą czat, ale nie mogą wysyłać wiadomości.",
       "chatLockStatusLocked": "Zablokowany",
       "chatLockStatusActive": "Aktywny",
-      "botsTitle": "Boty",
-      "botsHint": "Boty mogą wysyłać wiadomości na ten kanał przez API.",
-      "botsExtendedHint": "Boty wysyłają wiadomości do kanału przez API. Dodawać można tylko własne boty z Ustawień konta.",
-      "botsInChannel": "W kanale",
-      "botsAvailable": "Dostępne do dodania",
-      "botsEmpty": "Brak botów w tym kanale.",
-      "botsNoAvailable": "Brak dostępnych botów. Utwórz bota w Ustawieniach konta.",
-      "addBot": "Dodaj",
       "footerClose": "ZAMKNIJ",
       "footerLeave": "WYJDŹ",
       "leaveConfirm": {
@@ -938,8 +948,6 @@
         "usesLimited": "{{count}} / {{max}} dołączyło"
       },
       "toast": {
-        "addBotFailed": "Nie udało się dodać bota",
-        "removeBotFailed": "Nie udało się usunąć bota",
         "leaveFailed": "Nie udało się opuścić kanału",
         "avatarUploadFailed": "Nie udało się przesłać avatara kanału",
         "avatarRemoveFailed": "Nie udało się usunąć avatara kanału",
@@ -994,54 +1002,8 @@
         "unblock": "Odblokuj"
       }
     },
-    "bots": {
-      "title": "Boty",
-      "guide": {
-        "title": "Jak zrobić bota",
-        "intro": "Boty działają jak na Discordzie: tworzysz bota tutaj, kopiujesz token raz, a potem wołasz HTTP API z dowolnego języka, który umie wysyłać żądania. Nie potrzebujesz nagłówka custom client z przeglądarki — ten nagłówek jest tylko dla oficjalnej aplikacji web (filtr DDoS).",
-        "step1": "1. Utwórz bota poniżej i skopiuj token (pokazuje się tylko raz).",
-        "step2": "2. W ustawieniach kanału → Boty dodaj bota do kanału, na którym ma pisać.",
-        "step3": "3. Wysyłaj żądania z Authorization: Bearer <token> na https://api.klovy.chat",
-        "endpointsTitle": "Przydatne endpointy",
-        "me": "GET /api/bot/me — kim jestem",
-        "send": "POST /api/bot/channels/{channelId}/messages — body { \"content\": \"Cześć\" }",
-        "examplesTitle": "Szybkie przykłady"
-      },
-      "create": {
-        "title": "Utwórz bota",
-        "hint": "Po utworzeniu skopiuj token — wyświetli się tylko raz. Traktuj go jak hasło.",
-        "apiHint": "Wyślij wiadomości przez POST {{endpoint}} z Authorization: Bearer <token>.",
-        "username": "Nazwa użytkownika bota",
-        "usernamePlaceholder": "np. moj_bot",
-        "displayName": "Nazwa wyświetlana (opcjonalnie)",
-        "displayNamePlaceholder": "np. Mój Bot",
-        "submit": "Utwórz bota",
-        "tokenHint": "Skopiuj token teraz — zobaczysz go tylko raz. Nie będzie można go ponownie wyświetlić.",
-        "tokenRevealHint": "Skopiuj token teraz — zobaczysz go tylko raz. Przechowuj go w bezpiecznym miejscu; kto go ma, może wysyłać wiadomości jako ten bot.",
-        "botBadge": "Bot",
-        "usernameHint": "3–32 znaków, tylko małe litery, cyfry i podkreślenie.",
-        "creating": "Tworzenie…"
-      },
-      "list": {
-        "title": "Twoje boty",
-        "empty": "Nie masz jeszcze żadnych botów.",
-        "lastUsed": " · ostatnio użyto {{date}}",
-        "tokenUnused": " · token nieużywany",
-        "editUsername": "Nazwa użytkownika (@)",
-        "editDisplayName": "Nazwa wyświetlana",
-        "newToken": "Nowy token"
-      },
-      "deleteConfirm": "Usunąć bota @{{username}}? Token przestanie działać, a bot zostanie usunięty z kanałów.",
-      "errors": {
-        "createFailed": "Nie udało się utworzyć bota.",
-        "tokenFailed": "Nie udało się wygenerować tokenu.",
-        "saveFailed": "Nie udało się zapisać zmian.",
-        "deleteFailed": "Nie udało się usunąć bota."
-      }
-    },
     "otherUserProfile": {
       "ariaLabel": "Profil użytkownika",
-      "botBadge": "Bot",
       "addFriend": "Dodaj tę osobę do znajomych, aby móc rozmawiać.",
       "about": "O mnie",
       "joined": "Dołączył",
@@ -1063,7 +1025,6 @@
         "profile": "Profil",
         "sessions": "Urządzenia",
         "voice": "Ustawienia głosu",
-        "bots": "Boty",
         "warnings": "Ostrzeżenia",
         "app": "Ustawienia klienta",
         "logout": "Wyloguj się",
@@ -1145,9 +1106,6 @@
     }
   },
   "profile": {
-    "badges": {
-      "title": "Odznaki"
-    },
     "form": {
       "displayName": "Główna nazwa",
       "displayNameRequired": "Główna nazwa *",
@@ -1192,8 +1150,6 @@
       "admin": "Administrator"
     },
     "toast": {
-      "addBotFailed": "Nie udało się dodać bota",
-      "removeBotFailed": "Nie udało się usunąć bota",
       "leaveFailed": "Nie udało się opuścić kanału",
       "avatarUploadFailed": "Nie udało się przesłać avatara kanału",
       "avatarRemoveFailed": "Nie udało się usunąć avatara kanału"
@@ -1247,19 +1203,6 @@
     },
     "incoming": {
       "ariaLabel": "Połączenie przychodzące"
-    }
-  },
-  "badges": {
-    "received": {
-      "titleSelf": "Otrzymałeś odznakę!",
-      "titleOther": "{{name}} otrzymał odznakę",
-      "leadSelf": "Administrator przyznał Ci wyróżnienie. Zobacz je też w swoim profilu.",
-      "leadOther": "Twój znajomy właśnie otrzymał nową odznakę.",
-      "dismiss": "Super!",
-      "remaining_one": "Jeszcze {{count}} odznaka w kolejce",
-      "remaining_few": "Jeszcze {{count}} odznaki w kolejce",
-      "remaining_many": "Jeszcze {{count}} odznak w kolejce",
-      "remaining_other": "Jeszcze {{count}} odznaki w kolejce"
     }
   },
   "warnings": {

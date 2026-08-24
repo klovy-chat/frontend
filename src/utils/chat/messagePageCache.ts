@@ -327,27 +327,12 @@ export function patchCachedMessage(
   );
 }
 
-export function removeCachedMessage(key: string, messageId: string) {
-  const cached = messagePageCache.get(key);
-  if (!cached) return;
-  patchLive(
-    key,
-    cached,
-    cached.messages.filter((m) => m._id !== messageId),
-  );
-}
-
 export function patchCachedMessageEverywhere(
   messageId: string,
   patch: (m: Message) => Message,
 ) {
-  for (const [key, entry] of messagePageCache) {
-    if (!entry.messages.some((m) => m._id === messageId)) continue;
-    patchLive(
-      key,
-      entry,
-      entry.messages.map((m) => (m._id === messageId ? patch(m) : m)),
-    );
+  for (const key of [...messagePageCache.keys()]) {
+    patchCachedMessage(key, messageId, patch);
   }
 }
 

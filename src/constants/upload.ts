@@ -132,7 +132,9 @@ export function assertAttachmentSize(file: File): void {
   if (file.size > max) {
     throw new Error(
       i18n.t("upload.attachmentTooLarge", {
-        limit: formatUploadLimitMb(max),
+        limit: isImageAttachmentFile(file)
+          ? MAX_IMAGE_ATTACHMENT_SIZE_LABEL
+          : MAX_ATTACHMENT_SIZE_LABEL,
       }),
     );
   }

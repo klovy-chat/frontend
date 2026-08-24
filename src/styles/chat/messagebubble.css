@@ -71,21 +71,6 @@
   gap: 6px;
 }
 
-/* ── BOT tag ── */
-.message-bot-tag {
-  display: inline-flex;
-  align-items: center;
-  font-size: 9px;
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: 0.04em;
-  padding: 2px 5px;
-  border-radius: 4px;
-  color: #fff;
-  background: #5865f2;
-  text-transform: uppercase;
-}
-
 /* ── Bubble row ── */
 .message-bubble-row {
   display: flex;

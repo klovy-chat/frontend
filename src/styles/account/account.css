@@ -302,20 +302,6 @@
   line-height: 1.6;
 }
 
-.bots-guide-code {
-  margin: 0;
-  padding: 12px 14px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--bg-deep);
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  line-height: 1.5;
-  overflow-x: auto;
-  white-space: pre;
-}
-
 /* Profile card with banner */
 
 .as-avatar-lg {

@@ -1,7 +1,8 @@
 import {
   arrayBufferToBase64,
-  arrayBufferToUtf8Strict,
+  arrayBufferToUtf8,
   base64ToArrayBuffer,
+  isValidUtf8Buffer,
   utf8ToArrayBuffer,
 } from "./bufferUtils";
 
@@ -32,7 +33,9 @@ function decodeOpaqueLayer(stored: string): string | null {
     return null;
   }
   try {
-    return arrayBufferToUtf8Strict(base64ToArrayBuffer(normalized));
+    const buffer = base64ToArrayBuffer(normalized);
+    if (!isValidUtf8Buffer(buffer)) return null;
+    return arrayBufferToUtf8(buffer);
   } catch {
     return null;
   }

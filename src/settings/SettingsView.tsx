@@ -59,12 +59,14 @@ import { validatePasswordStrength } from "../utils/auth/password";
 import {
   checkPasswordBreach,
   isPasswordBreachError,
-  PASSWORD_BREACH_MESSAGE,
+  passwordBreachMessage,
 } from "../utils/auth/pwnedPassword";
 import { normalizeUsernameInput, validateUsernameInput } from "../utils/auth/username";
 import {
+  formatSessionAbsoluteTime,
   formatSessionRelativeTime,
   formatSessionTitle,
+  formatSessionUserAgent,
 } from "../utils/user/sessionDisplay";
 import type { SettingsSection } from "./routes";
 import "./settings-page.css";
@@ -601,7 +603,7 @@ export function SettingsView({
     try {
       const breachCheck = await checkPasswordBreach(newPassword);
       if (breachCheck === "breached") {
-        setPasswordError(PASSWORD_BREACH_MESSAGE);
+        setPasswordError(passwordBreachMessage());
         return;
       }
 
@@ -620,7 +622,7 @@ export function SettingsView({
       const message =
         err instanceof ApiError ? err.message : t("settings.account.passwordChangeFailed");
       setPasswordError(
-        isPasswordBreachError(message) ? PASSWORD_BREACH_MESSAGE : message,
+        isPasswordBreachError(message) ? passwordBreachMessage() : message,
       );
     } finally {
       setPasswordBusy(false);
@@ -1269,11 +1271,17 @@ export function SettingsView({
                   {sessions.map((session) => {
                     const sessionTitle = formatSessionTitle(session);
                     const createdAt = formatSessionRelativeTime(session.createdAt);
+                    const createdAtAbsolute = formatSessionAbsoluteTime(session.createdAt);
+                    const userAgent = formatSessionUserAgent(session.userAgent);
+                    const sessionHint = userAgent
+                      ? t("session.userAgent", { ua: userAgent })
+                      : undefined;
 
                     return (
                     <div
                       key={session.id}
                       className={`as-session-row${session.isCurrent ? " as-session-row--current" : ""}`}
+                      title={sessionHint}
                     >
                       {session.isCurrent ? (
                         <span className="as-session-device-badge">
@@ -1292,6 +1300,12 @@ export function SettingsView({
                           <p className="as-session-device">{sessionTitle}</p>
                           <p className="as-session-meta">
                             {t("session.createdAt", { time: createdAt })}
+                            {createdAtAbsolute !== createdAt ? (
+                              <>
+                                {" · "}
+                                {t("session.createdAtAbsolute", { time: createdAtAbsolute })}
+                              </>
+                            ) : null}
                           </p>
                         </div>
                         {!session.isCurrent ? (

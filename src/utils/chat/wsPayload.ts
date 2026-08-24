@@ -5,9 +5,9 @@ const OBJECT_ID = /^[a-f0-9]{24}$/i;
 const MAX_GENERIC_STRING = 2048;
 
 // Płytkie ograniczenie długości ciągów na poziomie top-level — obrona wgłębna
-// dla zdarzeń bez dedykowanego schematu (profil, odznaki, połączenia, itp.),
+// dla zdarzeń bez dedykowanego schematu (profil, połączenia, itp.),
 // by nadmiarowe stringi z WS nie trafiały do stanu React. Zagnieżdżone obiekty
-// są walidowane w warstwie renderu (allowlisty mediów, sanityzacja odznak).
+// są walidowane w warstwie renderu (allowlisty mediów).
 // Sanityzuje zagnieżdżoną wiadomość cytowaną: przycina treść i waliduje media
 // (zachowując surową wartość dla resolveMediaUrl przy renderze).
 function sanitizeQuoted(quoted: unknown): unknown {

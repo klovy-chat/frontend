@@ -35,6 +35,7 @@ import {
   getPendingHangupGeneration,
   peekAllPendingHangups,
   queuePendingHangupSync,
+  takePendingHangup,
   type PendingHangup,
 } from "../utils/sync/pendingHangup";
 import { buildScreenShareCaptureOptions } from "../utils/call/screenShareQuality";
@@ -1682,17 +1683,19 @@ export function CallProvider({ children }: { children: ReactNode }) {
         let anyFail = false;
         // Re-peek each iteration so queue bumps / clears do not abort siblings.
         while (!cancelled) {
-          const pending = peekAllPendingHangups();
-          if (pending.length === 0) break;
-          const hangup = pending[0];
+          const hangup = takePendingHangup();
+          if (!hangup) break;
           const ok = await flushOne(hangup);
-          if (cancelled) return;
-          if (ok) {
-            clearMatchingHangup(hangup);
-          } else {
-            anyFail = true;
-            break;
+          if (cancelled) {
+            if (!ok) queuePendingHangupSync(hangup);
+            return;
           }
+          if (ok) {
+            continue;
+          }
+          queuePendingHangupSync(hangup);
+          anyFail = true;
+          break;
         }
         if (anyFail) {
           attempt += 1;

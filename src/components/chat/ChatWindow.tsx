@@ -18,6 +18,7 @@ import { stripFormatting } from "../../utils/chat/messageFormat";
 import {
   isVoiceAttachment,
   resolveUploadMessageType,
+  uploadUsesFileNameAsContent,
 } from "../../utils/media/attachments";
 import {
   extractExternalMediaLinks,
@@ -1508,7 +1509,8 @@ export function ChatWindow({
       // User may have switched chats during upload — still send, but don't touch wrong UI.
       const stillActive = activeChatKeyRef.current === sendKey;
       const rawContent =
-        options?.content ?? (messageType === "AUDIO" ? "" : file.name);
+        options?.content ??
+        (uploadUsesFileNameAsContent(messageType) ? file.name : "");
       const payload = {
         sender: user.id,
         content: rawContent ? wrapOutgoingContent(rawContent) : rawContent,

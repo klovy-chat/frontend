@@ -26,7 +26,7 @@ export function getActiveConversationKey(): string | null {
 }
 
 export function isViewingConversation(kind: "dm" | "channel", id: string): boolean {
-  return activeKey === `${kind}:${id}`;
+  return getActiveConversationKey() === `${kind}:${id}`;
 }
 
 export function subscribeActiveConversation(listener: Listener): () => void {

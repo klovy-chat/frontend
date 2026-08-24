@@ -193,16 +193,11 @@ export function applyClientUserAgentHeader(headers: Headers): void {
   const navigatorUserAgent = navigator.userAgent ?? "";
   if (!navigatorUserAgent) return;
 
-  const value = loaded
+  const value = isClientEnvironmentReady()
     ? formatClientUserAgentHeader(navigatorUserAgent, cache)
     : navigatorUserAgent;
 
   headers.set(CLIENT_USER_AGENT_HEADER, value);
-}
-
-/** @deprecated Użyj applyClientUserAgentHeader — nie wysyłaj osobnych nagłówków env. */
-export function applyClientEnvironmentHeaders(headers: Headers): void {
-  applyClientUserAgentHeader(headers);
 }
 
 export function isClientEnvironmentReady(): boolean {

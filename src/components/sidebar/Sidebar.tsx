@@ -39,6 +39,10 @@ import {
   subscribePendingMarkReads,
 } from "../../utils/sync/pendingMarkRead";
 import {
+  getActiveConversationKey,
+  subscribeActiveConversation,
+} from "../../utils/sync/activeConversation";
+import {
   addMentionSource,
   clearMentionSource,
   getMentionSources,
@@ -547,8 +551,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
               cur.username !== fresh.username ||
               cur.image !== fresh.image ||
               cur.color !== fresh.color ||
-              Boolean(cur.isMuted) !== storeMuted ||
-              JSON.stringify(cur.badges ?? []) !== JSON.stringify(fresh.badges ?? []);
+              Boolean(cur.isMuted) !== storeMuted;
             if (needsSync) {
               onSelect({
                 type: "dm",
@@ -1651,32 +1654,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
   });
 
   useEffect(() => {
-    if (!ws) return;
-    const onBadgeUpdate = (payload: { userId: string; badges: Contact["badges"] }) => {
-      if (!payload?.userId) return;
-      const patch = (contact: Contact): Contact =>
-        contact._id === payload.userId
-          ? { ...contact, badges: payload.badges ?? [] }
-          : contact;
-      setContacts((prev) => prev.map(patch));
-      setContactProfile((prev) => (prev ? patch(prev) : prev));
-      const cur = activeRef.current;
-      if (cur?.type === "dm" && cur.contact._id === payload.userId) {
-        onSelectRef.current({
-          type: "dm",
-          contact: patch(cur.contact),
-        });
-      }
-    };
-    const unsubs = [
-      ws.subscribe(WsType.BADGE_ASSIGNED, onBadgeUpdate),
-      ws.subscribe(WsType.BADGE_REMOVED, onBadgeUpdate),
-      ws.subscribe(WsType.BADGE_UPDATED, onBadgeUpdate),
-    ];
-    return () => unsubs.forEach((unsub) => unsub());
-  }, [ws]);
-
-  useEffect(() => {
     if (showNewChannel || renameChannelInfo)
       setTimeout(() => channelInputRef.current?.focus(), 50);
   }, [showNewChannel, renameChannelInfo]);
@@ -2013,11 +1990,11 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
   useEffect(() => {
     try {
       const activeKey =
-        active?.type === "dm"
+        (active?.type === "dm"
           ? `dm:${active.contact._id}`
           : active?.type === "channel"
             ? `channel:${active.channel._id}`
-            : null;
+            : null) ?? getActiveConversationKey();
       // First paint after Chat remount: empty lists — keep prior title/exclude
       // until roster hydrate (do not zero the whole badge via fullCount exclude).
       if (
@@ -2071,6 +2048,13 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
   useEffect(
     () =>
       subscribePendingMarkReads(() => {
+        setPendingMarkEpoch((n) => n + 1);
+      }),
+    [],
+  );
+  useEffect(
+    () =>
+      subscribeActiveConversation(() => {
         setPendingMarkEpoch((n) => n + 1);
       }),
     [],

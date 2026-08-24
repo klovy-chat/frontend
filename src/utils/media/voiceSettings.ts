@@ -159,9 +159,7 @@ export async function applyAudioOutputDevice(
   }
 }
 
-export async function devicesLabeled(): Promise<boolean> {
-  if (!navigator.mediaDevices?.enumerateDevices) return false;
-  const devices = await navigator.mediaDevices.enumerateDevices();
+function audioDevicesHaveLabels(devices: MediaDeviceInfo[]): boolean {
   return devices.some(
     (device) =>
       (device.kind === "audioinput" || device.kind === "audiooutput") &&
@@ -181,11 +179,6 @@ export async function listAudioDevices(): Promise<{
   const devices = await navigator.mediaDevices.enumerateDevices();
   const inputs = devices.filter((device) => device.kind === "audioinput");
   const outputs = devices.filter((device) => device.kind === "audiooutput");
-  const hasLabels = devices.some(
-    (device) =>
-      (device.kind === "audioinput" || device.kind === "audiooutput") &&
-      device.label.length > 0,
-  );
 
-  return { inputs, outputs, hasLabels };
+  return { inputs, outputs, hasLabels: audioDevicesHaveLabels(devices) };
 }

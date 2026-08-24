@@ -12,11 +12,9 @@ import {
   ALLOWED_ATTACHMENT_EXTENSIONS,
   assertAttachmentSize,
   assertAttachmentType,
-  formatUploadLimitMb,
   formatChatUploadError,
-  isImageAttachmentFile,
   MAX_ATTACHMENT_SIZE_BYTES,
-  MAX_IMAGE_ATTACHMENT_SIZE_BYTES,
+  MAX_ATTACHMENT_SIZE_LABEL,
 } from "../../constants/upload";
 import { MAX_MESSAGE_LENGTH } from "../../constants/messages";
 import { sanitizeMessageInput } from "../../utils/text/unicodeText";
@@ -457,11 +455,7 @@ export function MessageInput({
         error instanceof Error
           ? error.message
           : t("upload.attachmentTooLarge", {
-              limit: formatUploadLimitMb(
-                isImageAttachmentFile(file)
-                  ? MAX_IMAGE_ATTACHMENT_SIZE_BYTES
-                  : MAX_ATTACHMENT_SIZE_BYTES,
-              ),
+              limit: MAX_ATTACHMENT_SIZE_LABEL,
             }),
       );
       setAttachedFile(null);
@@ -525,7 +519,7 @@ export function MessageInput({
       if (recording.file.size > MAX_ATTACHMENT_SIZE_BYTES) {
         setUploadError(
           t("voice.tooLarge", {
-            limit: formatUploadLimitMb(MAX_ATTACHMENT_SIZE_BYTES),
+            limit: MAX_ATTACHMENT_SIZE_LABEL,
           }),
         );
         return;

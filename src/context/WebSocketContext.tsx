@@ -87,17 +87,6 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
         }),
       );
 
-      const handleBadgeUpdate = (data: { userId: string; badges: any[] }) => {
-        const current = userRef.current;
-        if (data.userId === userId && current) {
-          updateUserRef.current({ ...current, badges: data.badges });
-        }
-      };
-
-      unsubs.push(instance.subscribe(WsType.BADGE_ASSIGNED, handleBadgeUpdate));
-      unsubs.push(instance.subscribe(WsType.BADGE_REMOVED, handleBadgeUpdate));
-      unsubs.push(instance.subscribe(WsType.BADGE_UPDATED, handleBadgeUpdate));
-
       unsubs.push(
         instance.subscribe(
           WsType.PROFILE_IMAGE_UPDATED,

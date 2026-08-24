@@ -68,11 +68,6 @@ export function queuePendingHangupSync(hangup: PendingHangup) {
   persist();
 }
 
-/** Peek without clearing — clear only after confirmed send. */
-export function peekPendingHangup(): PendingHangup | null {
-  return queue[0] ?? null;
-}
-
 /** All pending hangups (flush each independently). */
 export function peekAllPendingHangups(): PendingHangup[] {
   return queue.slice();
@@ -82,11 +77,11 @@ export function getPendingHangupGeneration(): number {
   return generation;
 }
 
-/** @deprecated Prefer peek + clearPendingHangup / clearMatchingHangup after ok. */
+/// Pop the head hangup. Siblings stay queued. Re-queue if send fails.
 export function takePendingHangup(): PendingHangup | null {
   const h = queue[0] ?? null;
-  generation += 1;
-  queue = [];
+  if (!h) return null;
+  queue = queue.slice(1);
   persist();
   return h;
 }

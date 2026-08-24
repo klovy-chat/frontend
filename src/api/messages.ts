@@ -55,7 +55,7 @@ export function uploadFile(file: File, context: UploadContext) {
 }
 
 export function getPinnedMessages(params: { contactId?: string; channelId?: string }) {
-  return apiRequest<{ messages: Message[] }>("/api/messages/pinned", {
+  return apiRequest<{ messages: Message[]; canPin?: boolean }>("/api/messages/pinned", {
     method: "POST",
     body: JSON.stringify(params),
   });

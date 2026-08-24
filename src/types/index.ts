@@ -16,23 +16,7 @@ export interface User {
   twoFactorEnabled?: boolean;
   isDisabled?: boolean;
   deletionScheduledAt?: string | null;
-  badges?: Badge[];
-  featuredBadgeIds?: string[];
   language?: "pl" | "en";
-}
-
-export interface Badge {
-  _id?: string;
-  badgeId?: {
-    _id: string;
-    name: string;
-    icon: string;
-    color: string | null;
-    description: string | null;
-    createdAt: string;
-    updatedAt: string;
-  };
-  assignedAt?: string;
 }
 
 export interface Contact {
@@ -54,7 +38,6 @@ export interface Contact {
   unreadCount?: number;
   isMuted?: boolean;
   isBlockedByMe?: boolean;
-  badges?: Badge[];
   moderationExpiresAt?: string | null;
   moderationPermanent?: boolean;
 }

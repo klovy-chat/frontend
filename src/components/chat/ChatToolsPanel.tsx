@@ -34,6 +34,7 @@ export function ChatToolsPanel({
   const ws = useWebSocket();
   const [filter, setFilter] = useState("");
   const [pinned, setPinned] = useState<Message[]>([]);
+  const [serverCanPin, setServerCanPin] = useState(true);
   const [searchResults, setSearchResults] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
@@ -54,14 +55,16 @@ export function ChatToolsPanel({
   const loadPinned = useCallback(async () => {
     setLoading(true);
     try {
-      const { messages } = await getPinnedMessages(contextParams);
+      const { messages, canPin: listedCanPin } = await getPinnedMessages(contextParams);
       setPinned(unwrapIncomingMessages(messages));
+      setServerCanPin(listedCanPin !== false);
     } catch {
       setPinned([]);
+      setServerCanPin(canPin);
     } finally {
       setLoading(false);
     }
-  }, [target.type === "dm" ? target.contact._id : target.channel._id]);
+  }, [target.type === "dm" ? target.contact._id : target.channel._id, canPin]);
 
   useEffect(() => {
     if (mode === "pinned") {
@@ -277,7 +280,7 @@ export function ChatToolsPanel({
                       <p className="chat-tools-item-text">{messagePreview(msg)}</p>
                     </div>
                   </button>
-                  {mode === "pinned" && canPin && onUnpin && (
+                  {mode === "pinned" && canPin && serverCanPin && onUnpin && (
                     <button
                       type="button"
                       className="chat-tools-unpin"

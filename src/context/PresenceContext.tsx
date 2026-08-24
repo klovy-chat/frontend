@@ -311,31 +311,3 @@ export function useUserPresence(userId: string | undefined): Presence | undefine
 export function getPresenceSnapshot(userId: string | undefined): Presence | undefined {
   return userId ? presenceSnapshot[userId] : undefined;
 }
-
-/**
- * Returns a user-like object merged with the latest live presence.
- * Prefer `useUserPresence` in list rows to avoid full-map subscriptions.
- */
-export function useResolvePresence() {
-  const presence = useSyncExternalStore(
-    (onStoreChange) => {
-      globalListeners.add(onStoreChange);
-      return () => {
-        globalListeners.delete(onStoreChange);
-      };
-    },
-    () => presenceSnapshot,
-    () => presenceSnapshot,
-  );
-  const presenceRef = useRef(presence);
-  presenceRef.current = presence;
-  return useCallback(
-    <T extends { _id?: string; id?: string }>(user: T): T & Presence => {
-      const id = user._id ?? user.id;
-      const live = id ? presenceRef.current[id] : undefined;
-      if (!live) return user as T & Presence;
-      return { ...user, ...live };
-    },
-    [presence],
-  );
-}

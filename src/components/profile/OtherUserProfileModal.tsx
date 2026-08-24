@@ -8,11 +8,9 @@ import { renderFormattedText } from "../../utils/chat/messageFormat";
 import { presenceColor } from "../../utils/user/presence";
 import { useProfileBannerStyle } from "../../hooks/usePublicMediaCacheRevision";
 import { useAnimatedModal } from "../../hooks/useAnimatedModal";
-import { ProfileBadgesSection } from "./ProfileBadgesSection";
 import { useUserPresence } from "../../context/PresenceContext";
 import type { Contact } from "../../types";
 import "../../styles/account/profile.css";
-import "../common/badge.css";
 
 interface OtherUserProfileModalProps {
   isOpen: boolean;
@@ -184,8 +182,6 @@ export function OtherUserProfileModal({
               {t("modals.otherUserProfile.addFriend")}
             </p>
           ) : null}
-
-          <ProfileBadgesSection badges={displayedUser.badges} />
 
           {bioText ? (
             <section className="up-bio-section">

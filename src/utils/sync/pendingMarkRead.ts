@@ -151,11 +151,6 @@ export function takePendingMarkReads(
   return { marks, generation: g };
 }
 
-/** Drop pending + in-flight zeroing for a mark (after server absolute, not wire ack). */
-export function ackPendingMarkRead(mark: PendingMark) {
-  ackPendingMarkReadByKey(markKey(mark));
-}
-
 /** Clear zero-guard when server emits absolute unread for this key. */
 export function ackPendingMarkReadByKey(key: string) {
   const hadInFlight = inFlight.delete(key);

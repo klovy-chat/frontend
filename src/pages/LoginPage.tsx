@@ -10,6 +10,8 @@ import {
   type TurnstileWidgetHandle,
 } from "../components/auth/TurnstileWidget";
 import { AuthPageLayout } from "../components/auth/AuthPageLayout";
+import { AuthCarousel, useAuthSlides } from "../components/auth/AuthCarousel";
+import { LOGO_COLOUR_URL } from "../constants/branding";
 import { normalizeUsernameInput, sanitizeUsernameInput } from "../utils/auth/username";
 import "../styles/auth/auth.css";
 
@@ -38,6 +40,7 @@ export function LoginPage() {
   const [useBackupCode, setUseBackupCode] = useState(false);
   const turnstileRef = useRef<TurnstileWidgetHandle>(null);
   const twoFactorTurnstileRef = useRef<TurnstileWidgetHandle>(null);
+  const slides = useAuthSlides();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -121,8 +124,17 @@ export function LoginPage() {
 
   return (
     <AuthPageLayout>
-      <div className="al-card al-card--solo">
+      <div className="al-card">
         <div className="al-left">
+          <div className="al-brand">
+            <div className="al-logo">
+              <img src={LOGO_COLOUR_URL} alt="" />
+            </div>
+            <div>
+              <strong>Klovy Chat</strong>
+              <span>{t("auth.brand.tagline")}</span>
+            </div>
+          </div>
           {step === "credentials" ? (
             <>
               <h1 className="al-title">{t("auth.login.title")}</h1>
@@ -296,6 +308,7 @@ export function LoginPage() {
             </>
           )}
         </div>
+        <AuthCarousel slides={slides} />
       </div>
     </AuthPageLayout>
   );

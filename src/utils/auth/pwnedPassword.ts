@@ -4,9 +4,6 @@ export function passwordBreachMessage(): string {
   return i18n.t("auth.password.breach");
 }
 
-/** Prefer {@link passwordBreachMessage} for locale-aware text. */
-export const PASSWORD_BREACH_MESSAGE = passwordBreachMessage();
-
 export type PasswordBreachCheck = "safe" | "breached" | "unavailable";
 
 async function sha1HexUpper(password: string): Promise<string> {

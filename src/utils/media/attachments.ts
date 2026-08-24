@@ -78,7 +78,7 @@ export function resolveUploadMessageType(file: File): "IMAGE" | "VIDEO" | "AUDIO
 }
 
 export function uploadUsesFileNameAsContent(
-  messageType: "IMAGE" | "VIDEO" | "AUDIO" | "FILE",
+  messageType: "IMAGE" | "VIDEO" | "AUDIO" | "FILE" | "STICKER",
 ): boolean {
   return messageType !== "AUDIO";
 }

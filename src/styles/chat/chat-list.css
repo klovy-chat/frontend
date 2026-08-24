@@ -124,6 +124,11 @@
   opacity: 0.8;
 }
 
+.chat-list-pane__tab-count--online {
+  color: #4CD964;
+  opacity: 1;
+}
+
 .chat-list-pane__scroll {
   flex: 1;
   overflow-y: auto;

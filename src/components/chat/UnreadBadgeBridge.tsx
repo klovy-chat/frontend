@@ -15,6 +15,7 @@ import {
 } from "../../utils/sync/chatPageMounted";
 import {
   ackPendingMarkReadByKey,
+  hasPendingMarkReads,
   peekPendingMarkReadKeys,
   queuePendingMarkRead,
   subscribePendingMarkReads,
@@ -249,6 +250,7 @@ export function UnreadBadgeBridge() {
     if (!ws || !wsConnected || !user?.id) return;
     const userId = user.id;
     const flush = (redrainInFlight: boolean) => {
+      if (!hasPendingMarkReads(userId)) return;
       const { marks, generation } = takePendingMarkReads(userId, {
         redrainInFlight,
       });

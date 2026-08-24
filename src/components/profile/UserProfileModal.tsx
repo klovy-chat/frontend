@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { Avatar } from "../common/Avatar";
-import { ProfileBadgesSection } from "./ProfileBadgesSection";
 import { useAuth } from "../../context/AuthContext";
 import { useUserPresence } from "../../context/PresenceContext";
 import { userLabel, formatJoinedDate, availabilityStatusLabel } from "../../utils/user/format";
@@ -12,7 +11,6 @@ import { useProfileBannerStyle } from "../../hooks/usePublicMediaCacheRevision";
 import { useAnimatedModal } from "../../hooks/useAnimatedModal";
 import type { User } from "../../types";
 import "../../styles/account/profile.css";
-import "../common/badge.css";
 
 interface UserProfileModalProps {
   isOpen: boolean;
@@ -133,8 +131,6 @@ export function UserProfileModal({
             <h2 className="up-display-name">{name}</h2>
             <p className="up-profile-handle">@{user.username}</p>
           </div>
-
-          <ProfileBadgesSection badges={user.badges} />
 
           {bioText ? (
             <section className="up-bio-section">
