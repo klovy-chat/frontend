@@ -23,7 +23,7 @@ export function avatarColor(colorIndex?: number | null, seed = ""): string {
   return PALETTE[Math.abs(hash) % PALETTE.length];
 }
 
-export function getDefaultAvatarImage(colorIndex?: number | null, seed = ""): string {
+function getDefaultAvatarImage(colorIndex?: number | null, seed = ""): string {
   if (colorIndex != null && colorIndex >= 0) {
     return AVATAR_IMAGES[colorIndex % AVATAR_IMAGES.length];
   }

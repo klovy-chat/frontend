@@ -200,11 +200,6 @@ export function applyClientUserAgentHeader(headers: Headers): void {
   headers.set(CLIENT_USER_AGENT_HEADER, value);
 }
 
-/** @deprecated Użyj applyClientUserAgentHeader — nie wysyłaj osobnych nagłówków env. */
-export function applyClientEnvironmentHeaders(headers: Headers): void {
-  applyClientUserAgentHeader(headers);
-}
-
 export function isClientEnvironmentReady(): boolean {
   return loaded;
 }

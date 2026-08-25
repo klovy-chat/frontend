@@ -4,7 +4,6 @@
     "body": "The browser app is not available on phones or tablets — including when your browser's \"Request desktop site\" mode is on. Open it on a computer."
   },
   "common": {
-    "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete",
     "close": "Close",
@@ -12,41 +11,19 @@
     "saving": "Saving…",
     "processing": "Processing…",
     "continue": "Continue",
-    "copy": "Copy",
     "copied": "Copied!",
-    "edit": "Edit",
-    "create": "Create",
-    "add": "Add",
     "remove": "Delete",
     "accept": "Accept",
     "reject": "Reject",
-    "refresh": "Refresh",
-    "search": "Search",
     "user": "User",
     "emDash": "—",
     "download": "Download",
     "today": "Today",
     "yesterday": "Yesterday",
-    "avatar": "Avatar",
     "channel": "channel",
     "contact": "Contact",
-    "preview": "Preview",
-    "image": "Image",
-    "attachment": "Attachment",
-    "optional": "optional",
-    "results": "Results",
-    "total": "Total",
-    "active": "Active",
-    "disabled": "Disabled",
     "acknowledged": "Acknowledged",
     "unread": "Unread",
-    "owner": "owner",
-    "private": "Private",
-    "public": "Public",
-    "permanent": "Permanent",
-    "expired": "Expired",
-    "until": "Until {{date}}",
-    "loadingResults": "Loading results…",
     "loadingList": "Loading list…",
     "uploading": "Sending…",
     "sending": "Sending…",
@@ -54,57 +31,21 @@
     "removing": "Removing…",
     "loggingOut": "Logging out…",
     "disconnecting": "Disabling…",
-    "connecting": "Connecting…",
-    "checking": "Checking…",
-    "verifying": "Verifying…",
-    "preparing": "Preparing…",
-    "assigning": "Assigning…",
-    "noResults": "No results",
-    "yes": "Yes",
-    "no": "No",
     "and": "and",
-    "id": "ID",
-    "date": "Date",
-    "reason": "Reason",
-    "name": "Name",
-    "description": "Description",
-    "icon": "Icon",
-    "color": "Color",
-    "password": "Password",
     "username": "Username",
     "displayName": "Display name",
     "bio": "Description",
-    "showPassword": "Show password",
-    "hidePassword": "Hide password",
     "closePanel": "Close panel",
     "closeSettings": "Close settings",
-    "accountSettings": "Account settings",
-    "checkingPermissions": "Checking permissions…",
-    "goToLogin": "Go to login",
-    "logout": "Log out",
     "logoutTitle": "Log out",
     "language": {
       "pl": "Polish",
       "en": "English",
-      "label": "Language",
-      "panelTitle": "Interface language",
-      "panelHint": "Choose the app display language."
+      "label": "Language"
     }
   },
   "errors": {
-    "network": {
-      "offline": "No connection to the server."
-    },
-    "auth": {
-      "csrfMissing": "Missing CSRF token. Log out and sign in again."
-    },
-    "api": {
-      "loadFailed": "Could not load data.",
-      "operationFailed": "Operation failed.",
-      "saveFailed": "Could not save."
-    },
     "ws": {
-      "backendUnavailable": "[ws] Backend unavailable — reconnecting…",
       "reconnecting": "Connection lost — reconnecting…"
     },
     "boundary": {
@@ -115,31 +56,13 @@
   },
   "validation": {
     "password": {
-      "minLength": "Password must be at least 8 characters.",
-      "lowercase": "Password must contain a lowercase letter.",
-      "uppercase": "Password must contain an uppercase letter.",
-      "digit": "Password must contain a digit.",
-      "special": "Password must contain a special character (@$!%*?&).",
-      "breach": "This password appeared in a data breach. Choose a different, more secure password.",
       "mismatch": "New passwords do not match.",
       "sameAsCurrent": "New password must differ from the current one.",
       "required": "Enter your password.",
       "currentRequired": "Enter your current password."
     },
-    "username": {
-      "required": "Username is required.",
-      "invalid": "Username: 3–32 characters, lowercase letters, digits and _ only.",
-      "sameAsCurrent": "This is already your current username.",
-      "inviteRequired": "Enter a username after @."
-    },
     "displayName": {
       "required": "Display name is required."
-    },
-    "warn": {
-      "reasonRequired": "Warning reason is required."
-    },
-    "announcement": {
-      "required": "Announcement title and content are required."
     },
     "captcha": {
       "login": "Complete captcha before logging in.",
@@ -161,50 +84,12 @@
     }
   },
   "format": {
-    "userLabel": "User",
-    "warningSeverity": {
-      "low": "Minor violation",
-      "medium": "Terms violation",
-      "high": "Serious violation"
-    },
-    "availability": {
-      "online": "Available",
-      "away": "Unavailable",
-      "brb": "Be right back",
-      "dnd": "Do not disturb",
-      "offline": "Unavailable"
-    },
-    "joined": "Joined",
-    "created": "Created",
-    "assigned": "Assigned {{date}}"
+    "userLabel": "User"
   },
   "session": {
-    "justNow": "Just now",
-    "minutesAgo_one": "1 minute ago",
-    "minutesAgo_few": "{{count}} minutes ago",
-    "minutesAgo_many": "{{count}} minutes ago",
-    "minutesAgo_other": "{{count}} minutes ago",
-    "hoursAgo_one": "1 hour ago",
-    "hoursAgo_few": "{{count}} hours ago",
-    "hoursAgo_many": "{{count}} hours ago",
-    "hoursAgo_other": "{{count}} hours ago",
-    "daysAgo_one": "1 day ago",
-    "daysAgo_few": "{{count}} days ago",
-    "daysAgo_many": "{{count}} days ago",
-    "daysAgo_other": "{{count}} days ago",
-    "monthsAgo_one": "1 month ago",
-    "monthsAgo_few": "{{count}} months ago",
-    "monthsAgo_many": "{{count}} months ago",
-    "monthsAgo_other": "{{count}} months ago",
-    "yearsAgo_one": "1 year ago",
-    "yearsAgo_few": "{{count}} years ago",
-    "yearsAgo_many": "{{count}} years ago",
-    "yearsAgo_other": "{{count}} years ago",
     "createdAt": "Created {{time}}",
     "createdAtAbsolute": "{{time}}",
     "userAgent": "Browser: {{ua}}",
-    "lastActivity": "Last activity: {{time}}",
-    "thisDevice": "(this device)",
     "thisDeviceLabel": "This device",
     "unknownOs": "Unknown OS",
     "loadingSessions": "Loading sessions…",
@@ -213,8 +98,6 @@
     "revokeOthersHint": "This will log you out of all devices except this one.",
     "revokeDevice": "Log out",
     "revokeDeviceAria": "Log out of this device",
-    "revokeDeviceConfirm": "Log out of this device? The session will end immediately.",
-    "revokeCurrentDeviceConfirm": "Log out of this device?",
     "revokeDeviceModal": {
       "title": "Log out device?",
       "subtitle": "The session will end immediately.",
@@ -225,10 +108,6 @@
     "securityHint": "If you see unknown sessions, log them out and change your password. Also enable two-factor authentication in My account."
   },
   "presence": {
-    "memberCount_one": "{{count}} participant",
-    "memberCount_few": "{{count}} participants",
-    "memberCount_many": "{{count}} participants",
-    "memberCount_other": "{{count}} participants",
     "channelMember_one": "1 member",
     "channelMember_few": "{{count}} members",
     "channelMember_many": "{{count}} members",
@@ -293,8 +172,7 @@
     "sendVoice": "Send voice message",
     "recordMessage": "Record voice message",
     "tooShort": "Recording is too short (min. 0.5 s).",
-    "tooLarge": "Recording is too large. Maximum size is {{limit}}.",
-    "sendFailed": "Could not send voice message."
+    "tooLarge": "Recording is too large. Maximum size is {{limit}}."
   },
   "media": {
     "invalidUrl": "Invalid file address.",
@@ -318,8 +196,7 @@
     "failed": "Could not upload file. Try again.",
     "attachFile": "Attach file",
     "removeFile": "Remove file",
-    "maxSizeHint": "Max {{size}}",
-    "maxAttachmentHint": "Max {{size}} per file"
+    "maxSizeHint": "Max {{size}}"
   },
   "imageCrop": {
     "avatarTitle": "Adjust your photo",
@@ -401,7 +278,6 @@
       "muteUser": "Mute user",
       "kickUser": "Kick user",
       "durationLabel": "Duration",
-      "chooseDuration": "Choose how long to apply this action.",
       "confirmKick": "Are you sure you want to kick {{name}} from this channel?",
       "confirmBan": "Are you sure you want to ban {{name}} on this channel?",
       "confirmMute": "Are you sure you want to mute {{name}} on this channel?"
@@ -413,8 +289,6 @@
       "noMuted": "No muted users."
     },
     "slowmode": {
-      "title": "Slow mode",
-      "lockedChat": "Locked chat",
       "unlock": "Unlock chat",
       "lock": "Lock chat"
     },
@@ -429,8 +303,6 @@
       },
       "action": "Report channel",
       "title": "Report channel",
-      "sent": "Report was submitted",
-      "sentHint": "Thank you. An administrator will review the report.",
       "reason": "Reason",
       "details": "Details (optional)",
       "send": "Submit report",
@@ -470,11 +342,7 @@
       "uppercase": "Password must contain an uppercase letter.",
       "digit": "Password must contain a digit.",
       "special": "Password must contain a special character (@$!%*?&).",
-      "breach": "This password appeared in a data breach. Choose a different, more secure password.",
-      "mismatch": "New passwords do not match.",
-      "sameAsCurrent": "New password must differ from the current one.",
-      "required": "Enter your password.",
-      "currentRequired": "Enter your current password."
+      "breach": "This password appeared in a data breach. Choose a different, more secure password."
     },
     "username": {
       "required": "Username is required.",
@@ -492,7 +360,6 @@
     "fields": {
       "username": "Username",
       "usernamePlaceholder": "e.g. john_doe",
-      "usernameHint": "This is your login, not an email. 3–32 chars: lowercase letters, digits and _.",
       "password": "Password",
       "showPassword": "Show password",
       "hidePassword": "Hide password",
@@ -553,12 +420,7 @@
       "joinedToast": "Joined channel",
       "joinFailed": "Could not join",
       "backToChat": "Back to chat",
-      "dismiss": "Not now",
-      "copied": "Invite link copied",
-      "copyManual": "Copy link manually: {{url}}",
-      "createFailed": "Could not create invite",
-      "inviteToChannel": "Invite to channel",
-      "shareLink": "Share a link to invite others to the channel."
+      "dismiss": "Not now"
     },
     "twoFactor": {
       "title": "2FA verification",
@@ -598,7 +460,6 @@
     }
   },
   "settings": {
-    "title": "Settings",
     "nav": {
       "account": "User settings",
       "myAccount": "My account",
@@ -607,8 +468,7 @@
       "voice": "Voice settings",
       "warnings": "Warnings",
       "app": "Client settings",
-      "logout": "Log out",
-      "sectionsAria": "Settings sections"
+      "logout": "Log out"
     },
     "profile": {
       "subtitle": "Manage your profile and information visible to other users.",
@@ -630,15 +490,7 @@
       "avatarRemoveFailed": "Could not remove photo",
       "bannerUploadFailed": "Could not upload banner",
       "bannerRemoved": "Profile banner removed.",
-      "bannerRemoveFailed": "Could not remove banner",
-      "form": {
-        "displayName": "Display name",
-        "displayNamePlaceholder": "e.g. John Smith",
-        "bio": "Short bio",
-        "bioLabel": "Description",
-        "avatarColor": "Avatar color",
-        "avatarColorHint": "Visible to others when you have no profile photo. Max {{max}} characters"
-      }
+      "bannerRemoveFailed": "Could not remove banner"
     },
     "account": {
       "subtitle": "Manage login credentials and security.",
@@ -706,7 +558,6 @@
       "established": "Est. {{date}}",
       "invitedBy": "Invited by {{name}}",
       "joinButton": "Join channel",
-      "openButton": "Go to channel",
       "unavailable": "Invite unavailable",
       "loadFailed": "Could not load invite"
     },
@@ -836,10 +687,6 @@
       "contacts": "Contacts",
       "settings": "Settings",
       "viewProfile": "View profile"
-    },
-    "mobile": {
-      "menu": "Menu",
-      "sections": "Sections"
     }
   },
   "sidebar": {
@@ -876,7 +723,6 @@
       "removeContact": {
         "title": "Remove contact",
         "subtitle": "This person will be removed from your friends list.",
-        "confirm": "Are you sure you want to remove this contact from your list?",
         "confirmWithName": "Are you sure you want to remove {{name}} from contacts?",
         "historyDeleted": "Message history will be permanently deleted.",
         "submit": "Remove contact"
@@ -884,7 +730,6 @@
       "deleteChannel": {
         "title": "Delete channel",
         "subtitle": "This action cannot be undone.",
-        "confirm": "Are you sure you want to permanently delete channel #{{name}}?",
         "confirmWithName": "Are you sure you want to delete channel \"{{name}}\"?",
         "messagesDeleted": "All messages will be permanently deleted.",
         "submit": "Delete channel"
@@ -894,7 +739,6 @@
   "modals": {
     "channelSettings": {
       "title": "Channel settings",
-      "subtitle": "Manage the channel, members and moderation.",
       "generalSubtitle": "Manage the channel, invite members and report violations.",
       "tabs": {
         "general": "General",
@@ -907,7 +751,6 @@
       "invite": "INVITE",
       "delete": "DELETE",
       "membersTitle": "Members",
-      "membersSubtitle": "People on this channel.",
       "membersActionsHint": "List of people on the channel. Administrators can kick, ban and mute.",
       "membersAdminTitle": "Administrator",
       "adminNote": "Only the channel creator is an administrator.",
@@ -971,7 +814,6 @@
       "invite": {
         "label": "USERNAME AFTER @",
         "placeholder": "username",
-        "hint": "Enter the exact login name (no spaces, lowercase).",
         "send": "Send invite",
         "sent": "Invite to {{handle}} sent",
         "sendFailed": "Could not send invite.",
@@ -1015,150 +857,28 @@
       "about": "About me",
       "joined": "Joined",
       "editProfile": "Edit profile"
-    },
-    "accountSettings": {
-      "title": "Settings",
-      "nav": {
-        "account": "User settings",
-        "myAccount": "My account",
-        "profile": "Profile",
-        "sessions": "Devices",
-        "voice": "Voice settings",
-        "warnings": "Warnings",
-        "app": "Client settings",
-        "logout": "Log out",
-        "sectionsAria": "Settings sections"
-      },
-      "profile": {
-        "subtitle": "Manage your profile and information visible to other users.",
-        "personalData": "Personal data",
-        "editProfile": "Edit profile",
-        "saveChanges": "Save changes",
-        "changeBanner": "Change banner",
-        "removeBanner": "Remove banner",
-        "changePhoto": "Change photo",
-        "changeBannerAria": "Change profile banner",
-        "changePhotoAria": "Change profile photo",
-        "saved": "Profile saved",
-        "saveFailed": "Could not save profile",
-        "avatarUpdated": "Profile photo updated.",
-        "avatarUploadFailed": "Could not upload photo",
-        "avatarRemoved": "Profile photo removed.",
-        "avatarRemoveFailed": "Could not remove photo",
-        "bannerUploadFailed": "Could not upload banner",
-        "bannerRemoved": "Profile banner removed.",
-        "bannerRemoveFailed": "Could not remove banner",
-        "form": {
-          "displayName": "Display name",
-          "displayNamePlaceholder": "e.g. John Smith",
-          "bio": "Short bio",
-          "bioLabel": "Description",
-          "avatarColor": "Avatar color",
-          "avatarColorHint": "Visible to others when you have no profile photo. Max {{max}} characters"
-        }
-      },
-      "account": {
-        "subtitle": "Manage login credentials and security.",
-        "usernameHint": "Your login (@{{username}}) is used to sign in and be found.",
-        "newUsername": "New username",
-        "changeUsername": "Change username",
-        "usernameChanged": "Username changed. Sign in with your new username from now on.",
-        "usernameChangeFailed": "Could not change username.",
-        "changePassword": "Change password",
-        "changePasswordHint": "Minimum 8 characters, upper and lowercase letter, digit",
-        "changePasswordSubmit": "Change password",
-        "passwordChanged": "Password changed. The session on this device stays active.",
-        "passwordChangeFailed": "Could not change password.",
-        "deletionScheduled": "Account marked for deletion.",
-        "deletionScheduledBody": "You can still use your account until {{date}}. It will then be permanently deleted. You can cancel below.",
-        "managementLead": "Disabling your account immediately blocks sign-in. Marking for deletion gives you 7 days to cancel — during that time you can use the account normally.",
-        "disableTitle": "Disable account",
-        "disableDesc": "We immediately block sign-in. Profile, messages and contacts remain — an administrator can restore the account.",
-        "deleteTitle": "Mark account for deletion",
-        "deleteDesc": "The account will be permanently deleted after 7 days. Until then you can sign in normally and cancel the request in settings.",
-        "confirmDisable": "Confirm account disable",
-        "confirmDelete": "Confirm marking account for deletion",
-        "confirmPasswordHint": "Enter your password{{twoFactor}} to continue.",
-        "confirmPasswordHintTwoFactor": " and 2FA code",
-        "disableNoDelete": "No data will be deleted. After disabling you cannot sign in again until an administrator restores the account.",
-        "cancelDeletion": "Cancel account deletion",
-        "cancelDeletionSubmit": "Cancel account deletion",
-        "cancelDeletionPassword": "Enter your password to cancel deletion.",
-        "cancelDeletionFailed": "Could not cancel deletion.",
-        "operationFailed": "Could not complete the operation.",
-        "disableAccount": "Disable account",
-        "markForDeletion": "Mark for deletion",
-        "sessionsTitle": "Devices",
-        "activeSessions": "Sessions signed in to your account.",
-        "sessionsLoadFailed": "Could not load sessions.",
-        "sessionRevokeFailed": "Could not log out session.",
-        "revokeOthersFailed": "Could not log out other sessions."
-      },
-      "warnings": {
-        "title": "Warnings",
-        "violations": "Your terms violations",
-        "intro": "Warnings address minor or first-time violations. Repeated or more serious violations may result in temporary suspension; severe ones — permanent account removal.",
-        "history": "Warning history",
-        "empty": "You have no warnings. Keep it up!",
-        "unread": "Unread"
-      }
     }
   },
   "profile": {
     "form": {
-      "displayName": "Display name",
       "displayNameRequired": "Display name *",
       "displayNamePlaceholder": "e.g. John Smith",
       "displayNameHint": "Visible to others in chat. Max {{max}} characters.",
-      "bio": "Short bio",
       "bioPlaceholderOptional": "Short bio (optional)",
       "bioLabel": "Description",
       "avatarColor": "Avatar color",
-      "avatarColorOption": "Color {{index}}",
-      "avatarColorHint": "Visible to others when you have no profile photo. Max {{max}} characters"
+      "avatarColorOption": "Color {{index}}"
     }
   },
   "channel": {
-    "settings": {
-      "title": "Channel settings"
-    },
-    "create": {
-      "title": "New channel",
-      "hint": "Enter a name for the new channel.",
-      "nameLabel": "Channel name",
-      "submit": "Create channel"
-    },
-    "rename": {
-      "title": "Rename channel",
-      "placeholder": "New channel name",
-      "submit": "Rename"
-    },
-    "delete": {
-      "title": "Delete channel",
-      "subtitle": "This action cannot be undone.",
-      "confirm": "Are you sure you want to permanently delete channel #{{name}}?",
-      "submit": "Delete channel"
-    },
-    "actions": {
-      "create": "New channel",
-      "delete": "Delete channel",
-      "invite": "Invite"
-    },
     "members": {
-      "ownerBadge": "owner",
-      "admin": "Administrator"
-    },
-    "toast": {
-      "leaveFailed": "Could not leave channel",
-      "avatarUploadFailed": "Could not upload channel avatar",
-      "avatarRemoveFailed": "Could not remove channel avatar"
+      "ownerBadge": "owner"
     }
   },
   "call": {
     "invalidServerUrl": "Invalid call server address.",
     "connectFailed": "Could not connect. Try again.",
     "rejected": "Call was rejected.",
-    "peerOffline": "User is unavailable.",
     "peerBusy": "User is already on another call.",
     "unavailable": "Could not place the call.",
     "cameraFailed": "Could not access the camera. Check browser permissions.",
@@ -1188,9 +908,6 @@
       "minimize": "Minimize",
       "fullscreen": "Full screen",
       "restore": "Restore to chat"
-    },
-    "layout": {
-      "openFullscreen": "Expand call with {{name}}"
     },
     "channel": {
       "join": "Join voice chat",

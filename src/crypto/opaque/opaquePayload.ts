@@ -42,7 +42,7 @@ function decodeOpaqueLayer(stored: string): string | null {
 }
 
 /** Whether `stored` is our transport base64 wrap (strict UTF-8 + roundtrip). */
-export function isLikelyBase64Opaque(stored: string): boolean {
+function isLikelyBase64Opaque(stored: string): boolean {
   const trimmed = stored.trim();
   if (!trimmed || trimmed.startsWith("{") || trimmed.startsWith("[")) {
     return false;
@@ -54,7 +54,7 @@ export function isLikelyBase64Opaque(stored: string): boolean {
 }
 
 /** Decode a single opaque layer; returns null when input is not our transport wrap. */
-export function unwrapOpaquePayloadOnce(stored: string): string | null {
+function unwrapOpaquePayloadOnce(stored: string): string | null {
   const trimmed = stored.trim();
   if (!trimmed || trimmed.startsWith("{") || trimmed.startsWith("[")) {
     return null;

@@ -17,7 +17,7 @@ export function normalizeLocale(value: string | null | undefined): AppLocale {
   return value === "en" ? "en" : "pl";
 }
 
-export function getDateLocale(locale: AppLocale): string {
+function getDateLocale(locale: AppLocale): string {
   return locale === "en" ? "en-US" : "pl-PL";
 }
 

@@ -4,7 +4,6 @@
     "body": "Aplikacja w przeglądarce nie jest dostępna na telefonach ani tabletach — także po włączeniu opcji „Wyświetlaj jak na komputerze”. Otwórz ją na komputerze."
   },
   "common": {
-    "save": "Zapisz",
     "cancel": "Anuluj",
     "delete": "Usuń",
     "close": "Zamknij",
@@ -12,41 +11,19 @@
     "saving": "Zapisywanie…",
     "processing": "Przetwarzanie…",
     "continue": "Kontynuuj",
-    "copy": "Kopiuj",
     "copied": "Skopiowano!",
-    "edit": "Edytuj",
-    "create": "Utwórz",
-    "add": "Dodaj",
     "remove": "Usuń",
     "accept": "Zaakceptuj",
     "reject": "Odrzuć",
-    "refresh": "Odśwież",
-    "search": "Szukaj",
     "user": "Użytkownik",
     "emDash": "—",
     "download": "Pobierz",
     "today": "Dziś",
     "yesterday": "Wczoraj",
-    "avatar": "Awatar",
     "channel": "kanał",
     "contact": "Kontakt",
-    "preview": "Podgląd",
-    "image": "Obraz",
-    "attachment": "Załącznik",
-    "optional": "opcjonalnie",
-    "results": "Wyników",
-    "total": "Łącznie",
-    "active": "Aktywne",
-    "disabled": "Wyłączone",
     "acknowledged": "Potwierdzone",
     "unread": "Nieprzeczytane",
-    "owner": "właściciel",
-    "private": "Prywatny",
-    "public": "Publiczny",
-    "permanent": "Na stałe",
-    "expired": "Wygasło",
-    "until": "Do {{date}}",
-    "loadingResults": "Ładowanie wyników…",
     "loadingList": "Ładowanie listy…",
     "uploading": "Wysyłanie…",
     "sending": "Wysyłanie…",
@@ -54,57 +31,21 @@
     "removing": "Usuwanie…",
     "loggingOut": "Wylogowywanie…",
     "disconnecting": "Wyłączanie…",
-    "connecting": "Łączenie…",
-    "checking": "Sprawdzanie…",
-    "verifying": "Weryfikacja…",
-    "preparing": "Przygotowywanie…",
-    "assigning": "Nadawanie…",
-    "noResults": "Brak wyników",
-    "yes": "Tak",
-    "no": "Nie",
     "and": "i",
-    "id": "ID",
-    "date": "Data",
-    "reason": "Powód",
-    "name": "Nazwa",
-    "description": "Opis",
-    "icon": "Ikona",
-    "color": "Kolor",
-    "password": "Hasło",
     "username": "Nazwa użytkownika",
     "displayName": "Nazwa wyświetlana",
     "bio": "Opis",
-    "showPassword": "Pokaż hasło",
-    "hidePassword": "Ukryj hasło",
     "closePanel": "Zamknij panel",
     "closeSettings": "Zamknij ustawienia",
-    "accountSettings": "Ustawienia konta",
-    "checkingPermissions": "Sprawdzanie uprawnień…",
-    "goToLogin": "Przejdź do logowania",
-    "logout": "Wyloguj się",
     "logoutTitle": "Wyloguj",
     "language": {
       "pl": "Polski",
       "en": "Angielski",
-      "label": "Język",
-      "panelTitle": "Język interfejsu",
-      "panelHint": "Wybierz język wyświetlania aplikacji."
+      "label": "Język"
     }
   },
   "errors": {
-    "network": {
-      "offline": "Brak połączenia z serwerem."
-    },
-    "auth": {
-      "csrfMissing": "Brak tokenu CSRF. Wyloguj się i zaloguj ponownie."
-    },
-    "api": {
-      "loadFailed": "Nie udało się załadować danych.",
-      "operationFailed": "Operacja nie powiodła się.",
-      "saveFailed": "Nie udało się zapisać."
-    },
     "ws": {
-      "backendUnavailable": "[ws] Backend niedostępny — ponowne połączenie…",
       "reconnecting": "Utracono połączenie — ponowne łączenie…"
     },
     "boundary": {
@@ -115,31 +56,13 @@
   },
   "validation": {
     "password": {
-      "minLength": "Hasło musi mieć co najmniej 8 znaków.",
-      "lowercase": "Hasło musi zawierać małą literę.",
-      "uppercase": "Hasło musi zawierać wielką literę.",
-      "digit": "Hasło musi zawierać cyfrę.",
-      "special": "Hasło musi zawierać znak specjalny (@$!%*?&).",
-      "breach": "To hasło pojawiło się w wycieku danych. Wybierz inne, bezpieczniejsze hasło.",
       "mismatch": "Nowe hasła nie są identyczne.",
       "sameAsCurrent": "Nowe hasło musi różnić się od aktualnego.",
       "required": "Podaj hasło.",
       "currentRequired": "Podaj aktualne hasło."
     },
-    "username": {
-      "required": "Nazwa użytkownika jest wymagana.",
-      "invalid": "Nazwa użytkownika: 3–32 znaków, tylko małe litery, cyfry i _.",
-      "sameAsCurrent": "To jest już Twoja obecna nazwa użytkownika.",
-      "inviteRequired": "Podaj nazwę użytkownika po @."
-    },
     "displayName": {
       "required": "Główna nazwa jest wymagana."
-    },
-    "warn": {
-      "reasonRequired": "Powód ostrzeżenia jest wymagany."
-    },
-    "announcement": {
-      "required": "Tytuł i treść ogłoszenia są wymagane."
     },
     "captcha": {
       "login": "Potwierdź captcha przed zalogowaniem.",
@@ -161,50 +84,12 @@
     }
   },
   "format": {
-    "userLabel": "Użytkownik",
-    "warningSeverity": {
-      "low": "Drobne naruszenie",
-      "medium": "Naruszenie regulaminu",
-      "high": "Poważne naruszenie"
-    },
-    "availability": {
-      "online": "Dostępny",
-      "away": "Niedostępny",
-      "brb": "Zaraz wracam",
-      "dnd": "Nie przeszkadzać",
-      "offline": "Niedostępny"
-    },
-    "joined": "Dołączył",
-    "created": "Utworzono",
-    "assigned": "Nadano {{date}}"
+    "userLabel": "Użytkownik"
   },
   "session": {
-    "justNow": "Przed chwilą",
-    "minutesAgo_one": "1 minutę temu",
-    "minutesAgo_few": "{{count}} minuty temu",
-    "minutesAgo_many": "{{count}} minut temu",
-    "minutesAgo_other": "{{count}} minut temu",
-    "hoursAgo_one": "1 godzinę temu",
-    "hoursAgo_few": "{{count}} godziny temu",
-    "hoursAgo_many": "{{count}} godzin temu",
-    "hoursAgo_other": "{{count}} godzin temu",
-    "daysAgo_one": "1 dzień temu",
-    "daysAgo_few": "{{count}} dni temu",
-    "daysAgo_many": "{{count}} dni temu",
-    "daysAgo_other": "{{count}} dni temu",
-    "monthsAgo_one": "1 miesiąc temu",
-    "monthsAgo_few": "{{count}} miesiące temu",
-    "monthsAgo_many": "{{count}} miesięcy temu",
-    "monthsAgo_other": "{{count}} miesięcy temu",
-    "yearsAgo_one": "1 rok temu",
-    "yearsAgo_few": "{{count}} lata temu",
-    "yearsAgo_many": "{{count}} lat temu",
-    "yearsAgo_other": "{{count}} lat temu",
     "createdAt": "Utworzono {{time}}",
     "createdAtAbsolute": "{{time}}",
     "userAgent": "Przeglądarka: {{ua}}",
-    "lastActivity": "Ostatnia aktywność: {{time}}",
-    "thisDevice": "(to urządzenie)",
     "thisDeviceLabel": "To urządzenie",
     "unknownOs": "Nieznany system",
     "loadingSessions": "Ładowanie sesji…",
@@ -213,8 +98,6 @@
     "revokeOthersHint": "Wyloguje Cię ze wszystkich urządzeń oprócz tego.",
     "revokeDevice": "Wyloguj",
     "revokeDeviceAria": "Wyloguj z tego urządzenia",
-    "revokeDeviceConfirm": "Wylogować to urządzenie? Sesja zostanie natychmiast zakończona.",
-    "revokeCurrentDeviceConfirm": "Wylogować się z tego urządzenia?",
     "revokeDeviceModal": {
       "title": "Wylogować urządzenie?",
       "subtitle": "Sesja zostanie natychmiast zakończona.",
@@ -225,10 +108,6 @@
     "securityHint": "Jeśli widzisz nieznane sesje, wyloguj je i zmień hasło. Włącz też uwierzytelnianie dwuetapowe w sekcji Moje konto."
   },
   "presence": {
-    "memberCount_one": "{{count}} uczestnik",
-    "memberCount_few": "{{count}} uczestnicy",
-    "memberCount_many": "{{count}} uczestników",
-    "memberCount_other": "{{count}} uczestników",
     "channelMember_one": "1 członek",
     "channelMember_few": "{{count}} członków",
     "channelMember_many": "{{count}} członków",
@@ -293,8 +172,7 @@
     "sendVoice": "Wyślij głosówkę",
     "recordMessage": "Nagraj wiadomość głosową",
     "tooShort": "Nagranie jest za krótkie (min. 0,5 s).",
-    "tooLarge": "Nagranie jest za duże. Maksymalny rozmiar to {{limit}}.",
-    "sendFailed": "Nie udało się wysłać wiadomości głosowej."
+    "tooLarge": "Nagranie jest za duże. Maksymalny rozmiar to {{limit}}."
   },
   "media": {
     "invalidUrl": "Niedozwolony adres pliku.",
@@ -318,8 +196,7 @@
     "failed": "Nie udało się wysłać pliku. Spróbuj ponownie.",
     "attachFile": "Załącz plik",
     "removeFile": "Usuń plik",
-    "maxSizeHint": "Maks. {{size}}",
-    "maxAttachmentHint": "Maks. {{size}} na plik"
+    "maxSizeHint": "Maks. {{size}}"
   },
   "imageCrop": {
     "avatarTitle": "Dopasuj zdjęcie",
@@ -401,7 +278,6 @@
       "muteUser": "Wycisz użytkownika",
       "kickUser": "Wyrzuć użytkownika",
       "durationLabel": "Czas trwania",
-      "chooseDuration": "Wybierz na jak długo chcesz zastosować tę akcję.",
       "confirmKick": "Czy na pewno chcesz wyrzucić {{name}} z kanału?",
       "confirmBan": "Czy na pewno chcesz zbanować {{name}} na tym kanale?",
       "confirmMute": "Czy na pewno chcesz wyciszyć {{name}} na tym kanale?"
@@ -413,8 +289,6 @@
       "noMuted": "Brak wyciszonych użytkowników."
     },
     "slowmode": {
-      "title": "Tryb wolny",
-      "lockedChat": "Zablokowany czat",
       "unlock": "Odblokuj czat",
       "lock": "Zablokuj czat"
     },
@@ -429,8 +303,6 @@
       },
       "action": "Zgłoś kanał",
       "title": "Zgłoś kanał",
-      "sent": "Zgłoszenie zostało wysłane",
-      "sentHint": "Dziękujemy. Administrator rozpatrzy zgłoszenie.",
       "reason": "Powód",
       "details": "Szczegóły (opcjonalnie)",
       "send": "Wyślij zgłoszenie",
@@ -470,11 +342,7 @@
       "uppercase": "Hasło musi zawierać wielką literę.",
       "digit": "Hasło musi zawierać cyfrę.",
       "special": "Hasło musi zawierać znak specjalny (@$!%*?&).",
-      "breach": "To hasło pojawiło się w wycieku danych. Wybierz inne, bezpieczniejsze hasło.",
-      "mismatch": "Nowe hasła nie są identyczne.",
-      "sameAsCurrent": "Nowe hasło musi różnić się od aktualnego.",
-      "required": "Podaj hasło.",
-      "currentRequired": "Podaj aktualne hasło."
+      "breach": "To hasło pojawiło się w wycieku danych. Wybierz inne, bezpieczniejsze hasło."
     },
     "username": {
       "required": "Nazwa użytkownika jest wymagana.",
@@ -492,7 +360,6 @@
     "fields": {
       "username": "Nazwa użytkownika",
       "usernamePlaceholder": "np. jan_kowalski",
-      "usernameHint": "To login, nie e-mail. 3–32 znaki: małe litery, cyfry i _.",
       "password": "Hasło",
       "showPassword": "Pokaż hasło",
       "hidePassword": "Ukryj hasło",
@@ -553,12 +420,7 @@
       "joinedToast": "Dołączono do kanału",
       "joinFailed": "Nie udało się dołączyć",
       "backToChat": "Wróć do czatu",
-      "dismiss": "Nie teraz",
-      "copied": "Link zaproszenia skopiowany",
-      "copyManual": "Skopiuj link ręcznie: {{url}}",
-      "createFailed": "Nie udało się utworzyć zaproszenia",
-      "inviteToChannel": "Zaproś na kanał",
-      "shareLink": "Udostępnij link, aby zaprosić innych na kanał."
+      "dismiss": "Nie teraz"
     },
     "twoFactor": {
       "title": "Weryfikacja 2FA",
@@ -598,7 +460,6 @@
     }
   },
   "settings": {
-    "title": "Ustawienia",
     "nav": {
       "account": "Ustawienia użytkownika",
       "myAccount": "Moje konto",
@@ -607,8 +468,7 @@
       "voice": "Ustawienia głosu",
       "warnings": "Ostrzeżenia",
       "app": "Ustawienia klienta",
-      "logout": "Wyloguj się",
-      "sectionsAria": "Sekcje ustawień"
+      "logout": "Wyloguj się"
     },
     "profile": {
       "subtitle": "Zarządzaj swoim profilem i informacjami widocznymi dla innych użytkowników.",
@@ -630,15 +490,7 @@
       "avatarRemoveFailed": "Nie udało się usunąć zdjęcia",
       "bannerUploadFailed": "Nie udało się wgrać banera",
       "bannerRemoved": "Baner profilu usunięty.",
-      "bannerRemoveFailed": "Nie udało się usunąć banera",
-      "form": {
-        "displayName": "Główna nazwa",
-        "displayNamePlaceholder": "np. Jan Kowalski",
-        "bio": "Krótki opis o sobie",
-        "bioLabel": "Opis",
-        "avatarColor": "Kolor awatara",
-        "avatarColorHint": "Widoczna dla innych, gdy nie masz zdjęcia profilowego. Maks. {{max}} znaków"
-      }
+      "bannerRemoveFailed": "Nie udało się usunąć banera"
     },
     "account": {
       "subtitle": "Zarządzaj danymi logowania i bezpieczeństwem.",
@@ -706,7 +558,6 @@
       "established": "Zał. {{date}}",
       "invitedBy": "Zaproszenie od {{name}}",
       "joinButton": "Dołącz do kanału",
-      "openButton": "Przejdź do kanału",
       "unavailable": "Zaproszenie niedostępne",
       "loadFailed": "Nie udało się wczytać zaproszenia"
     },
@@ -836,10 +687,6 @@
       "contacts": "Kontakty",
       "settings": "Ustawienia",
       "viewProfile": "Zobacz profil"
-    },
-    "mobile": {
-      "menu": "Menu",
-      "sections": "Sekcje"
     }
   },
   "sidebar": {
@@ -876,7 +723,6 @@
       "removeContact": {
         "title": "Usuń kontakt",
         "subtitle": "Ta osoba zniknie z listy znajomych.",
-        "confirm": "Czy na pewno chcesz usunąć ten kontakt z listy?",
         "confirmWithName": "Czy na pewno chcesz usunąć {{name}} z kontaktów?",
         "historyDeleted": "Historia wiadomości zostanie trwale usunięta.",
         "submit": "Usuń kontakt"
@@ -884,7 +730,6 @@
       "deleteChannel": {
         "title": "Usuń kanał",
         "subtitle": "Tej operacji nie można cofnąć.",
-        "confirm": "Czy na pewno chcesz trwale usunąć kanał #{{name}}?",
         "confirmWithName": "Czy na pewno chcesz usunąć kanał „{{name}}”?",
         "messagesDeleted": "Wszystkie wiadomości zostaną trwale usunięte.",
         "submit": "Usuń kanał"
@@ -894,7 +739,6 @@
   "modals": {
     "channelSettings": {
       "title": "Ustawienia kanału",
-      "subtitle": "Zarządzaj kanałem, członkami i moderacją.",
       "generalSubtitle": "Zarządzaj kanałem, zapraszaj członków i zgłaszaj naruszenia.",
       "tabs": {
         "general": "Ogólne",
@@ -907,7 +751,6 @@
       "invite": "ZAPROŚ",
       "delete": "USUŃ",
       "membersTitle": "Członkowie",
-      "membersSubtitle": "Lista osób na kanale.",
       "membersActionsHint": "Lista osób na kanale. Administrator może wyrzucać, banować i wyciszać.",
       "membersAdminTitle": "Administrator",
       "adminNote": "Administratorem jest wyłącznie twórca kanału.",
@@ -971,7 +814,6 @@
       "invite": {
         "label": "NAZWA PO @",
         "placeholder": "nazwa_uzytkownika",
-        "hint": "Wpisz dokładną nazwę logowania (bez spacji, małe litery).",
         "send": "Wyślij zaproszenie",
         "sent": "Zaproszenie do {{handle}} wysłane",
         "sendFailed": "Nie udało się wysłać zaproszenia.",
@@ -1015,150 +857,28 @@
       "about": "O mnie",
       "joined": "Dołączył",
       "editProfile": "Edytuj profil"
-    },
-    "accountSettings": {
-      "title": "Ustawienia",
-      "nav": {
-        "account": "Ustawienia użytkownika",
-        "myAccount": "Moje konto",
-        "profile": "Profil",
-        "sessions": "Urządzenia",
-        "voice": "Ustawienia głosu",
-        "warnings": "Ostrzeżenia",
-        "app": "Ustawienia klienta",
-        "logout": "Wyloguj się",
-        "sectionsAria": "Sekcje ustawień"
-      },
-      "profile": {
-        "subtitle": "Zarządzaj swoim profilem i informacjami widocznymi dla innych użytkowników.",
-        "personalData": "Dane osobowe",
-        "editProfile": "Edytuj profil",
-        "saveChanges": "Zapisz zmiany",
-        "changeBanner": "Zmień baner",
-        "removeBanner": "Usuń baner",
-        "changePhoto": "Zmień zdjęcie",
-        "changeBannerAria": "Zmień baner profilu",
-        "changePhotoAria": "Zmień zdjęcie profilowe",
-        "saved": "Profil zapisany",
-        "saveFailed": "Nie udało się zapisać profilu",
-        "avatarUpdated": "Zdjęcie profilowe zaktualizowane.",
-        "avatarUploadFailed": "Nie udało się wgrać zdjęcia",
-        "avatarRemoved": "Zdjęcie profilowe usunięte.",
-        "avatarRemoveFailed": "Nie udało się usunąć zdjęcia",
-        "bannerUploadFailed": "Nie udało się wgrać banera",
-        "bannerRemoved": "Baner profilu usunięty.",
-        "bannerRemoveFailed": "Nie udało się usunąć banera",
-        "form": {
-          "displayName": "Główna nazwa",
-          "displayNamePlaceholder": "np. Jan Kowalski",
-          "bio": "Krótki opis o sobie",
-          "bioLabel": "Opis",
-          "avatarColor": "Kolor awatara",
-          "avatarColorHint": "Widoczna dla innych, gdy nie masz zdjęcia profilowego. Maks. {{max}} znaków"
-        }
-      },
-      "account": {
-        "subtitle": "Zarządzaj danymi logowania i bezpieczeństwem.",
-        "usernameHint": "Twój login (@{{username}}) służy do logowania i wyszukiwania.",
-        "newUsername": "Nowa nazwa użytkownika",
-        "changeUsername": "Zmień nazwę użytkownika",
-        "usernameChanged": "Nazwa użytkownika została zmieniona. Od teraz loguj się nową nazwą.",
-        "usernameChangeFailed": "Nie udało się zmienić nazwy użytkownika.",
-        "changePassword": "Zmiana hasła",
-        "changePasswordHint": "Minimum 8 znaków, wielka i mała litera, cyfra",
-        "changePasswordSubmit": "Zmień hasło",
-        "passwordChanged": "Hasło zostało zmienione. Sesja na tym urządzeniu pozostaje aktywna.",
-        "passwordChangeFailed": "Nie udało się zmienić hasła.",
-        "deletionScheduled": "Konto oznaczone do usunięcia.",
-        "deletionScheduledBody": "Możesz nadal korzystać z konta do {{date}}. Potem zostanie trwale usunięte. Możesz anulować poniżej.",
-        "managementLead": "Wyłączenie konta natychmiast blokuje logowanie. Oznaczenie do usunięcia daje 7 dni na anulowanie — w tym czasie możesz normalnie korzystać z konta.",
-        "disableTitle": "Wyłącz konto",
-        "disableDesc": "Natychmiast blokujemy logowanie. Profil, wiadomości i kontakty zostają w systemie — administrator może przywrócić konto.",
-        "deleteTitle": "Oznacz konto do usunięcia",
-        "deleteDesc": "Konto zostanie trwale usunięte po 7 dniach. Do tego czasu możesz się normalnie logować i anulować prośbę w ustawieniach.",
-        "confirmDisable": "Potwierdź wyłączenie konta",
-        "confirmDelete": "Potwierdź oznaczenie konta do usunięcia",
-        "confirmPasswordHint": "Wprowadź hasło{{twoFactor}} , aby kontynuować.",
-        "confirmPasswordHintTwoFactor": " i kod 2FA",
-        "disableNoDelete": "Żadne dane nie zostaną usunięte. Po wyłączeniu nie zalogujesz się ponownie, dopóki administrator nie przywróci konta.",
-        "cancelDeletion": "Anuluj usunięcie konta",
-        "cancelDeletionSubmit": "Anuluj usunięcie konta",
-        "cancelDeletionPassword": "Podaj hasło, aby anulować usunięcie.",
-        "cancelDeletionFailed": "Nie udało się anulować usunięcia.",
-        "operationFailed": "Nie udało się wykonać operacji.",
-        "disableAccount": "Wyłącz konto",
-        "markForDeletion": "Oznacz do usunięcia",
-        "sessionsTitle": "Urządzenia",
-        "activeSessions": "Sesje zalogowane na Twoim koncie.",
-        "sessionsLoadFailed": "Nie udało się pobrać sesji.",
-        "sessionRevokeFailed": "Nie udało się wylogować sesji.",
-        "revokeOthersFailed": "Nie udało się wylogować innych sesji."
-      },
-      "warnings": {
-        "title": "Ostrzeżenia",
-        "violations": "Twoje naruszenia regulaminu",
-        "intro": "Ostrzeżenia dotyczą drobnych lub pierwszorazowych naruszeń. Powtarzające się lub poważniejsze naruszenia mogą skutkować tymczasowym zawieszeniem, a rażące — trwałym usunięciem konta.",
-        "history": "Historia ostrzeżeń",
-        "empty": "Nie masz żadnych ostrzeżeń. Tak trzymaj!",
-        "unread": "Nieprzeczytane"
-      }
     }
   },
   "profile": {
     "form": {
-      "displayName": "Główna nazwa",
       "displayNameRequired": "Główna nazwa *",
       "displayNamePlaceholder": "np. Jan Kowalski",
       "displayNameHint": "Widoczna dla innych w czacie. Maks. {{max}} znaków.",
-      "bio": "Krótki opis o sobie",
       "bioPlaceholderOptional": "Krótki opis o sobie (opcjonalnie)",
       "bioLabel": "Opis",
       "avatarColor": "Kolor awatara",
-      "avatarColorOption": "Kolor {{index}}",
-      "avatarColorHint": "Widoczna dla innych, gdy nie masz zdjęcia profilowego. Maks. {{max}} znaków"
+      "avatarColorOption": "Kolor {{index}}"
     }
   },
   "channel": {
-    "settings": {
-      "title": "Ustawienia kanału"
-    },
-    "create": {
-      "title": "Nowy kanał",
-      "hint": "Wprowadź nazwę nowego kanału.",
-      "nameLabel": "Nazwa kanału",
-      "submit": "Utwórz kanał"
-    },
-    "rename": {
-      "title": "Zmień nazwę kanału",
-      "placeholder": "Nowa nazwa kanału",
-      "submit": "Zmień nazwę"
-    },
-    "delete": {
-      "title": "Usuń kanał",
-      "subtitle": "Tej operacji nie można cofnąć.",
-      "confirm": "Czy na pewno chcesz trwale usunąć kanał #{{name}}?",
-      "submit": "Usuń kanał"
-    },
-    "actions": {
-      "create": "Nowy kanał",
-      "delete": "Usuń kanał",
-      "invite": "Zaproś"
-    },
     "members": {
-      "ownerBadge": "właściciel",
-      "admin": "Administrator"
-    },
-    "toast": {
-      "leaveFailed": "Nie udało się opuścić kanału",
-      "avatarUploadFailed": "Nie udało się przesłać avatara kanału",
-      "avatarRemoveFailed": "Nie udało się usunąć avatara kanału"
+      "ownerBadge": "właściciel"
     }
   },
   "call": {
     "invalidServerUrl": "Niedozwolony adres serwera rozmowy.",
     "connectFailed": "Nie udało się połączyć. Spróbuj ponownie.",
     "rejected": "Połączenie zostało odrzucone.",
-    "peerOffline": "Użytkownik jest niedostępny.",
     "peerBusy": "Użytkownik prowadzi już inną rozmowę.",
     "unavailable": "Nie można nawiązać połączenia.",
     "cameraFailed": "Nie udało się włączyć kamery. Sprawdź uprawnienia przeglądarki.",
@@ -1188,9 +908,6 @@
       "minimize": "Minimalizuj",
       "fullscreen": "Pełny ekran",
       "restore": "Przywróć do czatu"
-    },
-    "layout": {
-      "openFullscreen": "Powiększ rozmowę z {{name}}"
     },
     "channel": {
       "join": "Dołącz do rozmowy głosowej",

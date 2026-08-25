@@ -44,7 +44,7 @@ function parseInviteLink(raw: string): ResolvedInviteLink | null {
   return { inviteId, url: raw };
 }
 
-export function extractInviteLinks(text: string): ResolvedInviteLink[] {
+function extractInviteLinks(text: string): ResolvedInviteLink[] {
   const matches = text.match(HTTP_URL_REGEX) ?? [];
   const seen = new Set<string>();
   const invites: ResolvedInviteLink[] = [];

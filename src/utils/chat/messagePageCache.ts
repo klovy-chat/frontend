@@ -312,7 +312,7 @@ export function appendCachedMessage(
   patchLive(key, cached, [...messages, message]);
 }
 
-export function patchCachedMessage(
+function patchCachedMessage(
   key: string,
   messageId: string,
   patch: (m: Message) => Message,

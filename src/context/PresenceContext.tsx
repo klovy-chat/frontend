@@ -24,14 +24,12 @@ export interface Presence {
 type PresenceMap = Record<string, Presence>;
 
 let presenceSnapshot: PresenceMap = {};
-const globalListeners = new Set<() => void>();
 const userListeners = new Map<string, Set<() => void>>();
 
 function emitPresence(userId?: string) {
   if (userId) {
     userListeners.get(userId)?.forEach((l) => l());
   }
-  globalListeners.forEach((l) => l());
 }
 
 function setPresenceMap(updater: (prev: PresenceMap) => PresenceMap) {
@@ -55,7 +53,6 @@ export function clearPresenceSnapshot() {
   if (Object.keys(presenceSnapshot).length === 0) return;
   presenceSnapshot = {};
   userListeners.forEach((set) => set.forEach((l) => l()));
-  globalListeners.forEach((l) => l());
 }
 
 interface PresenceApi {
@@ -263,22 +260,6 @@ export function PresenceProvider({ children }: { children: ReactNode }) {
       {children}
     </PresenceApiContext.Provider>
   );
-}
-
-/** Stable API — does not re-render when presence map changes. */
-export function usePresenceStore(): PresenceApi & { presence: PresenceMap } {
-  const api = useContext(PresenceApiContext) ?? { seed: () => {} };
-  const presence = useSyncExternalStore(
-    (onStoreChange) => {
-      globalListeners.add(onStoreChange);
-      return () => {
-        globalListeners.delete(onStoreChange);
-      };
-    },
-    () => presenceSnapshot,
-    () => presenceSnapshot,
-  );
-  return { presence, seed: api.seed };
 }
 
 /** Seed-only hook — no re-render on status updates. */

@@ -11,7 +11,7 @@ function attachmentExtension(message: Pick<Message, "fileName" | "fileUrl">): st
   return fileExtension(message.fileName ?? message.fileUrl ?? "");
 }
 
-export function isRecordedVoiceNote(
+function isRecordedVoiceNote(
   message: Pick<Message, "fileName" | "durationMs">,
 ): boolean {
   if (message.durationMs != null && message.durationMs > 0) return true;
