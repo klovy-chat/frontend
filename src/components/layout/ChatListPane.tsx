@@ -7,7 +7,7 @@ import {
   getEffectiveStatus,
   PRESENCE_COLORS,
 } from "../../utils/user/presence";
-import { useUserPresence, usePresenceStore } from "../../context/PresenceContext";
+import { useUserPresence } from "../../context/PresenceContext";
 import type { Channel, ChatTarget, Contact } from "../../types";
 import "../../styles/chat/chat-list.css";
 
@@ -28,8 +28,6 @@ interface ChatListPaneProps {
   onContactContextMenu: (e: React.MouseEvent, contact: Contact) => void;
   onChannelContextMenu: (e: React.MouseEvent, channel: Channel) => void;
   onNewChannel: () => void;
-  /** Kept optional for call-site compat; presence is resolved per-row. */
-  getEffectiveStatus?: (c: Contact) => "online" | "away" | "brb" | "dnd" | "offline";
 }
 
 function ContactRow({
@@ -109,24 +107,6 @@ function ContactRow({
         </div>
       )}
     </div>
-  );
-}
-
-function DmOnlineBadge({ contacts }: { contacts: Contact[] }) {
-  const { t } = useTranslation();
-  const { presence } = usePresenceStore();
-  const online = contacts.reduce(
-    (n, c) => n + (presence[c._id]?.isOnline ? 1 : 0),
-    0,
-  );
-  if (online <= 0) return null;
-  return (
-    <span
-      className="chat-list-pane__tab-count chat-list-pane__tab-count--online"
-      title={t("chat.list.onlineCount", { count: online })}
-    >
-      {online}
-    </span>
   );
 }
 
@@ -259,7 +239,6 @@ export function ChatListPane({
             >
               {tabLabels[key]}
               {count > 0 && <span className="chat-list-pane__tab-count">{count}</span>}
-              {key === "dm" ? <DmOnlineBadge contacts={contacts} /> : null}
             </button>
           ))}
         </div>

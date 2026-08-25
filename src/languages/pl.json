@@ -722,8 +722,7 @@
       "mention": "Wzmianka",
       "searchEmpty": "Brak wyników.\nWpisz dokładną nazwę po @.",
       "emptyDm": "Brak wiadomości bezpośrednich.",
-      "emptyChannels": "Brak kanałów.",
-      "onlineCount": "{{count}} online"
+      "emptyChannels": "Brak kanałów."
     },
     "input": {
       "defaultPlaceholder": "Napisz wiadomość…",

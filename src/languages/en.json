@@ -722,8 +722,7 @@
       "mention": "Mention",
       "searchEmpty": "No results.\nEnter an exact @username.",
       "emptyDm": "No direct messages.",
-      "emptyChannels": "No channels.",
-      "onlineCount": "{{count}} online"
+      "emptyChannels": "No channels."
     },
     "input": {
       "defaultPlaceholder": "Write a message…",

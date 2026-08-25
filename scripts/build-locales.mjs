@@ -1137,7 +1137,6 @@ Object.assign(pl, {
 // Fix circular refs - remove broken assignments
 delete pl.contacts;
 delete pl.integrations;
-delete pl.bots;
 pl.modals.accountSettings = pl.settings;
 
 writeFileSync(join(root, "pl.json"), JSON.stringify(pl, null, 2), "utf8");

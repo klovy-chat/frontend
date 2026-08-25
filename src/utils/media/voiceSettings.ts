@@ -167,6 +167,12 @@ function audioDevicesHaveLabels(devices: MediaDeviceInfo[]): boolean {
   );
 }
 
+export async function devicesLabeled(): Promise<boolean> {
+  if (!navigator.mediaDevices?.enumerateDevices) return false;
+  const devices = await navigator.mediaDevices.enumerateDevices();
+  return audioDevicesHaveLabels(devices);
+}
+
 export async function listAudioDevices(): Promise<{
   inputs: MediaDeviceInfo[];
   outputs: MediaDeviceInfo[];
