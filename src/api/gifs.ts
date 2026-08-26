@@ -1,3 +1,11 @@
+// gifs.ts
+// Szukaj GIF: Giphy wyłącznie przez nasz backend.
+// Zakres:
+//  - wynik to URL wklejany jako external media
+//  - query → URL wklejany jako external media, nie upload
+// Klucz Giphy tylko w .env serwera.
+// Przy zmianach: pickers/Gif.tsx, controllers/gifs.rs.
+
 import { apiRequest } from "./client";
 import type { AppLocale } from "../languages";
 

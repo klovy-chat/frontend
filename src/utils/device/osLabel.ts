@@ -1,3 +1,11 @@
+// osLabel.ts
+// Czytelna nazwa OS do listy sesji.
+// Zakres:
+//  - Windows / macOS / Linux / …
+//  - czytelna nazwa OS do listy sesji
+// Ikona: OsIcon.tsx — trzymaj te same gałęzie.
+// Przy zmianach: clientInfo.ts, OsIcon.tsx.
+
 const ARCH_TOKENS = new Set([
   "x86",
   "x86_64",
@@ -18,7 +26,6 @@ function isVersionToken(token: string): boolean {
   return false;
 }
 
-/** Usuwa numery wersji i tokeny architektury — bez mapowania nazw systemów. */
 export function simplifyOsLabel(raw: string): string {
   const trimmed = raw.trim();
   if (!trimmed) return "";

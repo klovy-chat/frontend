@@ -1,3 +1,11 @@
+// channels.ts
+// HTTP kanałów: snapshot listy, szczegóły, CRUD, moderacja.
+// Zakres:
+//  - live join/leave i tak przyjdzie WS do Sidebara
+//  - snapshot listy, CRUD, mute/ban/kick — nie live roster (to WS)
+// Nowa akcja na kanale: ChannelSettings + controllers/channels.rs.
+// Przy zmianach: Sidebar.tsx, ChannelSettings.tsx.
+
 import { apiRequest, withTransientRetry } from "./client";
 import { assertAvatarSize } from "../constants/upload";
 import type { Channel, ChannelDetails, Message } from "../types";
@@ -165,4 +173,3 @@ export function unmuteChannelMember(channelId: string, userId: string) {
     { method: "POST", body: JSON.stringify({ userId }) },
   );
 }
-

@@ -1,11 +1,14 @@
+// useProfileSync.ts
+// Live patch pól profilu w otwartym UI (avatar, nazwa).
+// Zakres:
+//  - unika pełnego refetch listy
+//  - live patch nazwy/avatara bez refetch całej listy
+// Nowe pole live: event WS + ten hook.
+// Przy zmianach: ChatWindow.tsx, Sidebar.tsx.
+
 import { useEffect, useRef } from "react";
 import type { WebSocketClient } from "../api/ws";
-import { WsType } from "../api/wsProtocol";
-
-/**
- * Nasłuchuje globalnych zdarzeń aktualizacji profilu z WebSocket
- * i pozwala konsumentom zsynchronizować dane innych użytkowników w czasie rzeczywistym.
- */
+import { WsType } from "../api/protocol";
 
 interface ProfileInfoUpdate {
   userId: string;

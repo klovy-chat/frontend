@@ -1,9 +1,17 @@
+// Avatar.tsx
+// Avatar: obraz CDN, inicjały, kropka presence.
+// Zakres:
+//  - MediaImage + avatar.ts
+//  - CDN / inicjały / kropka presence; rozmiar przez prop
+// Nowy rozmiar: prop + CSS, nie hardcode w każdym miejscu.
+// Przy zmianach: avatar.ts, MediaImage.tsx, PresenceContext.tsx.
+
 import { useMemo } from "react";
 import { profileImageUrl } from "../../utils/media/avatar";
 import {
   useProfileAvatarStyle,
-  usePublicMediaCacheRevision,
-} from "../../hooks/usePublicMediaCacheRevision";
+  useMediaCache,
+} from "../../hooks/useMediaCache";
 import { userLabel } from "../../utils/user/format";
 
 interface AvatarProps {
@@ -23,7 +31,7 @@ export function Avatar({
   size = 40,
   placeholder,
 }: AvatarProps) {
-  const cacheRevision = usePublicMediaCacheRevision();
+  const cacheRevision = useMediaCache();
   const seed = username ?? displayName ?? "";
   const avatarStyle = useProfileAvatarStyle(image, color, seed);
   const hasPhoto = useMemo(

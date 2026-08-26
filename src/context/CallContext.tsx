@@ -1,3 +1,11 @@
+// CallContext.tsx
+// Stan rozmowy: outgoing/incoming/active, LiveKit, multi-tab Accept.
+// Zakres:
+//  - hangup.ts sync przy pagehide
+//  - kanał głosowy vs DM (peer=null)
+// Nowa kontrolka: CallView + event CALL_* na serwerze, nie tylko lokalny setState.
+// Przy zmianach: IncomingCall.tsx, CallView.tsx, ws/handlers.rs, hangup.ts.
+
 import {
   createContext,
   useCallback,
@@ -19,17 +27,17 @@ import {
   type RemoteParticipant,
 } from "livekit-client";
 import { useWebSocket, useWebSocketConnected } from "./WebSocketContext";
-import { WsType } from "../api/wsProtocol";
+import { WsType } from "../api/protocol";
 import { useAuth } from "./AuthContext";
-import { isAllowedLiveKitUrl } from "../utils/env/livekitAllowlist";
-import { applyAudioOutputDevice, loadVoiceSettings } from "../utils/media/voiceSettings";
+import { isAllowedLiveKitUrl } from "../utils/env/livekit";
+import { applyAudioOutputDevice, loadVoiceSettings } from "../utils/media/voice";
 import { requestVoiceToken, fetchActiveCall } from "../api/voice";
 import { getFriends } from "../api/friends";
 import {
   clearPersistedCall,
   loadPersistedCall,
   savePersistedCall,
-} from "../utils/call/callPersistence";
+} from "../utils/call/saved";
 import {
   clearMatchingHangup,
   getPendingHangupGeneration,
@@ -37,18 +45,17 @@ import {
   queuePendingHangupSync,
   takePendingHangup,
   type PendingHangup,
-} from "../utils/sync/pendingHangup";
-import { buildScreenShareCaptureOptions } from "../utils/call/screenShareQuality";
+} from "../utils/sync/hangup";
+import { buildScreenShareCaptureOptions } from "../utils/call/screenShare";
 import {
   readLocalCameraTrack,
   readLocalScreenShareTrack,
   readRemoteCameraTrack,
   readRemoteScreenShareTrack,
-} from "../utils/call/callMediaTracks";
+} from "../utils/call/tracks";
 
 export type CallMode = "audio" | "video";
 
-/** Stable per-tab id — only one tab's Accept claim wins across multi-tab races. */
 const CALL_TAB_ID =
   typeof crypto !== "undefined" && "randomUUID" in crypto
     ? crypto.randomUUID()
@@ -88,7 +95,7 @@ async function claimDmAcceptAsync(peerId: string): Promise<boolean> {
           return run();
         },
       );
-      // ifAvailable + null lock → undefined/false
+
       return result === true;
     } catch {
       return run();
@@ -164,29 +171,29 @@ interface CallContextValue {
   localScreenShareTrack: Track | null;
   remoteVideoTrack: Track | null;
   remoteScreenShareTrack: Track | null;
-  /** Rozpoczyna połączenie wychodzące do kontaktu. */
+
   startCall: (peer: CallPeer, mode: CallMode) => void;
-  /** Dołącza do kanału głosowego (bez dzwonienia). */
+
   joinChannelVoice: (channel: CallChannel, mode?: CallMode) => void;
-  /** Opuszcza kanał głosowy, jeśli jesteś na nim. */
+
   leaveChannelVoice: () => void;
-  /** Przełącza udział w kanale głosowym. */
+
   toggleChannelVoice: (channel: CallChannel, mode?: CallMode) => void;
-  /** Odświeża listę uczestników kanału głosowego. */
+
   requestChannelVoiceState: (channelId: string) => void;
-  /** Sprawdza, czy kanał ma aktywnych uczestników głosu. */
+
   isChannelVoiceActive: (channelId: string) => boolean;
-  /** Czy użytkownik jest obecnie na kanale głosowym. */
+
   isInChannelVoice: (channelId: string) => boolean;
-  /** Odbiera połączenie przychodzące. */
+
   acceptCall: () => void;
-  /** Accept claim / CALL_ACCEPT in flight — Incoming UI should disable actions. */
+
   acceptInFlight: boolean;
-  /** Odrzuca połączenie przychodzące. */
+
   rejectCall: () => void;
-  /** Anuluje połączenie wychodzące zanim zostanie odebrane. */
+
   cancelCall: () => void;
-  /** Kończy aktywne połączenie. */
+
   endCall: () => void;
   toggleMute: () => void;
   toggleCamera: () => void;
@@ -232,11 +239,11 @@ export function CallProvider({ children }: { children: ReactNode }) {
   const callKindRef = useRef<CallKind>("dm");
   const peerRef = useRef<CallPeer | null>(null);
   const channelRef = useRef<CallChannel | null>(null);
-  /** Guards overlapping LiveKit connects (double ACCEPT before paint). */
+
   const connectInFlightRef = useRef(false);
-  /** True only in the tab that clicked Accept — other ringing tabs must not join LiveKit. */
+
   const acceptedHereRef = useRef(false);
-  /** Blocks double-click Accept before claim/async resolves. */
+
   const acceptInFlightRef = useRef(false);
   const [acceptInFlight, setAcceptInFlight] = useState(false);
   const setAcceptInFlightBoth = useCallback((v: boolean) => {
@@ -248,19 +255,19 @@ export function CallProvider({ children }: { children: ReactNode }) {
   const muteGenRef = useRef(0);
   const cameraGenRef = useRef(0);
   const screenShareGenRef = useRef(0);
-  /** Invalidates in-flight CHANNEL_VOICE_LEAVE when re-joining. */
+
   const voiceOpGenRef = useRef(0);
   const pushToTalkActiveRef = useRef(false);
   const pushToTalkMutedBeforeRef = useRef(true);
   const pushToTalkGenRef = useRef(0);
   const ringTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
-  /** Watchdog after CALL_ACCEPT until CALL_ACCEPTED — must CALL_END if stuck. */
+
   const acceptTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
-  /** Bumped on pagehide/reset so in-flight acceptCall cannot CALL_ACCEPT after hangup. */
+
   const acceptAbortGenRef = useRef(0);
-  /** Bumped on reset so connectToRoom cannot setState(active) after hangup. */
+
   const connectGenRef = useRef(0);
-  // Ukryte elementy <audio> dla zdalnych ścieżek dźwięku.
+
   const audioElsRef = useRef<HTMLAudioElement[]>([]);
 
   const clearRingTimeout = useCallback(() => {
@@ -327,7 +334,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
     if (peerId) clearDmAcceptClaim(peerId);
     acceptedHereRef.current = false;
     setAcceptInFlightBoth(false);
-    // Sync refs immediately so cancel/end before next paint still see idle.
+
     stateRef.current = "idle";
     callKindRef.current = "dm";
     peerRef.current = null;
@@ -407,7 +414,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
           (el as HTMLMediaElement).srcObject = null;
           el.remove();
         });
-        // Another participant may still have camera/screenshare — rescan.
+
         refreshRemoteMediaTracks();
         return;
       }
@@ -489,7 +496,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
         room.on(RoomEvent.Disconnected, () => {
           const state = stateRef.current;
           if (state !== "active" && state !== "connecting") return;
-          // Signal peers before resetCall bumps connectGen (which would skip catch hangup).
+
           const kind = callKindRef.current;
           const target = peerRef.current;
           const activeChannel = channelRef.current;
@@ -576,7 +583,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
           room.disconnect();
           return;
         }
-        // Track may publish slightly after setCameraEnabled resolves.
+
         refreshLocalMediaTracks();
         window.setTimeout(() => {
           if (connectGen === connectGenRef.current && roomRef.current === room) {
@@ -648,12 +655,10 @@ export function CallProvider({ children }: { children: ReactNode }) {
     ],
   );
 
-  /* ── Akcje publiczne ─────────────────────────────────────────────── */
-
   const startCall = useCallback(
     (target: CallPeer, callMode: CallMode) => {
       if (!ws || !myId || stateRef.current !== "idle") return;
-      // Clear only hangup for this peer — never drop unrelated channel_leave.
+
       for (const pending of peekAllPendingHangups()) {
         if (
           pending.kind !== "channel_leave" &&
@@ -693,7 +698,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
             stateRef.current !== "outgoing" ||
             peerRef.current?._id !== target._id
           ) {
-            // Local hangup won the race — compensate so peer does not keep ringing.
+
             queuePendingHangupSync({
               kind: "call_cancel",
               from: myId,
@@ -716,12 +721,12 @@ export function CallProvider({ children }: { children: ReactNode }) {
             return;
           }
           clearRingTimeout();
-          // Match server RINGING_TTL (60s) — unanswered → missed call log.
+
           ringTimeoutRef.current = setTimeout(() => {
             if (stateRef.current !== "outgoing") return;
             const peerId = peerRef.current?._id;
             if (ws && myId && peerId) {
-              // Queue as timeout so flush retry keeps missed-call semantics.
+
               const hangup = {
                 kind: "call_timeout" as const,
                 from: myId,
@@ -754,7 +759,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
     (targetChannel: CallChannel, callMode: CallMode = "audio") => {
       if (!ws || !myId || stateRef.current !== "idle") return;
       voiceOpGenRef.current += 1;
-      // Clear only leave for THIS channel (rejoin) — keep other channel leaves queued.
+
       for (const pending of peekAllPendingHangups()) {
         if (
           pending.kind === "channel_leave" &&
@@ -899,7 +904,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
         return;
       }
       if (!ok) {
-        // Other tab / stale claim — keep Incoming UI; do not resetCall.
+
         setAcceptInFlightBoth(false);
         return;
       }
@@ -933,7 +938,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
         acceptedHereRef.current = false;
         return;
       }
-      // If CALL_ACCEPTED never arrives, hang up so peer is not stuck ringing.
+
       clearAcceptTimeout();
       acceptTimeoutRef.current = setTimeout(() => {
         acceptTimeoutRef.current = undefined;
@@ -1116,7 +1121,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
     setIsPushToTalkActive(true);
     void room.localParticipant.setMicrophoneEnabled(true).then(
       () => {
-        // Stop may have raced — only unmute UI if this start is still active.
+
         if (
           gen !== pushToTalkGenRef.current ||
           !pushToTalkActiveRef.current
@@ -1145,7 +1150,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
         setIsMuted(restoreMuted);
       },
       () => {
-        // Keep UI honest with actual track if restore fails.
+
         const pub = room.localParticipant.getTrackPublication(
           Track.Source.Microphone,
         );
@@ -1178,8 +1183,6 @@ export function CallProvider({ children }: { children: ReactNode }) {
   }, [isPushToTalkActive, stopPushToTalk]);
 
   const clearError = useCallback(() => setError(null), []);
-
-  /* ── Trwałość aktywnej rozmowy (odświeżenie strony) ─────────────── */
 
   const prevStateRef = useRef<CallState | null>(null);
 
@@ -1241,7 +1244,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
               };
             }
           } catch {
-            // Profil peera opcjonalny — wystarczy samo ID.
+
           }
         } catch {
           restoreAttemptedRef.current = false;
@@ -1265,14 +1268,12 @@ export function CallProvider({ children }: { children: ReactNode }) {
         startedAt: restoreStartedAt,
         isRestore: true,
       });
-      // Failed restore leaves idle — allow one more attempt on next effect cycle.
+
       if (stateRef.current === "idle") {
         restoreAttemptedRef.current = false;
       }
     })();
   }, [ws, myId, connectToRoom]);
-
-  /* ── Nasłuch sygnalizacji WebSocket ──────────────────────────────── */
 
   const modeRef = useRef(mode);
   modeRef.current = mode;
@@ -1334,7 +1335,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
         return;
       }
       if (stateRef.current === "incoming" && data.from === myId) {
-        // Only the accepting tab joins; other ringing tabs clear Incoming UI.
+
         const mine =
           acceptedHereRef.current && thisTabOwnsDmAccept(peerId);
         acceptedHereRef.current = false;
@@ -1351,7 +1352,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
     const onRejected = (data: { from: string }) => {
       const target = peerRef.current;
       if (!target) return;
-      // Caller: peer declined. Callee other tabs: we declined elsewhere.
+
       if (
         (stateRef.current === "outgoing" && data.from === target._id) ||
         (stateRef.current === "incoming" && data.from === myId)
@@ -1367,7 +1368,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
       const target = peerRef.current;
       const state = stateRef.current;
       if (!target) return;
-      // Caller (outgoing) or callee (incoming) — block/timeout ends ringing for both.
+
       if (
         (state === "incoming" || state === "outgoing") &&
         (data.from === target._id || data.from === myId)
@@ -1377,7 +1378,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
     };
 
     const onEnded = (data: { from: string }) => {
-      // Channel voice has peer=null — must not tear down LiveKit on DM call:ended.
+
       if (callKindRef.current === "channel") return;
       const target = peerRef.current;
       if (!target || data.from === myId || data.from === target._id) {
@@ -1398,7 +1399,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
         resetCallRef.current();
         return;
       }
-      // Accept/cancel/end terminal failures — clear stuck UI; signal if still live.
+
       if (
         state === "incoming" ||
         state === "connecting" ||
@@ -1497,12 +1498,12 @@ export function CallProvider({ children }: { children: ReactNode }) {
         WsType.CHANNEL_MEMBER_LEFT,
         (e: { channelId?: string; userId?: string }) => {
           if (!e.channelId) return;
-          // Kick/ban/purge for me — same as CHANNEL_LEFT for voice.
+
           if (e.userId && myId && e.userId === myId) {
             leaveIfActiveChannel(e.channelId);
             return;
           }
-          // Peer left: drop them from local voice roster maps.
+
           setChannelVoiceParticipants((prev) => {
             const list = prev[e.channelId!];
             if (!list || !e.userId) return prev;
@@ -1643,7 +1644,6 @@ export function CallProvider({ children }: { children: ReactNode }) {
     );
   }, [ws]);
 
-  // Flush hangups queued during pagehide (encrypt often dies on unload).
   useEffect(() => {
     if (!ws || !wsConnected) return;
     let cancelled = false;
@@ -1681,7 +1681,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
       if (cancelled) return;
       void (async () => {
         let anyFail = false;
-        // Re-peek each iteration so queue bumps / clears do not abort siblings.
+
         while (!cancelled) {
           const hangup = takePendingHangup();
           if (!hangup) break;
@@ -1719,7 +1719,6 @@ export function CallProvider({ children }: { children: ReactNode }) {
     };
   }, [ws, wsConnected]);
 
-  // After WS reconnect, re-announce channel voice membership + refresh active state.
   const voiceWasConnectedRef = useRef(wsConnected);
   useEffect(() => {
     const was = voiceWasConnectedRef.current;
@@ -1736,9 +1735,6 @@ export function CallProvider({ children }: { children: ReactNode }) {
     }
   }, [ws, wsConnected]);
 
-  // Hang up only on real tab close/hide — not on React remount or SPA route changes.
-  // Incoming ring is not bound to this tab: rejecting here would kill the session for other
-  // callee tabs. Last WS disconnect / server TTL clears unanswered ringing.
   useEffect(() => {
     const hangUpFromRefs = () => {
       const state = stateRef.current;
@@ -1748,8 +1744,6 @@ export function CallProvider({ children }: { children: ReactNode }) {
       const activeChannel = channelRef.current;
       clearPersistedCall();
 
-      // Accept claimed but still "incoming" until CALL_ACCEPTED — hang up + drop claim
-      // so reload cannot orphan the session / lock other tabs for 15s.
       if (state === "incoming") {
         if (acceptedHereRef.current || acceptInFlightRef.current) {
           if (target) {
@@ -1830,7 +1824,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
     return () => {
       window.removeEventListener("pagehide", hangUpOnUnload);
       unsubRevoked();
-      // Logout / shell unmount — signal while WS may still be open.
+
       hangUpFromRefs();
       cleanupRoom();
     };

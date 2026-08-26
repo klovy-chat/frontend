@@ -1,3 +1,11 @@
+// App.tsx
+// Trasy publiczne i chronione + powłoka zalogowanego użytkownika.
+// Zakres:
+//  - login/signup/setup/pending/chat/invite/settings
+//  - WS, presence, call, cache wiadomości przeżywają Chat↔Settings
+// Pending whitelist nie dostaje WebSocket — backend i tak zrzuci handshake.
+// Przy zmianach: pages/*, context/*, settings/Settings.tsx.
+
 import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { useEffect } from "react";
 import { useAuth } from "./context/AuthContext";
@@ -5,23 +13,23 @@ import { WebSocketProvider } from "./context/WebSocketContext";
 import { PresenceProvider } from "./context/PresenceContext";
 import { CallProvider } from "./context/CallContext";
 import { CallOverlay } from "./components/call/CallOverlay";
-import { MessageCacheBridge } from "./components/chat/MessageCacheBridge";
-import { FriendshipCacheBridge } from "./components/chat/FriendshipCacheBridge";
-import { UnreadBadgeBridge } from "./components/chat/UnreadBadgeBridge";
-import { MentionSourcesBridge } from "./components/chat/MentionSourcesBridge";
-import { WarningModal } from "./components/common/WarningModal";
-import { AnnouncementModal } from "./components/common/AnnouncementModal";
-import { useIdleAvailability } from "./hooks/useIdleAvailability";
-import { LoginPage } from "./pages/LoginPage";
-import { SignupPage } from "./pages/SignupPage";
-import { ProfileSetupPage } from "./pages/ProfileSetupPage";
-import { PendingApprovalPage } from "./pages/PendingApprovalPage";
-import { ChatPage } from "./pages/ChatPage";
-import { InvitePage } from "./pages/InvitePage";
-import { SettingsPage } from "./settings/SettingsPage";
+import { MessageCache } from "./components/chat/MessageCache";
+import { FriendsCache } from "./components/chat/FriendsCache";
+import { UnreadSync } from "./components/chat/UnreadSync";
+import { Mentions } from "./components/chat/Mentions";
+import { Warning } from "./components/common/Warning";
+import { Announcements } from "./components/common/Announcements";
+import { useIdle } from "./hooks/useIdle";
+import { Login } from "./pages/Login";
+import { Signup } from "./pages/Signup";
+import { ProfileSetup } from "./pages/ProfileSetup";
+import { PendingApproval } from "./pages/PendingApproval";
+import { Chat } from "./pages/Chat";
+import { Invite } from "./pages/Invite";
+import { Settings } from "./settings/Settings";
 import { isPendingWhitelist } from "./utils/auth/whitelist";
-import { setNativeUnreadBadge } from "./utils/device/nativeUnreadBadge";
-import { DesktopUpdateNotice } from "./components/common/DesktopUpdateNotice";
+import { setAppBadge } from "./utils/device/appBadge";
+import { UpdateNotice } from "./components/common/UpdateNotice";
 import { ToastProvider } from "./context/ToastContext";
 import type { User } from "./types";
 
@@ -88,22 +96,21 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-/** Layout route: CallProvider survives Chat ↔ Settings ↔ Invite navigation. */
 function AuthenticatedShell() {
-  useIdleAvailability();
+  useIdle();
   return (
     <ProtectedRoute>
       <WebSocketProvider>
         <PresenceProvider>
           <CallProvider>
-            <MessageCacheBridge />
-            <FriendshipCacheBridge />
-            <UnreadBadgeBridge />
-            <MentionSourcesBridge />
+            <MessageCache />
+            <FriendsCache />
+            <UnreadSync />
+            <Mentions />
             <Outlet />
             <CallOverlay />
-            <WarningModal />
-            <AnnouncementModal />
+            <Warning />
+            <Announcements />
           </CallProvider>
         </PresenceProvider>
       </WebSocketProvider>
@@ -118,7 +125,7 @@ function AppRoutes() {
         path="/login"
         element={
           <PublicRoute>
-            <LoginPage />
+            <Login />
           </PublicRoute>
         }
       />
@@ -126,7 +133,7 @@ function AppRoutes() {
         path="/signup"
         element={
           <PublicRoute>
-            <SignupPage />
+            <Signup />
           </PublicRoute>
         }
       />
@@ -134,7 +141,7 @@ function AppRoutes() {
         path="/setup"
         element={
           <AuthOnlyRoute>
-            <ProfileSetupPage />
+            <ProfileSetup />
           </AuthOnlyRoute>
         }
       />
@@ -142,15 +149,14 @@ function AppRoutes() {
         path="/pending"
         element={
           <WhitelistRoute>
-            {/* No WebSocket — pending users are blocked from /ws; approval is polled. */}
-            <PendingApprovalPage />
+            <PendingApproval />
           </WhitelistRoute>
         }
       />
       <Route element={<AuthenticatedShell />}>
-        <Route path="/" element={<ChatPage />} />
-        <Route path="/settings/:section?" element={<SettingsPage />} />
-        <Route path="/invite/:inviteId" element={<InvitePage />} />
+        <Route path="/" element={<Chat />} />
+        <Route path="/settings/:section?" element={<Settings />} />
+        <Route path="/invite/:inviteId" element={<Invite />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
@@ -163,10 +169,10 @@ export default function App() {
     try { baseTitle = baseTitle.replace(/^[()0-9]+\s*/, "").trim() || "Klovy Chat"; } catch { baseTitle = "Klovy Chat"; }
     let unsub: (() => void) | null = null;
     (async () => {
-      const mod = await import("./utils/sync/unreadSync");
+      const mod = await import("./utils/sync/unread");
       unsub = mod.default.onChange((n: number) => {
         document.title = n > 0 ? `(${n}) ${baseTitle}` : baseTitle;
-        setNativeUnreadBadge(n);
+        setAppBadge(n);
       });
     })();
     return () => { if (unsub) unsub(); };
@@ -174,7 +180,7 @@ export default function App() {
   return (
     <ToastProvider>
       <AppRoutes />
-      <DesktopUpdateNotice />
+      <UpdateNotice />
     </ToastProvider>
   );
 }

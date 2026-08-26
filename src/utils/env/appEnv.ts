@@ -1,13 +1,12 @@
-/**
- * Tryb aplikacji ustawiany przez Vite:
- * - `npm run dev`  → isDevelopment = true
- * - `npm run build` + hosting → isProduction = true
- *
- * To jest odpowiednik backendowego NODE_ENV, ale po stronie frontu
- * Vite sam przełącza te flagi — nie trzeba ich ręcznie zmieniać w kodzie.
- */
+// appEnv.ts
+// DEV vs PROD i czy API idzie wprost (prod) czy przez proxy Vite.
+// Zakres:
+//  - usesDirectBackendUrl
+//  - DEV vs PROD i czy fetch idzie wprost czy przez proxy Vite
+// Zmiana tego flaguje waitBackend i bazę URL — testuj oba tryby.
+// Przy zmianach: backend.ts, waitBackend.ts, api/client.ts.
+
 export const isDevelopment = import.meta.env.DEV;
 const isProduction = import.meta.env.PROD;
 
-/** W dev requesty idą przez proxy Vite; w prod bezpośrednio na VITE_BACKEND_URL. */
 export const usesDirectBackendUrl = isProduction;

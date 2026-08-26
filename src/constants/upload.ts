@@ -1,34 +1,34 @@
+// upload.ts
+// Limity rozmiaru i liczby uploadów — kontrakt z backendem.
+// Zakres:
+//  - załącznik, obraz czatu, avatar, banner, etykiety MB
+//  - bajty i liczba plików; etykiety MB do UI
+// Zmiana limitu bez backendu = ciche 413 u użytkowników.
+// Przy zmianach: utils/attachments.rs, utils/upload.rs, MessageInput.tsx.
+
 import i18n from "../i18n/config";
 import { ApiError } from "../api/client";
 
-/** Maximum non-image chat attachment size (10 MB) — must match backend `MAX_ATTACHMENT_BYTES`. */
 export const MAX_ATTACHMENT_SIZE_BYTES = 10 * 1024 * 1024;
 
-/** Maximum chat image upload size (10 MB) — must match backend `MAX_IMAGE_ATTACHMENT_BYTES`. */
 export const MAX_IMAGE_ATTACHMENT_SIZE_BYTES = MAX_ATTACHMENT_SIZE_BYTES;
 
-/** Maximum avatar size (6 MB) — must match backend `MAX_AVATAR_BYTES`. */
 export const MAX_AVATAR_SIZE_BYTES = 6 * 1024 * 1024;
 
-/** Maximum profile banner size (7 MB) — must match backend `MAX_BANNER_BYTES`. */
 export const MAX_BANNER_SIZE_BYTES = 7 * 1024 * 1024;
 
-/** Human-readable max attachment size, e.g. "10 MB". */
 export const MAX_ATTACHMENT_SIZE_LABEL = `${Math.round(
   MAX_ATTACHMENT_SIZE_BYTES / (1024 * 1024),
 )} MB`;
 
-/** Human-readable max image attachment size, e.g. "10 MB". */
 export const MAX_IMAGE_ATTACHMENT_SIZE_LABEL = `${Math.round(
   MAX_IMAGE_ATTACHMENT_SIZE_BYTES / (1024 * 1024),
 )} MB`;
 
-/** Human-readable max avatar size, e.g. "6 MB". */
 export const MAX_AVATAR_SIZE_LABEL = `${Math.round(
   MAX_AVATAR_SIZE_BYTES / (1024 * 1024),
 )} MB`;
 
-/** Human-readable max banner size, e.g. "7 MB". */
 export const MAX_BANNER_SIZE_LABEL = `${Math.round(
   MAX_BANNER_SIZE_BYTES / (1024 * 1024),
 )} MB`;
@@ -68,7 +68,7 @@ const ALLOWED_ATTACHMENT_MIME_TYPES: Record<
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   ],
   txt: ["text/plain"],
-  // Voice notes (MediaRecorder) i przesyłane pliki audio.
+
   webm: ["audio/webm", "video/webm"],
   ogg: ["audio/ogg", "video/ogg", "application/ogg"],
   wav: ["audio/wav", "audio/x-wav", "audio/wave", "audio/vnd.wave"],
@@ -87,7 +87,6 @@ export function formatUploadLimitMb(bytes: number): string {
   return `${Math.round(bytes / (1024 * 1024))} MB`;
 }
 
-/** Strip parameters such as `;codecs=opus` from a MIME type. */
 export function normalizeMimeType(mime: string): string {
   return mime.trim().toLowerCase().split(";")[0]?.trim() ?? "";
 }
@@ -160,7 +159,6 @@ export function assertBannerSize(file: File): void {
   }
 }
 
-/** Must match backend `MAX_CHAT_ATTACHMENTS_PER_WINDOW`. */
 export const MAX_CHAT_ATTACHMENTS_PER_WINDOW = 20;
 
 export function formatChatUploadError(error: unknown): string {

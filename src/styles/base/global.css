@@ -1,3 +1,12 @@
+/* global.css
+   Reset, zmienne kolorów, typografia, scrollbar, cursor.
+   Zakres:
+    - tokeny --bg-*, --border, font
+    - reset, scrollbar, kursor; nowy kolor = zmienna, nie hex w JSX
+   Nowy kolor motywu: zmienna tutaj, nie hex w komponencie.
+   Przy zmianach: layout.css, całe UI.
+ */
+
 :root {
   --bg-shell: #0B0B0E;
   --bg-chat: var(--bg-panel);

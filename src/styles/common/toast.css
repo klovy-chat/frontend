@@ -1,3 +1,12 @@
+/* toast.css
+   Kolejka toast (pozycja, sukces/błąd).
+   Zakres:
+    - animacja wjazdu
+    - pozycja i wjazd sukces/błąd; nie walidacja formularza
+   Nie używaj do błędów walidacji formularza.
+   Przy zmianach: ToastContext.tsx.
+ */
+
 .toast-viewport {
   position: fixed;
   bottom: calc(24px + var(--safe-bottom));

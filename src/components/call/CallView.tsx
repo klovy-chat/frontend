@@ -1,3 +1,11 @@
+// CallView.tsx
+// UI aktywnej rozmowy (siatka, mute, kamera, screenshare).
+// Zakres:
+//  - DM i voice kanału
+//  - mute/kamera/share; stan tylko z CallContext
+// Stan weź z CallContext — tu nie trzymaj drugiego źródła prawdy.
+// Przy zmianach: CallContext.tsx, view.css, screenShare.ts.
+
 import {
   useEffect,
   useRef,
@@ -20,7 +28,7 @@ import {
 import { Avatar } from "../common/Avatar";
 import { userLabel } from "../../utils/user/format";
 import { useCall } from "../../context/CallContext";
-import "../../styles/call/call-view.css";
+import "../../styles/call/view.css";
 
 type CallLayout = "floating" | "minimized" | "fullscreen";
 

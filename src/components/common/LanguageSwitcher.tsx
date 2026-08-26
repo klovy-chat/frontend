@@ -1,3 +1,11 @@
+// LanguageSwitcher.tsx
+// Szybki PL/EN na ekranach auth.
+// Zakres:
+//  - bez zapisu profilu (jeszcze nie ma sesji)
+//  - PL/EN przed sesją; zalogowany → LanguageSettings
+// Zalogowany zmienia język w LanguageSettings.
+// Przy zmianach: LocaleContext.tsx, Login.tsx.
+
 import { useTranslation } from "react-i18next";
 import { useLocale } from "../../context/LocaleContext";
 import {

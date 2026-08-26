@@ -1,8 +1,12 @@
-/* ============================================================
-   KLOVY AUTH — auth.css
-   ============================================================ */
+/* auth.css
+   Ekrany logowania/rejestracji (split, formularz, karuzela).
+   Zakres:
+    - .auth-*
+    - split, formularz, karuzela; też mobile gate DesktopOnly
+   DesktopOnly też importuje ten plik na mobile gate.
+   Przy zmianach: AuthLayout.tsx, Login.tsx, DesktopOnly.tsx.
+ */
 
-/* ── Global font reset ── */
 .al-page,
 .al-page *,
 .al-page *::before,
@@ -11,7 +15,6 @@
   box-sizing: border-box;
 }
 
-/* ── Page ── */
 .al-page {
   min-height: 100vh;
   display: flex;
@@ -56,7 +59,6 @@
   outline: none;
 }
 
-/* ── Card shell ── */
 .al-card {
   position: relative;
   z-index: 1;
@@ -71,7 +73,6 @@
   animation: klovy-slide-in 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* Jedna kolumna — login, signup, setup (bez slidera) */
 .al-card--solo {
   grid-template-columns: 1fr;
   width: min(480px, 100%);
@@ -83,7 +84,6 @@
   padding: 48px 44px;
 }
 
-/* ── Left side ── */
 .al-left {
   padding: 44px 40px;
   display: flex;
@@ -93,7 +93,6 @@
   background: var(--bg-panel);
 }
 
-/* Brand */
 .al-brand {
   display: flex;
   align-items: center;
@@ -139,7 +138,6 @@
   margin-top: 1px;
 }
 
-/* Title */
 .al-title {
   font-size: 1.35rem;
   font-weight: 600;
@@ -154,7 +152,6 @@
   margin: 0 0 1.75rem;
 }
 
-/* Form */
 .al-form {
   display: flex;
   flex-direction: column;
@@ -197,7 +194,6 @@
 
 .al-forgot:hover { opacity: 0.75; }
 
-/* Input */
 .al-input-wrap {
   position: relative;
 }
@@ -257,7 +253,6 @@
 
 .al-toggle-pass:hover { color: var(--accent); }
 
-/* Submit button */
 .al-btn-submit {
   width: 100%;
   padding: 13px;
@@ -313,7 +308,6 @@
   color: var(--accent);
 }
 
-/* Error */
 .al-error {
   display: flex;
   align-items: center;
@@ -326,7 +320,6 @@
   color: var(--danger);
 }
 
-/* Success */
 .al-success {
   display: flex;
   align-items: center;
@@ -339,7 +332,6 @@
   color: var(--success);
 }
 
-/* Switch link */
 .al-switch {
   margin-top: 1.25rem;
   text-align: center;
@@ -356,7 +348,6 @@
 
 .al-switch a:hover { opacity: 0.75; }
 
-/* Resend */
 .al-resend {
   font-size: 0.78rem;
   color: var(--text-dim);
@@ -371,14 +362,12 @@
 
 .al-link:hover { opacity: 0.75; }
 
-/* Divider */
 .al-divider {
   height: 1px;
   background: var(--border-light);
   margin: 1.5rem 0 1.25rem;
 }
 
-/* Signup */
 .al-signup {
   font-size: 0.82rem;
   color: var(--text-muted);
@@ -386,7 +375,6 @@
   margin-bottom: 0.85rem;
 }
 
-/* Legal */
 .al-legal {
   font-size: 0.72rem;
   color: var(--text-dim);
@@ -401,10 +389,8 @@
 
 .al-legal a:hover { color: var(--text-muted); }
 
-/* Footer slot */
 .al-footer { margin-top: 0; }
 
-/* ── Right side — slider ── */
 .al-right {
   position: relative;
   display: flex;
@@ -493,7 +479,6 @@
   margin: 0;
 }
 
-/* Dots */
 .al-dots {
   display: flex;
   justify-content: center;
@@ -519,7 +504,6 @@
   transform: scale(1.5);
 }
 
-/* ── Turnstile ── */
 .turnstile-wrap {
   width: 100%;
   min-height: 65px;
@@ -542,9 +526,6 @@
   background: var(--danger-dim);
 }
 
-/* ── Legacy compat ── */
-
-/* ── Custom checkbox (terms) ── */
 .al-checkbox-wrap {
   display: flex;
   align-items: flex-start;
@@ -603,7 +584,6 @@
 
 .al-checkbox-text a:hover { opacity: 0.75; }
 
-/* ── Responsive ── */
 @media (max-width: 860px) {
   .al-card {
     grid-template-columns: 1fr;
@@ -626,7 +606,6 @@
   .al-title { font-size: 1.2rem; }
 }
 
-/* ── Autofill override ── */
 .al-input-wrap input:-webkit-autofill,
 .al-input-wrap input:-webkit-autofill:hover,
 .al-input-wrap input:-webkit-autofill:focus,
@@ -640,7 +619,6 @@
   transition: background-color 9999s ease-in-out 0s;
 }
 
-/* ── ProfileSetupPage feature cards ── */
 .ps-features {
   display: flex;
   flex-direction: column;
@@ -697,7 +675,6 @@
   margin: 0;
 }
 
-/* ── Invite page ── */
 .al-card--invite {
   display: flex;
   flex-direction: column;

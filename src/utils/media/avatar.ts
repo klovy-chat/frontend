@@ -1,8 +1,16 @@
+// avatar.ts
+// Kolor fallback, URL avatara i bannera, style CSS-in-js.
+// Zakres:
+//  - indeks koloru jak ColorPicker
+//  - kolor fallback, URL avatara/bannera, indeks palety
+// Nowa paleta: tu + ColorPicker + ewentualnie backend default.
+// Przy zmianach: Avatar.tsx, ColorPicker.tsx.
+
 const PALETTE = [
-  "#3b82f6", // blue
-  "#f59e0b", // gold
-  "#10b981", // mint
-  "#ec4899", // pink
+  "#3b82f6",
+  "#f59e0b",
+  "#10b981",
+  "#ec4899",
 ];
 
 const AVATAR_IMAGES = [
@@ -51,8 +59,8 @@ import {
   normalizeMediaKey,
   publicCdnUrl,
 } from "./cdn";
-import { getPublicMediaCacheVersion } from "./cdnCacheVersion";
-import { isAllowedExternalMediaUrl, isSafeProfileUploadPath } from "./mediaAllowlist";
+import { getPublicMediaCacheVersion } from "./cdnVersion";
+import { isAllowedExternalMediaUrl, isSafeProfileUploadPath } from "./allowedMedia";
 
 function resolveProfileMediaUrl(
   path: string,

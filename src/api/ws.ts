@@ -1,13 +1,21 @@
-import { sanitizeWsPayload } from "../utils/chat/wsPayload";
+// ws.ts
+// Klient WebSocket: reconnect, ping, encrypt ramek, on(type).
+// Zakres:
+//  - prod bez klucza crypto nie wysyła plaintextu
+//  - reconnect, ping, szyfrowanie ramek, subskrypcja on(type)
+// Nowy type ramki: tu subskrypcja + ws/handlers.rs pod tą samą nazwą.
+// Przy zmianach: protocol.ts, WebSocketContext.tsx, ws/encrypt.rs.
+
+import { sanitizeWsPayload } from "../utils/chat/socketPayload";
 import {
   WsFrameCrypto,
   WS_CRYPTO_QUERY_PARAM,
   type WsCryptoSession,
-} from "../utils/chat/wsCrypto";
-import { getBackendBaseUrl } from "../utils/env/backendUrl";
+} from "../utils/chat/socketCrypto";
+import { getBackendBaseUrl } from "../utils/env/backend";
 import { usesDirectBackendUrl } from "../utils/env/appEnv";
 import { CLIENT_QUERY_PARAM, CLIENT_QUERY_VALUE } from "../utils/env/clientId";
-import { WsType, type WsFrame } from "./wsProtocol";
+import { WsType, type WsFrame } from "./protocol";
 
 export type WsHandler = (payload: any) => void;
 
@@ -21,12 +29,8 @@ export interface WebSocketClientOptions {
   resolveCrypto?: () => Promise<WsCryptoSession | undefined>;
 }
 
-/**
- * Client app-level ping interval. Browsers auto-answer protocol pings but never
- * surface them to JS, so we need a tiny JSON ping to detect a dead server.
- */
 const CLIENT_PING_INTERVAL_MS = 45_000;
-/** Force reconnect if no server traffic (incl. pong) arrives. */
+
 const IDLE_TIMEOUT_MS = 90_000;
 
 function getWsUrl(cryptoToken?: string): string {
@@ -49,7 +53,6 @@ function getWsUrl(cryptoToken?: string): string {
   return base.toString();
 }
 
-/** Klient natywnego WebSocket — odpowiednik HTTP `apiRequest` z client.ts. */
 export class WebSocketClient {
   private ws: WebSocket | null = null;
   private handlers = new Map<string, Set<WsHandler>>();
@@ -84,7 +87,7 @@ export class WebSocketClient {
       try {
         handler(status);
       } catch {
-        // ignoruj błędy subskrybentów statusu
+
       }
     }
   }
@@ -93,7 +96,6 @@ export class WebSocketClient {
     return this.status;
   }
 
-  /** Subskrybuj zmiany stanu połączenia. Wywołuje handler od razu z bieżącym stanem. */
   onStatusChange(handler: WsStatusHandler): () => void {
     this.statusHandlers.add(handler);
     handler(this.status);
@@ -161,8 +163,7 @@ export class WebSocketClient {
     try {
       await this.ensureFrameCrypto();
     } catch (err) {
-      // Prod wymaga szyfrowania ramek — chwilowy 502/CSRF na /ws-crypto nie może
-      // zostawić statusu "connecting" bez pętli reconnect.
+
       if (import.meta.env.DEV) {
         console.warn("[ws] Nie udało się pobrać klucza szyfrującego:", err);
       }
@@ -170,7 +171,6 @@ export class WebSocketClient {
       return;
     }
 
-    // W produkcji backend odrzuca handshake bez tokenu szyfrowania.
     if (usesDirectBackendUrl && !this.activeCrypto?.token) {
       this.scheduleReconnect();
       return;
@@ -201,7 +201,7 @@ export class WebSocketClient {
     };
 
     this.ws.onerror = () => {
-      // reconnect obsługuje onclose
+
     };
   }
 
@@ -229,7 +229,7 @@ export class WebSocketClient {
       if (safePayload == null) return;
       this.dispatch(frame.type, safePayload);
     } catch {
-      // ignoruj uszkodzone ramki
+
     }
   }
 
@@ -286,12 +286,10 @@ export class WebSocketClient {
     }
   }
 
-  /** Wyślij wiadomość do serwera. Zwraca Promise — false gdy socket nie OPEN / encrypt fail. */
   async send(type: string, payload?: unknown): Promise<boolean> {
     return this.sendFrame({ type, payload: payload ?? {} });
   }
 
-  /** Subskrybuj typ wiadomości z serwera. Zwraca funkcję rezygnacji. */
   subscribe(type: string, handler: WsHandler): () => void {
     if (!this.handlers.has(type)) {
       this.handlers.set(type, new Set());

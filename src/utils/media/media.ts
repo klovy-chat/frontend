@@ -1,14 +1,16 @@
+// media.ts
+// URL załącznika: CDN, legacy /api/messages/attachment, thumbs.
+// Zakres:
+//  - resolveMediaUrl nie jest w pełni idempotentny — nie wołaj dwa razy na wynik
+//  - CDN, legacy /api/…/attachment, thumbs — resolve raz
+// Stare linki przepisuj tutaj, nie w dymku.
+// Przy zmianach: MediaImage.tsx, messages.ts (komentarz historyczny o podwójnym resolve).
+
 import { isAttachmentKey, publicCdnUrl } from "./cdn";
-import { isAllowedExternalMediaUrl, isSafeMessageUploadPath } from "./mediaAllowlist";
+import { isAllowedExternalMediaUrl, isSafeMessageUploadPath } from "./allowedMedia";
 import { CLIENT_HEADER_NAME, CLIENT_IDENTIFIER } from "../env/clientId";
 import i18n from "../../i18n/config";
 
-/**
- * Pobiera zasób medialny. Dla adresów własnego backendu dołącza identyfikator
- * klienta (wymagany przez filtr `client_guard`) i wysyła ciasteczka. Dla
- * zewnętrznych, dozwolonych hostów (CDN/GIF) pomija nagłówek (uniknięcie
- * preflightu blokowanego przez CDN) oraz ciasteczka (higiena).
- */
 export function fetchMediaResource(url: string): Promise<Response> {
   const isExternal =
     /^https?:\/\//i.test(url) && isAllowedExternalMediaUrl(url);
@@ -26,7 +28,6 @@ function attachmentCdnUrl(path: string): string {
   return publicCdnUrl(path);
 }
 
-/** Rewrites old `/api/messages/attachment?path=…` URLs to CDN keys. */
 function extractLegacyAttachmentPath(url: string): string | null {
   try {
     const parsed = new URL(url);
@@ -71,10 +72,6 @@ export function resolveMediaUrl(fileUrl: string): string | null {
   return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
 }
 
-/**
- * Derive thumbnail storage key from a full attachment WebP key.
- * `…/{uuid}.webp` → `…/{uuid}.thumb.webp`. Returns null for non-webp / already-thumb.
- */
 export function attachmentThumbKey(fileUrl: string): string | null {
   const trimmed = fileUrl.trim().replace(/^\/+/, "");
   if (!trimmed || /^https?:\/\//i.test(trimmed)) return null;
@@ -84,12 +81,10 @@ export function attachmentThumbKey(fileUrl: string): string | null {
   return `${trimmed.slice(0, -".webp".length)}.thumb.webp`;
 }
 
-/** Prefer thumbnail URL for chat bubbles; falls back to full key when no thumb convention. */
 export function resolveChatImagePreviewUrl(fileUrl: string): string {
   return attachmentThumbKey(fileUrl) ?? fileUrl.trim();
 }
 
-/** @deprecated Use resolveMediaUrl. */
 export function legacyAttachmentFallbackUrl(fileUrl: string): string | null {
   return resolveMediaUrl(fileUrl);
 }

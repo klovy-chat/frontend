@@ -1,3 +1,11 @@
+// invites.ts
+// HTTP kodów zaproszeń do kanału.
+// Zakres:
+//  - create / preview / consume
+//  - create / preview / consume kodu kanału
+// Expiry i max uses są w modelu Mongo, nie tutaj.
+// Przy zmianach: pages/Invite.tsx, model/invites.rs.
+
 import { apiRequest } from "./client";
 
 export interface ChannelInvite {
@@ -10,10 +18,6 @@ export interface ChannelInvite {
   expiresAt?: string | null;
 }
 
-/**
- * Creates a multi-use invite link for a channel.
- * `maxUses` = null/undefined means unlimited joins; a positive number caps joins.
- */
 export function createChannelInvite(channelId: string, maxUses?: number | null) {
   return apiRequest<ChannelInvite>(`/api/channel/${channelId}/invites`, {
     method: "POST",

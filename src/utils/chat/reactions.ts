@@ -1,7 +1,13 @@
+// reactions.ts
+// Zliczanie i optymistyczny toggle reakcji.
+// Zakres:
+//  - zanim wróci WS
+//  - optymistyczny toggle zanim wróci WS
+// Serwer i tak autoryzuje; merge.ts broni przed wipe.
+// Przy zmianach: MessageBubble.tsx, ws react handler.
+
 import type { MessageReactions } from "../../types";
 
-// Klucz reakcji to emoji (kilka znaków). Odrzucamy nienaturalnie długie klucze
-// z niezaufanych danych (WS/REST), by nie zaśmiecać stanu/UI.
 const MAX_REACTION_KEY_LENGTH = 32;
 
 export function normalizeReactions(raw: unknown): MessageReactions {

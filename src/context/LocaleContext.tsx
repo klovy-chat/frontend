@@ -1,3 +1,11 @@
+// LocaleContext.tsx
+// Język UI + persist i PATCH profilu.
+// Zakres:
+//  - współpraca z i18n i formatowaniem dat
+//  - persist języka + PATCH profilu gdy jest sesja
+// Nowy locale: JSON tłumaczeń + ten plik + LanguageSettings.
+// Przy zmianach: i18n/config.ts, languages/index.ts.
+
 import {
   createContext,
   useCallback,
@@ -16,7 +24,7 @@ import {
   normalizeLocale,
   type AppLocale,
 } from "../languages";
-import { saveStoredLocale } from "../utils/locale/localeStorage";
+import { saveStoredLocale } from "../utils/locale/storage";
 import { useAuth } from "./AuthContext";
 
 interface LocaleContextValue {
@@ -57,7 +65,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
           const updated = await updateLanguage(normalized);
           updateUser(updated);
         } catch {
-          // local preference still applied
+
         }
       }
     },

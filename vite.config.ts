@@ -1,8 +1,16 @@
+// vite.config.ts
+// Build i dev-server frontendu (Vite + React, w prod Cloudflare).
+// Zakres:
+//  - proxy /api, /whitelist, /ws na backend w DEV
+//  - normalizacja VITE_BACKEND_URL
+// Wyłączony backend ma nie spamować konsoli — log proxy jest throttled.
+// Przy zmianach: api/client.ts, api/ws.ts, utils/env/backend.ts.
+
 import { defineConfig, loadEnv, type ProxyOptions } from "vite";
 import type { IncomingMessage } from "node:http";
 import type { Socket } from "node:net";
 import react from "@vitejs/plugin-react";
-import { normalizeBackendUrl } from "./src/utils/env/backendUrl";
+import { normalizeBackendUrl } from "./src/utils/env/backend";
 
 import { cloudflare } from "@cloudflare/vite-plugin";
 
@@ -58,8 +66,6 @@ function backendProxy(
       attachBackendProxyGuard(proxy, label, target);
       if (!ws) return;
 
-      // Niektóre warstwy pośrednie zdejmują hop-by-hop `Connection` — bez
-      // `upgrade` Axum odrzuca handshake ("Connection header did not include 'upgrade'").
       proxy.on("proxyReqWs", (proxyReq) => {
         proxyReq.setHeader("Connection", "Upgrade");
         proxyReq.setHeader("Upgrade", "websocket");
@@ -108,10 +114,7 @@ export default defineConfig(({ mode, command }) => {
   }
 
   return {
-    // `@cloudflare/vite-plugin` w `vite dev` przejmuje upgrade WebSocket i
-    // kieruje go do Miniflare zamiast do `server.proxy` — przez to backend
-    // dostaje zwykły GET bez `Connection: upgrade`. Plugin zostawiamy na build
-    // (Pages/Workers); lokalny dev idzie na czystym Vite + proxy.
+
     plugins: [react(), ...(command === "build" ? [cloudflare()] : [])],
     server: {
       host: "127.0.0.1",

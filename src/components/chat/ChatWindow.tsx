@@ -1,3 +1,12 @@
+// ChatWindow.tsx
+// Otwarta rozmowa: historia, wysyłka, edit, react, mark-read, przyjaźń.
+// Zakres:
+//  - cache HTTP+WS
+//  - optimistic pending
+//  - throttled mark-read kanału
+// Nie bierz pending mark-read tutaj przy visibility — UnreadSync jest właścicielem flush.
+// Przy zmianach: MessageInput.tsx, messageCache.ts, markRead.ts, UnreadSync.tsx.
+
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -11,10 +20,10 @@ import { checkFriendship } from "../../api/friends";
 import { toggleContactBlock } from "../../api/contacts";
 import { useAuth } from "../../context/AuthContext";
 import { useWebSocket, useWebSocketConnected } from "../../context/WebSocketContext";
-import { WsType } from "../../api/wsProtocol";
+import { WsType } from "../../api/protocol";
 import { useCall, type CallPeer } from "../../context/CallContext";
 import { userLabel, availabilityStatusLabel } from "../../utils/user/format";
-import { stripFormatting } from "../../utils/chat/messageFormat";
+import { stripFormatting } from "../../utils/chat/format";
 import {
   isVoiceAttachment,
   resolveUploadMessageType,
@@ -23,8 +32,8 @@ import {
 import {
   extractExternalMediaLinks,
   resolveSingleExternalMediaSend,
-} from "../../utils/media/externalMediaLinks";
-import { isAllowedGifMediaUrl } from "../../utils/media/mediaAllowlist";
+} from "../../utils/media/mediaLinks";
+import { isAllowedGifMediaUrl } from "../../utils/media/allowedMedia";
 import { useProfileSync } from "../../hooks/useProfileSync";
 import { presenceColor } from "../../utils/user/presence";
 import {
@@ -43,25 +52,25 @@ import {
   patchMessagePageCacheLive as patchCacheLive,
   patchCachedMessageEverywhere,
   subscribePendingDrop,
-} from "../../utils/chat/messagePageCache";
-import { isPendingAged } from "../../utils/chat/resendPendingOnReconnect";
+} from "../../utils/chat/messageCache";
+import { isPendingAged } from "../../utils/chat/resend";
 import {
   publishSidebarTipFromMessage,
   publishSidebarTipRevert,
-} from "../../utils/chat/listPreview";
+} from "../../utils/chat/preview";
 import {
   getPendingMarkReadGeneration,
   queuePendingMarkRead,
   queuePendingMarkReadSync,
   trackMarkReadInFlight,
-} from "../../utils/sync/pendingMarkRead";
+} from "../../utils/sync/markRead";
 import {
   getCachedFriendship,
   getFriendshipEpoch,
   setCachedFriendship,
   subscribeFriendshipInvalidation,
-} from "../../utils/chat/friendshipCache";
-import { mergeMessagePatch, mergePreferReactions } from "../../utils/chat/mergeMessage";
+} from "../../utils/chat/friendsCache";
+import { mergeMessagePatch, mergePreferReactions } from "../../utils/chat/merge";
 import {
   normalizeMessage,
 } from "../../utils/chat/messages";
@@ -71,12 +80,12 @@ import {
   toggleReactionLocal,
 } from "../../utils/chat/reactions";
 import { Avatar } from "../common/Avatar";
-import { OtherUserProfileModal } from "../profile/OtherUserProfileModal";
+import { OtherProfile } from "../profile/OtherProfile";
 import { MessageList } from "./MessageList";
 import { MessageInput } from "./MessageInput";
-import { DeleteMessageModal } from "./DeleteMessageModal";
-import { ImageLightbox, type LightboxItem } from "./ImageLightbox";
-import { ChatToolsPanel } from "./ChatToolsPanel";
+import { DeleteMessage } from "./DeleteMessage";
+import { Lightbox, type LightboxItem } from "./Lightbox";
+import { ChatTools } from "./ChatTools";
 import type {
   ChatTarget,
   Contact,
@@ -89,7 +98,7 @@ import {
   wrapOutgoingContent,
   unwrapIncomingMessage,
   unwrapIncomingMessages,
-} from "../../crypto/messageContent";
+} from "../../crypto/encrypt";
 
 type ToolsPanelMode = "pinned" | "search" | null;
 
@@ -98,11 +107,10 @@ function writeMessagePageCache(
   messages: Message[],
   hasMore?: boolean,
 ) {
-  // Default: live patch — HTTP loaders call writeCacheEntry / setMessagePageCache directly.
+
   patchCacheLive(chatCacheKey(target), messages, hasMore);
 }
 
-/** Merge HTTP page with live WS messages so revalidate does not drop newer frames. */
 function mergeHttpWithLive(
   http: Message[],
   live: Message[],
@@ -128,7 +136,7 @@ function mergeHttpWithLive(
     map.set(m._id, {
       ...cur,
       ...m,
-      // Prefer whichever side has the edit, keep newer content accordingly.
+
       content: m.edited || cur.edited
         ? m.edited
           ? m.content
@@ -137,7 +145,7 @@ function mergeHttpWithLive(
       edited: Boolean(cur.edited || m.edited),
       editedAt: m.editedAt ?? cur.editedAt,
       read: Boolean(cur.read || m.read),
-      // Empty `{}` from live must not wipe richer HTTP reactions during revalidate.
+
       reactions: mergePreferReactions(m.reactions, cur.reactions),
       pending: false,
       pinned: m.pinned ?? cur.pinned,
@@ -159,7 +167,7 @@ function messageSenderId(msg: Message): string | undefined {
 }
 
 function replacePendingWithServer(prev: Message[], next: Message, userId: string): Message[] {
-  // Drop any optimistic that matches this server row (nonce or content/file).
+
   const withoutMatchedPending = prev.filter((m) => {
     if (!m.pending || messageSenderId(m) !== userId) return true;
     if (m._id === next._id) return true;
@@ -186,7 +194,6 @@ function replacePendingWithServer(prev: Message[], next: Message, userId: string
   return [...withoutMatchedPending, next];
 }
 
-/** Aktualizuje pola nadawcy wiadomości, gdy jego profil zmieni się na żywo. */
 function patchMessageSender(
   message: Message,
   userId: string,
@@ -199,7 +206,6 @@ function patchMessageSender(
   return { ...message, sender: { ...sender, ...patch } };
 }
 
-/** Mapuje kontakt DM na uproszczony profil używany przez system rozmów. */
 function toCallPeer(contact: Contact): CallPeer {
   return {
     _id: contact._id,
@@ -217,14 +223,12 @@ interface ChatWindowProps {
   onRemoveContact?: (contact: Contact) => void;
 }
 
-/* ─── design tokens ─── */
 const C = {
   bgPanel:      "var(--bg-panel)",
   border:       "var(--border)",
   textMuted:    "var(--text-muted)",
 };
 
-/* ─── Icon button with hover ─── */
 function IconBtn({
   onClick,
   title,
@@ -281,13 +285,9 @@ export function ChatWindow({
   const [loadingOlder, setLoadingOlder] = useState(false);
   const [typingUserId, setTypingUserId] = useState<string | null>(null);
   const typingClearTimeout = useRef<ReturnType<typeof setTimeout>>();
-  /** clientNonce → originating chat key — scopes WS ERROR scrub across concurrent sends. */
   const pendingSendKeysRef = useRef<Map<string, string>>(new Map());
-  /** Fallback when error has no nonce (legacy). */
   const lastSendChatKeyRef = useRef<string | null>(null);
-  /** Currently open chat key — guards async send cleanup against chat switches. */
   const activeChatKeyRef = useRef<string | null>(null);
-  /** Throttle per-message mark-channel-read so busy channels do not hit WS RL. */
   const lastChannelMarkReadAtRef = useRef(0);
   const channelMarkReadTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const [editingMessage, setEditingMessage] = useState<Message | null>(null);
@@ -325,7 +325,6 @@ export function ChatWindow({
   messagesRef.current = messages;
   const userIdRef = useRef(user?.id);
   userIdRef.current = user?.id;
-  /** Bumped by clearPendingMarkReads on logout — gate mark-read re-queue. */
   const markSessionGenRef = useRef(getPendingMarkReadGeneration());
   useEffect(() => {
     if (user?.id) {
@@ -429,7 +428,6 @@ export function ChatWindow({
       setChannelRoster([]);
       return;
     }
-    // Prefer live members from Sidebar WS patches (join/leave) without HTTP.
     if (target.channel.members.length > 0) {
       setChannelRoster(target.channel.members);
     }
@@ -443,7 +441,7 @@ export function ChatWindow({
   useEffect(() => {
     if (target?.type !== "channel") return;
     const channelId = target.channel._id;
-    // Skip HTTP when Sidebar already seeded a live roster.
+
     if (target.channel.members.length > 0) {
       setChannelRoster(target.channel.members);
       return;
@@ -455,7 +453,7 @@ export function ChatWindow({
         setChannelRoster(res.channel.members ?? []);
       })
       .catch(() => {
-        /* keep seeded roster */
+
       });
     return () => {
       cancelled = true;
@@ -572,7 +570,7 @@ export function ChatWindow({
       });
       setHasMore(hasMorePage);
     } catch {
-      // Zostaw hasMore bez zmian — użytkownik może ponowić próbę.
+
     } finally {
       if (gen === loadGenRef.current) setLoadingOlder(false);
     }
@@ -613,11 +611,10 @@ export function ChatWindow({
     setReplyingTo(null);
     setDeleteConfirm(null);
     void loadMessagesRef.current();
-    // Identity only — do not depend on loadMessages (it closes over full `target`).
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- targetKey gates remount
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [targetKey, seedPresence]);
 
-  // Field patches (name/avatar/members) refresh presence without wiping composer.
   useEffect(() => {
     if (!target) return;
     if (target.type === "dm") seedPresence([target.contact]);
@@ -629,8 +626,8 @@ export function ChatWindow({
         ),
       ]);
     }
-    // Identity / roster signature only — mute/name patches must not spam seed.
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- targetKey + member ids
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     targetKey,
     target?.type === "dm" ? target.contact._id : null,
@@ -655,7 +652,7 @@ export function ChatWindow({
     const was = wsWasConnectedRef.current;
     wsWasConnectedRef.current = wsConnected;
     if (!wsConnected || was) return;
-    // Shell MessageCacheBridge owns cache scrub/resend — here only UI + revalidate.
+
     const now = Date.now();
     setMessages((prev) => {
       const dropped = prev.filter((m) => isPendingAged(m, now));
@@ -683,7 +680,6 @@ export function ChatWindow({
     }
   }, [wsConnected, loadMessages, targetKey, seedPresence, requestChannelVoiceState, t]);
 
-  // Bridge / cache drops failed resend nonces — keep open chat UI in sync.
   useEffect(() => {
     return subscribePendingDrop((key, clientNonce) => {
       pendingSendKeysRef.current.delete(clientNonce);
@@ -743,7 +739,7 @@ export function ChatWindow({
       setIsBlockedByMe(cached.isBlockedByMe);
       setIsBlockedByOther(cached.isBlockedByOther);
       setFriendshipLoading(false);
-      // Warm cache — still refresh in background (stale friend gate ≤ TTL).
+
       let cancelled = false;
       checkFriendship(contactId)
         .then((res) => {
@@ -780,7 +776,7 @@ export function ChatWindow({
         setIsBlockedByOther(Boolean(res.isBlockedByOther));
       })
       .catch(() => {
-        // Network failure — keep last cached friendship; only default-true with no cache.
+
         if (cancelled) return;
         const cached = getCachedFriendship(contactId);
         if (cached) {
@@ -800,14 +796,13 @@ export function ChatWindow({
     };
   }, [target?.type === "dm" ? target.contact._id : null, friendshipEpoch]);
 
-  // Re-check when friendship TTL expires while the same DM stays open.
   useEffect(() => {
     if (!target || target.type !== "dm") return;
     const contactId = target.contact._id;
     let cancelled = false;
     const id = window.setInterval(() => {
       if (getCachedFriendship(contactId)) return;
-      // Background only — do not flip friendshipLoading (avoids composer flicker).
+
       checkFriendship(contactId)
         .then((res) => {
           if (cancelled || activeChatKeyRef.current !== `dm:${contactId}`) return;
@@ -834,7 +829,7 @@ export function ChatWindow({
     const contactId = target.contact._id;
     const userId = user.id;
     const mark = { kind: "dm" as const, userId, contactId };
-    // Logout bumps generation — cleanup must not re-queue after clearPendingMarkReads.
+
     const sessionGen = getPendingMarkReadGeneration();
     const armOffline = () => {
       if (getPendingMarkReadGeneration() !== sessionGen) return;
@@ -861,8 +856,7 @@ export function ChatWindow({
           queuePendingMarkRead(mark, g);
         });
     };
-    // Mark on open immediately (not only post-load) + again on leave.
-    // Offline: still track+queue so Bridge heal pendingZero / reconnect flush.
+
     sendMark();
     return () => {
       sendMark();
@@ -874,8 +868,6 @@ export function ChatWindow({
     wsConnected,
   ]);
 
-  // Mark channel read when opening; flush again on leave/switch/unmount so
-  // throttled per-message marks cannot leave phantom unread after Settings/nav.
   useEffect(() => {
     if (!user?.id || target?.type !== "channel") {
       return;
@@ -883,7 +875,7 @@ export function ChatWindow({
     const channelId = target.channel._id;
     const userId = user.id;
     const mark = { kind: "channel" as const, userId, channelId };
-    // Logout bumps generation — cleanup must not re-queue after clearPendingMarkReads.
+
     const sessionGen = getPendingMarkReadGeneration();
     const armOffline = () => {
       if (getPendingMarkReadGeneration() !== sessionGen) return;
@@ -922,10 +914,6 @@ export function ChatWindow({
     wsConnected,
   ]);
 
-  // Flush is owned by UnreadBadgeBridge (shell) so Chat→Settings still drains.
-  // Do not takePendingMarkReads here — dual take races Bridge on visibility.
-
-  // Clear trailing channel mark timer on unmount (avoid stray send after leave).
   useEffect(() => {
     return () => {
       if (channelMarkReadTimerRef.current) {
@@ -935,23 +923,22 @@ export function ChatWindow({
     };
   }, []);
 
-  // pagehide / visibility=hidden: mark current chat read (same as open/leave).
   useEffect(() => {
     const markCurrentRead = () => {
       const current = targetRef.current;
       const userId = userIdRef.current;
       const socket = wsRef.current;
-      // Queue even without socket (provider teardown / pre-connect) — Bridge flush.
+
       if (!current || !userId) return;
-      // Logout clearPendingMarkReads bumps generation — do not re-arm pending.
+
       if (getPendingMarkReadGeneration() !== markSessionGenRef.current) return;
       if (current.type === "dm") {
         const contactId = current.contact._id;
         const mark = { kind: "dm" as const, userId, contactId };
-        // Queue sync first — unload often kills async encrypt before send completes.
+
         queuePendingMarkReadSync(mark);
         trackMarkReadInFlight(mark);
-        // Keep pending/inFlight until absolute — unload often kills encrypt before apply.
+
         if (socket) {
           void socket.send(WsType.MARK_CONVERSATION_READ, { userId, contactId });
         }
@@ -1075,7 +1062,7 @@ export function ChatWindow({
           }
           sendMark();
         } else if (!channelMarkReadTimerRef.current) {
-          // Trailing flush after burst so parked channel does not keep phantom unread.
+
           channelMarkReadTimerRef.current = setTimeout(() => {
             channelMarkReadTimerRef.current = undefined;
             if (activeChatKeyRef.current === `ch:${channelId}`) sendMark();
@@ -1261,7 +1248,7 @@ export function ChatWindow({
         if (data.clientNonce) {
           return msgs.filter((m) => m.clientNonce !== data.clientNonce);
         }
-        // No nonce — drop only the last pending (never wipe concurrent optimistics).
+
         let last = -1;
         for (let i = msgs.length - 1; i >= 0; i--) {
           if (msgs[i].pending) {
@@ -1506,7 +1493,7 @@ export function ChatWindow({
 
       const { filePath } = await uploadFile(file, uploadContext);
       const sendKey = chatCacheKey(target);
-      // User may have switched chats during upload — still send, but don't touch wrong UI.
+
       const stillActive = activeChatKeyRef.current === sendKey;
       const rawContent =
         options?.content ??
@@ -1537,7 +1524,7 @@ export function ChatWindow({
       if (!stillActive && clientNonce && user) {
         lastSendChatKeyRef.current = sendKey;
         pendingSendKeysRef.current.set(clientNonce, sendKey);
-        // Keep optimistic in inactive cache so reconnect/resend can find it.
+
         ensureOptimisticInCache(sendKey, {
           _id: `temp-${clientNonce}`,
           sender: {
@@ -1621,8 +1608,6 @@ export function ChatWindow({
       if (!ws || !target || !user || !canSendDm) return;
       if (!isAllowedGifMediaUrl(mediaUrl)) return;
 
-      // Send Giphy URL as external media (same path as paste). Do not re-fetch/upload —
-      // browser CORS/CSP often blocks Giphy fetch, and backend upload rejects .gif.
       const quotedMessage = replyingTo?._id;
       const quotePayload = quotedMessage ? { quotedMessage } : {};
       const fileName =
@@ -1809,7 +1794,7 @@ export function ChatWindow({
         emoji,
       });
       if (!sent) {
-        // Toggle again to undo — preserves concurrent WS updates on other fields.
+
         patchCachedMessageEverywhere(messageId, (m) => ({
           ...m,
           reactions: toggleReactionLocal(m.reactions, emoji, currentUserId),
@@ -1963,7 +1948,7 @@ export function ChatWindow({
       for (let page = 0; page < 25; page++) {
         if (working.some((m) => m._id === messageId)) {
           if (gen !== loadGenRef.current) return;
-          // Merge with live state so WS frames during pagination are kept.
+
           setMessages((prev) => {
             const merged = mergeHttpWithLive(working, prev, currentUserId);
             writeMessagePageCache(targetSnapshot, merged, more);
@@ -2006,7 +1991,6 @@ export function ChatWindow({
     window.setTimeout(() => setHighlightMessageId(null), 2500);
   };
 
-  /* ── Empty / welcome screen ─────────────────────────────────────────── */
   if (!target) {
     return (
       <div className="chat-window chat-window--empty">
@@ -2015,7 +1999,6 @@ export function ChatWindow({
     );
   }
 
-  /* ── Active chat ─────────────────────────────────────────────────────── */
   const dmContact =
     target.type === "dm"
       ? { ...target.contact, ...(dmPresence ?? {}) }
@@ -2038,7 +2021,7 @@ export function ChatWindow({
   return (
     <div className="chat-window">
       <header className="chat-header">
-        {/* ── Left: avatar + name ── */}
+
         {target.type === "dm" ? (
           <div style={{ position: "relative", display: "inline-flex" }}>
             <Avatar {...avatarProps} size={34} />
@@ -2064,12 +2047,9 @@ export function ChatWindow({
           )}
         </div>
 
-        {/* ── Right: action buttons ── */}
         <div className="chat-header__actions">
 
-          {/* grouped pill toolbar */}
           <div className="chat-header__toolbar">
-            {/* Phone (DM ze znajomym) */}
             {target.type === "dm" && !friendshipLoading && canSendDm && (
               <IconBtn
                 title={t("chat.window.call")}
@@ -2084,7 +2064,6 @@ export function ChatWindow({
               </IconBtn>
             )}
 
-            {/* Voice channel (kanał) */}
             {target.type === "channel" && (
               <IconBtn
                 title={
@@ -2110,7 +2089,6 @@ export function ChatWindow({
               </IconBtn>
             )}
 
-            {/* Video (tylko DM ze znajomym) */}
             {target.type === "dm" && !friendshipLoading && canSendDm && (
               <IconBtn
                 title={t("chat.window.videoCall")}
@@ -2126,7 +2104,6 @@ export function ChatWindow({
               </IconBtn>
             )}
 
-            {/* Pin */}
             <IconBtn
               title={t("chat.tools.pinned")}
               active={toolsPanel === "pinned"}
@@ -2140,7 +2117,6 @@ export function ChatWindow({
               </svg>
             </IconBtn>
 
-            {/* Search */}
             <IconBtn
               title={t("chat.tools.search")}
               active={toolsPanel === "search"}
@@ -2154,7 +2130,6 @@ export function ChatWindow({
               </svg>
             </IconBtn>
 
-            {/* Channel settings */}
             {target.type === "channel" && onOpenChannelSettings && (
               <IconBtn
                 title={t("chat.window.channelSettings")}
@@ -2167,7 +2142,6 @@ export function ChatWindow({
               </IconBtn>
             )}
 
-            {/* Profile (DM only) */}
             {target.type === "dm" && (
               <IconBtn title={t("chat.window.contactProfile")} onClick={() => setProfileOpen(true)}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -2176,10 +2150,9 @@ export function ChatWindow({
                 </svg>
               </IconBtn>
             )}
-            {/* separator */}
+
             <div className="chat-header__toolbar-sep" aria-hidden="true" />
 
-            {/* Close */}
             <IconBtn title={t("chat.window.closeChat")} danger onClick={onClose}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18"/>
@@ -2199,7 +2172,7 @@ export function ChatWindow({
 
       <div className="chat-main">
         {toolsPanel && (
-          <ChatToolsPanel
+          <ChatTools
             mode={toolsPanel}
             target={target}
             canPin={canPin}
@@ -2353,7 +2326,7 @@ export function ChatWindow({
       )}
 
       {target.type === "dm" && (
-        <OtherUserProfileModal
+        <OtherProfile
           isOpen={profileOpen}
           onClose={() => setProfileOpen(false)}
           user={target.contact}
@@ -2381,7 +2354,7 @@ export function ChatWindow({
         />
       )}
 
-      <DeleteMessageModal
+      <DeleteMessage
         isOpen={Boolean(deleteConfirm)}
         preview={deleteConfirm?.preview ?? ""}
         onConfirm={handleConfirmDelete}
@@ -2389,7 +2362,7 @@ export function ChatWindow({
       />
 
       {lightboxIndex !== null && imageLightboxItems.length > 0 && (
-        <ImageLightbox
+        <Lightbox
           items={imageLightboxItems}
           initialIndex={lightboxIndex}
           onClose={() => setLightboxIndex(null)}

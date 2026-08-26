@@ -1,3 +1,11 @@
+// attachments.ts
+// Klasyfikacja pliku (image/video/audio/file) po MIME/ext.
+// Zakres:
+//  - spójnie z backend file_type
+//  - image/video/audio/file po MIME i rozszerzeniu
+// Nowe rozszerzenie: tu + file_type.rs + input accept.
+// Przy zmianach: MessageInput.tsx, validators/file_type.rs.
+
 import type { Message } from "../../types";
 
 const VIDEO_EXTENSIONS = new Set(["webm", "mp4", "ogg"]);

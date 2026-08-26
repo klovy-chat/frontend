@@ -1,3 +1,11 @@
+// voice.ts
+// HTTP tokenów LiveKit; signaling dzwonienia jest na WS.
+// Zakres:
+//  - DM call i voice kanału
+//  - token LiveKit; dzwonek/hangup idzie ramkami CALL_*
+// Nowy stan rozmowy: CallContext + CALL_* w handlers.rs.
+// Przy zmianach: CallContext.tsx, utils/voice/*.rs.
+
 import { apiRequest } from "./client";
 
 export interface VoiceTokenResponse {
@@ -6,7 +14,6 @@ export interface VoiceTokenResponse {
   room: string;
 }
 
-/** Pobiera token dostępu LiveKit dla rozmowy 1:1 lub kanału głosowego. */
 export function requestVoiceToken(params: { peerId?: string; channelId?: string }) {
   return apiRequest<VoiceTokenResponse>("/api/voice/token", {
     method: "POST",
@@ -20,7 +27,6 @@ export interface ActiveCallResponse {
   mode?: "audio" | "video";
 }
 
-/** Sprawdza, czy użytkownik ma aktywną sesję rozmowy po stronie serwera. */
 export function fetchActiveCall() {
   return apiRequest<ActiveCallResponse>("/api/voice/active");
 }

@@ -1,4 +1,11 @@
-/* User profile modal — Klovy theme, login-page aesthetic */
+/* profile.css
+   Karta profilu: banner, avatar, bio, podgląd „jak widzą inni”.
+   Zakres:
+    - .as-profile-*
+    - banner, avatar, bio, podgląd „jak widzą inni”
+   Cropper ma własne wymiary — sprawdź ImageCrop przy zmianie banner height.
+   Przy zmianach: MyProfile.tsx, ProfileFields.tsx, OtherProfile.tsx.
+ */
 
 .up-backdrop {
   position: fixed;
@@ -22,7 +29,6 @@
 @keyframes backdropIn  { from { opacity: 0; } to { opacity: 1; } }
 @keyframes backdropOut { from { opacity: 1; } to { opacity: 0; } }
 
-/* CARD */
 .up-card {
   position: relative;
   width: min(440px, 92vw);
@@ -41,7 +47,6 @@
 @keyframes cardIn  { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes cardOut { from { opacity: 1; transform: translateY(0);    } to { opacity: 0; transform: translateY(6px); } }
 
-/* BANNER */
 .up-banner {
   height: 80px;
   width: 100%;
@@ -51,9 +56,6 @@
   overflow: hidden;
 }
 
-/* notch to make avatar sit into the banner (discord-like) */
-
-/* CLOSE */
 .up-close {
   position: absolute;
   top: 12px;
@@ -76,14 +78,12 @@
   color: rgba(255, 255, 255, 0.9);
 }
 
-/* BODY */
 .up-body {
   padding: 0 24px 24px;
   display: grid;
   gap: 0;
 }
 
-/* PROFILE HEADER */
 .up-profile-header {
   display: flex;
   align-items: flex-end;
@@ -106,7 +106,7 @@
 
 .up-avatar-wrap .presence-dot {
   position: absolute;
-  /* position at the outer corner of the avatar border */
+
   right: -6px;
   bottom: -6px;
   z-index: 6;
@@ -126,7 +126,6 @@
   font-size: 1.4rem !important;
 }
 
-/* NAME + HANDLE */
 .up-identity {
   margin-bottom: 20px;
 }
@@ -203,7 +202,6 @@
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--text-muted) 25%, transparent);
 }
 
-/* DIVIDER */
 .up-section {
   padding-top: 0;
   margin-top: 0;
@@ -214,7 +212,6 @@
   margin-top: 10px;
 }
 
-/* FIELD LABEL */
 .up-section-label {
   display: block;
   margin: 0 0 5px;
@@ -225,7 +222,6 @@
   color: var(--text-muted);
 }
 
-/* FIELD BOX — same look as login inputs */
 .up-joined-value {
   margin: 0;
   font-size: 0.85rem;
@@ -233,9 +229,6 @@
   color: var(--text);
 }
 
-/* Wrap section content in input-style box */
-
-/* Joined row — icon + text */
 .up-joined-row {
   display: flex;
   align-items: center;
@@ -250,7 +243,6 @@
   color: var(--text-muted);
 }
 
-/* Bio */
 .up-bio-section {
   margin: 6px 0 22px;
 }
@@ -308,7 +300,6 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Shared profile form hints (setup + settings) */
 .profile-field-hint {
   margin: 6px 0 0;
   font-size: 0.72rem;
@@ -337,7 +328,6 @@
   text-align: right;
 }
 
-/* Divider between header and sections */
 .up-divider {
   height: 1px;
   background: rgba(255, 255, 255, 0.06);

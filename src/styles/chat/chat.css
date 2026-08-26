@@ -1,4 +1,12 @@
-/* ── Mention toast (ping) ── */
+/* chat.css
+   Ramka strony czatu (puste stany, overlay delete, split).
+   Zakres:
+    - nie dymek — to bubble.css
+    - puste stany, overlay delete, split — nie styl dymka
+   Dialogi delete/revoke mogą reużywać klas stąd.
+   Przy zmianach: Chat.tsx, DeleteMessage.tsx.
+ */
+
 .mention-toast {
   position: fixed;
   right: 22px;
@@ -123,8 +131,6 @@
   border: 2px solid var(--bg-deep);
   box-sizing: border-box;
 }
-
-/* ─── Chat Window Styles ────────────────────────────────────────────────── */
 
 .chat-main {
   position: relative;
@@ -298,7 +304,7 @@
 }
 
 .message-list--virtual {
-  /* Virtual rows own their vertical spacing via item padding. */
+
   gap: 0;
 }
 
@@ -403,8 +409,6 @@
   margin: auto;
   padding: 2rem 1rem;
 }
-
-/* ─── Delete message modal ───────────────────────────────────────────────── */
 
 .delete-msg-backdrop {
   padding: 1.25rem;

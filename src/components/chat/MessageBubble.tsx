@@ -1,26 +1,34 @@
+// MessageBubble.tsx
+// Jeden dymek: treść, pliki, reakcje, menu, status wysyłki.
+// Zakres:
+//  - format.tsx, embedy, cytat
+//  - treść, pliki, reakcje, menu, status wysyłki
+// Nowa akcja na wiadomości: menu tutaj + handler WS/HTTP w ChatWindow.
+// Przy zmianach: format.tsx, ChatWindow.tsx, styles/chat/bubble.css.
+
 import { useState, useRef, useEffect, useLayoutEffect, memo } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { Avatar } from "../common/Avatar";
-import { ReactionPicker } from "./pickers/ReactionPicker";
-import { QuotedMessageBlock } from "./QuotedMessageBlock";
+import { Reaction } from "./pickers/Reaction";
+import { Quote } from "./Quote";
 import { ReadReceipt } from "./ReadReceipt";
 import { formatMessageTime, getUserId, userLabel } from "../../utils/user/format";
-import { renderFormattedText } from "../../utils/chat/messageFormat";
+import { renderFormattedText } from "../../utils/chat/format";
 import { getReactionEntries, hasUserReacted } from "../../utils/chat/reactions";
 import { MediaImage } from "../common/MediaImage";
 import { resolveChatImagePreviewUrl, resolveMediaUrl } from "../../utils/media/media";
-import { VoiceMessagePlayer } from "./VoiceMessagePlayer";
-import { VideoMessagePlayer } from "./VideoMessagePlayer";
-import { MessageLinkEmbeds } from "./MessageLinkEmbeds";
+import { VoicePlayer } from "./VoicePlayer";
+import { VideoPlayer } from "./VideoPlayer";
+import { LinkEmbeds } from "./LinkEmbeds";
 import {
-  MessageExternalMedia,
+  ExternalMedia,
   shouldHideTextForExternalMedia,
-} from "./MessageExternalMedia";
+} from "./ExternalMedia";
 import { isVideoAttachment, isVoiceAttachment } from "../../utils/media/attachments";
-import { isOnlyInviteLinkContent } from "../../utils/chat/linkEmbeds";
+import { isOnlyInviteLinkContent } from "../../utils/chat/embeds";
 import type { Message, MessageUser } from "../../types";
-import "../../styles/chat/messagebubble.css";
+import "../../styles/chat/bubble.css";
 
 interface MessageBubbleProps {
   message: Message;
@@ -300,7 +308,7 @@ export const MessageBubble = memo(function MessageBubble({
 
                   {reactionPickerOpen &&
                     createPortal(
-                      <ReactionPicker
+                      <Reaction
                         onSelect={handleReactionSelect}
                         onClose={() => setReactionPickerOpen(false)}
                         style={reactionPickerStyles}
@@ -411,7 +419,7 @@ export const MessageBubble = memo(function MessageBubble({
           )}
 
           <div className={`message-bubble${isOwn ? " own" : ""}${mentionsMe ? " message-bubble--mention" : ""}${isSticker ? " message-bubble--sticker" : ""}`}>
-            <QuotedMessageBlock
+            <Quote
               quotedMessage={message.quotedMessage}
               isOwn={isOwn}
               onJumpToMessage={onJumpToMessage}
@@ -443,13 +451,13 @@ export const MessageBubble = memo(function MessageBubble({
                     />
                   </button>
                 ) : isVideo ? (
-                  <VideoMessagePlayer
+                  <VideoPlayer
                     src={resolvedFileUrl}
                     fileName={message.fileName}
                     fileType={message.fileType}
                   />
                 ) : isVoice ? (
-                  <VoiceMessagePlayer
+                  <VoicePlayer
                     src={resolvedFileUrl}
                     durationMs={message.durationMs}
                     isOwn={isOwn}
@@ -486,7 +494,7 @@ export const MessageBubble = memo(function MessageBubble({
                     })}
                   </p>
                 )}
-                <MessageExternalMedia
+                <ExternalMedia
                   content={message.content}
                   onImageClick={(url, fileName) =>
                     onImageClick?.({
@@ -497,7 +505,7 @@ export const MessageBubble = memo(function MessageBubble({
                     })
                   }
                 />
-                <MessageLinkEmbeds content={message.content} />
+                <LinkEmbeds content={message.content} />
               </>
             )}
 

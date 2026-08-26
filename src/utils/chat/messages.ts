@@ -1,18 +1,26 @@
+// messages.ts
+// Normalizacja Message, preview, cytat, legacy opaque w tekście listy.
+// Zakres:
+//  - resolveQuotedMessage
+//  - normalizacja Message, cytat, legacy opaque na liście
+// Zmiana preview listy: też preview.ts (tip) i formatListLastMessage.
+// Przy zmianach: ChatWindow.tsx, preview.ts, format.tsx.
+
 import { normalizeReactions } from "./reactions";
 import { userLabel } from "../user/format";
-import { stripFormatting } from "./messageFormat";
+import { stripFormatting } from "./format";
 import { resolveMediaUrl } from "../media/media";
 import { MAX_MESSAGE_LENGTH } from "../../constants/messages";
 import i18n from "../../i18n/config";
 import {
   extractExternalMediaLinks,
   isOnlyExternalMediaContent,
-} from "../media/externalMediaLinks";
+} from "../media/mediaLinks";
 import { isVideoAttachment, isVoiceAttachment } from "../media/attachments";
 import type { Message, MessageUser } from "../../types";
 import {
   readableContentForPreview,
-} from "../../crypto/messageContent";
+} from "../../crypto/encrypt";
 
 function capContent(content: unknown): string {
   return typeof content === "string"
@@ -20,8 +28,6 @@ function capContent(content: unknown): string {
     : "";
 }
 
-// Waliduje, ale zwraca SUROWĄ wartość — komponenty renderujące same wywołują
-// resolveMediaUrl(), które nie jest idempotentne (podwójne rozwiązanie → null).
 function safeFileUrl(fileUrl: unknown): string | undefined {
   if (typeof fileUrl !== "string" || !fileUrl) return undefined;
   return resolveMediaUrl(fileUrl) ? fileUrl : undefined;
@@ -80,7 +86,6 @@ export function getMessagePreview(
   return text.length > 120 ? `${text.slice(0, 120)}…` : text;
 }
 
-/** Podgląd ostatniej wiadomości z listy kontaktów/kanałów (legacy opaque tolerated). */
 export function formatListLastMessage(raw?: string): string {
   if (!raw?.trim()) return "";
   const text = stripFormatting(readableContentForPreview(raw)).trim();

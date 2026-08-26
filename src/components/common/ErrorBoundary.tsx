@@ -1,3 +1,11 @@
+// ErrorBoundary.tsx
+// Łapie crash React i pokazuje fallback.
+// Zakres:
+//  - owija całe drzewo w main
+//  - tylko crash renderu, nie błędy fetch
+// Nie połykaj błędów API — tylko render.
+// Przy zmianach: main.tsx.
+
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import i18n from "../../i18n/config";
 
@@ -9,10 +17,6 @@ interface ErrorBoundaryState {
   hasError: boolean;
 }
 
-/**
- * Przechwytuje nieobsłużone błędy renderowania i wyświetla ekran awaryjny
- * zamiast białego ekranu, dając użytkownikowi możliwość odświeżenia aplikacji.
- */
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   state: ErrorBoundaryState = { hasError: false };
 

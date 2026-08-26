@@ -1,3 +1,11 @@
+// stickers.ts
+// Szukaj naklejek (Giphy stickers przez backend).
+// Zakres:
+//  - wysyłka jako sticker, nie jako zwykły obrazek-link
+//  - wynik to sticker, nie GIF-link ani zwykły obrazek
+// Jak GIF — sekret API zostaje na serwerze.
+// Przy zmianach: pickers/Sticker.tsx, controllers/stickers.rs.
+
 import { apiRequest } from "./client";
 import type { AppLocale } from "../languages";
 

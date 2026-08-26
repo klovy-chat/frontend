@@ -1,3 +1,11 @@
+// ColorPicker.tsx
+// Wybór koloru profilu (siatka).
+// Zakres:
+//  - wartość = indeks koloru jak na backendzie
+//  - siatka; wartość = indeks jak avatar.ts / backend
+// Paleta musi być ta sama co avatar.ts / user color.
+// Przy zmianach: ProfileFields.tsx, avatar.ts.
+
 import { useTranslation } from "react-i18next";
 
 interface ColorPickerProps {

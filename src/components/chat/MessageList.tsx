@@ -1,3 +1,11 @@
+// MessageList.tsx
+// Wirtualizowana lista dymków, paginacja w górę, highlight.
+// Zakres:
+//  - krótki czat: spacer przykleja do dołu
+//  - wirtualizacja, paginacja w górę, highlight skoku
+// Zmiana wysokości wiersza = przelicz overscan/estimate.
+// Przy zmianach: MessageBubble.tsx, ChatWindow.tsx, constants/messages.ts.
+
 import {
   useCallback,
   useEffect,
@@ -37,7 +45,7 @@ interface MessageListProps {
 const NEAR_BOTTOM_THRESHOLD_PX = 96;
 const LOAD_OLDER_THRESHOLD_PX = 80;
 const ESTIMATED_MESSAGE_HEIGHT_PX = 88;
-/** Below this count, keep the simple flex layout (spacer pins short chats to bottom). */
+
 const VIRTUALIZE_AFTER = 40;
 const OVERSCAN = 8;
 
@@ -141,7 +149,6 @@ export function MessageList({
       return;
     }
 
-    // Doładowano starsze wiadomości (prepend) — zachowaj pozycję widoku.
     const isPrepend =
       messages.length > prevCount && prevFirstId !== null && firstId !== prevFirstId;
     if (isPrepend) {

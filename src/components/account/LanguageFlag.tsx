@@ -1,3 +1,11 @@
+// LanguageFlag.tsx
+// Ikonka flagi przy języku.
+// Zakres:
+//  - PL/EN
+//  - asset flagi przy etykiecie języka
+// Nowy locale: dodaj asset flagi.
+// Przy zmianach: LanguageSettings.tsx, LanguageSwitcher.tsx.
+
 import type { AppLocale } from "../../languages";
 
 interface LanguageFlagProps {

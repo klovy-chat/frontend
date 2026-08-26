@@ -1,3 +1,12 @@
+/* layout.css
+   Szkielet app-shell (kolumny, overlay ustawień, loading).
+   Zakres:
+    - klasy app-shell*
+    - kolumny app-shell, overlay ustawień, loading
+   Breakpoints desktop-only — mobile i tak jest zablokowany.
+   Przy zmianach: Chat.tsx, Settings, Nav.
+ */
+
 .app-shell {
   display: grid;
   height: 100%;
@@ -72,7 +81,6 @@
   flex-direction: column;
 }
 
-/* ── ≤1280px: ukryj detail z grida ── */
 @media (max-width: 1280px) {
   .app-shell--chat,
   .app-shell--chat.app-shell--no-detail {

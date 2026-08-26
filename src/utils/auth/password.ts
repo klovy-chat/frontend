@@ -1,3 +1,11 @@
+// password.ts
+// Reguły siły hasła na kliencie (długość itd.).
+// Zakres:
+//  - signup i zmiana hasła
+//  - długość/siła na kliencie; serwer i tak sprawdzi
+// Serwer i tak waliduje — to tylko UX. Zmiana: też auth/validation.rs.
+// Przy zmianach: Signup.tsx, Panel.tsx, utils/auth/validation.rs.
+
 import i18n from "../../i18n/config";
 
 export function validatePasswordStrength(password: string): string | null {

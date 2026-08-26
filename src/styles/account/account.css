@@ -1,6 +1,11 @@
-/* ============================================================
-   ACCOUNT SETTINGS — account.css
-   ============================================================ */
+/* account.css
+   Formularze ustawień konta i lista sesji.
+   Zakres:
+    - sekcje, wiersze urządzeń
+    - formularze konta i wiersze sesji (urządzenie, revoke)
+   Backdrop animacji może być w klasie globalnej .klovy-backdrop.
+   Przy zmianach: Panel.tsx.
+ */
 
 .app-shell__settings-main {
   grid-column: 2 / -1;
@@ -19,13 +24,11 @@
   overflow: hidden;
 }
 
-/* ── Backdrop (layout only — animacja w .klovy-backdrop) ── */
 .as-backdrop {
   padding: 20px;
   font-family: inherit;
 }
 
-/* ── Shell ── */
 .as-shell {
   display: flex;
   align-items: stretch;
@@ -61,7 +64,6 @@
   z-index: 1;
 }
 
-/* ── Left nav ── */
 .as-nav {
   width: var(--settings-nav-width);
   flex-shrink: 0;
@@ -83,7 +85,6 @@
   height: 0;
 }
 
-/* Identity block */
 .as-nav-identity {
   display: flex;
   align-items: center;
@@ -223,7 +224,6 @@
   opacity: 1;
 }
 
-/* ── Right content ── */
 .as-content {
   flex: 1;
   min-width: 0;
@@ -242,7 +242,6 @@
   height: 0;
 }
 
-/* Close button */
 .as-close {
   position: absolute;
   top: 1.25rem;
@@ -267,7 +266,6 @@
   color: var(--text);
 }
 
-/* Section title */
 .as-section-title {
   font-size: 1.75rem;
   font-weight: 600;
@@ -276,7 +274,6 @@
   margin: 0 0 0.35rem;
 }
 
-/* ── Cards ── */
 .as-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -301,8 +298,6 @@
   margin: 0 0 1.25rem;
   line-height: 1.6;
 }
-
-/* Profile card with banner */
 
 .as-avatar-lg {
   position: relative;
@@ -379,7 +374,6 @@
   to { transform: rotate(360deg); }
 }
 
-/* ── Form ── */
 .as-form {
   display: flex;
   flex-direction: column;
@@ -454,7 +448,6 @@
   cursor: not-allowed;
 }
 
-/* ── Buttons ── */
 .as-btn-primary {
   padding: 0.65rem 1.2rem;
   background: var(--accent);
@@ -526,7 +519,6 @@
   border-color: rgba(239, 68, 68, 0.35);
 }
 
-/* ── Messages ── */
 .as-error {
   display: flex;
   align-items: center;
@@ -555,7 +547,6 @@
   margin-bottom: 1rem;
 }
 
-/* ── Session section ── */
 .as-session-row {
   display: flex;
   flex-direction: column;
@@ -787,7 +778,6 @@
   }
 }
 
-/* ── Autofill ── */
 .as-form input:-webkit-autofill,
 .as-form input:-webkit-autofill:hover,
 .as-form input:-webkit-autofill:focus,
@@ -801,8 +791,6 @@
   transition: background-color 9999s ease-in-out 0s;
 }
 
-
-/* ── Mobile ── */
 @media (max-width: 640px) {
   .as-backdrop {
     padding: 0;
@@ -843,7 +831,6 @@
   .as-content { padding: 1.25rem 1rem 2rem; }
 }
 
-/* ── Ostrzeżenia (warnings) ─────────────────────────────── */
 .as-nav-count {
   margin-left: auto;
   min-width: 20px;
@@ -1641,7 +1628,6 @@
   border-top: 1px solid var(--border);
 }
 
-/* ── Voice settings ── */
 .as-voice-banner {
   display: flex;
   align-items: flex-start;
@@ -1705,7 +1691,6 @@
   font-weight: 600;
 }
 
-/* ── Language picker ── */
 .as-group-label--language {
   margin: 0 0 16px;
 }
@@ -1788,7 +1773,6 @@
   background: transparent;
 }
 
-/* Custom checkbox — matches auth login */
 .al-checkbox-wrap {
   display: flex;
   align-items: flex-start;

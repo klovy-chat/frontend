@@ -1,3 +1,11 @@
+// AuthContext.tsx
+// Źródło prawdy sesji: user, login, logout, restore /me.
+// Zakres:
+//  - bind unread/mute do userId zanim setUser
+//  - logout nie czyści kolejki hangup (Call unmount wyśle)
+// Nowe pole usera z /me: typ User + ten kontekst + backend json usera.
+// Przy zmianach: api/auth.ts, utils/user/restore.ts, unread.ts.
+
 import {
   createContext,
   useCallback,
@@ -10,8 +18,8 @@ import {
 import * as authApi from "../api/auth";
 import { isTwoFactorLoginResponse } from "../api/auth";
 import { ApiError, clearCsrfToken } from "../api/client";
-import { clearAutoIdleBrbFlag } from "../hooks/useIdleAvailability";
-import { restoreSession, clearCachedSessionUser } from "../utils/user/sessionRestore";
+import { clearAutoIdleBrbFlag } from "../hooks/useIdle";
+import { restoreSession, clearCachedSessionUser } from "../utils/user/restore";
 import type { User } from "../types";
 
 export interface LoginResult {
@@ -60,16 +68,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     restoreSession()
       .then(async (info) => {
         if (cancelled) return;
-        // Bind storage before setUser so Sidebar/Bridge don't race unscoped keys.
+
         if (info?.id) {
           try {
-            const unreadSync = (await import("../utils/sync/unreadSync")).default;
+            const unreadSync = (await import("../utils/sync/unread")).default;
             unreadSync.setUserId(info.id);
           } catch {
             /* ignore */
           }
           try {
-            const mute = await import("../utils/sync/mutedConversations");
+            const mute = await import("../utils/sync/muted");
             mute.setMutedConversationsUserId(info.id);
           } catch {
             /* ignore */
@@ -80,21 +88,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .catch(() => {
         if (!cancelled) {
           setUser(null);
-          void import("../utils/sync/pendingMarkRead")
+          void import("../utils/sync/markRead")
             .then((m) => m.clearPendingMarkReads())
             .catch(() => {});
-          void import("../utils/sync/pendingHangup")
+          void import("../utils/sync/hangup")
             .then((m) => m.clearPendingHangup())
             .catch(() => {});
-          void import("../utils/sync/unreadSync")
+          void import("../utils/sync/unread")
             .then((m) => {
               m.default.resetCount({ broadcast: false });
               m.default.setUserId(null);
             })
             .catch(() => {});
-          void import("../utils/sync/mutedConversations")
+          void import("../utils/sync/muted")
             .then((m) => {
-              // Null userId first — otherwise persistLocal([]) wipes durable mutes.
+
               m.setMutedConversationsUserId(null);
               m.setMutedConversationKeys([], { broadcast: false, skipGuards: true });
             })
@@ -117,23 +125,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       turnstileToken: string,
     ): Promise<LoginResult> => {
       try {
-        const { clearPendingMarkReads } = await import("../utils/sync/pendingMarkRead");
+        const { clearPendingMarkReads } = await import("../utils/sync/markRead");
         clearPendingMarkReads();
-      } catch { /* ignore */ }
+      } catch {/* ignore */}
       try {
-        const { clearPendingHangup } = await import("../utils/sync/pendingHangup");
+        const { clearPendingHangup } = await import("../utils/sync/hangup");
         clearPendingHangup();
-      } catch { /* ignore */ }
+      } catch {/* ignore */}
       try {
-        const unreadSync = (await import("../utils/sync/unreadSync")).default;
+        const unreadSync = (await import("../utils/sync/unread")).default;
         unreadSync.resetCount({ broadcast: false });
         unreadSync.setUserId(null);
-      } catch { /* ignore */ }
+      } catch {/* ignore */}
       try {
-        const mute = await import("../utils/sync/mutedConversations");
+        const mute = await import("../utils/sync/muted");
         mute.setMutedConversationsUserId(null);
         mute.setMutedConversationKeys([], { broadcast: false, skipGuards: true });
-      } catch { /* ignore */ }
+      } catch {/* ignore */}
       const response = await authApi.login(username, password, turnstileToken);
       if (isTwoFactorLoginResponse(response)) {
         return {
@@ -142,14 +150,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         };
       }
       try {
-        const unreadSync = (await import("../utils/sync/unreadSync")).default;
+        const unreadSync = (await import("../utils/sync/unread")).default;
         unreadSync.setUserId(response.user.id);
         unreadSync.resetCount({ broadcast: false });
-      } catch { /* ignore */ }
+      } catch {/* ignore */}
       try {
-        const mute = await import("../utils/sync/mutedConversations");
+        const mute = await import("../utils/sync/muted");
         mute.setMutedConversationsUserId(response.user.id);
-      } catch { /* ignore */ }
+      } catch {/* ignore */}
       setUser(response.user);
       return { requiresTwoFactor: false };
     },
@@ -159,37 +167,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const completeTwoFactorLogin = useCallback(
     async (twoFactorToken: string, code: string, turnstileToken: string) => {
       try {
-        const { clearPendingMarkReads } = await import("../utils/sync/pendingMarkRead");
+        const { clearPendingMarkReads } = await import("../utils/sync/markRead");
         clearPendingMarkReads();
-      } catch { /* ignore */ }
+      } catch {/* ignore */}
       try {
-        const { clearPendingHangup } = await import("../utils/sync/pendingHangup");
+        const { clearPendingHangup } = await import("../utils/sync/hangup");
         clearPendingHangup();
-      } catch { /* ignore */ }
+      } catch {/* ignore */}
       try {
-        const unreadSync = (await import("../utils/sync/unreadSync")).default;
+        const unreadSync = (await import("../utils/sync/unread")).default;
         unreadSync.resetCount({ broadcast: false });
         unreadSync.setUserId(null);
-      } catch { /* ignore */ }
+      } catch {/* ignore */}
       try {
-        const mute = await import("../utils/sync/mutedConversations");
+        const mute = await import("../utils/sync/muted");
         mute.setMutedConversationsUserId(null);
         mute.setMutedConversationKeys([], { broadcast: false, skipGuards: true });
-      } catch { /* ignore */ }
+      } catch {/* ignore */}
       const { user: loggedIn } = await authApi.verifyTwoFactorLogin(
         twoFactorToken,
         code.trim(),
         turnstileToken,
       );
       try {
-        const unreadSync = (await import("../utils/sync/unreadSync")).default;
+        const unreadSync = (await import("../utils/sync/unread")).default;
         unreadSync.setUserId(loggedIn.id);
         unreadSync.resetCount({ broadcast: false });
-      } catch { /* ignore */ }
+      } catch {/* ignore */}
       try {
-        const mute = await import("../utils/sync/mutedConversations");
+        const mute = await import("../utils/sync/muted");
         mute.setMutedConversationsUserId(loggedIn.id);
-      } catch { /* ignore */ }
+      } catch {/* ignore */}
       setUser(loggedIn);
     },
     [],
@@ -223,41 +231,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       clearCachedSessionUser();
       clearAutoIdleBrbFlag();
       try {
-        const { clearAllMentionSources } = await import("../utils/sync/mentionSources");
+        const { clearAllMentionSources } = await import("../utils/sync/mentions");
         clearAllMentionSources();
-      } catch { /* ignore */ }
+      } catch {/* ignore */}
       try {
-        const mute = await import("../utils/sync/mutedConversations");
+        const mute = await import("../utils/sync/muted");
         mute.setMutedConversationsUserId(null);
         mute.setMutedConversationKeys([], { broadcast: false, skipGuards: true });
-      } catch { /* ignore */ }
+      } catch {/* ignore */}
       try {
-        const unreadSync = (await import("../utils/sync/unreadSync")).default;
+        const unreadSync = (await import("../utils/sync/unread")).default;
         unreadSync.resetCount({ broadcast: false });
         unreadSync.setUserId(null);
-      } catch { /* ignore */ }
-      // Do not clearPendingHangup here — CallContext unmount queues+sends first;
-      // next shell mount flushes leftovers. Clearing here drops the peer signal.
+      } catch {/* ignore */}
+
       try {
-        const { setActiveConversationKey } = await import("../utils/sync/activeConversation");
+        const { setActiveConversationKey } = await import("../utils/sync/activeChat");
         setActiveConversationKey(null);
-      } catch { /* ignore */ }
+      } catch {/* ignore */}
       try {
-        const { clearAllMessagePageCaches } = await import("../utils/chat/messagePageCache");
+        const { clearAllMessagePageCaches } = await import("../utils/chat/messageCache");
         clearAllMessagePageCaches();
-      } catch { /* ignore */ }
+      } catch {/* ignore */}
       try {
-        const { invalidateFriendshipCache } = await import("../utils/chat/friendshipCache");
+        const { invalidateFriendshipCache } = await import("../utils/chat/friendsCache");
         invalidateFriendshipCache();
-      } catch { /* ignore */ }
+      } catch {/* ignore */}
       try {
-        const { clearPendingMarkReads } = await import("../utils/sync/pendingMarkRead");
+        const { clearPendingMarkReads } = await import("../utils/sync/markRead");
         clearPendingMarkReads();
-      } catch { /* ignore */ }
+      } catch {/* ignore */}
       try {
         const { clearPresenceSnapshot } = await import("./PresenceContext");
         clearPresenceSnapshot();
-      } catch { /* ignore */ }
+      } catch {/* ignore */}
       setUser(null);
     }
   }, []);

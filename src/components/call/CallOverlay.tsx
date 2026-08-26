@@ -1,10 +1,17 @@
+// CallOverlay.tsx
+// Globalna warstwa IncomingCall + CallView (nie zależy od / vs /settings).
+// Zakres:
+//  - montowana w AuthenticatedShell
+//  - IncomingCall + CallView nad całą powłoką (i Settings)
+// Nie wkładaj tego tylko do Chat.tsx — zniknie w ustawieniach.
+// Przy zmianach: App.tsx, CallContext.tsx.
+
 import { useEffect, useRef } from "react";
 import { useCall } from "../../context/CallContext";
 import { useToast } from "../../context/ToastContext";
-import { IncomingCallModal } from "./IncomingCallModal";
+import { IncomingCall } from "./IncomingCall";
 import { CallView } from "./CallView";
 
-/** Globalna warstwa UI rozmów: modal przychodzącego + panel aktywnego. */
 export function CallOverlay() {
   const { error, clearError } = useCall();
   const toast = useToast();
@@ -19,7 +26,7 @@ export function CallOverlay() {
 
   return (
     <>
-      <IncomingCallModal />
+      <IncomingCall />
       <CallView />
     </>
   );

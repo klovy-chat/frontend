@@ -1,14 +1,20 @@
+// username.ts
+// Reguły username po stronie klienta.
+// Zakres:
+//  - znaki, długość
+//  - znaki i długość UX; normalizacja jest na BE
+// Normalizacja na serwerze może być inna — testuj conflict 409.
+// Przy zmianach: validators/username.rs, Signup.tsx.
+
 import i18n from "../../i18n/config";
 
 const USERNAME_PATTERN = /^[a-z0-9_]{3,32}$/;
 
-/** Normalizuje login — usuwa spacje, @ na początku i zamienia na małe litery. */
 export function normalizeUsernameInput(raw: string): string {
   const trimmed = raw.trim().toLowerCase();
   return trimmed.startsWith("@") ? trimmed.slice(1) : trimmed;
 }
 
-/** Ogranicza wpisywanie do dozwolonych znaków nazwy użytkownika (bez e-maila). */
 export function sanitizeUsernameInput(raw: string): string {
   const withoutAt = raw.trim().replace(/^@+/, "");
   return withoutAt.toLowerCase().replace(/[^a-z0-9_]/g, "").slice(0, 32);

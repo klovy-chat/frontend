@@ -1,3 +1,11 @@
+// cdn.ts
+// Składanie publicznego URL R2/CDN.
+// Zakres:
+//  - baza z env + klucz obiektu
+//  - publiczny URL R2 z env + klucz obiektu
+// Klucze obiektów: storage/keys.rs — nie zgaduj path.
+// Przy zmianach: cdnVersion.ts, utils/storage/keys.rs.
+
 const CDN_BASE =
   import.meta.env.VITE_CDN_BASE_URL?.replace(/\/+$/, "") ??
   "https://cdn.klovy.chat";

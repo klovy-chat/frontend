@@ -1,0 +1,97 @@
+/* menu.css
+   Menu kontekstowe listy/dymka (prawy przycisk).
+   Zakres:
+    - pozycja fixed, z-index
+    - menu PPM listy/dymka; danger jak ActionMenu
+   Itemy danger jak ActionMenu.
+   Przy zmianach: Sidebar.tsx, MessageBubble.tsx.
+ */
+
+.chat-ctx {
+  position: fixed;
+  z-index: 1000;
+  min-width: 220px;
+  max-width: 280px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  padding: 6px;
+  overflow: hidden;
+}
+
+.chat-ctx__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 10px 8px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 4px;
+}
+
+.chat-ctx__meta {
+  min-width: 0;
+  flex: 1;
+}
+
+.chat-ctx__name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chat-ctx__sub {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chat-ctx__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 10px;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: var(--cursor-pointer);
+  text-align: left;
+  transition: background 0.12s, color 0.12s;
+}
+
+.chat-ctx__item:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+.chat-ctx__item svg {
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+.chat-ctx__item--danger {
+  color: var(--danger);
+}
+
+.chat-ctx__item--danger:hover {
+  background: var(--danger-dim);
+  color: var(--danger);
+}
+
+.chat-ctx__sep {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 6px;
+}

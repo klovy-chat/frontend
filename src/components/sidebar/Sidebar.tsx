@@ -1,3 +1,12 @@
+// Sidebar.tsx
+// Lista kontaktów i kanałów + live unread/mute/tip z HTTP i WS.
+// Zakres:
+//  - merge snapshotu z deltami
+//  - sticky-0 po mark-read
+//  - menu, tworzenie kanału
+// To najczulszy plik listy — zmiana unread bez UnreadSync/markRead psuje badge w Settings.
+// Przy zmianach: UnreadSync.tsx, unread.ts, muted.ts, preview.ts.
+
 import { cloneElement, isValidElement, useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -14,7 +23,7 @@ import {
 } from "../../api/channels";
 import { useAuth } from "../../context/AuthContext";
 import { usePresenceSeed, getPresenceSnapshot } from "../../context/PresenceContext";
-import { invalidateFriendshipCache } from "../../utils/chat/friendshipCache";
+import { invalidateFriendshipCache } from "../../utils/chat/friendsCache";
 import { useToast } from "../../context/ToastContext";
 import { useWebSocket, useWebSocketConnected } from "../../context/WebSocketContext";
 import {
@@ -22,38 +31,38 @@ import {
   dmCacheKey,
   removeMessagePageCache,
   staleAllMessagePageCaches,
-} from "../../utils/chat/messagePageCache";
-import { WsType } from "../../api/wsProtocol";
+} from "../../utils/chat/messageCache";
+import { WsType } from "../../api/protocol";
 import { Avatar } from "../common/Avatar";
-import unreadSync from "../../utils/sync/unreadSync";
+import unreadSync from "../../utils/sync/unread";
 import {
   getMutedConversationKeys,
   isConversationMuted,
   mergeMutedFromHttp,
   setMutedConversationKeys,
   subscribeMutedConversations,
-} from "../../utils/sync/mutedConversations";
+} from "../../utils/sync/muted";
 import {
   ackPendingMarkReadByKey,
   peekPendingMarkReadKeys,
   subscribePendingMarkReads,
-} from "../../utils/sync/pendingMarkRead";
+} from "../../utils/sync/markRead";
 import {
   getActiveConversationKey,
   subscribeActiveConversation,
-} from "../../utils/sync/activeConversation";
+} from "../../utils/sync/activeChat";
 import {
   addMentionSource,
   clearMentionSource,
   getMentionSources,
   subscribeMentionSources,
-} from "../../utils/sync/mentionSources";
-import { playNotificationSound } from "../../utils/media/notificationSound";
+} from "../../utils/sync/mentions";
+import { playNotificationSound } from "../../utils/media/notifySound";
 import { settingsPath } from "../../settings/routes";
-import { AppNavRail } from "../layout/AppNavRail";
-import { ChatListPane, type ChatListTab } from "../layout/ChatListPane";
-import { UserProfileModal } from "../profile/UserProfileModal";
-import { OtherUserProfileModal } from "../profile/OtherUserProfileModal";
+import { Nav } from "../layout/Nav";
+import { ChatList, type ChatListTab } from "../layout/ChatList";
+import { MyProfile } from "../profile/MyProfile";
+import { OtherProfile } from "../profile/OtherProfile";
 import { userLabel, availabilityStatusLabel } from "../../utils/user/format";
 import { channelMemberCount, channelMemberCountLabel, getEffectiveStatus } from "../../utils/user/presence";
 import {
@@ -66,12 +75,12 @@ import {
   subscribeSidebarTipFromMessage,
   subscribeSidebarTipRevert,
   tipIdNewerPreferNonTemp,
-} from "../../utils/chat/listPreview";
+} from "../../utils/chat/preview";
 import { useProfileSync } from "../../hooks/useProfileSync";
 import type { Channel, ChatTarget, Contact, Message } from "../../types";
-import { ChannelSettingsModal } from "../channel/ChannelSettingsModal";
-import { ContactsModal } from "../contacts/ContactsModal";
-import { ImageCropModal } from "../common/ImageCropModal";
+import { ChannelSettings } from "../channel/ChannelSettings";
+import { Contacts } from "../contacts/Contacts";
+import { ImageCrop } from "../common/ImageCrop";
 import {
   MAX_AVATAR_SIZE_BYTES,
   MAX_AVATAR_SIZE_LABEL,
@@ -79,10 +88,9 @@ import {
 import {
   bumpPublicMediaCache,
   bumpPublicMediaCacheForChannel,
-} from "../../utils/media/cdnCacheVersion";
-import "../../styles/chat/chat-context-menu.css";
+} from "../../utils/media/cdnVersion";
+import "../../styles/chat/menu.css";
 
-/* ─── design tokens (mirror global.css vars) ─── */
 const C = {
   bgDeep:    "var(--bg-deep)",
   bgPanel:   "var(--bg-panel)",
@@ -101,7 +109,6 @@ const C = {
   dangerBorder: "var(--danger-border)",
 };
 
-/* ─── inline style helpers ─── */
 const modalCard: React.CSSProperties = {
   background: C.bgPanel,
   border: `1px solid ${C.border}`,
@@ -182,7 +189,6 @@ const btnDanger: React.CSSProperties = {
   cursor: "pointer", transition: "background 0.15s",
 };
 
-/* ─── Hover button helper ─── */
 function HoverBtn({
   style, hoverStyle, children, ...props
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & { hoverStyle?: React.CSSProperties }) {
@@ -198,8 +204,6 @@ function HoverBtn({
     </button>
   );
 }
-
-/* ─── Constants ─── */
 
 interface SidebarProps {
   active: ChatTarget | null;
@@ -239,17 +243,13 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [channels, setChannels] = useState<Channel[]>([]);
 
-  // Refy z aktualnymi listami i id zalogowanego użytkownika — pozwalają
-  // handlerom WebSocket (rejestrowanym raz) sprawdzić stan wyciszenia bez
-  // ponownego podpinania nasłuchiwaczy przy każdej zmianie.
   const contactsRef = useRef(contacts);
   contactsRef.current = contacts;
   const channelsRef = useRef(channels);
   channelsRef.current = channels;
   const currentUserIdRef = useRef(user?.id);
   currentUserIdRef.current = user?.id;
-  // Keep the logged-in user's availability status fresh for the WS handlers so
-  // notification sounds can be suppressed while "Do Not Disturb" is active.
+
   const availabilityRef = useRef(user?.availabilityStatus);
   availabilityRef.current = user?.availabilityStatus;
 
@@ -304,7 +304,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
     getMentionSources,
   );
   const [mentionToast, setMentionToast] = useState<MentionToast | null>(null);
-  /** Bumps when pending mark-read keys change so title/nav re-peek. */
+
   const [pendingMarkEpoch, setPendingMarkEpoch] = useState(0);
   const mentionToastTimeout = useRef<ReturnType<typeof setTimeout>>();
 
@@ -313,7 +313,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
   const menuRef = useRef<HTMLDivElement>(null);
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const refreshInFlightRef = useRef<Promise<void> | null>(null);
-  /** WS roster add during HTTP refresh — schedule a follow-up so snapshot is not wiped. */
+
   const rosterDirtyDuringRefreshRef = useRef(false);
   const refreshDebounceRef = useRef<ReturnType<typeof setTimeout>>();
   const rosterDetailsDebounceRef = useRef(
@@ -335,19 +335,18 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
   userIdRef.current = user?.id;
   const unreadRevisionRef = useRef(new Map<string, number>());
   const unreadGenerationRef = useRef(new Map<string, number>());
-  /** Raw (non-viewing-zeroed) unread for multi-tab title broadcast. */
+
   const rawUnreadRef = useRef(new Map<string, number>());
-  /** Keys that received deltas while HTTP refresh ignore=∞ (same-gen safe preferLive). */
+
   const dirtyUnreadDuringRefreshRef = useRef(new Set<string>());
-  /** After HTTP refresh/reconnect, ignore stale WS deltas briefly (HTTP is source of truth). */
+
   const ignoreUnreadDeltasUntilRef = useRef(0);
-  /** Contacts/channels snapshot for tip preferLive across refresh. */
+
   const contactsSnapshotRef = useRef<Contact[]>([]);
   const channelsSnapshotRef = useRef<Channel[]>([]);
-  /** DM wipe without absolute — reject stale wire until HTTP reseed. */
+
   const wipedUnreadKeysRef = useRef(new Set<string>());
 
-  /* data */
   const refresh = useCallback(async () => {
     if (refreshInFlightRef.current) {
       return refreshInFlightRef.current;
@@ -356,11 +355,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
     const run = (async () => {
       let mergeOk = false;
       try {
-        // Ignore deltas while HTTP fetch is in flight (+ grace for in-flight WS
-        // events already counted in the snapshot). Keep gens — clearing them
-        // lets delayed same-gen deltas overcount on top of HTTP.
-        // Keep dirty across start — absolute sticky-0 must survive until merge
-        // (clear only after successful HTTP merge below).
+
         ignoreUnreadDeltasUntilRef.current = Number.POSITIVE_INFINITY;
         rosterDirtyDuringRefreshRef.current = false;
         const gensAtStart = new Map(unreadGenerationRef.current);
@@ -368,15 +363,14 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
           getContactsForList(),
           getUserChannels(),
         ]);
-        // Tip preferLive at merge time — tips applied during HTTP RTT live in
-        // snapshot refs (pre-await snapshot would discard them).
+
         const prevContacts = new Map(
           contactsSnapshotRef.current.map((c) => [c._id, c]),
         );
         const prevChannels = new Map(
           channelsSnapshotRef.current.map((ch) => [ch._id, ch]),
         );
-        // Merge HTTP mute into store (guards block remute / wipe on lag).
+
         {
           const rosterIds: string[] = [];
           const httpMuted: string[] = [];
@@ -390,7 +384,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
             rosterIds.push(key);
             if (ch.isMuted) httpMuted.push(key);
           }
-          // Capture before merge — only unmute transitions drop sticky-0 dirty.
+
           const mutedBefore = new Set(getMutedConversationKeys());
           mergeMutedFromHttp(httpMuted, rosterIds);
           const dirty = dirtyUnreadDuringRefreshRef.current;
@@ -410,12 +404,12 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
           httpTime?: string,
           httpId?: string,
         ) => {
-          // Cleared tip (deleted tip with no cache backfill) must not beat HTTP.
+
           if (!liveId && liveTime == null) return false;
           const lt = liveTime ? Date.parse(liveTime) : NaN;
           const ht = httpTime ? Date.parse(httpTime) : NaN;
           if (Number.isFinite(lt) && Number.isFinite(ht)) {
-            // Never keep sticky temp-* over a real server tip (even if temp ts newer).
+
             if (
               liveId?.startsWith("temp-") &&
               httpId &&
@@ -425,16 +419,16 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
             }
             if (lt > ht) return true;
             if (lt < ht) return false;
-            // Same-ms: prefer non-temp server id over sticky optimistic temp-*.
+
             return tipIdNewerPreferNonTemp(liveId, httpId);
           }
-          // Empty HTTP tip after refresh is SoT — do not keep stale live preview.
+
           return false;
         };
         setContacts(() =>
           contactsRes.contacts.map((c) => {
             const key = `dm:${c._id}`;
-            // Store is SoT (unmute guard blocks stale HTTP remute).
+
             const muted = isConversationMuted("dm", c._id);
             const preferLiveUnread =
               dirty.has(key) ||
@@ -445,7 +439,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
             const live = preferLiveUnread
               ? rawUnreadRef.current.get(key)
               : undefined;
-            // Align with Bridge: pending mark → 0; max(http, live); sticky 0.
+
             const raw = muted || pendingZero
               ? 0
               : live !== undefined
@@ -535,8 +529,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
         }
         seedPresence(contactsRes.contacts);
 
-        // Close ghost chats; patch open chat fields without remounting ChatWindow
-        // when identity is unchanged (ChatWindow remounts on targetKey only).
         if (current?.type === "dm") {
           const fresh = contactsRes.contacts.find(
             (c) => c._id === current.contact._id,
@@ -605,11 +597,11 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
             }
           }
         }
-        // Clear dirty only after side-effects that can throw — sticky-0 survives retry.
+
         dirtyUnreadDuringRefreshRef.current.clear();
         mergeOk = true;
       } catch {
-        // Keep ∞ so deltas still accumulate into raw; retry shortly.
+
         ignoreUnreadDeltasUntilRef.current = Number.POSITIVE_INFINITY;
         window.setTimeout(() => {
           void refresh();
@@ -630,7 +622,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
       }
       if (rosterDirtyDuringRefreshRef.current) {
         rosterDirtyDuringRefreshRef.current = false;
-        // Stale HTTP snapshot may have wiped a live add — refresh again.
+
         window.setTimeout(() => {
           void refresh();
         }, 0);
@@ -659,8 +651,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
     [],
   );
 
-  // Clear timed channel mutes locally when mutedHereExpiresAt elapses (BE also
-  // emits on prune, but UI must unlock without waiting for the next HTTP/WS).
   const muteExpiryKey = channels
     .filter((ch) => ch.isMutedHere && ch.mutedHereExpiresAt)
     .map((ch) => `${ch._id}:${ch.mutedHereExpiresAt}`)
@@ -710,8 +700,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
 
   const displayContacts = contacts;
 
-  // External setActive (invite openChannelId) must viewing-zero the list row —
-  // handleSelect* already does this; keep raw for title preferLive.
   useEffect(() => {
     if (!active) return;
     if (active.type === "dm") {
@@ -746,22 +734,19 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
     const was = wsWasConnectedRef.current;
     wsWasConnectedRef.current = wsConnected;
     if (!wsConnected || was) return;
-    // Arm ∞ before clearing gens so the scheduleRefresh gap cannot apply
-    // replayed deltas onto a blank generation map.
+
     ignoreUnreadDeltasUntilRef.current = Number.POSITIVE_INFINITY;
     unreadRevisionRef.current.clear();
     unreadGenerationRef.current.clear();
-    // Drop dirty — sticky-0 from pre-disconnect mark-read must not beat
-    // offline HTTP unread after gens reset (pendingZero covers in-flight).
+
     dirtyUnreadDuringRefreshRef.current.clear();
     staleAllMessagePageCaches();
     scheduleRefresh();
   }, [wsConnected, scheduleRefresh]);
 
-  // Multi-tab mute BC → roster isMuted (list/sound follow other tab's toggle).
   useEffect(() => {
     return subscribeMutedConversations(() => {
-      // Sync from snapshots — setState updaters may not run before we read unmutedKeys.
+
       const unmutedKeys: string[] = [];
       for (const c of contactsSnapshotRef.current) {
         const key = `dm:${c._id}`;
@@ -843,13 +828,13 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
       const gen = payload.generation ?? 0;
       const lastGen = unreadGenerationRef.current.get(key) ?? 0;
       const isAbsolute = typeof payload.unreadCount === "number";
-      // Stale absolute — do not ack pendingZero (newer mark-read may still be in flight).
+
       if (gen < lastGen) {
         return;
       }
 
       const rev = payload.revision ?? 0;
-      // Same-gen revisionless deltas after absolute → phantom overcount.
+
       if (!isAbsolute && gen === lastGen && rev <= 0) return;
       if (isAbsolute || gen > lastGen) {
         unreadGenerationRef.current.set(key, gen);
@@ -859,9 +844,9 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
         const last = unreadRevisionRef.current.get(key) ?? 0;
         if (rev > 0) {
           if (!isAbsolute && rev <= last) return;
-          // Same-gen absolute older than applied delta — delayed mark-read vs newer +1.
+
           if (isAbsolute && gen === lastGen && last > 0 && rev < last) {
-            // Ignore — ack only on apply path.
+
             return;
           }
           unreadRevisionRef.current.set(
@@ -869,7 +854,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
             isAbsolute ? Math.max(last, rev) : rev,
           );
         } else if (isAbsolute && gen === lastGen && last > 0) {
-          // Revisionless absolute after a revisioned delta — ignore (clobber risk).
+
           return;
         }
       }
@@ -877,9 +862,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
       const ignoreUntil = ignoreUnreadDeltasUntilRef.current;
       const ignoringDeltas =
         !isAbsolute && Date.now() < ignoreUntil;
-      // Finite post-refresh grace no longer drops deltas — gen/rev gates above
-      // already filter delayed events; dropping here permanently undercounts.
-      // During in-flight HTTP (∞): accumulate raw only so preferLive can win.
+
       const applyRawOnly =
         ignoringDeltas && ignoreUntil === Number.POSITIVE_INFINITY;
 
@@ -893,10 +876,9 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
           current.channel._id === payload.id);
 
       if (isAbsolute) {
-        // Server absolute — clear mark-read zero-guard (wire ack is not enough).
+
         ackPendingMarkReadByKey(key);
-        // Dirty so HTTP merge preferLive keeps sticky 0 — but never for muted→0
-        // (unmute must not preferLive sticky 0 over real HTTP unread).
+
         const mutedAbs = isConversationMuted(
           payload.type === "dm" ? "dm" : "channel",
           payload.id,
@@ -917,7 +899,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
             );
             if (!muted) dirtyUnreadDuringRefreshRef.current.add(key);
           } else if (typeof payload.unreadCount === "number") {
-            // Absolute during ∞ — write raw so preferLive cannot keep stale high.
+
             if (rejectOffRoster()) return;
             const muted = isConversationMuted("dm", payload.id);
             rawUnreadRef.current.set(
@@ -952,7 +934,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
         setContacts((prev) =>
           prev.map((c) => {
             if (c._id !== payload.id) return c;
-            // Viewing zeros list UI only — raw stays for multi-tab title broadcast.
+
             return { ...c, unreadCount: viewing || muted ? 0 : raw };
           }),
         );
@@ -971,7 +953,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
           );
           if (!muted) dirtyUnreadDuringRefreshRef.current.add(key);
         } else if (typeof payload.unreadCount === "number") {
-          // Absolute during ∞ — write raw so preferLive cannot keep stale high.
+
           if (rejectOffRoster()) return;
           const muted = isConversationMuted("channel", payload.id);
           rawUnreadRef.current.set(
@@ -1084,7 +1066,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
     }, 220);
   };
 
-  /* WebSocket */
   useEffect(() => {
     if (!ws) return;
     const onRenamed = (e: { channelId: string; name: string }) => {
@@ -1160,7 +1141,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
       if (payload.channel?._id) {
         const ch = payload.channel;
         const key = `channel:${ch._id}`;
-        // Mute store is SoT — do not trust WS isMuted alone.
+
         const muted = isConversationMuted("channel", ch._id);
         const unread = muted ? 0 : Math.max(0, ch.unreadCount ?? 0);
         rawUnreadRef.current.set(key, unread);
@@ -1194,7 +1175,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
       memberCount?: number;
     }) => {
       if (!e.channelId) return;
-      // Kick/ban/purge may only emit member-left — treat self as leave.
+
       if (e.userId && userIdRef.current && e.userId === userIdRef.current) {
         ackPendingMarkReadByKey(`channel:${e.channelId}`);
         channelsSnapshotRef.current = channelsSnapshotRef.current.filter(
@@ -1259,7 +1240,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
       );
       const channelId = e.channelId;
       const memberCount = e.memberCount;
-      // Debounce roster HTTP — join storms would otherwise N× getChannelDetails.
+
       const pending = rosterDetailsDebounceRef.current.get(channelId);
       if (pending) clearTimeout(pending);
       rosterDetailsDebounceRef.current.set(
@@ -1294,7 +1275,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
                       typeof memberCount === "number"
                         ? memberCount
                         : (res.channel.memberCount ?? current.channel.memberCount),
-                    // Mute store is SoT — do not remute from lagged HTTP details.
+
                     isMuted: isConversationMuted("channel", channelId),
                     unreadCount: 0,
                   },
@@ -1302,7 +1283,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
               }
             })
             .catch(() => {
-              /* keep memberCount bump */
+
             });
         }, 300),
       );
@@ -1316,7 +1297,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
       wipedUnreadKeysRef.current.add(key);
       rawUnreadRef.current.set(key, 0);
       dirtyUnreadDuringRefreshRef.current.delete(key);
-      // Wipe may arrive without absolute (server sync fail) — fence same-gen stale wire.
+
       const prevGen = unreadGenerationRef.current.get(key) ?? 0;
       unreadGenerationRef.current.set(key, prevGen + 1);
       unreadRevisionRef.current.delete(key);
@@ -1368,7 +1349,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
         rosterDirtyDuringRefreshRef.current = true;
       }
       invalidateFriendshipCache(contact._id);
-      // Mute store is SoT — do not trust WS isMuted alone.
+
       const muted = isConversationMuted("dm", contact._id);
       const key = `dm:${contact._id}`;
       const unread = muted ? 0 : Math.max(0, contact.unreadCount ?? 0);
@@ -1399,7 +1380,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
       const patch: Partial<Contact> = {};
       if (typeof e.isBlockedByMe === "boolean") patch.isBlockedByMe = e.isBlockedByMe;
       if (typeof e.isBlockedByOther === "boolean") {
-        /* list row may not show byOther */
+
       }
       if (Object.keys(patch).length === 0) return;
       setContacts((prev) =>
@@ -1507,7 +1488,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
     return () => unsubs.forEach((u) => u());
   }, [ws, scheduleRefresh, applyUnreadUpdate]);
 
-  // Optimistic own send tip (before RECEIVE echo).
   useEffect(() => {
     const unsubTip = subscribeSidebarTipFromMessage((msg) => {
       setContacts((prev) =>
@@ -1701,7 +1681,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setContextMenu(null);
     };
-    // Opóźnienie zapobiega natychmiastowemu zamknięciu menu po prawym kliknięciu.
+
     const attachTimer = window.setTimeout(() => {
       document.addEventListener("mousedown", handlePointer);
     }, 0);
@@ -1723,7 +1703,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
     return () => { if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current); };
   }, [searchTerm]);
 
-  /* actions */
   const handleNewChannel = async () => {
     const name = channelName.trim(); if (!name) return;
     try {
@@ -1805,7 +1784,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
     clearMention(id);
   }, [active, clearMention]);
 
-  // Leaving a chat: restore list badge from raw unless mute / pending mark-zero.
   const prevActiveKeyRef = useRef<string | null>(null);
   useEffect(() => {
     const nextKey = active
@@ -1836,7 +1814,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
   const handleSelectContact = (contact: Contact) => {
     clearMention(contact._id);
     const storeMuted = isConversationMuted("dm", contact._id);
-    // Zero list UI only — keep raw until mark-read absolute (avoids sticky 0 on fail).
+
     onSelect({
       type: "dm",
       contact: { ...contact, isMuted: storeMuted, unreadCount: 0 },
@@ -1924,14 +1902,14 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
             : c,
         );
         setContacts(nextContacts);
-        // Merge into store SoT (avoid stale React roster wiping other keys).
+
         const nextMuted = new Set(getMutedConversationKeys());
         if (res.isMuted) nextMuted.add(`dm:${id}`);
         else nextMuted.delete(`dm:${id}`);
         setMutedConversationKeys(nextMuted, { broadcast: true });
         if (res.isMuted) rawUnreadRef.current.set(`dm:${id}`, 0);
         if (!res.isMuted) {
-          // Wait out any in-flight snapshot so unmute is not rewritten by stale HTTP.
+
           if (refreshInFlightRef.current) await refreshInFlightRef.current;
           await refresh();
         }
@@ -1957,7 +1935,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
           await refresh();
         }
       }
-      // Po wyciszeniu usuń ewentualny znacznik wzmianki dla tej konwersacji.
+
       clearMention(id);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t("sidebar.toast.muteFailed"));
@@ -1986,7 +1964,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
   contactsSnapshotRef.current = contacts;
   channelsSnapshotRef.current = channels;
 
-  /* sync total unread across tabs — broadcast full; exclude open chat only locally */
   useEffect(() => {
     try {
       const activeKey =
@@ -1995,8 +1972,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
           : active?.type === "channel"
             ? `channel:${active.channel._id}`
             : null) ?? getActiveConversationKey();
-      // First paint after Chat remount: empty lists — keep prior title/exclude
-      // until roster hydrate (do not zero the whole badge via fullCount exclude).
+
       if (
         rawUnreadRef.current.size === 0 &&
         contacts.length === 0 &&
@@ -2044,7 +2020,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
     }
   }, [contacts, channels, active, pendingMarkEpoch]);
 
-  // pendingZero ack/track without roster change — re-sync title + nav.
   useEffect(
     () =>
       subscribePendingMarkReads(() => {
@@ -2060,7 +2035,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
     [],
   );
 
-  /* ─── context menu ─── */
   const openChats = useCallback(() => {
     setContactsModalOpen(false);
     setContactsModalClosing(false);
@@ -2094,12 +2068,11 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
       return s + Math.max(0, ch.unreadCount ?? 0);
     }, 0);
 
-  /* ───────────────────── JSX ───────────────────── */
   return (
     <>
       <div className="app-shell app-shell--chat app-shell--no-detail">
         <div className="app-shell__nav">
-          <AppNavRail
+          <Nav
             onOpenChats={openChats}
             settingsActive={false}
             onOpenSettings={() => navigate(settingsPath())}
@@ -2113,7 +2086,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
         </div>
 
         <div className="app-shell__list">
-          <ChatListPane
+          <ChatList
             contacts={displayContacts}
             channels={channels}
             active={active}
@@ -2153,12 +2126,12 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
         </div>
       </div>
 
-      <UserProfileModal
+      <MyProfile
         isOpen={profileOpen}
         onClose={() => setProfileOpen(false)}
         onOpenSettings={() => navigate(settingsPath())}
       />
-      <OtherUserProfileModal
+      <OtherProfile
         isOpen={contactProfileOpen}
         openKey={contactProfileOpenKey}
         onClose={() => {
@@ -2192,7 +2165,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
         }
       />
       {(contactsModalOpen || contactsModalClosing) && (
-        <ContactsModal
+        <Contacts
           isOpen={contactsModalOpen}
           isClosing={contactsModalClosing}
           onClose={handleCloseContactsModal}
@@ -2204,7 +2177,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
         />
       )}
 
-      {/* ═══════════════ CONTEXT MENU ═══════════════ */}
       {contextMenu && (
         <div
           ref={menuRef}
@@ -2350,7 +2322,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
       )}
 
       {channelSettingsInfo && user && (
-        <ChannelSettingsModal
+        <ChannelSettings
           channel={channelSettingsInfo.channel}
           currentUserId={user.id}
           onClose={() => setChannelSettingsInfo(null)}
@@ -2378,7 +2350,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
         />
       )}
 
-      {/* ═══════════════ NEW CHANNEL MODAL ═══════════════ */}
       {(showNewChannel || newChannelClosing) && (
         <div
           className={`klovy-backdrop klovy-backdrop--center${newChannelClosing ? " closing" : ""}`}
@@ -2417,7 +2388,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
         </div>
       )}
 
-      {/* ═══════════════ RENAME MODAL ═══════════════ */}
       {(renameChannelInfo || renameChannelClosing) && (
         <div
           className={`klovy-backdrop klovy-backdrop--center${renameChannelClosing ? " closing" : ""}`}
@@ -2451,7 +2421,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
         </div>
       )}
 
-      {/* ═══════════════ REMOVE CONTACT CONFIRM ═══════════════ */}
       {(removeContactInfo || removeContactClosing) && (
         <div
           className={`klovy-backdrop${removeContactClosing ? " closing" : ""}`}
@@ -2489,7 +2458,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
         </div>
       )}
 
-      {/* ═══════════════ DELETE CONFIRM MODAL ═══════════════ */}
       {(deleteChannelInfo || deleteChannelClosing) && (
         <div
           className={`klovy-backdrop${deleteChannelClosing ? " closing" : ""}`}
@@ -2529,7 +2497,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
         </div>
       )}
 
-      {/* ═══════════════ MENTION TOAST ═══════════════ */}
       {mentionToast && (
         <div
           className="mention-toast"
@@ -2578,11 +2545,10 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
         </div>
       )}
 
-      {/* Hidden avatar input */}
       <input ref={channelAvatarInputRef} type="file" accept="image/jpeg,image/png,image/webp" style={{ display: "none" }} onChange={handleChannelAvatarFileChange} />
 
       {channelCropFile ? (
-        <ImageCropModal
+        <ImageCrop
           file={channelCropFile}
           aspect={1}
           outputWidth={512}

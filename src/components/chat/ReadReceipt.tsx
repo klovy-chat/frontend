@@ -1,5 +1,13 @@
+// ReadReceipt.tsx
+// Ptaszki przeczytania na własnych dymkach.
+// Zakres:
+//  - read z readBy / stanu listy
+//  - ptaszki na własnych; to nie badge listy (read_state)
+// Nie mylić z badge unread na liście — to inna ścieżka (read_state).
+// Przy zmianach: MessageBubble.tsx, model/read_state.rs.
+
 import { useTranslation } from "react-i18next";
-import "../../styles/chat/messagebubble.css";
+import "../../styles/chat/bubble.css";
 
 interface ReadReceiptProps {
   read?: boolean;

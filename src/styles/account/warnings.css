@@ -1,3 +1,12 @@
+/* warnings.css
+   Baner i lista ostrzeżeń.
+   Zakres:
+    - stan przeczytane/nie
+    - baner + lista; kolory danger z design systemu
+   Kolory danger trzymaj z resztą design systemu.
+   Przy zmianach: Warning.tsx, Panel ostrzeżenia.
+ */
+
 .warn-overlay {
   position: fixed;
   inset: 0;

@@ -1,0 +1,299 @@
+/* settings.css
+   Layout strony ustawień (nav sekcji + panel).
+   Zakres:
+    - app-shell__settings-*
+    - nav sekcji + panel; nowa zakładka to Panel.tsx, tu siatka
+   Nowa sekcja: Panel.tsx, ten plik tylko siatka.
+   Przy zmianach: Settings.tsx, Panel.tsx.
+ */
+
+.settings-page {
+  --settings-nav-width: 200px;
+  --settings-content-min: 720px;
+  --settings-column-gap: 20px;
+  width: 100%;
+  height: 100%;
+  background: var(--bg-settings-nav);
+  animation: klovy-fade-in 0.18s ease both;
+}
+
+.settings-page-layout {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  animation: klovy-slide-in 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.settings-page-left-spacer {
+  flex: 0 0 auto;
+  width: max(
+    0px,
+    calc((100vw - var(--settings-nav-width) - var(--settings-content-min)) / 2)
+  );
+  background: var(--bg-settings-nav);
+}
+
+.settings-page .app-shell__settings-nav {
+  flex: 0 0 var(--settings-nav-width);
+  min-height: 0;
+  overflow: hidden;
+  background: var(--bg-settings-nav);
+  border-right: none;
+  padding-right: var(--settings-column-gap);
+}
+
+.settings-page .app-shell__settings-content,
+.settings-page .as-content--inline {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  background: var(--bg-settings-surface);
+}
+
+.settings-page-layout .as-content {
+  min-height: 0;
+}
+
+.settings-page .as-nav--inline {
+  background: var(--bg-settings-nav);
+  padding: 52px 8px 20px 14px;
+  gap: 2px;
+  border-right: none;
+  align-items: stretch;
+}
+
+.settings-page .as-nav-title {
+  font-size: 0.95rem;
+  margin: 0 0 16px;
+  padding: 0 6px 0 2px;
+  text-align: left;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.settings-page .as-nav-label {
+  display: block;
+  padding: 0 8px 6px 8px;
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  text-align: left;
+  color: var(--text-dim);
+}
+
+.settings-page .as-nav-label--spaced {
+  margin-top: 10px;
+}
+
+.settings-page .as-nav-item {
+  padding: 7px 8px 7px 8px;
+  border-radius: 6px;
+  font-size: 13px;
+  gap: 0.5rem;
+  margin-bottom: 2px;
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.settings-page .as-nav-item:hover {
+  background: var(--bg-settings-card);
+  color: var(--text);
+}
+
+.settings-page .as-nav-item.active {
+  background: var(--bg-settings-active);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.settings-page .as-nav-item.active svg {
+  color: var(--accent);
+  opacity: 1;
+}
+
+.settings-page .as-nav-spacer {
+  flex: 1;
+  min-height: 12px;
+}
+
+.settings-page .as-content-inner {
+  max-width: var(--settings-content-min);
+  margin: 0;
+  padding: 28px 32px 48px 28px;
+}
+
+.settings-page .as-section-title {
+  font-size: 1.45rem;
+  margin-bottom: 2px;
+}
+
+.settings-page .as-section-subtitle {
+  margin: 0 0 16px;
+  font-size: 12px;
+}
+
+.settings-page .as-account-hero {
+  margin-bottom: 6px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: var(--bg-settings-card);
+  border-color: transparent;
+}
+
+.settings-page .as-card,
+.settings-page .as-setting-card,
+.settings-page .as-data-card {
+  margin-bottom: 4px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: var(--bg-settings-card);
+  border-color: transparent;
+}
+
+.settings-page .as-setting-card:hover {
+  background: var(--bg-settings-card-hover);
+}
+
+.settings-page .as-action-row {
+  margin-top: 4px;
+  margin-bottom: 0;
+  padding: 13px 16px;
+  border-radius: 10px;
+  background: var(--bg-settings-card);
+  border-color: transparent;
+}
+
+.settings-page .as-action-row:hover:not(:disabled) {
+  background: var(--bg-settings-card-hover);
+}
+
+.settings-page .as-group-label {
+  margin: 16px 0 4px;
+  font-size: 9px;
+  letter-spacing: 0.11em;
+  color: var(--text-dim);
+}
+
+.settings-page .as-card-label {
+  margin-bottom: 4px;
+  font-size: 9px;
+  color: var(--text-dim);
+  opacity: 1;
+}
+
+.settings-page .as-hint {
+  margin-bottom: 0.75rem;
+  font-size: 12px;
+}
+
+.settings-page .as-form--inset {
+  margin-top: 10px;
+  padding-top: 10px;
+}
+
+.settings-page .as-deletion-pending-banner,
+.settings-page .as-info-banner {
+  margin-bottom: 4px;
+  border-radius: 10px;
+}
+
+.settings-page .as-content-topbar {
+  right: 24px;
+  top: 24px;
+}
+
+.settings-page .as-close--inline {
+  background: var(--bg-settings-card);
+  border-color: transparent;
+}
+
+.settings-page .as-close--inline:hover {
+  background: var(--bg-settings-card-hover);
+}
+
+.settings-section-panel {
+  animation: settings-section-in 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes settings-section-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.settings-page .as-nav-item {
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    transform 0.12s ease;
+}
+
+.settings-page .as-nav-item:active {
+  transform: scale(0.98);
+}
+
+.settings-page .as-action-row,
+.settings-page .as-setting-row {
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.12s ease;
+}
+
+.settings-page .as-action-row:active,
+.settings-page .as-setting-row:active {
+  transform: scale(0.995);
+}
+
+.settings-page .as-banner-block {
+  margin-bottom: 8px;
+}
+
+.settings-page .as-profile-header-row {
+  margin-bottom: 8px;
+}
+
+.settings-page .as-session-row {
+  margin-bottom: 0;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--bg-settings-card);
+  border: 1px solid var(--border);
+}
+
+.settings-page .as-session-row--current {
+  background: color-mix(in srgb, var(--accent) 14%, var(--bg-settings-card));
+  border-color: color-mix(in srgb, var(--accent) 38%, var(--border));
+}
+
+.settings-page .as-sessions-list {
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.settings-page .as-session-icon-stack__os {
+  border-color: var(--bg-settings-card);
+}
+
+.settings-page .as-session-row--current .as-session-icon-stack__os {
+  border-color: color-mix(in srgb, var(--accent) 14%, var(--bg-settings-card));
+}
+
+.settings-page .as-voice-banner {
+  margin-bottom: 6px;
+}
+
+.settings-page .as-lang-row {
+  margin-bottom: 0;
+  background: var(--bg-settings-card);
+  border-color: transparent;
+}

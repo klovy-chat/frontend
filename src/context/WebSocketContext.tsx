@@ -1,3 +1,11 @@
+// WebSocketContext.tsx
+// Jedno gniazdo na powłokę zalogowanego.
+// Zakres:
+//  - waitBackend, connect, connected flag
+//  - zamknięcie po logout (po hangup)
+// Nie spinaj drugiego WS w stronie — dopisz listener na istniejącym kliencie.
+// Przy zmianach: api/ws.ts, waitBackend.ts, App.tsx.
+
 import {
   createContext,
   useContext,
@@ -8,14 +16,14 @@ import {
 } from "react";
 import { WebSocketClient } from "../api/ws";
 import { issueWsCryptoKey } from "../api/auth";
-import { WsType } from "../api/wsProtocol";
+import { WsType } from "../api/protocol";
 import {
   bumpPublicMediaCache,
   bumpPublicMediaCacheForChannel,
   bumpPublicMediaCacheForUser,
-} from "../utils/media/cdnCacheVersion";
+} from "../utils/media/cdnVersion";
 import { usesDirectBackendUrl } from "../utils/env/appEnv";
-import { getBackendStartHint, waitForBackend } from "../utils/env/waitForBackend";
+import { getBackendStartHint, waitBackend } from "../utils/env/waitBackend";
 import { useAuth } from "./AuthContext";
 
 const WebSocketContext = createContext<WebSocketClient | null>(null);
@@ -52,7 +60,7 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
 
     const connect = async () => {
       if (!usesDirectBackendUrl) {
-        const ready = await waitForBackend();
+        const ready = await waitBackend();
         if (!ready) {
         if (import.meta.env.DEV) {
           console.warn(`[ws] Backend niedostępny. ${getBackendStartHint()}`);
@@ -141,7 +149,7 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
       );
       unsubs.push(
         instance.subscribe(WsType.SESSION_REVOKED, () => {
-          // Logout first so CallProvider unmount hangup can still use an open socket.
+
           void (async () => {
             try {
               await logoutRef.current();
@@ -201,7 +209,6 @@ export function useWebSocket() {
   return useContext(WebSocketContext);
 }
 
-/** Zwraca `true`, gdy połączenie WebSocket jest aktywne (otwarte). */
 export function useWebSocketConnected() {
   return useContext(WebSocketConnectedContext);
 }

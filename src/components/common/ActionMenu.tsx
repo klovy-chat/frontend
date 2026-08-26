@@ -1,3 +1,11 @@
+// ActionMenu.tsx
+// Dropdown akcji (trigger + portal pozycji).
+// Zakres:
+//  - danger variant
+//  - trigger + portal; pozycje z tablicy items
+// Nowa pozycja: tablica items, nie kopiuj markup.
+// Przy zmianach: action-menu.css, ChannelSettings.tsx.
+
 import {
   useEffect,
   useId,

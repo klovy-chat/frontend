@@ -1,3 +1,11 @@
+// auth.ts
+// Endpointy sesji i konta (login, 2FA, profil, sesje, ostrzeżenia).
+// Zakres:
+//  - nie trzyma haseł w pamięci poza requestem
+//  - login, 2FA, sesje, profil, ostrzeżenia — bez logiki UI
+// Nowy endpoint /api/auth/*: ten plik + routes/auth.rs.
+// Przy zmianach: AuthContext.tsx, controllers/auth.rs.
+
 import { apiRequest, withTransientRetry } from "./client";
 import { assertAvatarSize, assertBannerSize } from "../constants/upload";
 import type { User } from "../types";

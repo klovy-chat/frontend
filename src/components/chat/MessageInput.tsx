@@ -1,11 +1,19 @@
+// MessageInput.tsx
+// Composer: tekst, pliki, emoji/GIF/sticker, @wzmianki, voice, typing.
+// Zakres:
+//  - heartbeat typing max co 5s (rate limit)
+//  - tekst, pliki, pickery, @, voice, typing heartbeat
+// Wklejony GIF idzie jako external media, nie jako upload .gif (backend i CORS blokują).
+// Przy zmianach: socketPayload.ts, mentions.ts, pickers/*, input.css.
+
 import { FormEvent, KeyboardEvent, MouseEvent, useMemo, useRef, useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { EmojiPicker } from "./pickers/EmojiPicker";
-import { GifPicker } from "./pickers/GifPicker";
-import { StickerPicker } from "./pickers/StickerPicker";
+import { Emoji } from "./pickers/Emoji";
+import { Gif } from "./pickers/Gif";
+import { Sticker } from "./pickers/Sticker";
 import { Avatar } from "../common/Avatar";
 import { getMessagePreview, getQuotedAuthorLabel } from "../../utils/chat/messages";
-import { getCaretCoordinates } from "../../utils/chat/caretPosition";
+import { getCaretCoordinates } from "../../utils/chat/caret";
 import { userLabel } from "../../utils/user/format";
 import type { Message, MentionCandidate } from "../../types";
 import {
@@ -17,15 +25,15 @@ import {
   MAX_ATTACHMENT_SIZE_LABEL,
 } from "../../constants/upload";
 import { MAX_MESSAGE_LENGTH } from "../../constants/messages";
-import { sanitizeMessageInput } from "../../utils/text/unicodeText";
-import { isAllowedGifMediaUrl } from "../../utils/media/mediaAllowlist";
+import { sanitizeMessageInput } from "../../utils/text/unicode";
+import { isAllowedGifMediaUrl } from "../../utils/media/allowedMedia";
 import {
   formatVoiceDuration,
-  useVoiceRecorder,
+  useRecorder,
   type VoiceRecordingResult,
-} from "../../hooks/useVoiceRecorder";
+} from "../../hooks/useRecorder";
 import { useLocale } from "../../context/LocaleContext";
-import "../../styles/chat/messageinput.css";
+import "../../styles/chat/input.css";
 
 const ALLOWED_FILE_EXTENSIONS = [...ALLOWED_ATTACHMENT_EXTENSIONS];
 const FILE_ACCEPT = ALLOWED_FILE_EXTENSIONS.map((ext) => `.${ext}`).join(",");
@@ -125,7 +133,7 @@ export function MessageInput({
     stop: stopRecording,
     cancel: cancelRecording,
     setError: setVoiceError,
-  } = useVoiceRecorder(undefined, (result) => {
+  } = useRecorder(undefined, (result) => {
     void finishVoiceRecordingRef.current(result);
   });
 
@@ -232,13 +240,13 @@ export function MessageInput({
       return;
     }
     const now = Date.now();
-    // Heartbeat at most every 5s — keeps under per-chat rate limits even with multi-tab.
+
     if (!typingActive.current || now - lastTypingSent.current > 5000) {
       typingActive.current = true;
       lastTypingSent.current = now;
       onTyping?.(true);
     }
-    // Reliable stop: if no keystroke arrives within 3s, tell the peer we stopped.
+
     if (typingTimeout.current) clearTimeout(typingTimeout.current);
     typingTimeout.current = setTimeout(() => stopTyping(), 3000);
   };
@@ -247,7 +255,7 @@ export function MessageInput({
     return () => {
       stopTyping();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- unmount cleanup only
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -380,7 +388,7 @@ export function MessageInput({
     prefix: string,
     suffix?: string,
   ) => {
-    // Zachowaj zaznaczenie/focus w textarei – nie pozwól przyciskowi przejąć focusu.
+
     e.preventDefault();
     applyFormat(prefix, suffix ?? prefix);
   };
@@ -532,7 +540,6 @@ export function MessageInput({
     }
   };
 
-
   return (
     <form
       ref={formRef}
@@ -665,21 +672,21 @@ export function MessageInput({
       )}
 
       {showEmojiPicker && (
-        <EmojiPicker
+        <Emoji
           onEmojiSelect={handleEmojiSelect}
           onClose={() => setShowEmojiPicker(false)}
         />
       )}
 
       {showGifPicker && (
-        <GifPicker
+        <Gif
           onGifSelect={handleGifSelect}
           onClose={() => setShowGifPicker(false)}
         />
       )}
 
       {showStickerPicker && onSticker && (
-        <StickerPicker
+        <Sticker
           onStickerSelect={handleStickerSelect}
           onClose={() => setShowStickerPicker(false)}
         />
@@ -853,7 +860,6 @@ export function MessageInput({
             blurTimeout.current = setTimeout(() => {
               setFormatBar(null);
               closeMention();
-              // Don't clear typing while interacting with emoji/gif/sticker pickers.
               if (!pickerOpenRef.current) {
                 stopTyping();
               }

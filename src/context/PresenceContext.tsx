@@ -1,3 +1,11 @@
+// PresenceContext.tsx
+// Statusy online/away/dnd znajomych.
+// Zakres:
+//  - seed HTTP, delty WS
+//  - usePresenceSeed bez re-renderu, useUserPresence z subskrypcją
+// Po logout wyczyść snapshot, inaczej zostaną kropki poprzedniego konta.
+// Przy zmianach: Sidebar.tsx, Avatar.tsx, user/online.rs.
+
 import {
   createContext,
   useCallback,
@@ -10,7 +18,7 @@ import {
 } from "react";
 import { useAuth } from "./AuthContext";
 import { useWebSocket, useWebSocketConnected } from "./WebSocketContext";
-import { WsType } from "../api/wsProtocol";
+import { WsType } from "../api/protocol";
 import type { User } from "../types";
 
 export type AvailabilityStatus = "online" | "away" | "brb" | "dnd";
@@ -48,7 +56,6 @@ function setPresenceMap(updater: (prev: PresenceMap) => PresenceMap) {
   if (changedIds.size === 0) emitPresence();
 }
 
-/** Drop module snapshot on logout / account switch. */
 export function clearPresenceSnapshot() {
   if (Object.keys(presenceSnapshot).length === 0) return;
   presenceSnapshot = {};
@@ -56,7 +63,7 @@ export function clearPresenceSnapshot() {
 }
 
 interface PresenceApi {
-  /** Seed presence from an HTTP snapshot (e.g. contacts/friends list). */
+
   seed: (
     users: Array<{
       _id?: string;
@@ -79,11 +86,6 @@ interface StatusChangedPayload {
   };
 }
 
-/**
- * Central, WebSocket-driven presence store. Consumers that only need `seed`
- * do not re-render on status changes; `useUserPresence(id)` re-renders only
- * when that user's presence changes.
- */
 export function PresenceProvider({ children }: { children: ReactNode }) {
   const ws = useWebSocket();
   const wsConnected = useWebSocketConnected();
@@ -100,8 +102,7 @@ export function PresenceProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const was = wasConnectedRef.current;
     wasConnectedRef.current = wsConnected;
-    // Keep last presence across short WS blips — only force offline after a
-    // short delay, and cancel if we reconnect (seeds/WS will refresh).
+
     if (disconnectOfflineTimerRef.current) {
       clearTimeout(disconnectOfflineTimerRef.current);
       disconnectOfflineTimerRef.current = undefined;
@@ -219,8 +220,7 @@ export function PresenceProvider({ children }: { children: ReactNode }) {
           ) {
             continue;
           }
-          // Don't let a stale HTTP seed downgrade a live WS online presence,
-          // and keep live availability while both sides report online.
+
           if (prevEntry?.isOnline === true && incoming.isOnline === false) {
             next[id] = {
               isOnline: true,
@@ -231,7 +231,7 @@ export function PresenceProvider({ children }: { children: ReactNode }) {
             continue;
           }
           if (prevEntry?.isOnline === true && incoming.isOnline === true) {
-            // Prefer HTTP availability when both report online (missed WS flip).
+
             next[id] = {
               isOnline: true,
               availabilityStatus:
@@ -262,12 +262,10 @@ export function PresenceProvider({ children }: { children: ReactNode }) {
   );
 }
 
-/** Seed-only hook — no re-render on status updates. */
 export function usePresenceSeed(): PresenceApi["seed"] {
   return useContext(PresenceApiContext)?.seed ?? (() => {});
 }
 
-/** Subscribe to a single user's presence. */
 export function useUserPresence(userId: string | undefined): Presence | undefined {
   return useSyncExternalStore(
     (onStoreChange) => {
@@ -288,7 +286,6 @@ export function useUserPresence(userId: string | undefined): Presence | undefine
   );
 }
 
-/** Non-reactive snapshot for one-off reads (context menus, etc.). */
 export function getPresenceSnapshot(userId: string | undefined): Presence | undefined {
   return userId ? presenceSnapshot[userId] : undefined;
 }

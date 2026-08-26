@@ -1,3 +1,11 @@
+// emojis.ts
+// Lista emoji z backendu (bez kluczy zewnętrznych w przeglądarce).
+// Zakres:
+//  - grupy do pickera
+//  - grupy do pickera; klucz zewnętrzny zostaje na serwerze
+// Pusta tablica przy błędzie — nie udawaj cache.
+// Przy zmianach: pickers/Emoji.tsx, controllers/emojis.rs.
+
 import { apiRequest } from "./client";
 
 interface EmojiItem {
@@ -33,8 +41,6 @@ const QUICK_REACTION_KEYWORDS = [
   "party popper",
 ] as const;
 
-// Zbiór emotek jest niezmienny, więc pobieramy go tylko raz na sesję
-// i współdzielimy między wszystkimi instancjami pickera.
 let cache: Promise<EmojiGroup[]> | null = null;
 
 export function getEmojis(): Promise<EmojiGroup[]> {

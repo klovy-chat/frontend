@@ -1,3 +1,11 @@
+// friends.ts
+// HTTP zaproszeń i blokad.
+// Zakres:
+//  - UI DM dodatkowo ufa friendsCache, żeby composer nie migał
+//  - invite/accept/block; po mutacji patch friendsCache
+// Zmiana relacji: inwaliduj cache znajomych (FE i BE typing cache).
+// Przy zmianach: friendsCache.ts, controllers/friends.rs.
+
 import { apiRequest } from "./client";
 import type { Contact, FriendRequestItem } from "../types";
 

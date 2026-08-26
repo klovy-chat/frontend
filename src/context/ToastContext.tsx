@@ -1,3 +1,11 @@
+// ToastContext.tsx
+// Krótki feedback po akcjach (toast).
+// Zakres:
+//  - kolejka sukces/błąd
+//  - kolejka sukces/błąd; walidacja pól zostaje inline
+// Błędy pól formularza zostaw inline, nie w toście.
+// Przy zmianach: styles/common/toast.css.
+
 import {
   createContext,
   useCallback,

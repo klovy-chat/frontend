@@ -1,3 +1,11 @@
+// presence.ts
+// Pomocnicze mapowanie availability → UI/dźwięki.
+// Zakres:
+//  - online/away/brb/dnd
+//  - availability → UI/dźwięki; live jest w PresenceContext
+// Źródło live: PresenceContext, nie ten plik.
+// Przy zmianach: PresenceContext.tsx, notifySound.ts.
+
 import i18n from "../../i18n/config";
 
 export type AvailabilityStatus = "online" | "away" | "brb" | "dnd" | "offline";

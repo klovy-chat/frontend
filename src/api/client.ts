@@ -1,15 +1,23 @@
-import { getBackendBaseUrl } from "../utils/env/backendUrl";
+// client.ts
+// Wspólny fetch JSON (cookies, CSRF, klient, UA).
+// Zakres:
+//  - ApiError
+//  - retry 502/503/504 na niestabilnym uploadzie
+// Nowy nagłówek CORS musi trafić też na backend (security/cors.rs).
+// Przy zmianach: utils/env/clientId.ts, middlewares/csrf.rs.
+
+import { getBackendBaseUrl } from "../utils/env/backend";
 import { usesDirectBackendUrl } from "../utils/env/appEnv";
 import { CLIENT_HEADER_NAME, CLIENT_IDENTIFIER } from "../utils/env/clientId";
 import {
   applyClientUserAgentHeader,
-  ensureClientEnvironment,
-} from "../utils/device/clientEnvironment";
+  ensureClientInfo,
+} from "../utils/device/clientInfo";
 import {
   absorbCsrfToken,
   clearCsrfToken,
   getCsrfToken,
-} from "../utils/auth/csrfToken";
+} from "../utils/auth/csrf";
 import i18n from "../i18n/config";
 
 export class ApiError extends Error {
@@ -51,7 +59,6 @@ export function isTransientApiError(error: unknown): boolean {
   return isFetchNetworkError(error);
 }
 
-/** Retry transient upload/proxy failures (502/503/504/network) with short backoff. */
 export async function withTransientRetry<T>(
   fn: () => Promise<T>,
   attempts = 3,
@@ -113,7 +120,7 @@ async function tryRefreshSession(): Promise<boolean> {
     }
 
     try {
-      await ensureClientEnvironment();
+      await ensureClientInfo();
       const refreshHeaders = new Headers({
         [CLIENT_HEADER_NAME]: CLIENT_IDENTIFIER,
       });
@@ -147,7 +154,7 @@ export async function apiRequest<T>(
   path: string,
   options: ApiRequestOptions = {},
 ): Promise<T> {
-  await ensureClientEnvironment();
+  await ensureClientInfo();
 
   const headers = new Headers(options.headers);
   const method = (options.method ?? "GET").toUpperCase();

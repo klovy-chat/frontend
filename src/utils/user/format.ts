@@ -1,3 +1,11 @@
+// format.ts
+// Jedna etykieta osoby: displayName albo @username.
+// Zakres:
+//  - getUserId helper
+//  - displayName albo @username; getUserId helper
+// Nie składaj nazwy ad-hoc w dymku — tu łatwiej i18n/fallback.
+// Przy zmianach: MessageBubble.tsx, ChatList.tsx.
+
 import type { WarningSeverity } from "../../api/auth";
 import i18n from "../../i18n/config";
 import { getFormattingLocale, normalizeLocale } from "../../languages";
@@ -70,7 +78,6 @@ export function isSameLocalDay(a: string | Date, b: string | Date): boolean {
   return localDayKey(dateA) === localDayKey(dateB);
 }
 
-/** Etykieta separatora dnia w liście wiadomości (Dziś / Wczoraj / 20 lipca 2026). */
 export function formatMessageDateSeparator(dateStr: string): string {
   const date = new Date(dateStr);
   if (Number.isNaN(date.getTime())) return i18n.t("common.emDash");
@@ -98,7 +105,6 @@ export type UserLabelSource = {
   username?: string;
 };
 
-/** Główna nazwa widoczna w UI: displayName → @username */
 export function userLabel(user?: UserLabelSource | null): string {
   if (!user) return i18n.t("user.defaultLabel");
   if (user.displayName?.trim()) return user.displayName.trim();

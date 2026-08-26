@@ -1,3 +1,11 @@
+// MediaImage.tsx
+// Img z CDN i fallbackiem na API, cache który URL zadziałał.
+// Zakres:
+//  - lazy thumbs vs priority lightbox
+//  - CDN z fallbackiem API; cache który URL zadziałał
+// Nowy kind obrazka: rozwiąż URL w media.ts, nie tutaj.
+// Przy zmianach: media.ts, Avatar.tsx, Lightbox.tsx.
+
 import {
   useCallback,
   useEffect,
@@ -10,19 +18,14 @@ import { legacyAttachmentFallbackUrl, resolveMediaUrl } from "../../utils/media/
 
 interface MediaImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, "src"> {
   fileUrl: string;
-  /** Tried after `fileUrl` (and its CDN→API fallback) fail — e.g. full image when thumb is missing. */
+
   fallbackFileUrl?: string;
-  /**
-   * When true (default), defer setting `src` until the image is near the viewport
-   * of `.message-list` (or the document if no list root is found).
-   */
+
   deferUntilVisible?: boolean;
 }
 
-/** Remember which URL worked for a given file key so remounts don't re-hit the API. */
 const resolvedSrcCache = new Map<string, string>();
 
-/** Lazy chat thumbnails share this pool; lightbox uses priority loading instead. */
 const MAX_CONCURRENT_LOADS = 10;
 let activeLoads = 0;
 const loadWaitQueue: Array<() => void> = [];
@@ -147,7 +150,7 @@ export function MediaImage({
       setSrc(resolvedSrcCache.get(cacheKey) ?? null);
       return;
     }
-    // Lightbox / other eager loads must not wait behind lazy message-list thumbnails.
+
     if (!deferUntilVisible) {
       slotHeld.current = false;
       setSlotReady(true);

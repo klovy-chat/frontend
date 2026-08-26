@@ -1,10 +1,18 @@
+// messages.ts
+// HTTP historii, pin, search, upload, link-preview.
+// Zakres:
+//  - live send idzie WebSocketem, nie tym plikiem
+//  - historia, pin, search, upload, link-preview — send jest na WS
+// Kształt strony (items, hasMore) musi zgadzać się z messageCache.
+// Przy zmianach: controllers/messages.rs, messageCache.ts.
+
 import { apiRequest } from "./client";
 import {
   assertAttachmentSize,
   assertAttachmentType,
   normalizeMimeType,
 } from "../constants/upload";
-import type { LinkPreviewCard } from "../utils/chat/linkEmbeds";
+import type { LinkPreviewCard } from "../utils/chat/embeds";
 import type { Message } from "../types";
 
 export type UploadContext =

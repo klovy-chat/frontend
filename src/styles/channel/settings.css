@@ -1,0 +1,444 @@
+/* settings.css
+   Modal/panel ustawień kanału (członkowie, bany).
+   Zakres:
+    - .cs-*
+    - modal członków/banów; trigger ActionMenu w tym pliku
+   Wiersz członka używa ActionMenu — trigger w tym CSS.
+   Przy zmianach: ChannelSettings.tsx.
+ */
+
+.cs-modal {
+  display: grid;
+  grid-template-columns: 168px minmax(0, 1fr);
+  width: min(720px, calc(100vw - 32px));
+  height: min(82vh, 640px);
+  min-height: min(82vh, 640px);
+  max-height: min(82vh, 640px);
+}
+
+.cs-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 10px;
+  border-right: 1px solid var(--border-light);
+  background: var(--bg-deep);
+  min-height: 0;
+}
+
+.cs-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.62rem 0.72rem;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: var(--cursor-pointer);
+  text-align: left;
+  transition: background 0.15s, color 0.15s;
+}
+
+.cs-nav-item svg {
+  flex-shrink: 0;
+  opacity: 0.72;
+  color: currentColor;
+  transition: opacity 0.15s, color 0.15s;
+}
+
+.cs-nav-item:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+.cs-nav-item.active {
+  background: var(--bg-active);
+  color: var(--text);
+}
+
+.cs-nav-item.active svg,
+.cs-nav-item:hover svg {
+  opacity: 1;
+  color: var(--accent);
+}
+
+.cs-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.cs-content-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px 18px 18px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(124, 92, 255, 0.4) transparent;
+}
+
+.cs-content-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.cs-content-scroll::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 4px 0;
+}
+
+.cs-content-scroll::-webkit-scrollbar-thumb {
+  background: rgba(124, 92, 255, 0.35);
+  border-radius: 4px;
+}
+
+.cs-content-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(124, 92, 255, 0.55);
+}
+
+.cs-header {
+  flex-shrink: 0;
+}
+
+.cs-section-title {
+  margin: 0 0 4px;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.cs-section-subtitle {
+  margin: 0 0 16px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.cs-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-elevated);
+  padding: 14px;
+}
+
+.cs-card + .cs-card {
+  margin-top: 10px;
+}
+
+.cs-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.cs-card-label {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.cs-card-hint {
+  margin: 4px 0 0;
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.cs-card-status {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+}
+
+.cs-card-status.is-active {
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.1);
+  border-color: rgba(251, 191, 36, 0.28);
+}
+
+.cs-card-status.is-locked {
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.1);
+  border-color: rgba(248, 113, 113, 0.28);
+}
+
+.cs-select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-deep);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: var(--cursor-pointer);
+}
+
+.cs-select:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.cs-lock-btn {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: var(--cursor-pointer);
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.cs-lock-btn:hover:not(:disabled) {
+  background: var(--bg-hover);
+}
+
+.cs-lock-btn.is-danger {
+  border-color: rgba(248, 113, 113, 0.35);
+  color: #fca5a5;
+  background: rgba(248, 113, 113, 0.08);
+}
+
+.cs-lock-btn.is-danger:hover:not(:disabled) {
+  background: rgba(248, 113, 113, 0.14);
+}
+
+.cs-lock-btn.is-success {
+  border-color: rgba(74, 222, 128, 0.35);
+  color: #86efac;
+  background: rgba(74, 222, 128, 0.08);
+}
+
+.cs-lock-btn:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.cs-list-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 11px 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: var(--cursor-pointer);
+  text-align: left;
+  transition: background 0.15s, color 0.15s;
+}
+
+.cs-list-item:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+.cs-list-item svg {
+  flex-shrink: 0;
+  opacity: 0.8;
+  color: var(--accent);
+}
+
+.cs-list-item .cs-list-chevron {
+  margin-left: auto;
+  color: var(--text-dim);
+}
+
+.cs-footer {
+  flex-shrink: 0;
+  padding: 12px 18px 18px;
+  border-top: 1px solid var(--border-light);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.cs-toolbar-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 960px) {
+  .klovy-backdrop:has(.cs-modal) > .cs-modal {
+    height: auto;
+    min-height: 0;
+    display: flex !important;
+    flex-direction: column;
+    grid-template-columns: unset;
+    overflow: hidden;
+  }
+
+  .cs-nav {
+    order: 0;
+    flex: 0 0 auto;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 0;
+    overflow-x: auto;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    border-radius: 0;
+    padding: 0;
+    background: var(--bg-panel);
+    scrollbar-width: none;
+  }
+
+  .cs-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .cs-nav-item {
+    flex: 1 0 auto;
+    min-width: max-content;
+    justify-content: center;
+    white-space: nowrap;
+    padding: 12px 14px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 0;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+    color: var(--text-muted);
+  }
+
+  .cs-nav-item.active {
+    color: var(--accent);
+    background: transparent;
+    border-bottom-color: var(--accent);
+  }
+
+  .cs-nav-item svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .cs-content {
+    order: 1;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--bg-panel);
+  }
+
+  .cs-header {
+    padding: 14px 16px 12px !important;
+    gap: 12px !important;
+    align-items: center !important;
+    border-bottom: 1px solid var(--border-light);
+    background: var(--bg-panel) !important;
+  }
+
+  .cs-header h2 {
+    font-size: 1rem !important;
+    margin-bottom: 2px !important;
+  }
+
+  .cs-header p {
+    font-size: 0.78rem !important;
+  }
+
+  .cs-content-scroll {
+    flex: 0 1 auto;
+    overflow-y: auto;
+    padding: 14px 16px 8px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .cs-section-title {
+    font-size: 0.92rem;
+  }
+
+  .cs-section-subtitle {
+    margin-bottom: 12px;
+    font-size: 0.8rem;
+  }
+
+  .cs-footer {
+    flex: 0 0 auto;
+    margin-top: 0;
+    padding: 12px 16px calc(14px + var(--safe-bottom));
+    border-top: 1px solid var(--border-light);
+    background: var(--bg-panel);
+    justify-content: stretch;
+  }
+
+  .cs-footer > button {
+    width: 100%;
+    padding: 12px 16px !important;
+    border-radius: 10px !important;
+    font-size: 0.8rem !important;
+  }
+
+  .cs-toolbar-row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+    width: 100%;
+  }
+
+  .cs-toolbar-row > * {
+    flex: 1 1 calc(50% - 4px);
+    min-width: 0;
+    width: auto;
+    padding: 12px 8px !important;
+    font-size: 0.72rem !important;
+  }
+
+  .cs-list-item {
+    padding: 13px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg-elevated);
+  }
+}
+
+@media (max-width: 640px) {
+  .cs-toolbar-row > * {
+    flex: 1 1 100%;
+  }
+
+  .cs-general-intro {
+    display: none;
+  }
+}
+
+.cs-member-row .action-menu-trigger {
+  padding: 6px 10px;
+  font-size: 0.68rem;
+}

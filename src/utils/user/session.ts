@@ -1,0 +1,135 @@
+// session.ts
+// Lokalny szkic własnego usera przed /me.
+// Zakres:
+//  - szybszy pierwszy paint
+//  - lokalny szkic usera do pierwszego paint — nie jest auth
+// Nie ufaj temu jako auth — restore i tak woła serwer.
+// Przy zmianach: restore.ts, AuthContext.tsx.
+
+import i18n from "../../i18n/config";
+import { primaryOsSegment, simplifyOsLabel } from "../device/osLabel";
+
+export function displaySessionOs(os: string): string {
+  const simplified = simplifyOsLabel(primaryOsSegment(os));
+  return simplified || os.trim() || i18n.t("session.unknownOs");
+}
+
+export type OsIconKey = "windows" | "mac" | "ios" | "android" | "linux" | "unknown";
+
+export function resolveOsIconKey(os: string): OsIconKey {
+  const raw = `${primaryOsSegment(os)} ${os}`.trim().toLowerCase();
+  if (!raw) return "unknown";
+
+  if (raw.includes("android")) return "android";
+  if (raw.includes("iphone") || raw.includes("ipad") || /\bios\b/.test(raw)) return "ios";
+  if (
+    raw.includes("mac")
+    || raw.includes("darwin")
+    || raw.includes("os x")
+    || raw.includes("macos")
+  ) {
+    return "mac";
+  }
+  if (raw.includes("windows") || raw.includes("win32") || raw.includes("win64") || /\bwin\b/.test(raw)) {
+    return "windows";
+  }
+  if (
+    raw.includes("linux")
+    || raw.includes("ubuntu")
+    || raw.includes("debian")
+    || raw.includes("fedora")
+    || raw.includes("arch")
+  ) {
+    return "linux";
+  }
+
+  return "unknown";
+}
+
+export function formatSessionTitle(session: {
+  browser: string;
+  os: string;
+  label: string;
+}): string {
+  const browser = normalizeSessionBrowser(session.browser);
+  const os = displaySessionOs(session.os);
+  if (browser && os) {
+    return `${browser} on ${os}`;
+  }
+  return session.label?.trim() || browser || os || i18n.t("session.unknownOs");
+}
+
+export function formatSessionAbsoluteTime(value: string | null): string {
+  if (!value) return i18n.t("common.emDash");
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return i18n.t("common.emDash");
+
+  return new Intl.DateTimeFormat(i18n.language, {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  }).format(date);
+}
+
+export function formatSessionUserAgent(userAgent?: string | null): string | null {
+  const trimmed = userAgent?.trim();
+  if (!trimmed) return null;
+  return trimmed;
+}
+
+export function normalizeSessionBrowser(browser: string): string {
+  const normalized = browser.trim().toLowerCase();
+  if (normalized.includes("opera")) return "Opera";
+  if (normalized.includes("brave")) return "Brave";
+  if (normalized.includes("vivaldi")) return "Vivaldi";
+  if (normalized.includes("firefox") || normalized.includes("fxios")) return "Firefox";
+  if (normalized.includes("edg")) return "Edge";
+  if (
+    normalized.includes("chrome")
+    || normalized.includes("chromium")
+    || normalized.includes("crios")
+  ) {
+    return "Chrome";
+  }
+  if (normalized.includes("safari")) return "Safari";
+  if (normalized.includes("stoat")) {
+    if (normalized.includes("android")) return "Stoat For Android";
+    if (normalized.includes("ios")) return "Stoat IOS";
+    return "Stoat For Web";
+  }
+  return browser.trim();
+}
+
+export function formatSessionRelativeTime(value: string | null): string {
+  if (!value) return i18n.t("common.emDash");
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return i18n.t("common.emDash");
+
+  const diffMs = Date.now() - date.getTime();
+  const minutes = Math.floor(diffMs / 60_000);
+  if (minutes < 1) return i18n.t("user.sessionRelative.justNow");
+  if (minutes < 60) {
+    return i18n.t("user.sessionRelative.minutes", { count: minutes });
+  }
+
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) {
+    return i18n.t("user.sessionRelative.hours", { count: hours });
+  }
+
+  const days = Math.floor(hours / 24);
+  if (days < 30) {
+    return i18n.t("user.sessionRelative.days", { count: days });
+  }
+
+  const months = Math.floor(days / 30);
+  if (months < 12) {
+    return i18n.t("user.sessionRelative.months", { count: months });
+  }
+
+  const years = Math.floor(months / 12);
+  return i18n.t("user.sessionRelative.years", { count: years });
+}

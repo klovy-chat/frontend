@@ -1,3 +1,11 @@
+// index.ts
+// Locale formatowania dat vs język UI (mogą się rozjechać).
+// Zakres:
+//  - region przeglądarki, fallback do języka apki
+//  - locale dat vs język UI — mogą się rozjechać
+// Nowy język UI to osobna sprawa niż format daty.
+// Przy zmianach: i18n/config.ts, LocaleContext.tsx.
+
 export const SUPPORTED_LOCALES = ["pl", "en"] as const;
 
 export type AppLocale = (typeof SUPPORTED_LOCALES)[number];
@@ -21,7 +29,6 @@ function getDateLocale(locale: AppLocale): string {
   return locale === "en" ? "en-US" : "pl-PL";
 }
 
-/** Locale for dates/times — prefers browser region (system / VPN), falls back to app language. */
 export function getFormattingLocale(appLocale?: AppLocale): string {
   if (typeof navigator !== "undefined") {
     const browserLocale = navigator.language?.trim();

@@ -1,3 +1,11 @@
+// contacts.ts
+// HTTP listy DM, mute, wipe historii.
+// Zakres:
+//  - unread/tip mogą być zdenormalizowane — 0 z HTTP nie zawsze znaczy 0
+//  - GET listy DM, mute, wipe; unread/tip mogą być denorm
+// Wipe musi czyścić badge: UnreadSync + Sidebar.
+// Przy zmianach: controllers/contacts.rs, unread.ts.
+
 import { apiRequest } from "./client";
 import type { Contact } from "../types";
 
