@@ -53,11 +53,14 @@ export function Lightbox({
   const [zoom, setZoom] = useState(100);
   const [closing, setClosing] = useState(false);
   const [downloading, setDownloading] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [imageError, setImageError] = useState(false);
+  const [loadedKey, setLoadedKey] = useState<string | null>(null);
+  const [errorKey, setErrorKey] = useState<string | null>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
 
   const item = items[index];
+  const itemKey = item ? `${item.messageId}:${item.url}` : "";
+  const imageLoaded = Boolean(itemKey) && loadedKey === itemKey;
+  const imageError = Boolean(itemKey) && errorKey === itemKey;
   const hasMultiple = items.length > 1;
   const canGoPrev = index > 0;
   const canGoNext = index < items.length - 1;
@@ -75,16 +78,12 @@ export function Lightbox({
     if (!canGoPrev) return;
     setIndex((value) => value - 1);
     setZoom(100);
-    setImageLoaded(false);
-    setImageError(false);
   }, [canGoPrev]);
 
   const goNext = useCallback(() => {
     if (!canGoNext) return;
     setIndex((value) => value + 1);
     setZoom(100);
-    setImageLoaded(false);
-    setImageError(false);
   }, [canGoNext]);
 
   const adjustZoom = useCallback((delta: number) => {
@@ -106,15 +105,8 @@ export function Lightbox({
   useEffect(() => {
     setIndex(initialIndex);
     setZoom(100);
-    setImageLoaded(false);
-    setImageError(false);
     setClosing(false);
-  }, [initialIndex, items]);
-
-  useEffect(() => {
-    setImageLoaded(false);
-    setImageError(false);
-  }, [item?.url, item?.messageId, index]);
+  }, [initialIndex]);
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -263,15 +255,15 @@ export function Lightbox({
           <p className="image-lightbox__error">{t("media.lightbox.cannotDisplay")}</p>
         ) : (
         <MediaImage
-          key={`${item.messageId}:${item.url}`}
+          key={itemKey}
           fileUrl={item.url}
           alt={item.fileName}
           className={`image-lightbox__image${imageLoaded ? " image-lightbox__image--loaded" : ""}`}
           style={{ transform: `scale(${zoom / 100})` }}
           deferUntilVisible={false}
           draggable={false}
-          onLoad={() => setImageLoaded(true)}
-          onError={() => setImageError(true)}
+          onLoad={() => setLoadedKey(itemKey)}
+          onError={() => setErrorKey(itemKey)}
           onClick={(event) => event.stopPropagation()}
         />
         )

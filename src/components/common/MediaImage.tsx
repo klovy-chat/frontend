@@ -28,25 +28,52 @@ const resolvedSrcCache = new Map<string, string>();
 
 const MAX_CONCURRENT_LOADS = 10;
 let activeLoads = 0;
-const loadWaitQueue: Array<() => void> = [];
 
-function acquireLoadSlot(): Promise<void> {
+type LoadWaiter = {
+  cancelled: boolean;
+  grant: () => void;
+};
+
+const loadWaitQueue: LoadWaiter[] = [];
+
+function acquireLoadSlot(): {
+  promise: Promise<boolean>;
+  cancelWait: () => void;
+} {
   if (activeLoads < MAX_CONCURRENT_LOADS) {
     activeLoads += 1;
-    return Promise.resolve();
+    return { promise: Promise.resolve(true), cancelWait: () => {} };
   }
-  return new Promise((resolve) => {
-    loadWaitQueue.push(() => {
+  let settle: ((gotSlot: boolean) => void) | null = null;
+  const waiter: LoadWaiter = { cancelled: false, grant: () => {} };
+  const promise = new Promise<boolean>((resolve) => {
+    settle = resolve;
+    waiter.grant = () => {
+      if (waiter.cancelled) return;
       activeLoads += 1;
-      resolve();
-    });
+      resolve(true);
+    };
   });
+  loadWaitQueue.push(waiter);
+  return {
+    promise,
+    cancelWait: () => {
+      if (waiter.cancelled) return;
+      waiter.cancelled = true;
+      settle?.(false);
+    },
+  };
 }
 
 function releaseLoadSlot() {
   activeLoads = Math.max(0, activeLoads - 1);
-  const next = loadWaitQueue.shift();
-  if (next) next();
+  while (loadWaitQueue.length > 0) {
+    const next = loadWaitQueue.shift();
+    if (next && !next.cancelled) {
+      next.grant();
+      return;
+    }
+  }
 }
 
 function findScrollRoot(el: HTMLElement | null): Element | null {
@@ -104,11 +131,7 @@ export function MediaImage({
   const slotHeld = useRef(false);
 
   useEffect(() => {
-    if (!deferUntilVisible) {
-      setVisible(true);
-      return;
-    }
-    if (resolvedSrcCache.has(cacheKey)) {
+    if (!deferUntilVisible || resolvedSrcCache.has(cacheKey)) {
       setVisible(true);
       return;
     }
@@ -118,17 +141,22 @@ export function MediaImage({
       return;
     }
     const root = findScrollRoot(el);
+    const reveal = () => setVisible(true);
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries.some((entry) => entry.isIntersecting)) {
-          setVisible(true);
+          reveal();
           observer.disconnect();
         }
       },
-      { root, rootMargin: "200px 0px", threshold: 0.01 },
+      { root, rootMargin: "240px 0px", threshold: 0 },
     );
     observer.observe(el);
-    return () => observer.disconnect();
+    const fallback = window.setTimeout(reveal, 250);
+    return () => {
+      observer.disconnect();
+      window.clearTimeout(fallback);
+    };
   }, [cacheKey, deferUntilVisible]);
 
   useEffect(() => {
@@ -145,6 +173,7 @@ export function MediaImage({
   useEffect(() => {
     if (!visible) return;
     let cancelled = false;
+    let cancelWait = () => {};
     if (resolvedSrcCache.has(cacheKey)) {
       setSlotReady(true);
       setSrc(resolvedSrcCache.get(cacheKey) ?? null);
@@ -158,17 +187,21 @@ export function MediaImage({
       return;
     }
     setSlotReady(false);
-    void acquireLoadSlot().then(() => {
+    const slot = acquireLoadSlot();
+    cancelWait = slot.cancelWait;
+    void slot.promise.then((gotSlot) => {
       if (cancelled) {
-        releaseLoadSlot();
+        if (gotSlot) releaseLoadSlot();
         return;
       }
+      if (!gotSlot) return;
       slotHeld.current = true;
       setSlotReady(true);
       setSrc(candidates[0] ?? null);
     });
     return () => {
       cancelled = true;
+      cancelWait();
       if (slotHeld.current) {
         releaseLoadSlot();
         slotHeld.current = false;
@@ -210,12 +243,18 @@ export function MediaImage({
     const markIfReady = () => {
       if (img.complete && img.naturalWidth > 0) {
         notifyLoaded({ currentTarget: img } as React.SyntheticEvent<HTMLImageElement>);
+        return true;
       }
+      return false;
     };
 
-    markIfReady();
+    if (markIfReady()) return;
     const frame = window.requestAnimationFrame(markIfReady);
-    return () => window.cancelAnimationFrame(frame);
+    const retry = window.setTimeout(markIfReady, 50);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(retry);
+    };
   }, [src, slotReady, notifyLoaded, cacheKey]);
 
   return (
