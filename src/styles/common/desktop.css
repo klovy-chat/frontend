@@ -15,21 +15,6 @@
   margin-bottom: 0.75rem;
 }
 
-.desktop-only__badge {
-  display: inline-flex;
-  align-items: center;
-  margin: 0 0 0.85rem;
-  padding: 0.28rem 0.65rem;
-  border-radius: var(--radius-pill);
-  background: var(--accent-dim);
-  border: 1px solid var(--accent-border);
-  color: var(--accent);
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
 .desktop-only__title {
   font-size: 1.35rem;
   line-height: 1.25;

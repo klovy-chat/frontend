@@ -2,7 +2,7 @@
 // Bramka: web na telefonie = komunikat o wersji mobilnej.
 // Zakres:
 //  - isMobileBlock; Tauri przechodzi
-//  - karta jak auth (logo, shell), nie goły tekst
+//  - karta jak auth, bez brandu
 // Tekst / CTA: i18n + desktop.css.
 // Przy zmianach: useMobileBlock.ts, languages/*.json, desktop.css.
 
@@ -10,7 +10,6 @@ import { type ReactNode } from "react";
 import { Smartphone, Store } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { AuthLayout } from "../auth/AuthLayout";
-import { LOGO_COLOUR_URL } from "../../constants/branding";
 import { useMobileBlock } from "../../hooks/useMobileBlock";
 import "../../styles/common/desktop.css";
 
@@ -31,17 +30,6 @@ export function DesktopOnly({ children }: DesktopOnlyProps) {
       <AuthLayout>
         <div className="al-card al-card--solo desktop-only-card">
           <div className="al-left">
-            <div className="al-brand">
-              <div className="al-logo">
-                <img src={LOGO_COLOUR_URL} alt="" />
-              </div>
-              <div>
-                <strong>Klovy Chat</strong>
-                <span>{t("auth.brand.tagline")}</span>
-              </div>
-            </div>
-
-            <p className="desktop-only__badge">{t("desktopOnly.badge")}</p>
             <h1 className="al-title desktop-only__title">{t("desktopOnly.title")}</h1>
             <p className="desktop-only__body">{t("desktopOnly.body")}</p>
 
