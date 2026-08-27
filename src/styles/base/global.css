@@ -60,14 +60,23 @@
   --shadow-sm: 0 8px 24px rgba(0, 0, 0, 0.4);
   --font-sans: "Space Grotesk", system-ui, sans-serif;
   --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  --cursor-auto: auto;
-  --cursor-pointer: pointer;
-  --cursor-text: text;
+  /* Hotspot 0 0 = czubek strzałki (grafika przesunięta). Bez tego klik szedł w (0,0) canvasu. */
+  --cursor-auto: url("/assets/cursor.png") 0 0, auto;
+  --cursor-pointer: url("/assets/cursor.png") 0 0, pointer;
+  --cursor-text: url("/assets/cursor.png") 0 0, text;
   font-family: var(--font-sans);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   letter-spacing: -0.01em;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  :root {
+    --cursor-auto: auto;
+    --cursor-pointer: pointer;
+    --cursor-text: text;
+  }
 }
 
 *,

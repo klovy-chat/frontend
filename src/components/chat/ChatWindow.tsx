@@ -598,13 +598,6 @@ export function ChatWindow({
     }
     setDmError(null);
     if (target?.type === "dm") seedPresence([target.contact]);
-    if (target?.type === "channel") {
-      const channel = target.channel;
-      seedPresence([
-        channel.admin,
-        ...(channel.members ?? []).filter((m) => m._id !== channel.admin?._id),
-      ]);
-    }
     setToolsPanel(null);
     setHighlightMessageId(null);
     setEditingMessage(null);
@@ -616,27 +609,12 @@ export function ChatWindow({
   }, [targetKey, seedPresence]);
 
   useEffect(() => {
-    if (!target) return;
-    if (target.type === "dm") seedPresence([target.contact]);
-    else {
-      seedPresence([
-        target.channel.admin,
-        ...(target.channel.members ?? []).filter(
-          (m) => m._id !== target.channel.admin?._id,
-        ),
-      ]);
-    }
+    if (target?.type === "dm") seedPresence([target.contact]);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     targetKey,
     target?.type === "dm" ? target.contact._id : null,
-    target?.type === "channel"
-      ? [
-          target.channel.admin?._id,
-          ...(target.channel.members ?? []).map((m) => m._id),
-        ].join(",")
-      : "",
     seedPresence,
   ]);
 
@@ -669,12 +647,7 @@ export function ChatWindow({
     void loadMessages();
     const current = targetRef.current;
     if (current?.type === "channel") {
-      const channel = current.channel;
-      seedPresence([
-        channel.admin,
-        ...(channel.members ?? []).filter((m) => m._id !== channel.admin?._id),
-      ]);
-      requestChannelVoiceState(channel._id);
+      requestChannelVoiceState(current.channel._id);
     } else if (current?.type === "dm") {
       seedPresence([current.contact]);
     }

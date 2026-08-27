@@ -260,7 +260,7 @@
   color: #fff;
   font-size: 13px;
   font-weight: 600;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: background 0.15s ease, opacity 0.15s ease;
 }
 

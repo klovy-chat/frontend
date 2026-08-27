@@ -717,7 +717,7 @@
   border-radius: 8px;
   background: transparent;
   color: #ff5c5c;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   flex-shrink: 0;
   transition: background 0.15s ease, color 0.15s ease;
 }

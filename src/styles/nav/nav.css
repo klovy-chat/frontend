@@ -168,7 +168,7 @@
   background: transparent;
   border: none;
   padding: 0;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   color: inherit;
   min-width: 0;
 }

@@ -144,7 +144,7 @@ const modalFooter: React.CSSProperties = {
 const closeBtn: React.CSSProperties = {
   width: 32, height: 32,
   display: "flex", alignItems: "center", justifyContent: "center",
-  background: "transparent", border: "none", cursor: "pointer",
+  background: "transparent", border: "none", cursor: "var(--cursor-pointer)",
   color: C.textMuted, fontSize: "1.3rem", lineHeight: 1,
   borderRadius: 8, flexShrink: 0,
   transition: "color 0.15s, background 0.15s",
@@ -172,21 +172,21 @@ const btnPrimary: React.CSSProperties = {
   padding: "10px 22px",
   background: C.accent, border: "none", borderRadius: 8,
   fontSize: "0.85rem", fontWeight: 700, color: "#fff",
-  cursor: "pointer", transition: "background 0.15s",
+  cursor: "var(--cursor-pointer)", transition: "background 0.15s",
 };
 
 const btnSecondary: React.CSSProperties = {
   padding: "10px 18px",
   background: "transparent", border: `1px solid ${C.border}`,
   borderRadius: 8, fontSize: "0.85rem", fontWeight: 600,
-  color: C.textMuted, cursor: "pointer", transition: "background 0.15s, color 0.15s",
+  color: C.textMuted, cursor: "var(--cursor-pointer)", transition: "background 0.15s, color 0.15s",
 };
 
 const btnDanger: React.CSSProperties = {
   padding: "10px 22px",
   background: C.danger, border: "none", borderRadius: 8,
   fontSize: "0.85rem", fontWeight: 700, color: "#fff",
-  cursor: "pointer", transition: "background 0.15s",
+  cursor: "var(--cursor-pointer)", transition: "background 0.15s",
 };
 
 function HoverBtn({

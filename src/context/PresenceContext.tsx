@@ -3,8 +3,9 @@
 // Zakres:
 //  - seed HTTP, delty WS
 //  - usePresenceSeed bez re-renderu, useUserPresence z subskrypcją
+//  - seed pomija obiekty bez boolean isOnline (slim channel JSON)
 // Po logout wyczyść snapshot, inaczej zostaną kropki poprzedniego konta.
-// Przy zmianach: Sidebar.tsx, Avatar.tsx, user/online.rs.
+// Przy zmianach: Sidebar.tsx, ChatWindow.tsx, user/online.rs.
 
 import {
   createContext,
@@ -204,12 +205,16 @@ export function PresenceProvider({ children }: { children: ReactNode }) {
         for (const u of users) {
           const id = u._id ?? u.id;
           if (!id) continue;
+          // Channel admin/members (i inne slim JSON) nie mają isOnline —
+          // nie nadpisuj live WS statusu „dziurawym” obiektem (wygląda jak offline).
+          if (typeof u.isOnline !== "boolean") continue;
           const incoming = {
             isOnline: u.isOnline,
             availabilityStatus:
               (u.availabilityStatus as AvailabilityStatus | undefined) ??
+              prev[id]?.availabilityStatus ??
               "online",
-            lastSeen: u.lastSeen ?? null,
+            lastSeen: u.lastSeen ?? prev[id]?.lastSeen ?? null,
           };
           const prevEntry = next[id];
           if (
