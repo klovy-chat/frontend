@@ -1695,13 +1695,16 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
 
   useEffect(() => {
     if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
-    if (!searchTerm.trim()) { setSearchResults([]); return; }
+    if (!searchTerm.trim() || chatListTab !== "dm") {
+      setSearchResults([]);
+      return;
+    }
     searchTimeoutRef.current = setTimeout(async () => {
       try { const { contacts } = await searchContacts(searchTerm); setSearchResults(contacts); }
       catch { setSearchResults([]); }
     }, 300);
     return () => { if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current); };
-  }, [searchTerm]);
+  }, [searchTerm, chatListTab]);
 
   const handleNewChannel = async () => {
     const name = channelName.trim(); if (!name) return;

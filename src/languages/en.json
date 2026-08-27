@@ -568,10 +568,12 @@
         "channels": "Channels"
       },
       "searchPlaceholder": "Search chats",
+      "searchPlaceholderChannels": "Search channels",
       "newChannel": "New channel",
       "muted": "Muted",
       "mention": "Mention",
       "searchEmpty": "No results.\nEnter an exact @username.",
+      "searchEmptyChannels": "No channels match that name.",
       "emptyDm": "No direct messages.",
       "emptyChannels": "No channels."
     },

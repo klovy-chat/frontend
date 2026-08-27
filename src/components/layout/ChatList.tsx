@@ -2,7 +2,7 @@
 // Wiersze listy DM/kanałów (taby, preview, badge, szukajka).
 // Zakres:
 //  - prezentacja stanu z Sidebara, mało logiki sync
-//  - wiersze z danymi Sidebara: preview, badge, taby
+//  - szukajka: DM = API kontaktów, kanały = filtr nazwy/opisu
 // Nowe pole w wierszu: dane z Sidebara/Contact, styl list.css.
 // Przy zmianach: Sidebar.tsx, styles/chat/list.css.
 
@@ -20,6 +20,20 @@ import type { Channel, ChatTarget, Contact } from "../../types";
 import "../../styles/chat/list.css";
 
 export type ChatListTab = "dm" | "channels";
+
+function foldSearch(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "");
+}
+
+function channelMatchesQuery(channel: Channel, query: string): boolean {
+  if (!query) return true;
+  if (foldSearch(channel.name).includes(query)) return true;
+  return foldSearch(channel.description ?? "").includes(query);
+}
 
 interface ChatListProps {
   contacts: Contact[];
@@ -140,7 +154,11 @@ export function ChatList({
 
   const filteredContacts = activeTab === "channels" ? [] : contacts;
   const filteredChannels = activeTab === "dm" ? [] : channels;
-  const showSearch = searchTerm.trim().length > 0;
+  const query = foldSearch(searchTerm);
+  const showSearch = query.length > 0;
+  const searchedChannels = showSearch
+    ? channels.filter((channel) => channelMatchesQuery(channel, query))
+    : [];
 
   const renderContact = (c: Contact) => (
     <ContactRow
@@ -226,35 +244,43 @@ export function ChatList({
           <input
             type="text"
             className="chat-list-pane__search-input"
-            placeholder={t("chat.list.searchPlaceholder")}
+            placeholder={
+              activeTab === "channels"
+                ? t("chat.list.searchPlaceholderChannels")
+                : t("chat.list.searchPlaceholder")
+            }
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
           />
         </div>
       </div>
 
-      {!showSearch && (
-        <div className="chat-list-pane__tabs">
-          {([
-            ["dm", contacts.length],
-            ["channels", channels.length],
-          ] as const).map(([key, count]) => (
-            <button
-              key={key}
-              type="button"
-              className={`chat-list-pane__tab${activeTab === key ? " active" : ""}`}
-              onClick={() => onTabChange(key)}
-            >
-              {tabLabels[key]}
-              {count > 0 && <span className="chat-list-pane__tab-count">{count}</span>}
-            </button>
-          ))}
-        </div>
-      )}
+      <div className="chat-list-pane__tabs">
+        {([
+          ["dm", contacts.length],
+          ["channels", channels.length],
+        ] as const).map(([key, count]) => (
+          <button
+            key={key}
+            type="button"
+            className={`chat-list-pane__tab${activeTab === key ? " active" : ""}`}
+            onClick={() => onTabChange(key)}
+          >
+            {tabLabels[key]}
+            {count > 0 && <span className="chat-list-pane__tab-count">{count}</span>}
+          </button>
+        ))}
+      </div>
 
       <div className="chat-list-pane__scroll">
         {showSearch ? (
-          searchResults.length === 0 ? (
+          activeTab === "channels" ? (
+            searchedChannels.length === 0 ? (
+              <p className="chat-list-pane__empty">{t("chat.list.searchEmptyChannels")}</p>
+            ) : (
+              searchedChannels.map(renderChannel)
+            )
+          ) : searchResults.length === 0 ? (
             <p className="chat-list-pane__empty">{t("chat.list.searchEmpty")}</p>
           ) : (
             searchResults.map(renderContact)

@@ -568,10 +568,12 @@
         "channels": "Kanały"
       },
       "searchPlaceholder": "Szukaj czatów",
+      "searchPlaceholderChannels": "Szukaj kanałów",
       "newChannel": "Nowy kanał",
       "muted": "Wyciszono",
       "mention": "Wzmianka",
       "searchEmpty": "Brak wyników.\nWpisz dokładną nazwę po @.",
+      "searchEmptyChannels": "Brak kanałów o tej nazwie.",
       "emptyDm": "Brak wiadomości bezpośrednich.",
       "emptyChannels": "Brak kanałów."
     },
