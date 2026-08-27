@@ -1,10 +1,9 @@
 // encrypt.ts
 // Wrap/unwrap treści wiadomości do transportu.
 // Zakres:
-//  - zdejmuje legacy opaque przy preview
-//  - koperta treści do transportu; legacy opaque zdejmowane przy preview
-// Zmiana formatu koperty = breaking starych wiadomości (jest migracja na BE).
-// Przy zmianach: opaque/payload.ts, utils/crypto/encrypt.rs.
+//  - UI: odwijaj tylko kopertę k1., reszta treści bez zgadywania
+//  - wrap wychodzących; API i tak zwraca plaintext
+// Przy zmianach: opaque/payload.ts, utils/messages/storage.rs.
 
 import { unwrapOpaquePayload, wrapOpaquePayload } from "./opaque/payload";
 import type { Message } from "../types";
