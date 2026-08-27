@@ -1,7 +1,13 @@
 {
   "desktopOnly": {
-    "title": "Desktop only for now",
-    "body": "The browser app is not available on phones or tablets — including when your browser's \"Request desktop site\" mode is on. Open it on a computer."
+    "badge": "Coming soon",
+    "title": "Mobile version in the works",
+    "body": "We're building Klovy Chat for the phone and tablet browser. Later it will also be available directly from the mobile app stores.",
+    "browserTitle": "Phone browser",
+    "browserBody": "First you'll be able to use it in the browser on your phone — no store install yet.",
+    "storesTitle": "App stores",
+    "storesBody": "After that, Klovy Chat will land in the mobile app stores.",
+    "hint": "For now, open the messenger on a computer."
   },
   "common": {
     "cancel": "Cancel",

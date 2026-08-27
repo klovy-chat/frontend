@@ -3,7 +3,7 @@
    Zakres:
     - .auth-*
     - split, formularz, karuzela; też mobile gate DesktopOnly
-   DesktopOnly też importuje ten plik na mobile gate.
+   DesktopOnly używa AuthLayout + ten plik.
    Przy zmianach: AuthLayout.tsx, Login.tsx, DesktopOnly.tsx.
  */
 

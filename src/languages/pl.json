@@ -1,7 +1,13 @@
 {
   "desktopOnly": {
-    "title": "Dostępne tylko na komputerze",
-    "body": "Aplikacja w przeglądarce nie jest dostępna na telefonach ani tabletach — także po włączeniu opcji „Wyświetlaj jak na komputerze”. Otwórz ją na komputerze."
+    "badge": "Wkrótce",
+    "title": "Wersja mobilna w przygotowaniu",
+    "body": "Pracujemy nad Klovy Chat w przeglądarce na telefonie i tablecie. Później aplikacja trafi też bezpośrednio do sklepów mobilnych.",
+    "browserTitle": "Przeglądarka w telefonie",
+    "browserBody": "Najpierw pojawi się wersja z poziomu przeglądarki — bez instalacji ze sklepu.",
+    "storesTitle": "Sklepy mobilne",
+    "storesBody": "Potem Klovy Chat będzie dostępny w sklepach z aplikacjami na telefon.",
+    "hint": "Na razie otwórz komunikator na komputerze."
   },
   "common": {
     "cancel": "Anuluj",

@@ -1,49 +1,109 @@
 /* desktop.css
-   Ekran „tylko desktop” na telefonie.
+   Ekran wersji mobilnej (gate na telefonie).
    Zakres:
-    - komunikat, CTA
-    - komunikat i CTA na telefonie; copy w i18n
+    - karta jak auth, kroki przeglądarka → sklepy
+    - layout z AuthLayout; copy w i18n
    Treść i18n w DesktopOnly, nie w CSS.
    Przy zmianach: DesktopOnly.tsx.
  */
 
-.desktop-only {
-  position: relative;
-  min-height: 100vh;
-  min-height: 100dvh;
-  display: flex;
+.desktop-only-card {
+  width: min(440px, 100%);
+}
+
+.desktop-only-card .al-title {
+  margin-bottom: 0.75rem;
+}
+
+.desktop-only__badge {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  padding: 4.5rem 1.5rem 1.5rem;
-  box-sizing: border-box;
-  background: var(--bg-deep);
-  color: var(--text);
-}
-
-.desktop-only__lang {
-  position: absolute;
-  top: 1.25rem;
-  right: 1.25rem;
-  z-index: 10;
-}
-
-.desktop-only__content {
-  width: min(420px, 100%);
-  text-align: center;
+  margin: 0 0 0.85rem;
+  padding: 0.28rem 0.65rem;
+  border-radius: var(--radius-pill);
+  background: var(--accent-dim);
+  border: 1px solid var(--accent-border);
+  color: var(--accent);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .desktop-only__title {
-  margin: 0 0 0.85rem;
   font-size: 1.35rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
   line-height: 1.25;
-  color: var(--text);
 }
 
 .desktop-only__body {
-  margin: 0;
-  font-size: 0.82rem;
-  line-height: 1.65;
+  margin: 0 0 1.35rem;
+  font-size: 0.88rem;
+  line-height: 1.55;
   color: var(--text-muted);
+}
+
+.desktop-only__steps {
+  list-style: none;
+  margin: 0 0 1.35rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.desktop-only__step {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.desktop-only__step-icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: var(--accent-dim);
+  border: 1px solid var(--accent-border);
+  color: var(--accent);
+}
+
+.desktop-only__step-title {
+  margin: 0 0 0.2rem;
+  font-size: 0.84rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+.desktop-only__step-body {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.desktop-only__hint {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+
+@media (max-width: 480px) {
+  .desktop-only-page .al-page {
+    padding: 1.25rem;
+    align-items: center;
+  }
+
+  .desktop-only-page .desktop-only-card {
+    border-radius: 16px;
+    max-width: 100%;
+  }
 }
