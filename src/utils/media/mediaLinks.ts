@@ -8,6 +8,7 @@
 
 import { safeHttpsHref } from "../chat/format";
 import { extractHttpsUrls } from "../chat/embeds";
+import { isOwnCdnHost } from "./allowedMedia";
 
 export type ExternalMediaKind = "gif" | "image";
 
@@ -18,12 +19,10 @@ export interface ExternalMediaLink {
   fileName: string;
 }
 
-const DIRECT_MEDIA_PATH =
-  /\.(gif|jpe?g|png|webp)(?:[?#]|$)/i;
-
 const TRUSTED_IMAGE_HOSTS = new Set([
   "media.giphy.com",
   "i.giphy.com",
+  "cdn.klovy.chat",
   "cdn.discordapp.com",
   "media.discordapp.net",
   "i.imgur.com",
@@ -31,6 +30,16 @@ const TRUSTED_IMAGE_HOSTS = new Set([
   "images.unsplash.com",
   "raw.githubusercontent.com",
 ]);
+
+function configuredCdnHost(): string | null {
+  const raw = import.meta.env.VITE_CDN_BASE_URL?.trim();
+  if (!raw) return null;
+  try {
+    return new URL(raw).hostname.toLowerCase().replace(/^www\./, "");
+  } catch {
+    return null;
+  }
+}
 
 function fileNameFromUrl(url: URL): string {
   const segment = url.pathname.split("/").filter(Boolean).pop();
@@ -50,18 +59,19 @@ function classifyExternalMediaUrl(raw: string): ExternalMediaLink | null {
   }
 
   const host = parsed.hostname.toLowerCase().replace(/^www\./, "");
-  const pathAndQuery = `${parsed.pathname}${parsed.search}`;
-  const isGif = /\.gif(?:[?#]|$)/i.test(pathAndQuery);
-  const hasDirectMediaPath = DIRECT_MEDIA_PATH.test(pathAndQuery);
-  const trustedHost = TRUSTED_IMAGE_HOSTS.has(host) || host.endsWith(".giphy.com");
-
-  if (!hasDirectMediaPath && !trustedHost) {
+  if (isOwnCdnHost(host)) {
     return null;
   }
+  const pathAndQuery = `${parsed.pathname}${parsed.search}`;
+  const isGif = /\.gif(?:[?#]|$)/i.test(pathAndQuery);
+  const trustedHost =
+    TRUSTED_IMAGE_HOSTS.has(host) ||
+    host.endsWith(".giphy.com") ||
+    host === configuredCdnHost();
+  const segments = parsed.pathname.split("/").filter(Boolean);
 
-  if (!hasDirectMediaPath && trustedHost) {
-    const segments = parsed.pathname.split("/").filter(Boolean);
-    if (segments.length === 0) return null;
+  if (!trustedHost || segments.length === 0) {
+    return null;
   }
 
   const fileName = fileNameFromUrl(parsed);

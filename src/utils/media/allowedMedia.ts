@@ -28,6 +28,25 @@ function hostAllowed(hostname: string): boolean {
   );
 }
 
+export function isOwnCdnHost(hostname: string): boolean {
+  const host = hostname.toLowerCase().replace(/^www\./, "");
+  const envCdn = configuredCdnHost()?.replace(/^www\./, "") ?? null;
+  return host === "cdn.klovy.chat" || (envCdn != null && host === envCdn);
+}
+
+function isTrustedExternalMediaHost(hostname: string): boolean {
+  const host = hostname.toLowerCase().replace(/^www\./, "");
+  if (hostAllowed(host)) return true;
+  return (
+    host === "cdn.discordapp.com" ||
+    host === "media.discordapp.net" ||
+    host === "i.imgur.com" ||
+    host === "media.tenor.com" ||
+    host === "images.unsplash.com" ||
+    host === "raw.githubusercontent.com"
+  );
+}
+
 export function isAllowedExternalMediaUrl(url: string): boolean {
   const trimmed = url.trim();
   if (!/^https:\/\//i.test(trimmed)) {
@@ -39,32 +58,8 @@ export function isAllowedExternalMediaUrl(url: string): boolean {
   try {
     const parsed = new URL(trimmed);
     if (parsed.username || parsed.password) return false;
-    if (hostAllowed(parsed.hostname)) return true;
-
-    return isAllowedExternalMediaLink(trimmed);
-  } catch {
-    return false;
-  }
-}
-
-function isAllowedExternalMediaLink(url: string): boolean {
-
-  const trimmed = url.trim();
-  try {
-    const parsed = new URL(trimmed);
-    const pathAndQuery = `${parsed.pathname}${parsed.search}`;
-    if (/\.(gif|jpe?g|png|webp)(?:[?#]|$)/i.test(pathAndQuery)) {
-      return true;
-    }
-    const host = parsed.hostname.toLowerCase().replace(/^www\./, "");
-    const trusted =
-      host === "cdn.discordapp.com" ||
-      host === "media.discordapp.net" ||
-      host === "i.imgur.com" ||
-      host === "media.tenor.com" ||
-      host === "images.unsplash.com" ||
-      host === "raw.githubusercontent.com";
-    return trusted && parsed.pathname.split("/").filter(Boolean).length > 0;
+    if (!isTrustedExternalMediaHost(parsed.hostname)) return false;
+    return parsed.pathname.split("/").filter(Boolean).length > 0;
   } catch {
     return false;
   }
@@ -99,7 +94,12 @@ export function isSafeProfileUploadPath(path: string): boolean {
 }
 
 export function isAllowedGifMediaUrl(url: string): boolean {
-  return isAllowedExternalMediaUrl(url);
+  if (!isAllowedExternalMediaUrl(url)) return false;
+  try {
+    return !isOwnCdnHost(new URL(url.trim()).hostname);
+  } catch {
+    return false;
+  }
 }
 
 export function isSafeOtpauthUrl(url: string): boolean {
