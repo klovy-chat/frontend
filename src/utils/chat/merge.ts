@@ -20,17 +20,28 @@ export function mergePreferReactions(
 }
 
 export function mergeMessagePatch(existing: Message, patch: Message): Message {
-  const scanStatus = patch.scanStatus ?? existing.scanStatus;
+  const scanStatus = mergeScanStatus(existing.scanStatus, patch.scanStatus);
   const hideFile =
     scanStatus === "pending" || scanStatus === "blocked";
   return {
     ...existing,
     ...patch,
     scanStatus,
-    fileUrl: hideFile ? undefined : (patch.fileUrl ?? existing.fileUrl),
+    fileUrl: hideFile
+      ? undefined
+      : (patch.fileUrl ?? existing.fileUrl),
     pinned: patch.pinned ?? existing.pinned,
     pinnedAt: patch.pinnedAt ?? existing.pinnedAt,
     pinnedBy: patch.pinnedBy ?? existing.pinnedBy,
     reactions: mergePreferReactions(patch.reactions, existing.reactions),
   };
+}
+
+function mergeScanStatus(
+  existing: Message["scanStatus"],
+  patch: Message["scanStatus"],
+): Message["scanStatus"] {
+  if (existing === "blocked" || patch === "blocked") return "blocked";
+  if (existing === "clean" || patch === "clean") return "clean";
+  return patch ?? existing;
 }

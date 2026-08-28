@@ -112,6 +112,11 @@ export const MessageBubble = memo(function MessageBubble({
   const isVideo = isVideoAttachment(message);
   const isSticker = message.messageType === "STICKER";
   const isFile = message.messageType && message.messageType !== "TEXT";
+  const waitingForScan =
+    Boolean(isFile) &&
+    message.messageType !== "CALL" &&
+    message.scanStatus !== "blocked" &&
+    (message.scanStatus === "pending" || !message.fileUrl);
   const senderName = userLabel(sender);
   const showSenderName = !isOwn && senderName !== t("format.userLabel");
   const canPinAction = !message.pending && canPin && (onPin || onUnpin);
@@ -425,13 +430,13 @@ export const MessageBubble = memo(function MessageBubble({
               onJumpToMessage={onJumpToMessage}
             />
 
-            {isFile && message.scanStatus === "pending" ? (
-              <div className="message-scan-status">
-                {t("messages.scanPending")}
-              </div>
-            ) : isFile && message.scanStatus === "blocked" ? (
+            {isFile && message.scanStatus === "blocked" ? (
               <div className="message-scan-status message-scan-status--blocked">
                 {t("messages.scanBlocked")}
+              </div>
+            ) : waitingForScan ? (
+              <div className="message-scan-status">
+                {t("messages.scanPending")}
               </div>
             ) : isFile && message.fileUrl ? (
               <>

@@ -1049,7 +1049,11 @@ export function ChatWindow({
       const next = prepareForDisplay([msg])[0];
       if (!next) return;
       const patchQuotes = (m: Message): Message => {
-        const base = m._id === next._id ? mergeMessagePatch(m, next) : m;
+        const base =
+          m._id === next._id ||
+          (Boolean(m.clientNonce) && m.clientNonce === next.clientNonce)
+            ? mergeMessagePatch(m, next)
+            : m;
         const q = base.quotedMessage;
         if (q && typeof q === "object" && q._id === next._id) {
           return {
@@ -1060,7 +1064,14 @@ export function ChatWindow({
         return base;
       };
       setMessages((prev) => {
-        const updated = prev.map(patchQuotes);
+        const patched = prev.map(patchQuotes);
+        const updated = patched.some(
+          (m) =>
+            m._id === next._id ||
+            (Boolean(m.clientNonce) && m.clientNonce === next.clientNonce),
+        )
+          ? patched
+          : replacePendingWithServer(patched, next, currentUserId);
         if (target) writeMessagePageCache(target, updated);
         return updated;
       });
