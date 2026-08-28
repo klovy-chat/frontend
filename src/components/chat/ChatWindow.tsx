@@ -134,9 +134,7 @@ function mergeHttpWithLive(
       continue;
     }
     map.set(m._id, {
-      ...cur,
-      ...m,
-
+      ...mergeMessagePatch(cur, m),
       content: m.edited || cur.edited
         ? m.edited
           ? m.content
@@ -145,7 +143,6 @@ function mergeHttpWithLive(
       edited: Boolean(cur.edited || m.edited),
       editedAt: m.editedAt ?? cur.editedAt,
       read: Boolean(cur.read || m.read),
-
       reactions: mergePreferReactions(m.reactions, cur.reactions),
       pending: false,
       pinned: m.pinned ?? cur.pinned,

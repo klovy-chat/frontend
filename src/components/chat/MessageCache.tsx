@@ -97,7 +97,10 @@ export function MessageCache() {
     const onEdited = (msg: Message) => {
       const next = unwrapIncomingMessage(normalizeMessage(msg));
       mapCachedMessagesEverywhere((m: Message) => {
-        const base = m._id === next._id ? mergeMessagePatch(m, next) : m;
+        const matches =
+          m._id === next._id ||
+          (Boolean(m.clientNonce) && m.clientNonce === next.clientNonce);
+        const base = matches ? mergeMessagePatch(m, next) : m;
         const q = base.quotedMessage;
         if (q && typeof q === "object" && q._id === next._id) {
           return { ...base, quotedMessage: mergeMessagePatch(q, next) };
