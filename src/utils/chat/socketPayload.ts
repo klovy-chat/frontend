@@ -21,11 +21,19 @@ function sanitizeQuoted(quoted: unknown): unknown {
     typeof q.content === "string"
       ? q.content.slice(0, MAX_MESSAGE_LENGTH)
       : q.content;
-  const fileUrl =
-    typeof q.fileUrl === "string" && resolveMediaUrl(q.fileUrl)
-      ? q.fileUrl
+  const scanStatus =
+    q.scanStatus === "pending" ||
+    q.scanStatus === "clean" ||
+    q.scanStatus === "blocked"
+      ? q.scanStatus
       : undefined;
-  return { ...q, content, fileUrl };
+  const fileUrl =
+    scanStatus === "pending" || scanStatus === "blocked"
+      ? undefined
+      : typeof q.fileUrl === "string" && resolveMediaUrl(q.fileUrl)
+        ? q.fileUrl
+        : undefined;
+  return { ...q, content, fileUrl, scanStatus };
 }
 
 function capGenericStrings(
@@ -58,14 +66,23 @@ export function sanitizeWsPayload(type: string, payload: unknown): unknown {
           ? record.content.slice(0, MAX_MESSAGE_LENGTH)
           : "";
 
-      const fileUrl =
-        typeof record.fileUrl === "string" && resolveMediaUrl(record.fileUrl)
-          ? record.fileUrl
+      const scanStatus =
+        record.scanStatus === "pending" ||
+        record.scanStatus === "clean" ||
+        record.scanStatus === "blocked"
+          ? record.scanStatus
           : undefined;
+      const fileUrl =
+        scanStatus === "pending" || scanStatus === "blocked"
+          ? undefined
+          : typeof record.fileUrl === "string" && resolveMediaUrl(record.fileUrl)
+            ? record.fileUrl
+            : undefined;
       return {
         ...record,
         content,
         fileUrl,
+        scanStatus,
         quotedMessage: sanitizeQuoted(record.quotedMessage),
       };
     }

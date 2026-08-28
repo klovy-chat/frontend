@@ -56,10 +56,13 @@ export function uploadFile(file: File, context: UploadContext) {
   }
   form.append("contextType", context.type);
   form.append("contextId", context.type === "dm" ? context.contactId : context.channelId);
-  return apiRequest<{ filePath: string }>("/api/messages/upload-file", {
-    method: "POST",
-    body: form,
-  });
+  return apiRequest<{ filePath: string; scanStatus?: "pending" | "clean" | "blocked" }>(
+    "/api/messages/upload-file",
+    {
+      method: "POST",
+      body: form,
+    },
+  );
 }
 
 export function getPinnedMessages(params: { contactId?: string; channelId?: string }) {

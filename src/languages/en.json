@@ -223,6 +223,8 @@
     "call": "Voice call",
     "file": "File: {{name}}",
     "attachment": "Attachment",
+    "scanPending": "Scanning file…",
+    "scanBlocked": "File blocked by the scanner.",
     "default": "Message",
     "thisMessage": "This message",
     "quote": {

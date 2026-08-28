@@ -33,6 +33,14 @@ function safeFileUrl(fileUrl: unknown): string | undefined {
   return resolveMediaUrl(fileUrl) ? fileUrl : undefined;
 }
 
+function visibleFileUrl(
+  scanStatus: Message["scanStatus"],
+  fileUrl: unknown,
+): string | undefined {
+  if (scanStatus === "pending" || scanStatus === "blocked") return undefined;
+  return safeFileUrl(fileUrl);
+}
+
 export function resolveQuotedMessage(
   quoted: Message["quotedMessage"],
 ): Message | null {
@@ -49,10 +57,13 @@ export function getMessagePreview(
     | "fileType"
     | "fileName"
     | "durationMs"
+    | "scanStatus"
     | "deleted"
   >,
 ): string {
   if (message.deleted) return i18n.t("messages.deleted");
+  if (message.scanStatus === "blocked") return i18n.t("messages.scanBlocked");
+  if (message.scanStatus === "pending") return i18n.t("messages.scanPending");
 
   const readable = readableContentForPreview(message.content);
 
@@ -107,7 +118,7 @@ function normalizeQuotedMessageField(
   return {
     ...quoted,
     content: capContent(readableContentForPreview(raw)),
-    fileUrl: safeFileUrl(quoted.fileUrl),
+    fileUrl: visibleFileUrl(quoted.scanStatus, quoted.fileUrl),
     reactions: normalizeReactions(quoted.reactions),
   };
 }
@@ -117,7 +128,7 @@ export function normalizeMessage(message: Message): Message {
   return {
     ...message,
     content: capContent(readableContentForPreview(raw)),
-    fileUrl: safeFileUrl(message.fileUrl),
+    fileUrl: visibleFileUrl(message.scanStatus, message.fileUrl),
     reactions: normalizeReactions(message.reactions),
     quotedMessage: normalizeQuotedMessageField(message.quotedMessage),
   };

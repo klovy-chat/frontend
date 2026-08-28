@@ -4,11 +4,12 @@
 //  - spójnie z backend file_type
 //  - image/video/audio/file po MIME i rozszerzeniu
 // Nowe rozszerzenie: tu + file_type.rs + input accept.
-// Przy zmianach: MessageInput.tsx, validators/file_type.rs.
+// Przy zmianach: MessageInput.tsx, constants/upload.ts, validators/file_type.rs.
 
 import type { Message } from "../../types";
 
-const VIDEO_EXTENSIONS = new Set(["webm", "mp4", "ogg"]);
+const VIDEO_EXTENSIONS = new Set(["webm", "mp4", "ogg", "mov"]);
+const AUDIO_EXTENSIONS = new Set(["mp3", "aac", "m4a", "wav"]);
 const VOICE_NOTE_NAME = /^voice-\d+\.(webm|ogg|mp4|wav|m4a)$/i;
 
 function fileExtension(name: string): string {
@@ -38,7 +39,7 @@ export function isVideoAttachment(
   if (!VIDEO_EXTENSIONS.has(ext)) return false;
 
   if (message.messageType === "FILE") {
-    return ext === "webm" || ext === "mp4" || mime.startsWith("video/");
+    return ext === "webm" || ext === "mp4" || ext === "mov" || mime.startsWith("video/");
   }
 
   if (message.messageType === "AUDIO" && !isRecordedVoiceNote(message)) {
@@ -67,6 +68,7 @@ export function resolveVideoMimeType(
   if (ext === "mp4") return "video/mp4";
   if (ext === "webm") return "video/webm";
   if (ext === "ogg") return "video/ogg";
+  if (ext === "mov") return "video/quicktime";
   return undefined;
 }
 
@@ -75,11 +77,8 @@ export function resolveUploadMessageType(file: File): "IMAGE" | "VIDEO" | "AUDIO
   const mime = file.type.trim().toLowerCase();
 
   if (["jpg", "jpeg", "png", "webp"].includes(ext)) return "IMAGE";
-  if (mime.startsWith("video/")) return "VIDEO";
-  if (mime.startsWith("audio/")) return "AUDIO";
-
-  if (ext === "wav") return "AUDIO";
-  if (ext === "mp4") return "VIDEO";
+  if (["mp4", "mov"].includes(ext) || mime.startsWith("video/")) return "VIDEO";
+  if (AUDIO_EXTENSIONS.has(ext) || mime.startsWith("audio/")) return "AUDIO";
   if (["webm", "ogg"].includes(ext)) return "FILE";
 
   return "FILE";

@@ -20,10 +20,14 @@ export function mergePreferReactions(
 }
 
 export function mergeMessagePatch(existing: Message, patch: Message): Message {
+  const scanStatus = patch.scanStatus ?? existing.scanStatus;
+  const hideFile =
+    scanStatus === "pending" || scanStatus === "blocked";
   return {
     ...existing,
     ...patch,
-
+    scanStatus,
+    fileUrl: hideFile ? undefined : (patch.fileUrl ?? existing.fileUrl),
     pinned: patch.pinned ?? existing.pinned,
     pinnedAt: patch.pinnedAt ?? existing.pinnedAt,
     pinnedBy: patch.pinnedBy ?? existing.pinnedBy,

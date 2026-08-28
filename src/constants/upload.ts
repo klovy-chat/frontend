@@ -39,14 +39,21 @@ export const ALLOWED_ATTACHMENT_EXTENSIONS = [
   "jpeg",
   "png",
   "webp",
-  "gif",
+  "heic",
+  "heif",
   "docx",
   "xlsx",
+  "pptx",
   "txt",
+  "csv",
   "webm",
   "ogg",
   "wav",
+  "mp3",
+  "aac",
+  "m4a",
   "mp4",
+  "mov",
 ] as const;
 
 const IMAGE_ATTACHMENT_EXTENSIONS = new Set(["jpg", "jpeg", "png", "webp"]);
@@ -60,18 +67,26 @@ const ALLOWED_ATTACHMENT_MIME_TYPES: Record<
   jpeg: ["image/jpeg", "application/octet-stream"],
   png: ["image/png", "application/octet-stream"],
   webp: ["image/webp", "application/octet-stream"],
-  gif: ["image/gif", "application/octet-stream"],
+  heic: ["image/heic", "image/heif"],
+  heif: ["image/heif", "image/heic"],
   docx: [
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   ],
   xlsx: [
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   ],
+  pptx: [
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  ],
   txt: ["text/plain"],
+  csv: ["text/csv", "text/plain", "application/csv"],
 
   webm: ["audio/webm", "video/webm"],
   ogg: ["audio/ogg", "video/ogg", "application/ogg"],
   wav: ["audio/wav", "audio/x-wav", "audio/wave", "audio/vnd.wave"],
+  mp3: ["audio/mpeg", "audio/mp3"],
+  aac: ["audio/aac", "audio/mp4", "audio/x-m4a"],
+  m4a: ["audio/mp4", "audio/aac", "audio/x-m4a"],
   mp4: [
     "audio/mp4",
     "audio/aac",
@@ -79,8 +94,8 @@ const ALLOWED_ATTACHMENT_MIME_TYPES: Record<
     "video/mp4",
     "video/quicktime",
     "application/mp4",
-    "application/octet-stream",
   ],
+  mov: ["video/quicktime", "video/mp4"],
 };
 
 export function formatUploadLimitMb(bytes: number): string {

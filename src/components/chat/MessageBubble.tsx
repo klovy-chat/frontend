@@ -425,7 +425,15 @@ export const MessageBubble = memo(function MessageBubble({
               onJumpToMessage={onJumpToMessage}
             />
 
-            {isFile && message.fileUrl ? (
+            {isFile && message.scanStatus === "pending" ? (
+              <div className="message-scan-status">
+                {t("messages.scanPending")}
+              </div>
+            ) : isFile && message.scanStatus === "blocked" ? (
+              <div className="message-scan-status message-scan-status--blocked">
+                {t("messages.scanBlocked")}
+              </div>
+            ) : isFile && message.fileUrl ? (
               <>
                 {isSticker ? (
                   <MediaImage

@@ -110,6 +110,7 @@ export interface Message {
   fileUrl?: string;
   fileType?: string;
   fileName?: string;
+  scanStatus?: "pending" | "clean" | "blocked";
   durationMs?: number;
   timestamp: string;
   read?: boolean;

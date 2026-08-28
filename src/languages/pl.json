@@ -223,6 +223,8 @@
     "call": "Rozmowa głosowa",
     "file": "Plik: {{name}}",
     "attachment": "Załącznik",
+    "scanPending": "Skanowanie pliku…",
+    "scanBlocked": "Plik odrzucony przez skaner.",
     "default": "Wiadomość",
     "thisMessage": "Ta wiadomość",
     "quote": {

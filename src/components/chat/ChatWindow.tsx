@@ -1464,8 +1464,10 @@ export function ChatWindow({
       const quotePayload = quotedMessage ? { quotedMessage } : {};
       const messageType = options?.messageType ?? resolveUploadMessageType(file);
 
-      const { filePath } = await uploadFile(file, uploadContext);
+      const { filePath, scanStatus } = await uploadFile(file, uploadContext);
       const sendKey = chatCacheKey(target);
+      const resolvedScan = scanStatus === "clean" ? "clean" : "pending";
+      const visibleFileUrl = resolvedScan === "clean" ? filePath : undefined;
 
       const stillActive = activeChatKeyRef.current === sendKey;
       const rawContent =
@@ -1487,9 +1489,10 @@ export function ChatWindow({
         ? pushOptimistic({
             content: rawContent,
             messageType,
-            fileUrl: filePath,
+            fileUrl: visibleFileUrl,
             fileName: file.name,
             fileType: file.type || "application/octet-stream",
+            scanStatus: resolvedScan,
             ...(options?.durationMs != null ? { durationMs: options.durationMs } : {}),
             ...(replyingTo ? { quotedMessage: replyingTo } : {}),
           })
@@ -1513,9 +1516,10 @@ export function ChatWindow({
           read: false,
           content: rawContent,
           messageType,
-          fileUrl: filePath,
+          fileUrl: visibleFileUrl,
           fileName: file.name,
           fileType: file.type || "application/octet-stream",
+          scanStatus: resolvedScan,
           ...(options?.durationMs != null ? { durationMs: options.durationMs } : {}),
           ...(replyingTo ? { quotedMessage: replyingTo } : {}),
           ...(target.type === "dm"
