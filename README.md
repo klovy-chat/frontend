@@ -4,7 +4,7 @@
 
 The official frontend of Klovy Chat.
 
-Oficjalna aplikacja webowa komunikatora **Klovy Chat** (Klovy Systems) — React + Vite + TypeScript, hostowana na Cloudflare.
+Oficjalna aplikacja webowa komunikatora **Klovy Chat** — React + Vite + TypeScript, hostowana na Cloudflare.
 
 Produkcja: [app.klovy.chat](https://app.klovy.chat)
 
@@ -160,4 +160,4 @@ Luki zgłaszaj prywatnie przez [GitHub Security Advisories](https://github.com/k
 
 Kod jest udostępniony na **[Klovy License](LICENSE)** — użycie osobiste, edukacyjne i niekomercyjne. Dystrybucja komercyjna, konkurencyjny komunikator oraz użycie marek Klovy wymagają pisemnej zgody Jakuba Maksymowicza. Zgłoszenie PR, błędu lub audytu bezpieczeństwa oznacza zgodę na warunki kontrybucji z licencji (pkt 7–11).
 
-© 2026 [Jakub Maksymowicz](https://github.com/klovy-chat)
+© 2026 [Jakub Maksymowicz](https://github.com/Klovy06)
