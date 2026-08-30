@@ -2,6 +2,7 @@
   "name": "klovy-chat-frontend",
   "private": true,
   "version": "1.0.0",
+  "license": "SEE LICENSE IN LICENSE",
   "packageManager": "bun@1.2.15",
   "type": "module",
   "scripts": {
