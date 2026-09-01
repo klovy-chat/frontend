@@ -145,7 +145,8 @@
     max-width: 100%;
     transform: none;
     border-radius: 16px 16px 0 0;
-    max-height: min(52dvh, 400px);
+    height: min(58dvh, 460px);
+    max-height: min(58dvh, 460px);
     padding-bottom: calc(12px + var(--safe-bottom));
     animation: sticker-picker-mobile-in 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   }
@@ -161,11 +162,26 @@
     }
   }
 
+  .sticker-picker-search {
+    flex-shrink: 0;
+  }
+
   .sticker-picker-grid {
-    grid-template-columns: repeat(3, 1fr);
-    max-height: none;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: minmax(120px, auto);
+    align-content: start;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     flex: 1;
     min-height: 0;
+    max-height: none;
+    padding-right: 0;
+  }
+
+  .sticker-picker-item {
+    min-height: 120px;
+    height: 100%;
+    padding: 10px;
   }
 
   .sticker-picker-item:hover {

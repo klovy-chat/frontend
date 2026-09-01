@@ -235,7 +235,7 @@
 
   .chat-header__toolbar {
     padding: 1px;
-    max-width: min(220px, 42vw);
+    max-width: min(280px, 58vw);
     overflow-x: auto;
     scrollbar-width: none;
   }

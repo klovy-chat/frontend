@@ -324,7 +324,7 @@
     align-items: center;
     gap: 8px;
     flex-shrink: 0;
-    padding: calc(10px + var(--safe-top)) 52px 10px 12px;
+    padding: calc(10px + var(--safe-top)) 16px 10px 12px;
     border-bottom: 1px solid var(--border);
     background: var(--bg-settings-nav, var(--bg-panel));
   }
@@ -371,6 +371,13 @@
     background: transparent;
     border: none;
     gap: 16px;
+    box-shadow: none;
+  }
+
+  .settings-page .as-account-hero.settings-mobile-hub__hero {
+    background: transparent;
+    border: none;
+    box-shadow: none;
   }
 
   .settings-mobile-hub__hero .as-account-hero-avatar {
@@ -382,12 +389,13 @@
   .settings-mobile-hub__hero .as-account-hero-copy strong {
     font-size: 1.2rem;
     font-weight: 700;
+    color: var(--text);
   }
 
   .settings-mobile-hub__hero .as-account-hero-copy span {
     font-size: 0.9rem;
     margin-top: 4px;
-    color: var(--accent);
+    color: var(--text-muted);
   }
 
   .settings-mobile-menu {
@@ -486,19 +494,11 @@
   }
 
   .settings-page .as-content-topbar {
-    position: absolute;
-    top: calc(8px + var(--safe-top));
-    right: 12px;
-    z-index: 3;
+    display: none;
   }
 
   .settings-page .as-close-hint {
     display: none;
-  }
-
-  .settings-page .as-close--inline {
-    width: 36px;
-    height: 36px;
   }
 
   .settings-page .as-card,
