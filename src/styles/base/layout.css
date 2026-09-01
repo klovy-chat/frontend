@@ -3,8 +3,8 @@
    Zakres:
     - klasy app-shell*
     - kolumny app-shell, overlay ustawień, loading
-   Breakpoints desktop-only — mobile i tak jest zablokowany.
-   Przy zmianach: Chat.tsx, Settings, Nav.
+    - mobile: jeden panel + dolna nawigacja
+   Przy zmianach: Chat.tsx, Settings, Nav, BottomNav.
  */
 
 .app-shell {
@@ -85,6 +85,80 @@
   .app-shell--chat,
   .app-shell--chat.app-shell--no-detail {
     grid-template-columns: var(--nav-width) var(--list-width) 1fr;
+  }
+}
+
+/* ── Mobile layout: single panel + bottom nav ── */
+@media (max-width: 768px) {
+  .app-shell--chat {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .app-shell--chat .app-shell__nav {
+    display: none;
+  }
+
+  .app-shell--chat .app-shell__list,
+  .app-shell--chat .app-shell__main,
+  .app-shell--chat .app-shell__contacts {
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+    overflow: hidden;
+    border-right: none;
+  }
+
+  .app-shell--chat .app-shell__list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .app-shell--chat .app-shell__main {
+    display: none;
+    flex-direction: column;
+  }
+
+  .app-shell--chat .app-shell__contacts {
+    display: none;
+    flex-direction: column;
+  }
+
+  /* Panel: aktywny czat */
+  .app-shell--chat.app-shell--show-chat .app-shell__list {
+    display: none;
+  }
+
+  .app-shell--chat.app-shell--show-chat .app-shell__main {
+    display: flex;
+  }
+
+  /* Panel: kontakty */
+  .app-shell--chat.app-shell--show-contacts .app-shell__list {
+    display: none;
+  }
+
+  .app-shell--chat.app-shell--show-contacts .app-shell__main {
+    display: none;
+  }
+
+  .app-shell--chat.app-shell--show-contacts .app-shell__contacts {
+    display: flex;
+  }
+
+  .app-shell--settings-standalone {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+  }
+
+  .app-shell--settings-standalone .settings-page-layout {
+    flex: 1;
+    min-height: 0;
   }
 }
 

@@ -88,6 +88,7 @@ interface ContactsProps {
   onClose: () => void;
   onSelectContact: (contact: Contact) => void;
   onRefreshContacts: () => Promise<void>;
+  variant?: "modal" | "inline";
 }
 
 const TABS: ContactsTab[] = ["invite", "myContacts", "sent", "blocked"];
@@ -145,6 +146,7 @@ export function Contacts({
   onClose,
   onSelectContact,
   onRefreshContacts,
+  variant = "modal",
 }: ContactsProps) {
   const { t } = useTranslation();
   const toast = useToast();
@@ -512,24 +514,18 @@ export function Contacts({
     return null;
   };
 
-  if (!isOpen && !isClosing) return null;
+  if (!isOpen && !isClosing && variant === "modal") return null;
 
-  return (
+  const shell = (
     <div
-      className={`klovy-backdrop klovy-backdrop--center${isClosing ? " closing" : ""}`}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-      role="dialog"
-      aria-modal="true"
-      aria-label={t("modals.contacts.title")}
+      className={`klovy-shell contacts-modal${isClosing ? " closing" : ""}${variant === "inline" ? " contacts-modal--inline" : ""}`}
     >
-      <div className={`klovy-shell contacts-modal${isClosing ? " closing" : ""}`}>
-        <div className="contacts-modal__header">
-          <div>
-            <h2>{t("modals.contacts.title")}</h2>
-            <p>{t("modals.contacts.subtitle")}</p>
-          </div>
+      <div className="contacts-modal__header">
+        <div>
+          <h2>{t("modals.contacts.title")}</h2>
+          <p>{t("modals.contacts.subtitle")}</p>
+        </div>
+        {variant === "modal" && (
           <button
             type="button"
             className="contacts-modal__close"
@@ -541,68 +537,86 @@ export function Contacts({
               <path d="M18 6 6 18M6 6l12 12" />
             </svg>
           </button>
-        </div>
+        )}
+      </div>
 
-        <div className="contacts-modal__tabs-row">
-          <div className="contacts-modal__tabs" ref={tabsRef}>
-            <div className="contacts-modal__tab-indicator" ref={indicatorRef} />
-            {TABS.map((key) => (
-              <button
-                key={key}
-                type="button"
-                className={`contacts-modal__tab${tab === key ? " active" : ""}`}
-                onClick={() => setTab(key)}
-              >
-                {tabLabels[key]}
-                <span className="contacts-modal__tab-count">{counts[key]}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="contacts-modal__body">
-          <div className="contacts-modal__main">{renderMain()}</div>
-
-          <div className="contacts-modal__side">
-            <div className="contacts-modal__side-label">{t("modals.contacts.invite.label")}</div>
-            <div className="contacts-modal__add-field">
-              <input
-                type="text"
-                value={inviteUsername}
-                placeholder={t("modals.contacts.invite.placeholder")}
-                autoComplete="off"
-                className={`contacts-modal__add-input${inviteError ? " contacts-modal__add-input--error" : ""}`}
-                onChange={(e) => {
-                  setInviteUsername(e.target.value);
-                  setInviteError(null);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") void handleSendInvite();
-                }}
-              />
-              <button
-                type="button"
-                className={`contacts-modal__send-btn${inviteSentPulse ? " contacts-modal__send-btn--sent" : ""}`}
-                title={t("modals.contacts.invite.send")}
-                disabled={inviteSending}
-                onClick={() => void handleSendInvite()}
-              >
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20 6 9 17l-5-5" />
-                </svg>
-              </button>
-            </div>
-            <p className="contacts-modal__hint">
-              {t("modals.contacts.invite.hintExtended")}
-            </p>
-            {inviteError && (
-              <div className="contacts-modal__toast contacts-modal__toast--error contacts-modal__toast--show" role="alert">
-                {inviteError}
-              </div>
-            )}
-          </div>
+      <div className="contacts-modal__tabs-row">
+        <div className="contacts-modal__tabs" ref={tabsRef}>
+          <div className="contacts-modal__tab-indicator" ref={indicatorRef} />
+          {TABS.map((key) => (
+            <button
+              key={key}
+              type="button"
+              className={`contacts-modal__tab${tab === key ? " active" : ""}`}
+              onClick={() => setTab(key)}
+            >
+              {tabLabels[key]}
+              <span className="contacts-modal__tab-count">{counts[key]}</span>
+            </button>
+          ))}
         </div>
       </div>
+
+      <div className="contacts-modal__body">
+        <div className="contacts-modal__main">{renderMain()}</div>
+
+        <div className="contacts-modal__side">
+          <div className="contacts-modal__side-label">{t("modals.contacts.invite.label")}</div>
+          <div className="contacts-modal__add-field">
+            <input
+              type="text"
+              value={inviteUsername}
+              placeholder={t("modals.contacts.invite.placeholder")}
+              autoComplete="off"
+              className={`contacts-modal__add-input${inviteError ? " contacts-modal__add-input--error" : ""}`}
+              onChange={(e) => {
+                setInviteUsername(e.target.value);
+                setInviteError(null);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") void handleSendInvite();
+              }}
+            />
+            <button
+              type="button"
+              className={`contacts-modal__send-btn${inviteSentPulse ? " contacts-modal__send-btn--sent" : ""}`}
+              title={t("modals.contacts.invite.send")}
+              disabled={inviteSending}
+              onClick={() => void handleSendInvite()}
+            >
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+            </button>
+          </div>
+          <p className="contacts-modal__hint">
+            {t("modals.contacts.invite.hintExtended")}
+          </p>
+          {inviteError && (
+            <div className="contacts-modal__toast contacts-modal__toast--error contacts-modal__toast--show" role="alert">
+              {inviteError}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
+  if (variant === "inline") {
+    return shell;
+  }
+
+  return (
+    <div
+      className={`klovy-backdrop klovy-backdrop--center${isClosing ? " closing" : ""}`}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      role="dialog"
+      aria-modal="true"
+      aria-label={t("modals.contacts.title")}
+    >
+      {shell}
     </div>
   );
 }

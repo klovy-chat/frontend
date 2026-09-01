@@ -9,6 +9,8 @@
 import { useCallback } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { Panel } from "./Panel";
+import { BottomNav } from "../components/layout/BottomNav";
+import { useIsMobile } from "../hooks/useIsMobile";
 import {
   DEFAULT_SETTINGS_SECTION,
   parseSettingsSection,
@@ -19,6 +21,7 @@ import "./settings.css";
 
 export function Settings() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const { section: sectionSlug } = useParams<{ section?: string }>();
   const section = parseSettingsSection(sectionSlug) ?? DEFAULT_SETTINGS_SECTION;
 
@@ -48,6 +51,14 @@ export function Settings() {
         onSectionChange={handleSectionChange}
         onClose={handleClose}
       />
+      {isMobile && (
+        <BottomNav
+          active="settings"
+          onChats={() => navigate("/")}
+          onContacts={() => navigate("/", { state: { openContacts: true } })}
+          onSettings={() => navigate(settingsPath(section))}
+        />
+      )}
     </div>
   );
 }

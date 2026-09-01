@@ -56,6 +56,7 @@
   --bp-tablet: 960px;
   --bp-mobile: 640px;
   --bp-mobile-sm: 480px;
+  --bp-mobile-layout: 768px;
   --shadow: 0 32px 80px rgba(0, 0, 0, 0.6);
   --shadow-sm: 0 8px 24px rgba(0, 0, 0, 0.4);
   --font-sans: "Space Grotesk", system-ui, sans-serif;

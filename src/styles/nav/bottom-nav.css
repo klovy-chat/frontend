@@ -1,0 +1,102 @@
+/* bottom-nav.css
+   Dolna nawigacja na mobile (czaty, kontakty, ustawienia).
+   Zakres:
+    - fixed bottom bar z safe-area
+    - aktywna zakładka, badge unread
+ */
+
+.bottom-nav {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .bottom-nav {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-around;
+    gap: 4px;
+    height: calc(56px + var(--safe-bottom));
+    padding: 6px 8px var(--safe-bottom);
+    background: var(--bg-panel);
+    border-top: 1px solid var(--border);
+    z-index: 200;
+    flex-shrink: 0;
+  }
+
+  .bottom-nav__item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 4px 8px;
+    border-radius: 10px;
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 600;
+    transition: color 0.15s, background 0.15s;
+    position: relative;
+    min-width: 0;
+  }
+
+  .bottom-nav__item::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 28px;
+    height: 2px;
+    border-radius: 2px;
+    background: transparent;
+    transition: background 0.15s;
+  }
+
+  .bottom-nav__item.active {
+    color: var(--accent);
+  }
+
+  .bottom-nav__item.active::before {
+    background: var(--accent);
+  }
+
+  .bottom-nav__item:active {
+    background: var(--bg-hover);
+  }
+
+  .bottom-nav__icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+  }
+
+  .bottom-nav__label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    letter-spacing: -0.01em;
+  }
+
+  .bottom-nav__badge {
+    position: absolute;
+    top: -2px;
+    right: -6px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: var(--radius-pill);
+    background: var(--accent);
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+}

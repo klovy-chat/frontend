@@ -216,6 +216,7 @@ function toCallPeer(contact: Contact): CallPeer {
 interface ChatWindowProps {
   target: ChatTarget | null;
   onClose?: () => void;
+  showBack?: boolean;
   onOpenChannelSettings?: (channel: import("../../types").Channel) => void;
   onRemoveContact?: (contact: Contact) => void;
 }
@@ -257,6 +258,7 @@ function IconBtn({
 export function ChatWindow({
   target,
   onClose,
+  showBack = false,
   onOpenChannelSettings,
   onRemoveContact,
 }: ChatWindowProps) {
@@ -2006,6 +2008,18 @@ export function ChatWindow({
   return (
     <div className="chat-window">
       <header className="chat-header">
+        {showBack && onClose && (
+          <button
+            type="button"
+            className="chat-header__back"
+            onClick={onClose}
+            aria-label={t("common.back")}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+        )}
 
         {target.type === "dm" ? (
           <div style={{ position: "relative", display: "inline-flex" }}>

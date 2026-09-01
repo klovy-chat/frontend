@@ -258,3 +258,30 @@
   border-radius: 50%;
   border: 2px solid var(--bg-panel);
 }
+
+@media (max-width: 768px) {
+  .chat-list-pane__header {
+    padding: calc(12px + var(--safe-top)) 16px 10px;
+  }
+
+  .chat-list-pane__title {
+    font-size: 24px;
+  }
+
+  .chat-list-pane__search-wrap {
+    padding: 0 12px 10px;
+  }
+
+  .chat-list-pane__tabs {
+    padding: 0 12px 8px;
+  }
+
+  .chat-list-pane__scroll {
+    padding: 6px 8px;
+  }
+
+  .chat-list-item {
+    padding: 12px 14px;
+    border-radius: 14px;
+  }
+}

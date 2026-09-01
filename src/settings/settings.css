@@ -297,3 +297,64 @@
   background: var(--bg-settings-card);
   border-color: transparent;
 }
+
+@media (max-width: 768px) {
+  .settings-page-left-spacer {
+    display: none;
+  }
+
+  .settings-page-layout {
+    flex-direction: column;
+  }
+
+  .settings-page .app-shell__settings-nav {
+    flex: 0 0 auto;
+    width: 100%;
+    padding-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .settings-page .as-nav--inline {
+    flex-direction: row;
+    overflow-x: auto;
+    padding: calc(8px + var(--safe-top)) 8px 8px;
+    gap: 4px;
+    scrollbar-width: none;
+  }
+
+  .settings-page .as-nav--inline::-webkit-scrollbar {
+    display: none;
+  }
+
+  .settings-page .as-nav-title {
+    display: none;
+  }
+
+  .settings-page .as-nav-label {
+    display: none;
+  }
+
+  .settings-page .as-nav-item {
+    white-space: nowrap;
+    flex-shrink: 0;
+    padding: 8px 12px;
+  }
+
+  .settings-page .as-nav-spacer {
+    display: none;
+  }
+
+  .settings-page .as-content-inner {
+    padding: 20px 16px calc(24px + var(--safe-bottom));
+    max-width: none;
+  }
+
+  .settings-page .as-section-title {
+    font-size: 1.25rem;
+  }
+
+  .settings-page .as-content-topbar {
+    top: calc(8px + var(--safe-top));
+    right: 12px;
+  }
+}
