@@ -262,23 +262,42 @@ input:-webkit-autofill:focus {
 
 @media (max-width: 768px) {
   .klovy-backdrop {
-    padding: 0;
-    align-items: flex-end;
-  }
-
-  .klovy-backdrop--center {
-    align-items: flex-end;
+    padding: 16px;
+    align-items: center;
+    justify-content: center;
   }
 
   .klovy-shell {
-    width: 100%;
-    max-width: 100%;
-    border-radius: 16px 16px 0 0;
-    max-height: 92dvh;
-    animation: klovy-sheet-in 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+    width: min(440px, calc(100vw - 32px));
+    max-width: calc(100vw - 32px);
+    max-height: min(88dvh, 780px);
+    border-radius: 16px;
+    animation: klovy-slide-in 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
   .klovy-backdrop.closing .klovy-shell {
+    animation: klovy-slide-out 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  /* Duże modale — bottom sheet */
+  .klovy-backdrop--center:has(.contacts-modal),
+  .klovy-backdrop--center:has(.cs-modal) {
+    padding: 0;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .klovy-backdrop--center:has(.contacts-modal) .klovy-shell,
+  .klovy-backdrop--center:has(.cs-modal) {
+    width: 100%;
+    max-width: 100%;
+    max-height: 94dvh;
+    border-radius: 16px 16px 0 0;
+    animation: klovy-sheet-in 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .klovy-backdrop--center.closing:has(.contacts-modal) .klovy-shell,
+  .klovy-backdrop--center.closing:has(.cs-modal) .klovy-shell {
     animation: klovy-sheet-out 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 

@@ -77,6 +77,7 @@ import {
   formatSessionUserAgent,
 } from "../utils/user/session";
 import type { SettingsSection } from "./routes";
+import { useIsMobile } from "../hooks/useIsMobile";
 import "./settings.css";
 import "../styles/account/account.css";
 import "../styles/account/profile.css";
@@ -95,6 +96,7 @@ export function Panel({
   onClose,
 }: PanelProps) {
   const { t } = useTranslation();
+  const isMobile = useIsMobile();
   const { dateLocale } = useLocale();
   const { user, updateUser, logout, refreshUser } = useAuth();
   const toast = useToast();
@@ -748,6 +750,124 @@ export function Panel({
     </aside>
   );
 
+  const mobileSectionTitle = (key: SettingsSection): string => {
+    const titles: Record<SettingsSection, string> = {
+      profil: t("settings.nav.profile"),
+      konto: t("settings.nav.myAccount"),
+      sesje: t("settings.nav.sessions"),
+      glos: t("settings.nav.voice"),
+      jezyk: t("settings.language.title"),
+      ostrzezenia: t("settings.nav.warnings"),
+    };
+    return titles[key];
+  };
+
+  const mobileHub = (
+    <div className="settings-mobile-hub">
+      <div className="as-account-hero settings-mobile-hub__hero">
+        <div className="as-account-hero-avatar" style={avatarStyle}>
+          {renderAvatarContent("sm")}
+        </div>
+        <div className="as-account-hero-copy">
+          <strong>{navName}</strong>
+          <span>@{user?.username}</span>
+        </div>
+      </div>
+
+      <nav className="settings-mobile-menu" aria-label={t("settings.nav.account")}>
+        {(
+          [
+            {
+              id: "profil" as const,
+              label: t("settings.nav.profile"),
+              icon: (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+              ),
+            },
+            {
+              id: "sesje" as const,
+              label: t("settings.nav.sessions"),
+              icon: (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="3" width="20" height="14" rx="2" />
+                  <line x1="8" y1="21" x2="16" y2="21" />
+                  <line x1="12" y1="17" x2="12" y2="21" />
+                </svg>
+              ),
+            },
+            {
+              id: "glos" as const,
+              label: t("settings.nav.voice"),
+              icon: (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                  <line x1="12" y1="19" x2="12" y2="22" />
+                </svg>
+              ),
+            },
+            {
+              id: "jezyk" as const,
+              label: t("settings.language.title"),
+              icon: (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M2 12h20" />
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                </svg>
+              ),
+            },
+            {
+              id: "ostrzezenia" as const,
+              label: t("settings.nav.warnings"),
+              badge: warningCount,
+              alert: unacknowledgedCount > 0,
+              icon: (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                  <line x1="12" y1="9" x2="12" y2="13" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+              ),
+            },
+          ] as const
+        ).map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            className="settings-mobile-menu__row"
+            onClick={() => onSectionChange(item.id)}
+          >
+            <span className="settings-mobile-menu__icon">{item.icon}</span>
+            <span className="settings-mobile-menu__label">{item.label}</span>
+            {"badge" in item && item.badge > 0 ? (
+              <span className={`settings-mobile-menu__badge${item.alert ? " settings-mobile-menu__badge--alert" : ""}`}>
+                {item.badge}
+              </span>
+            ) : null}
+            <svg className="settings-mobile-menu__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
+        ))}
+
+        <button type="button" className="settings-mobile-menu__row settings-mobile-menu__row--danger" onClick={() => void handleLogout()}>
+          <span className="settings-mobile-menu__icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+          </span>
+          <span className="settings-mobile-menu__label">{t("settings.nav.logout")}</span>
+        </button>
+      </nav>
+    </div>
+  );
+
   const settingsSections = (
     <div key={section}>
           {section === "profil" && (
@@ -902,22 +1022,28 @@ export function Panel({
 
           {section === "konto" && (
             <>
-              <h2 className="as-section-title">{t("settings.nav.myAccount")}</h2>
-              <p className="as-section-subtitle">{t("settings.account.subtitle")}</p>
+              {isMobile ? (
+                mobileHub
+              ) : (
+                <>
+                  <h2 className="as-section-title">{t("settings.nav.myAccount")}</h2>
+                  <p className="as-section-subtitle">{t("settings.account.subtitle")}</p>
 
-              <div className="as-account-hero">
-                <div
-                  className="as-account-hero-avatar"
-                  style={avatarStyle}
-                >
-                  {renderAvatarContent("sm")}
-                </div>
-                <div className="as-account-hero-copy">
-                  <strong>{navName}</strong>
-                  <span>@{user?.username}</span>
-                  {user?.id ? <code className="as-account-hero-id">{user.id}</code> : null}
-                </div>
-              </div>
+                  <div className="as-account-hero">
+                    <div
+                      className="as-account-hero-avatar"
+                      style={avatarStyle}
+                    >
+                      {renderAvatarContent("sm")}
+                    </div>
+                    <div className="as-account-hero-copy">
+                      <strong>{navName}</strong>
+                      <span>@{user?.username}</span>
+                      {user?.id ? <code className="as-account-hero-id">{user.id}</code> : null}
+                    </div>
+                  </div>
+                </>
+              )}
 
               {user?.deletionScheduledAt ? (
                 <div className="as-deletion-pending-banner" role="status">
@@ -1468,10 +1594,32 @@ export function Panel({
 
   return (
     <>
-      <div className="settings-page-layout" style={accentStyle}>
+      <div className={`settings-page-layout${isMobile ? " settings-page-layout--mobile" : ""}`} style={accentStyle}>
         <div className="settings-page-left-spacer" aria-hidden="true" />
-        <div className="app-shell__settings-nav">{navPanel}</div>
+        {!isMobile && <div className="app-shell__settings-nav">{navPanel}</div>}
         <div className="app-shell__settings-content as-content as-content--inline">
+          {isMobile && section !== "konto" && (
+            <div className="settings-mobile-bar">
+              <button
+                type="button"
+                className="settings-mobile-bar__back"
+                onClick={() => onSectionChange("konto")}
+                aria-label={t("common.back")}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+              </button>
+              <h1 className="settings-mobile-bar__title">{mobileSectionTitle(section)}</h1>
+            </div>
+          )}
+
+          {isMobile && section === "konto" && (
+            <div className="settings-mobile-bar settings-mobile-bar--hub">
+              <h1 className="settings-mobile-bar__title">{t("nav.items.settings")}</h1>
+            </div>
+          )}
+
           <div className="as-content-topbar">
             <button
               type="button"
@@ -1484,7 +1632,7 @@ export function Panel({
                 <line x1="6" y1="6" x2="18" y2="18"/>
               </svg>
             </button>
-            <span className="as-close-hint">ESC</span>
+            {!isMobile && <span className="as-close-hint">ESC</span>}
           </div>
           <div className="as-content-inner settings-section-panel" key={section}>
             {settingsSections}

@@ -27,7 +27,7 @@ const SLUG_TO_SECTION = Object.fromEntries(
   Object.entries(SECTION_SLUGS).map(([section, slug]) => [slug, section]),
 ) as Record<string, SettingsSection>;
 
-export const DEFAULT_SETTINGS_SECTION: SettingsSection = "profil";
+export const DEFAULT_SETTINGS_SECTION: SettingsSection = "konto";
 
 export function settingsPath(section: SettingsSection = DEFAULT_SETTINGS_SECTION): string {
   return `/settings/${SECTION_SLUGS[section]}`;

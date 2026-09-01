@@ -56,7 +56,7 @@ export function Settings() {
           active="settings"
           onChats={() => navigate("/")}
           onContacts={() => navigate("/", { state: { openContacts: true } })}
-          onSettings={() => navigate(settingsPath(section))}
+          onSettings={() => navigate(settingsPath("konto"))}
         />
       )}
     </div>

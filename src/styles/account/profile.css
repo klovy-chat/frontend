@@ -336,40 +336,29 @@
 
 @media (max-width: 768px) {
   .up-backdrop {
-    padding: 0;
-    align-items: flex-end;
+    padding: 16px;
+    align-items: center;
+    justify-content: center;
   }
 
   .up-card {
-    width: 100%;
-    max-width: 100%;
-    border-radius: 16px 16px 0 0;
-    max-height: 88dvh;
-    animation: up-sheet-in 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+    width: min(440px, calc(100vw - 32px));
+    max-width: calc(100vw - 32px);
+    max-height: min(88dvh, 720px);
+    border-radius: 16px;
+    animation: cardIn 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+    overflow-y: auto;
   }
 
   .up-card.closing {
-    animation: up-sheet-out 0.22s ease forwards;
-  }
-
-  @keyframes up-sheet-in {
-    from { opacity: 0; transform: translateY(100%); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes up-sheet-out {
-    from { opacity: 1; transform: translateY(0); }
-    to   { opacity: 0; transform: translateY(100%); }
+    animation: cardOut 0.2s ease forwards;
   }
 
   .up-banner {
-    border-radius: 16px 16px 0 0;
     height: 64px;
   }
 
   .up-body {
     padding: 0 16px calc(16px + var(--safe-bottom));
-    overflow-y: auto;
-    max-height: calc(88dvh - 64px);
   }
 }
