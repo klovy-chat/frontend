@@ -608,6 +608,7 @@
   width: 100%;
   max-width: none;
   min-height: 0;
+  flex: 1;
   height: 100%;
   border: none;
   border-radius: 0;
@@ -615,10 +616,13 @@
   display: flex;
   flex-direction: column;
   animation: none;
+  background: var(--bg-panel);
 }
 
 .contacts-modal--inline .contacts-modal__header {
   padding: calc(12px + var(--safe-top)) 16px 10px;
+  flex-shrink: 0;
+  border-bottom: none;
 }
 
 .contacts-modal--inline .contacts-modal__header p {
@@ -631,18 +635,74 @@
 }
 
 .contacts-modal--inline .contacts-modal__tabs-row {
-  padding: 0 12px;
-  overflow-x: auto;
-  scrollbar-width: none;
+  padding: 0;
+  flex-shrink: 0;
+  background: transparent;
 }
 
-.contacts-modal--inline .contacts-modal__tabs-row::-webkit-scrollbar {
-  display: none;
+.contacts-modal--inline .contacts-modal__tabs-row--mobile {
+  padding: 0 16px 12px;
 }
 
-.contacts-modal--inline .contacts-modal__tabs {
+.contacts-modal__mobile-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+}
+
+.contacts-modal__mobile-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-align: center;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.contacts-modal__mobile-tab-label {
+  line-height: 1.2;
+}
+
+.contacts-modal__mobile-tab-count {
+  flex-shrink: 0;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-dim);
   display: inline-flex;
-  min-width: min-content;
+  align-items: center;
+  justify-content: center;
+}
+
+.contacts-modal__mobile-tab.active {
+  background: var(--accent-dim);
+  border-color: var(--accent-border);
+  color: var(--text);
+}
+
+.contacts-modal__mobile-tab.active .contacts-modal__mobile-tab-count {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.contacts-modal__mobile-tab:active {
+  background: var(--bg-hover);
 }
 
 .contacts-modal--inline .contacts-modal__body {
@@ -652,13 +712,14 @@
   flex-direction: column;
   grid-template-columns: none;
   overflow: hidden;
+  background: var(--bg-panel);
 }
 
 .contacts-modal--inline .contacts-modal__main {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 8px 16px 16px;
+  padding: 0 16px 12px;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -707,13 +768,14 @@
 }
 
 @media (max-width: 768px) {
-  .contacts-modal--inline .contacts-modal__tabs-row {
-    padding: 0 12px 8px;
+  .contacts-modal--inline .contacts-modal__tabs-row--mobile {
+    padding: 0 16px 10px;
   }
 
-  .contacts-modal--inline .contacts-modal__tab {
-    padding: 7px 11px;
-    font-size: 12px;
+  .contacts-modal--inline .contacts-modal__mobile-tab {
+    font-size: 12.5px;
+    min-height: 42px;
+    padding: 9px 10px;
   }
 
   /* Modal kontaktów (desktop overlay na mobile) — spójny wygląd listy */

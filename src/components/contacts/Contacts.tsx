@@ -232,9 +232,9 @@ export function Contacts({
   }, []);
 
   useLayoutEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || isMobileInline) return;
     updateIndicator();
-  }, [isOpen, tab, counts, loading, updateIndicator]);
+  }, [isOpen, isMobileInline, tab, counts, loading, updateIndicator]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -652,23 +652,43 @@ export function Contacts({
         )}
       </div>
 
-      <div className="contacts-modal__tabs-row">
-        <div className="contacts-modal__tabs" ref={tabsRef}>
-          <div className="contacts-modal__tab-indicator" ref={indicatorRef} />
-          {tabs.map((key) => (
-            <button
-              key={key}
-              type="button"
-              className={`contacts-modal__tab${tab === key ? " active" : ""}`}
-              onClick={() => setTab(key)}
-            >
-              {tabLabels[key]}
-              {(key !== "send" || counts[key] > 0) && (
-                <span className="contacts-modal__tab-count">{counts[key]}</span>
-              )}
-            </button>
-          ))}
-        </div>
+      <div className={`contacts-modal__tabs-row${isMobileInline ? " contacts-modal__tabs-row--mobile" : ""}`}>
+        {isMobileInline ? (
+          <div className="contacts-modal__mobile-tabs" role="tablist" aria-label={t("modals.contacts.title")}>
+            {tabs.map((key) => (
+              <button
+                key={key}
+                type="button"
+                role="tab"
+                aria-selected={tab === key}
+                className={`contacts-modal__mobile-tab${tab === key ? " active" : ""}`}
+                onClick={() => setTab(key)}
+              >
+                <span className="contacts-modal__mobile-tab-label">{tabLabels[key]}</span>
+                {(key !== "send" || counts[key] > 0) && counts[key] > 0 ? (
+                  <span className="contacts-modal__mobile-tab-count">{counts[key]}</span>
+                ) : null}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="contacts-modal__tabs" ref={tabsRef}>
+            <div className="contacts-modal__tab-indicator" ref={indicatorRef} />
+            {tabs.map((key) => (
+              <button
+                key={key}
+                type="button"
+                className={`contacts-modal__tab${tab === key ? " active" : ""}`}
+                onClick={() => setTab(key)}
+              >
+                {tabLabels[key]}
+                {(key !== "send" || counts[key] > 0) && (
+                  <span className="contacts-modal__tab-count">{counts[key]}</span>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="contacts-modal__body">

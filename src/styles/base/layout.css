@@ -125,6 +125,9 @@
   .app-shell--chat .app-shell__contacts {
     display: none;
     flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    background: var(--bg-panel);
   }
 
   /* Panel: aktywny czat */
@@ -147,6 +150,9 @@
 
   .app-shell--chat.app-shell--show-contacts .app-shell__contacts {
     display: flex;
+    flex: 1;
+    min-height: 0;
+    background: var(--bg-panel);
   }
 
   .app-shell--settings-standalone {
