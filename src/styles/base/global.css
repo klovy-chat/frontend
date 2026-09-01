@@ -259,3 +259,36 @@ input:-webkit-autofill:focus {
 .klovy-ctx-in {
   animation: ctx-in 0.18s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
+
+@media (max-width: 768px) {
+  .klovy-backdrop {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .klovy-backdrop--center {
+    align-items: flex-end;
+  }
+
+  .klovy-shell {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 16px 16px 0 0;
+    max-height: 92dvh;
+    animation: klovy-sheet-in 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .klovy-backdrop.closing .klovy-shell {
+    animation: klovy-sheet-out 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  @keyframes klovy-sheet-in {
+    from { opacity: 0; transform: translateY(100%); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes klovy-sheet-out {
+    from { opacity: 1; transform: translateY(0); }
+    to   { opacity: 0; transform: translateY(100%); }
+  }
+}

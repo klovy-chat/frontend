@@ -299,6 +299,10 @@
 }
 
 @media (max-width: 768px) {
+  .settings-page .app-shell__settings-content {
+    position: relative;
+  }
+
   .settings-page-left-spacer {
     display: none;
   }
@@ -345,16 +349,61 @@
   }
 
   .settings-page .as-content-inner {
-    padding: 20px 16px calc(24px + var(--safe-bottom));
+    padding: 12px 16px calc(80px + var(--safe-bottom));
     max-width: none;
   }
 
   .settings-page .as-section-title {
-    font-size: 1.25rem;
+    font-size: 1.2rem;
+    padding-right: 48px;
+  }
+
+  .settings-page .as-section-subtitle {
+    font-size: 12px;
+    margin-bottom: 16px;
   }
 
   .settings-page .as-content-topbar {
-    top: calc(8px + var(--safe-top));
+    position: absolute;
+    top: calc(4px + var(--safe-top));
     right: 12px;
+    z-index: 2;
+  }
+
+  .settings-page .as-close-hint {
+    display: none;
+  }
+
+  .settings-page .as-close--inline {
+    width: 36px;
+    height: 36px;
+  }
+
+  .settings-page .as-profile-preview-actions {
+    margin-bottom: 16px;
+  }
+
+  .settings-page .as-profile-preview-actions .as-hint {
+    font-size: 11px;
+  }
+
+  .settings-page .as-banner-preview {
+    height: 96px;
+  }
+
+  .settings-page .as-profile-header-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .settings-page .as-profile-header-actions {
+    width: 100%;
+  }
+
+  .settings-page .as-profile-header-actions .as-btn-secondary,
+  .settings-page .as-profile-header-actions .as-btn-danger {
+    flex: 1;
+    justify-content: center;
   }
 }

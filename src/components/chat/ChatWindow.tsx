@@ -80,6 +80,7 @@ import {
   toggleReactionLocal,
 } from "../../utils/chat/reactions";
 import { Avatar } from "../common/Avatar";
+import { useIsMobile } from "../../hooks/useIsMobile";
 import { OtherProfile } from "../profile/OtherProfile";
 import { MessageList } from "./MessageList";
 import { MessageInput } from "./MessageInput";
@@ -263,6 +264,7 @@ export function ChatWindow({
   onRemoveContact,
 }: ChatWindowProps) {
   const { t } = useTranslation();
+  const isMobile = useIsMobile();
   const { user } = useAuth();
   const ws = useWebSocket();
   const wsConnected = useWebSocketConnected();
@@ -2304,13 +2306,15 @@ export function ChatWindow({
                     ? t("chat.input.replyPlaceholder")
                     : friendshipLoading
                       ? t("chat.input.checkingPermissions")
-                      : target.type === "channel"
-                        ? t("chat.input.channelPlaceholder", {
-                            channel: target.channel.name,
-                          })
-                        : t("chat.input.dmPlaceholder", {
-                            name: userLabel(target.contact),
-                          })
+                      : isMobile
+                        ? t("chat.input.defaultPlaceholder")
+                        : target.type === "channel"
+                          ? t("chat.input.channelPlaceholder", {
+                              channel: target.channel.name,
+                            })
+                          : t("chat.input.dmPlaceholder", {
+                              name: userLabel(target.contact),
+                            })
               }
               initialText={editingMessage?.content ?? ""}
               isEditing={Boolean(editingMessage)}

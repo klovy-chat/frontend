@@ -209,18 +209,45 @@
   }
 
   .chat-header {
-    padding: var(--safe-top) 12px 0 12px;
-    height: calc(56px + var(--safe-top));
-    min-height: calc(56px + var(--safe-top));
+    padding: var(--safe-top) 8px 0 8px;
+    height: calc(52px + var(--safe-top));
+    min-height: calc(52px + var(--safe-top));
+    gap: 8px;
+  }
+
+  .chat-header__info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .chat-header__name {
+    font-size: 0.95rem;
+  }
+
+  .chat-header__desc {
+    display: none;
+  }
+
+  .chat-header__actions {
+    flex-shrink: 0;
+    gap: 4px;
   }
 
   .chat-header__toolbar {
-    padding: 1px 2px;
+    padding: 1px;
+    max-width: min(220px, 42vw);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .chat-header__toolbar::-webkit-scrollbar {
+    display: none;
   }
 
   .chat-header__toolbar-btn {
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
   }
 
   .chat-window--empty {
@@ -231,7 +258,11 @@
     right: 12px;
     left: 12px;
     width: auto;
-    bottom: calc(72px + var(--safe-bottom));
+    bottom: calc(12px + var(--safe-bottom));
+  }
+
+  .app-shell--show-chat .mention-toast {
+    bottom: calc(12px + var(--safe-bottom));
   }
 }
 

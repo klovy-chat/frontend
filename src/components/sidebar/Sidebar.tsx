@@ -2177,7 +2177,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
           </div>
         )}
 
-        {isMobile && (
+        {isMobile && !showMobileChat && (
           <BottomNav
             active={mobileTab}
             totalUnread={totalUnread}

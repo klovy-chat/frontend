@@ -633,9 +633,36 @@
   .mi-sticker {
     display: none;
   }
+}
+
+@media (max-width: 768px) {
+  .mi-row {
+    padding: 5px 10px;
+    padding-left: calc(10px + var(--safe-left));
+    padding-right: calc(10px + var(--safe-right));
+    gap: 4px;
+  }
+
+  .mi-textarea {
+    font-size: 15px;
+    line-height: 1.35;
+    min-height: 22px;
+    max-height: 120px;
+    padding: 4px 0;
+  }
 
   .mi-icon-btn {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+  }
+
+  .mi-edit-banner,
+  .mi-reply-banner,
+  .mi-attachment,
+  .mi-voice-recording {
+    margin: 6px 10px 0;
+    margin-left: calc(10px + var(--safe-left));
+    margin-right: calc(10px + var(--safe-right));
   }
 }

@@ -801,9 +801,10 @@
     flex-direction: column;
     width: 100%;
     min-width: 0;
-    height: 95vh;
-    min-height: 95vh;
-    border-radius: 14px 14px 0 0;
+    height: 92dvh;
+    min-height: 0;
+    max-height: 92dvh;
+    border-radius: 16px 16px 0 0;
   }
 
   .as-nav {
