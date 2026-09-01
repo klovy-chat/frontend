@@ -475,6 +475,7 @@
       "sessions": "Devices",
       "voice": "Voice settings",
       "warnings": "Warnings",
+      "status": "Status",
       "app": "Client settings",
       "logout": "Log out"
     },
@@ -499,6 +500,10 @@
       "bannerUploadFailed": "Could not upload banner",
       "bannerRemoved": "Profile banner removed.",
       "bannerRemoveFailed": "Could not remove banner"
+    },
+    "status": {
+      "subtitle": "Choose how others see you.",
+      "updateFailed": "Could not update status."
     },
     "account": {
       "subtitle": "Manage login credentials and security.",

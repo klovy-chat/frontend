@@ -475,6 +475,7 @@
       "sessions": "Urządzenia",
       "voice": "Ustawienia głosu",
       "warnings": "Ostrzeżenia",
+      "status": "Status",
       "app": "Ustawienia klienta",
       "logout": "Wyloguj się"
     },
@@ -499,6 +500,10 @@
       "bannerUploadFailed": "Nie udało się wgrać banera",
       "bannerRemoved": "Baner profilu usunięty.",
       "bannerRemoveFailed": "Nie udało się usunąć banera"
+    },
+    "status": {
+      "subtitle": "Wybierz, jak widzą Cię inni użytkownicy.",
+      "updateFailed": "Nie udało się zmienić statusu."
     },
     "account": {
       "subtitle": "Zarządzaj danymi logowania i bezpieczeństwem.",
