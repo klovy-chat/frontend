@@ -641,31 +641,42 @@
 }
 
 .contacts-modal--inline .contacts-modal__tabs-row--mobile {
-  padding: 0 16px 12px;
+  padding: 0 0 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.contacts-modal--inline .contacts-modal__tabs-row--mobile::-webkit-scrollbar {
+  display: none;
 }
 
 .contacts-modal__mobile-tabs {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  width: 100%;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+  width: max-content;
+  min-width: 100%;
+  padding: 0 16px;
 }
 
 .contacts-modal__mobile-tab {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  min-height: 44px;
-  padding: 10px 12px;
-  border-radius: 12px;
+  gap: 5px;
+  flex: 0 0 auto;
+  min-height: 34px;
+  padding: 7px 11px;
+  border-radius: 10px;
   border: 1px solid var(--border);
   background: var(--bg-card);
   font-family: var(--font-sans);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text-muted);
   text-align: center;
+  white-space: nowrap;
   transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 
@@ -675,13 +686,13 @@
 
 .contacts-modal__mobile-tab-count {
   flex-shrink: 0;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
   border-radius: var(--radius-pill);
   background: var(--bg-elevated);
   border: 1px solid var(--border);
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
   color: var(--text-dim);
   display: inline-flex;
@@ -769,13 +780,13 @@
 
 @media (max-width: 768px) {
   .contacts-modal--inline .contacts-modal__tabs-row--mobile {
-    padding: 0 16px 10px;
+    padding: 0 0 8px;
   }
 
   .contacts-modal--inline .contacts-modal__mobile-tab {
-    font-size: 12.5px;
-    min-height: 42px;
-    padding: 9px 10px;
+    font-size: 11.5px;
+    min-height: 32px;
+    padding: 6px 10px;
   }
 
   /* Modal kontaktów (desktop overlay na mobile) — spójny wygląd listy */
