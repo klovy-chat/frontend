@@ -28,6 +28,7 @@ import {
 import { userLabel, availabilityStatusLabel } from "../../utils/user/format";
 import { getEffectiveStatus } from "../../utils/user/presence";
 import type { Contact, FriendRequestItem } from "../../types";
+import { useIsMobile } from "../../hooks/useIsMobile";
 import "../../styles/contacts/contacts.css";
 
 function FriendPresenceRow({
@@ -80,7 +81,7 @@ function FriendPresenceRow({
   );
 }
 
-export type ContactsTab = "invite" | "myContacts" | "sent" | "blocked";
+export type ContactsTab = "invite" | "myContacts" | "sent" | "blocked" | "send";
 
 interface ContactsProps {
   isOpen: boolean;
@@ -91,7 +92,8 @@ interface ContactsProps {
   variant?: "modal" | "inline";
 }
 
-const TABS: ContactsTab[] = ["invite", "myContacts", "sent", "blocked"];
+const DESKTOP_TABS: ContactsTab[] = ["invite", "myContacts", "sent", "blocked"];
+const MOBILE_TABS: ContactsTab[] = ["myContacts", "sent", "blocked", "send"];
 
 function EmptyState({
   icon,
@@ -149,8 +151,11 @@ export function Contacts({
   variant = "modal",
 }: ContactsProps) {
   const { t } = useTranslation();
+  const isMobile = useIsMobile();
+  const isMobileInline = isMobile && variant === "inline";
+  const tabs = isMobileInline ? MOBILE_TABS : DESKTOP_TABS;
   const toast = useToast();
-  const [tab, setTab] = useState<ContactsTab>("invite");
+  const [tab, setTab] = useState<ContactsTab>(() => (isMobileInline ? "myContacts" : "invite"));
   const [inviteUsername, setInviteUsername] = useState("");
   const [inviteError, setInviteError] = useState<string | null>(null);
   const [inviteSending, setInviteSending] = useState(false);
@@ -172,6 +177,7 @@ export function Contacts({
       myContacts: t("modals.contacts.tabs.friends"),
       sent: t("modals.contacts.tabs.sent"),
       blocked: t("modals.contacts.tabs.blocked"),
+      send: t("modals.contacts.tabs.send"),
     }),
     [t],
   );
@@ -182,6 +188,7 @@ export function Contacts({
       myContacts: friendsList.length,
       sent: sentRequests.length,
       blocked: blockedList.length,
+      send: receivedRequests.length,
     }),
     [receivedRequests.length, friendsList.length, sentRequests.length, blockedList.length],
   );
@@ -304,6 +311,102 @@ export function Contacts({
     }
   };
 
+  useEffect(() => {
+    if (isMobileInline && tab === "invite") {
+      setTab("myContacts");
+    }
+  }, [isMobileInline, tab]);
+
+  const renderInvitePanel = () => (
+    <div className="contacts-modal__invite-panel">
+      <div className="contacts-modal__side-label">{t("modals.contacts.invite.label")}</div>
+      <div className="contacts-modal__add-field">
+        <input
+          type="text"
+          value={inviteUsername}
+          placeholder={t("modals.contacts.invite.placeholder")}
+          autoComplete="off"
+          className={`contacts-modal__add-input${inviteError ? " contacts-modal__add-input--error" : ""}`}
+          onChange={(e) => {
+            setInviteUsername(e.target.value);
+            setInviteError(null);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") void handleSendInvite();
+          }}
+        />
+        <button
+          type="button"
+          className={`contacts-modal__send-btn${inviteSentPulse ? " contacts-modal__send-btn--sent" : ""}`}
+          title={t("modals.contacts.invite.send")}
+          disabled={inviteSending}
+          onClick={() => void handleSendInvite()}
+        >
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20 6 9 17l-5-5" />
+          </svg>
+        </button>
+      </div>
+      <p className="contacts-modal__hint">{t("modals.contacts.invite.hintExtended")}</p>
+      {inviteError && (
+        <div className="contacts-modal__toast contacts-modal__toast--error contacts-modal__toast--show" role="alert">
+          {inviteError}
+        </div>
+      )}
+    </div>
+  );
+
+  const renderReceivedInvites = () => {
+    if (receivedRequests.length === 0) return null;
+    return (
+      <>
+        <p className="contacts-modal__section-label">{t("modals.contacts.tabs.invites")}</p>
+        <div className="contacts-modal__list contacts-modal__list--compact">
+          {receivedRequests.map((req, i) => (
+            <div key={req._id} className="contacts-modal__row" style={{ animationDelay: `${i * 40}ms` }}>
+              <Avatar
+                displayName={req.from?.displayName}
+                username={req.from?.username}
+                image={req.from?.image ?? null}
+                color={req.from?.color}
+                size={40}
+              />
+              <div className="contacts-modal__info">
+                <div className="contacts-modal__name">{userLabel(req.from ?? {})}</div>
+                <div className="contacts-modal__meta">
+                  {req.from?.username ? `@${req.from.username}` : t("common.user")}
+                  {t("modals.contacts.invite.newInvite")}
+                </div>
+              </div>
+              <div className="contacts-modal__actions">
+                <button
+                  type="button"
+                  className="contacts-modal__icon-btn contacts-modal__icon-btn--accept"
+                  title={t("common.accept")}
+                  onClick={() => void handleAccept(req._id)}
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+                    <path d="M20 6 9 17l-5-5" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  className="contacts-modal__icon-btn contacts-modal__icon-btn--decline"
+                  title={t("common.reject")}
+                  onClick={() => void handleReject(req._id)}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+                    <path d="M18 6 6 18M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </>
+    );
+  };
+
   const filteredFriends = useMemo(() => {
     const q = contactsSearch.trim().toLowerCase();
     if (!q) return friendsList;
@@ -317,6 +420,15 @@ export function Contacts({
   const renderMain = () => {
     if (loading) {
       return <p className="contacts-modal__loading">{t("common.loading")}</p>;
+    }
+
+    if (tab === "send") {
+      return (
+        <>
+          {renderInvitePanel()}
+          {renderReceivedInvites()}
+        </>
+      );
     }
 
     if (tab === "invite") {
@@ -543,7 +655,7 @@ export function Contacts({
       <div className="contacts-modal__tabs-row">
         <div className="contacts-modal__tabs" ref={tabsRef}>
           <div className="contacts-modal__tab-indicator" ref={indicatorRef} />
-          {TABS.map((key) => (
+          {tabs.map((key) => (
             <button
               key={key}
               type="button"
@@ -551,7 +663,9 @@ export function Contacts({
               onClick={() => setTab(key)}
             >
               {tabLabels[key]}
-              <span className="contacts-modal__tab-count">{counts[key]}</span>
+              {(key !== "send" || counts[key] > 0) && (
+                <span className="contacts-modal__tab-count">{counts[key]}</span>
+              )}
             </button>
           ))}
         </div>
@@ -560,44 +674,11 @@ export function Contacts({
       <div className="contacts-modal__body">
         <div className="contacts-modal__main">{renderMain()}</div>
 
-        <div className="contacts-modal__side">
-          <div className="contacts-modal__side-label">{t("modals.contacts.invite.label")}</div>
-          <div className="contacts-modal__add-field">
-            <input
-              type="text"
-              value={inviteUsername}
-              placeholder={t("modals.contacts.invite.placeholder")}
-              autoComplete="off"
-              className={`contacts-modal__add-input${inviteError ? " contacts-modal__add-input--error" : ""}`}
-              onChange={(e) => {
-                setInviteUsername(e.target.value);
-                setInviteError(null);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") void handleSendInvite();
-              }}
-            />
-            <button
-              type="button"
-              className={`contacts-modal__send-btn${inviteSentPulse ? " contacts-modal__send-btn--sent" : ""}`}
-              title={t("modals.contacts.invite.send")}
-              disabled={inviteSending}
-              onClick={() => void handleSendInvite()}
-            >
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 6 9 17l-5-5" />
-              </svg>
-            </button>
+        {!isMobileInline && (
+          <div className="contacts-modal__side">
+            {renderInvitePanel()}
           </div>
-          <p className="contacts-modal__hint">
-            {t("modals.contacts.invite.hintExtended")}
-          </p>
-          {inviteError && (
-            <div className="contacts-modal__toast contacts-modal__toast--error contacts-modal__toast--show" role="alert">
-              {inviteError}
-            </div>
-          )}
-        </div>
+        )}
       </div>
     </div>
   );

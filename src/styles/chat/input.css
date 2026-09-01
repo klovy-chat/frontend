@@ -630,31 +630,32 @@
 }
 
 @media (max-width: 400px) {
-  .mi-sticker {
-    display: none;
+  .mi-icon-btn {
+    width: 34px;
+    height: 34px;
   }
 }
 
 @media (max-width: 768px) {
   .mi-row {
-    padding: 5px 10px;
-    padding-left: calc(10px + var(--safe-left));
-    padding-right: calc(10px + var(--safe-right));
-    gap: 4px;
+    padding: 8px 12px;
+    padding-left: calc(12px + var(--safe-left));
+    padding-right: calc(12px + var(--safe-right));
+    gap: 6px;
   }
 
   .mi-textarea {
-    font-size: 15px;
-    line-height: 1.35;
-    min-height: 22px;
+    font-size: 16px;
+    line-height: 1.4;
+    min-height: 36px;
     max-height: 120px;
-    padding: 4px 0;
+    padding: 6px 2px;
   }
 
   .mi-icon-btn {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
   }
 
   .mi-edit-banner,

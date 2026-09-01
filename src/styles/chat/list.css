@@ -88,6 +88,10 @@
 .chat-list-pane__search-icon {
   color: var(--text-muted);
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
 }
 
 .chat-list-pane__tabs {
@@ -268,8 +272,19 @@
     font-size: 24px;
   }
 
-  .chat-list-pane__search-wrap {
+  .chat-list-pane__search {
     padding: 0 12px 10px;
+  }
+
+  .chat-list-pane__search-wrap {
+    height: 40px;
+    padding: 0 14px;
+    gap: 10px;
+  }
+
+  .chat-list-pane__search-input {
+    font-size: 14px;
+    line-height: 1.2;
   }
 
   .chat-list-pane__tabs {

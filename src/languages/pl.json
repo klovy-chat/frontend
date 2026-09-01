@@ -819,7 +819,8 @@
         "invites": "Zaproszenia",
         "friends": "Moje kontakty",
         "sent": "Wysłane",
-        "blocked": "Zablokowani"
+        "blocked": "Zablokowani",
+        "send": "Wyślij"
       },
       "invite": {
         "label": "NAZWA PO @",

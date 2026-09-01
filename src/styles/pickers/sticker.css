@@ -135,3 +135,40 @@
   color: var(--text-muted);
   padding-top: 2px;
 }
+
+@media (max-width: 768px) {
+  .sticker-picker {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: 100%;
+    transform: none;
+    border-radius: 16px 16px 0 0;
+    max-height: min(52dvh, 400px);
+    padding-bottom: calc(12px + var(--safe-bottom));
+    animation: sticker-picker-mobile-in 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes sticker-picker-mobile-in {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .sticker-picker-grid {
+    grid-template-columns: repeat(3, 1fr);
+    max-height: none;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .sticker-picker-item:hover {
+    transform: none;
+  }
+}

@@ -819,7 +819,8 @@
         "invites": "Invites",
         "friends": "My contacts",
         "sent": "Sent",
-        "blocked": "Blocked"
+        "blocked": "Blocked",
+        "send": "Send"
       },
       "invite": {
         "label": "USERNAME AFTER @",
