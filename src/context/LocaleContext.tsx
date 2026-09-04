@@ -24,7 +24,7 @@ import {
   normalizeLocale,
   type AppLocale,
 } from "../languages";
-import { saveStoredLocale } from "../utils/locale/storage";
+import { saveStoredLocale, readStoredLocale } from "../utils/locale/storage";
 import { useAuth } from "./AuthContext";
 
 interface LocaleContextValue {
@@ -43,13 +43,19 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
   );
 
   useEffect(() => {
-    if (user?.language && isAppLocale(user.language)) {
-      const profileLocale = user.language;
-      if (profileLocale !== locale) {
-        setLocaleState(profileLocale);
-        changeAppLanguage(profileLocale);
-        saveStoredLocale(profileLocale);
+    const stored = readStoredLocale();
+    if (stored) {
+      if (stored !== locale) {
+        setLocaleState(stored);
+        changeAppLanguage(stored);
       }
+      return;
+    }
+
+    if (user?.language && isAppLocale(user.language)) {
+      setLocaleState(user.language);
+      changeAppLanguage(user.language);
+      saveStoredLocale(user.language);
     }
   }, [user?.language]); // eslint-disable-line react-hooks/exhaustive-deps
 

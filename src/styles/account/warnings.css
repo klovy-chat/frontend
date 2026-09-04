@@ -35,7 +35,7 @@
   box-shadow: var(--shadow);
   padding: 1.75rem 1.6rem 1.5rem;
   color: var(--text);
-  font-family: var(--font-sans, 'Funnel Display', system-ui, sans-serif);
+  font-family: var(--font-sans, 'Space Grotesk', system-ui, sans-serif);
   animation: warn-pop 0.2s ease-out;
 }
 
