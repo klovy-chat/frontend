@@ -26,7 +26,7 @@ export function normalizeAuthError(
     if (lower.includes("captcha") || lower.includes("turnstile")) {
       return trimmed;
     }
-    if (lower.includes("whitelist") || lower.includes("aktyw")) {
+    if (lower.includes("aktyw")) {
       return trimmed;
     }
     return trimmed;

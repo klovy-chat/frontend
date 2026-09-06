@@ -407,12 +407,6 @@
       "submit": "Kontynuuj",
       "saveFailed": "Nie udało się zapisać profilu"
     },
-    "pending": {
-      "title": "Oczekiwanie na zatwierdzenie",
-      "body": "Twoje konto @{{username}} zostało utworzone, ale administrator musi je jeszcze zatwierdzić, zanim będziesz mógł korzystać z Klovy Chat.",
-      "hint": "Otrzymasz dostęp automatycznie po zatwierdzeniu. Ta strona odświeża status co kilka sekund.",
-      "logout": "Wyloguj się"
-    },
     "invite": {
       "title": "Zaproszenie do kanału",
       "invalidLink": "Nieprawidłowy link zaproszenia",

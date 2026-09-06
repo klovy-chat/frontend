@@ -1,9 +1,8 @@
 // App.tsx
 // Trasy publiczne i chronione + powłoka zalogowanego użytkownika.
 // Zakres:
-//  - login/signup/setup/pending/chat/invite/settings
+//  - login/signup/setup/chat/invite/settings
 //  - WS, presence, call, cache wiadomości przeżywają Chat↔Settings
-// Pending whitelist nie dostaje WebSocket — backend i tak zrzuci handshake.
 // Przy zmianach: pages/*, context/*, settings/Settings.tsx.
 
 import { Navigate, Outlet, Route, Routes } from "react-router-dom";
@@ -23,20 +22,12 @@ import { useIdle } from "./hooks/useIdle";
 import { Login } from "./pages/Login";
 import { Signup } from "./pages/Signup";
 import { ProfileSetup } from "./pages/ProfileSetup";
-import { PendingApproval } from "./pages/PendingApproval";
 import { Chat } from "./pages/Chat";
 import { Invite } from "./pages/Invite";
 import { Settings } from "./settings/Settings";
-import { isPendingWhitelist } from "./utils/auth/whitelist";
 import { setAppBadge } from "./utils/device/appBadge";
 import { UpdateNotice } from "./components/common/UpdateNotice";
 import { ToastProvider } from "./context/ToastContext";
-import type { User } from "./types";
-
-function postSetupPath(user: User): string {
-  if (isPendingWhitelist(user)) return "/pending";
-  return "/";
-}
 
 function AuthOnlyRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -48,22 +39,7 @@ function AuthOnlyRoute({ children }: { children: React.ReactNode }) {
     );
   }
   if (!user) return <Navigate to="/login" replace />;
-  if (user.profileSetup) return <Navigate to={postSetupPath(user)} replace />;
-  return <>{children}</>;
-}
-
-function WhitelistRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
-  if (loading) {
-    return (
-      <div className="app-loading">
-        <div className="spinner" />
-      </div>
-    );
-  }
-  if (!user) return <Navigate to="/login" replace />;
-  if (!user.profileSetup) return <Navigate to="/setup" replace />;
-  if (!isPendingWhitelist(user)) return <Navigate to="/" replace />;
+  if (user.profileSetup) return <Navigate to="/" replace />;
   return <>{children}</>;
 }
 
@@ -78,7 +54,6 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   }
   if (!user) return <Navigate to="/login" replace />;
   if (!user.profileSetup) return <Navigate to="/setup" replace />;
-  if (isPendingWhitelist(user)) return <Navigate to="/pending" replace />;
   return <>{children}</>;
 }
 
@@ -91,7 +66,7 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
       </div>
     );
   }
-  if (user?.profileSetup) return <Navigate to={postSetupPath(user)} replace />;
+  if (user?.profileSetup) return <Navigate to="/" replace />;
   if (user && !user.profileSetup) return <Navigate to="/setup" replace />;
   return <>{children}</>;
 }
@@ -143,14 +118,6 @@ function AppRoutes() {
           <AuthOnlyRoute>
             <ProfileSetup />
           </AuthOnlyRoute>
-        }
-      />
-      <Route
-        path="/pending"
-        element={
-          <WhitelistRoute>
-            <PendingApproval />
-          </WhitelistRoute>
         }
       />
       <Route element={<AuthenticatedShell />}>

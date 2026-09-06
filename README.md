@@ -14,7 +14,7 @@ Produkcja: [app.klovy.chat](https://app.klovy.chat)
 
 Frontend to klient Klovy Chat w przeglądarce: logowanie, czat, kanały, znajomi, załączniki, połączenia głosowe (LiveKit) i obecność na żywo przez WebSocket.
 
-W dewelopmencie Vite proxy’uje `/api`, `/whitelist` i `/ws` na backend. Produkcja to SPA na Cloudflare Workers (`wrangler deploy`). Aplikacja desktopowa ładuje ten sam frontend z `app.klovy.chat`.
+W dewelopmencie Vite proxy’uje `/api` i `/ws` na backend. Produkcja to SPA na Cloudflare Workers (`wrangler deploy`). Aplikacja desktopowa ładuje ten sam frontend z `app.klovy.chat`.
 
 ### Ekosystem
 

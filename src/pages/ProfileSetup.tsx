@@ -11,7 +11,6 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { updateProfile } from "../api/auth";
 import { useAuth } from "../context/AuthContext";
-import { isPendingWhitelist } from "../utils/auth/whitelist";
 import { ApiError } from "../api/client";
 import {
   ProfileFields,
@@ -50,7 +49,7 @@ export function ProfileSetup() {
         color: values.color,
       });
       updateUser(updated);
-      navigate(isPendingWhitelist(updated) ? "/pending" : "/");
+      navigate("/");
     } catch (err) {
       setError(
         err instanceof ApiError ? err.message : t("auth.setup.saveFailed"),

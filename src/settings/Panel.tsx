@@ -151,6 +151,7 @@ export function Panel({
   const [sessionsError, setSessionsError] = useState("");
   const [sessionActionId, setSessionActionId] = useState<string | null>(null);
   const [sessionRevokeTarget, setSessionRevokeTarget] = useState<UserSessionRow | null>(null);
+  const [sessionRevokeError, setSessionRevokeError] = useState("");
   const [revokeOthersBusy, setRevokeOthersBusy] = useState(false);
   const [profilePreviewOpen, setProfilePreviewOpen] = useState(false);
 
@@ -455,6 +456,7 @@ export function Panel({
   const handleRevokeSession = async (session: UserSessionRow) => {
     setSessionActionId(session.id);
     setSessionsError("");
+    setSessionRevokeError("");
     try {
       const res = await revokeSession(session.id);
       if (session.isCurrent || res.currentSessionRevoked) {
@@ -462,10 +464,11 @@ export function Panel({
         requestClose();
         return;
       }
+      setSessionRevokeTarget(null);
       await loadSessions();
       toast.success(t("session.revokeDeviceSuccess"));
     } catch (err) {
-      setSessionsError(
+      setSessionRevokeError(
         err instanceof ApiError ? err.message : t("settings.account.sessionRevokeFailed"),
       );
     } finally {
@@ -1555,7 +1558,10 @@ export function Panel({
                             type="button"
                             className="as-session-revoke-action"
                             disabled={sessionActionId === session.id}
-                            onClick={() => setSessionRevokeTarget(session)}
+                            onClick={() => {
+                              setSessionRevokeError("");
+                              setSessionRevokeTarget(session);
+                            }}
                             aria-label={t("session.revokeDeviceAria")}
                           >
                             {sessionActionId === session.id ? (
@@ -1781,10 +1787,14 @@ export function Panel({
         busy={Boolean(
           sessionRevokeTarget && sessionActionId === sessionRevokeTarget.id,
         )}
+        error={sessionRevokeError}
         onConfirm={() => {
           if (sessionRevokeTarget) void handleRevokeSession(sessionRevokeTarget);
         }}
-        onClose={() => setSessionRevokeTarget(null)}
+        onClose={() => {
+          setSessionRevokeTarget(null);
+          setSessionRevokeError("");
+        }}
       />
       <MyProfile
         isOpen={profilePreviewOpen}

@@ -19,8 +19,6 @@ export interface User {
   lastSeen?: string | null;
   availabilityStatus?: "online" | "away" | "brb" | "dnd";
   createdAt?: string;
-  isWhitelisted?: boolean;
-  isWhitelistEnabled?: boolean;
   twoFactorEnabled?: boolean;
   isDisabled?: boolean;
   deletionScheduledAt?: string | null;

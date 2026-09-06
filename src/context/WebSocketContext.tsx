@@ -30,7 +30,7 @@ const WebSocketContext = createContext<WebSocketClient | null>(null);
 const WebSocketConnectedContext = createContext<boolean>(false);
 
 export function WebSocketProvider({ children }: { children: ReactNode }) {
-  const { user, updateUser, logout, refreshUser } = useAuth();
+  const { user, updateUser, logout } = useAuth();
   const [ws, setWs] = useState<WebSocketClient | null>(null);
   const [connected, setConnected] = useState(false);
   const userId = user?.id;
@@ -41,8 +41,6 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
   updateUserRef.current = updateUser;
   const logoutRef = useRef(logout);
   logoutRef.current = logout;
-  const refreshUserRef = useRef(refreshUser);
-  refreshUserRef.current = refreshUser;
 
   useEffect(() => {
     if (!userId) {
@@ -157,14 +155,6 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
               instance?.close();
             }
           })();
-        }),
-      );
-
-      unsubs.push(
-        instance.subscribe(WsType.WHITELIST_APPROVED, (data: { userId?: string }) => {
-          if (data.userId === userId) {
-            void refreshUserRef.current();
-          }
         }),
       );
 

@@ -14,6 +14,7 @@ interface RevokeSessionProps {
   isOpen: boolean;
   deviceLabel: string;
   busy?: boolean;
+  error?: string;
   onConfirm: () => void;
   onClose: () => void;
 }
@@ -22,6 +23,7 @@ export function RevokeSession({
   isOpen,
   deviceLabel,
   busy = false,
+  error,
   onConfirm,
   onClose,
 }: RevokeSessionProps) {
@@ -107,6 +109,19 @@ export function RevokeSession({
               {t("session.revokeDeviceModal.confirmWithDevice", { device: deviceLabel })}
             </p>
           </div>
+          {error ? (
+            <p
+              role="alert"
+              className="delete-msg-modal__error"
+              style={{
+                margin: "0.75rem 0 0",
+                color: "var(--danger, #e5484d)",
+                fontSize: "0.85rem",
+              }}
+            >
+              {error}
+            </p>
+          ) : null}
         </div>
 
         <div className="delete-msg-modal__footer">
@@ -123,8 +138,8 @@ export function RevokeSession({
             className="delete-msg-modal__btn delete-msg-modal__btn--danger"
             disabled={busy}
             onClick={() => {
+              if (busy) return;
               onConfirm();
-              requestClose();
             }}
           >
             {busy ? t("common.loggingOut") : t("session.revokeDeviceModal.submit")}

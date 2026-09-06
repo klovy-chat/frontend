@@ -224,9 +224,10 @@ export async function apiRequest<T>(
       const data = (await response.json()) as {
         message?: string;
         error?: string;
+        code?: string;
         retryAfter?: number;
       };
-      code = data.error;
+      code = data.code ?? data.error;
       retryAfter =
         typeof data.retryAfter === "number" ? data.retryAfter : undefined;
       message = data.message ?? data.error ?? message;

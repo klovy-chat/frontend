@@ -1,7 +1,7 @@
 // vite.config.ts
 // Build i dev-server frontendu (Vite + React, w prod Cloudflare).
 // Zakres:
-//  - proxy /api, /whitelist, /ws na backend w DEV
+//  - proxy /api, /ws na backend w DEV
 //  - normalizacja VITE_BACKEND_URL
 // Wyłączony backend ma nie spamować konsoli — log proxy jest throttled.
 // Przy zmianach: api/client.ts, api/ws.ts, utils/env/backend.ts.
@@ -121,7 +121,6 @@ export default defineConfig(({ mode, command }) => {
       port: 5173,
       proxy: {
         "/api": backendProxy(backendUrl, "HTTP /api"),
-        "/whitelist": backendProxy(backendUrl, "HTTP /whitelist"),
         "/ws": backendProxy(backendUrl, "WebSocket /ws", true),
       },
     },

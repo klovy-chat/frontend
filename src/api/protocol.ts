@@ -69,7 +69,6 @@ export const WsType = {
   CALL_ENDED: "call:ended",
   CALL_UNAVAILABLE: "call:unavailable",
   SESSION_REVOKED: "session:revoked",
-  WHITELIST_APPROVED: "whitelist:approved",
   ANNOUNCEMENT_PUBLISHED: "announcement:published",
   ERROR: "error",
 
