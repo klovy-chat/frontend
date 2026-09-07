@@ -7,12 +7,8 @@
 // Przy zmianach: DesktopOnly.tsx, isMobile.ts.
 
 import { useEffect, useState } from "react";
-import { isCapacitor, isDesktop } from "../utils/device/isDesktop";
-import { isMobile } from "../utils/device/isMobile";
-
 export function shouldBlockMobileBrowserAccess(): boolean {
-  if (isDesktop() || isCapacitor()) return false;
-  return isMobile();
+  return false;
 }
 
 export function useMobileBlock(): boolean {

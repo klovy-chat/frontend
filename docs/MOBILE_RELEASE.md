@@ -1,6 +1,6 @@
 # Klovy Chat — aplikacje mobilne
 
-Frontend jest budowany jako lokalny bundle Vite i uruchamiany w Capacitorze. Aplikacja nie jest tylko WebView wskazującym na stronę internetową: podstawowe widoki, logowanie i obsługa offline błędów są częścią paczki, a API i WebSocket korzystają z produkcyjnego HTTPS/WSS.
+Frontend jest dostępny zarówno w zwykłej przeglądarce mobilnej, jak i jako lokalny bundle Vite uruchamiany w Capacitorze. Użytkownik może korzystać z komunikatora od razu z telefonu, zanim aplikacja trafi do Google Play lub App Store. Wersja Capacitor nie jest tylko WebView wskazującym na stronę internetową: podstawowe widoki, logowanie i obsługa błędów są częścią paczki, a API i WebSocket korzystają z produkcyjnego HTTPS/WSS.
 
 ## Przygotowanie
 

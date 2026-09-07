@@ -36,7 +36,7 @@ W dewelopmencie Vite proxy’uje `/api` i `/ws` na backend. Produkcja to SPA na 
 - Połączenia głosowe (LiveKit)
 - GIF-y, stickery, emoji
 - i18n: polski i angielski
-- Tryb desktop (Tauri) i ograniczenia mobile
+- Tryb desktop (Tauri), mobilna przeglądarka i aplikacje Capacitor
 - Aplikacje mobilne Android/iOS przez Capacitor — zobacz [`docs/MOBILE_RELEASE.md`](docs/MOBILE_RELEASE.md)
 
 ---
