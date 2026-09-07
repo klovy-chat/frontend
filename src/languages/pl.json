@@ -661,6 +661,8 @@
       "options": "Opcje"
     },
     "typing": "Pisze…",
+    "typingUsers_one": "{{names}} pisze",
+    "typingUsers_other": "{{names}} piszą",
     "callLog": "Rozmowa głosowa · {{duration}}",
     "missedCall": "Nieodebrane połączenie",
     "loadOlder": "Załaduj starsze wiadomości",

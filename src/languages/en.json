@@ -661,6 +661,8 @@
       "options": "Options"
     },
     "typing": "Typing…",
+    "typingUsers_one": "{{names}} is typing",
+    "typingUsers_other": "{{names}} are typing",
     "callLog": "Voice call · {{duration}}",
     "missedCall": "Missed call",
     "loadOlder": "Load older messages",

@@ -17,13 +17,18 @@ import {
 import { useTranslation } from "react-i18next";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { MessageBubble } from "./MessageBubble";
+import { Avatar } from "../common/Avatar";
 import type { Message } from "../../types";
-import { formatMessageDateSeparator, isSameLocalDay } from "../../utils/user/format";
+import {
+  formatMessageDateSeparator,
+  isSameLocalDay,
+  userLabel,
+} from "../../utils/user/format";
 
 interface MessageListProps {
   messages: Message[];
   currentUserId: string;
-  typingUserId?: string | null;
+  typingUsers?: TypingUser[];
   highlightMessageId?: string | null;
   hasMore?: boolean;
   loadingOlder?: boolean;
@@ -42,6 +47,14 @@ interface MessageListProps {
   onUnpin?: (message: Message) => void;
 }
 
+export interface TypingUser {
+  id: string;
+  displayName?: string | null;
+  username?: string;
+  image?: string | null;
+  color?: number;
+}
+
 const NEAR_BOTTOM_THRESHOLD_PX = 96;
 const LOAD_OLDER_THRESHOLD_PX = 80;
 const ESTIMATED_MESSAGE_HEIGHT_PX = 88;
@@ -56,7 +69,7 @@ function isNearBottom(el: HTMLElement): boolean {
 export function MessageList({
   messages,
   currentUserId,
-  typingUserId,
+  typingUsers = [],
   highlightMessageId,
   hasMore = false,
   loadingOlder = false,
@@ -104,7 +117,7 @@ export function MessageList({
     const virt = virtualListRef.current;
     if (!list || !virt) return;
     setScrollMargin(virt.offsetTop);
-  }, [useVirtual, hasMore, loadingOlder, messages.length, typingUserId]);
+  }, [useVirtual, hasMore, loadingOlder, messages.length, typingUsers.length]);
 
   const scrollToBottom = useCallback((behavior: ScrollBehavior = "auto") => {
     const el = listRef.current;
@@ -158,10 +171,10 @@ export function MessageList({
     }
 
     const isNewMessage = messages.length > prevCount;
-    if ((isNewMessage || typingUserId) && isNearBottomRef.current) {
+    if ((isNewMessage || typingUsers.length > 0) && isNearBottomRef.current) {
       requestAnimationFrame(() => scrollToBottom("smooth"));
     }
-  }, [messages, typingUserId, scrollToBottom]);
+  }, [messages, typingUsers.length, scrollToBottom]);
 
   useEffect(() => {
     if (!highlightMessageId || !useVirtual) return;
@@ -171,7 +184,7 @@ export function MessageList({
     }
   }, [highlightMessageId, messages, useVirtual, virtualizer]);
 
-  const hasContent = messages.length > 0 || Boolean(typingUserId);
+  const hasContent = messages.length > 0 || typingUsers.length > 0;
 
   const bubbleProps = useMemo(
     () => ({
@@ -228,7 +241,7 @@ export function MessageList({
         <div className="message-list-spacer" aria-hidden />
       )}
 
-      {messages.length === 0 && !typingUserId ? (
+      {messages.length === 0 && typingUsers.length === 0 ? (
         <p className="empty-chat"></p>
       ) : useVirtual ? (
         <div
@@ -298,8 +311,32 @@ export function MessageList({
         })
       )}
 
-      {typingUserId && typingUserId !== currentUserId && (
-        <p className="typing-indicator">{t("chat.typing")}</p>
+      {typingUsers.length > 0 && (
+        <div className="typing-indicator" aria-live="polite">
+          <div className="typing-indicator__avatars" aria-hidden="true">
+            {typingUsers.slice(0, 3).map((user) => (
+              <Avatar
+                key={user.id}
+                displayName={user.displayName}
+                username={user.username}
+                image={user.image}
+                color={user.color}
+                size={24}
+              />
+            ))}
+          </div>
+          <span>
+            {t("chat.typingUsers", {
+              count: typingUsers.length,
+              names: typingUsers
+                .slice(0, 3)
+                .map((user) => userLabel(user))
+                .join(", ")
+                .concat(typingUsers.length > 3 ? ` +${typingUsers.length - 3}` : ""),
+            })}
+          </span>
+          <span className="typing-indicator__dots" aria-hidden="true">•••</span>
+        </div>
       )}
     </div>
   );

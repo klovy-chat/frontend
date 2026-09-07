@@ -284,13 +284,20 @@ export function ChatWindow({
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [loadingOlder, setLoadingOlder] = useState(false);
-  const [typingUserId, setTypingUserId] = useState<string | null>(null);
-  const typingClearTimeout = useRef<ReturnType<typeof setTimeout>>();
+  const [typingUserIds, setTypingUserIds] = useState<string[]>([]);
+  const typingClearTimeouts = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
   const pendingSendKeysRef = useRef<Map<string, string>>(new Map());
   const lastSendChatKeyRef = useRef<string | null>(null);
   const activeChatKeyRef = useRef<string | null>(null);
   const lastChannelMarkReadAtRef = useRef(0);
   const channelMarkReadTimerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => {
+    return () => {
+      typingClearTimeouts.current.forEach((timeout) => clearTimeout(timeout));
+      typingClearTimeouts.current.clear();
+    };
+  }, []);
   const [editingMessage, setEditingMessage] = useState<Message | null>(null);
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{
@@ -592,11 +599,9 @@ export function ChatWindow({
       setHasMore(false);
     }
     setLoadingOlder(false);
-    setTypingUserId(null);
-    if (typingClearTimeout.current) {
-      clearTimeout(typingClearTimeout.current);
-      typingClearTimeout.current = undefined;
-    }
+    setTypingUserIds([]);
+    typingClearTimeouts.current.forEach((timeout) => clearTimeout(timeout));
+    typingClearTimeouts.current.clear();
     setDmError(null);
     if (target?.type === "dm") seedPresence([target.contact]);
     setToolsPanel(null);
@@ -1181,18 +1186,23 @@ export function ChatWindow({
     };
 
     const applyTyping = (userId: string | null, isTyping: boolean) => {
-      if (typingClearTimeout.current) {
-        clearTimeout(typingClearTimeout.current);
-        typingClearTimeout.current = undefined;
-      }
-      if (isTyping && userId) {
-        setTypingUserId(userId);
-        typingClearTimeout.current = setTimeout(
-          () => setTypingUserId(null),
-          4000,
+      if (!userId) return;
+      const existing = typingClearTimeouts.current.get(userId);
+      if (existing) clearTimeout(existing);
+      if (isTyping) {
+        setTypingUserIds((current) =>
+          current.includes(userId) ? current : [...current, userId],
+        );
+        typingClearTimeouts.current.set(
+          userId,
+          setTimeout(() => {
+            typingClearTimeouts.current.delete(userId);
+            setTypingUserIds((current) => current.filter((id) => id !== userId));
+          }, 4000),
         );
       } else {
-        setTypingUserId(null);
+        typingClearTimeouts.current.delete(userId);
+        setTypingUserIds((current) => current.filter((id) => id !== userId));
       }
     };
 
@@ -2195,7 +2205,21 @@ export function ChatWindow({
           <MessageList
             messages={messages}
             currentUserId={currentUserId}
-            typingUserId={typingUserId}
+            typingUsers={typingUserIds.map((id) => {
+              const source =
+                target?.type === "dm"
+                  ? target.contact._id === id
+                    ? target.contact
+                    : undefined
+                  : target?.channel.members.find((member) => member._id === id);
+              return {
+                id,
+                displayName: source?.displayName,
+                username: source?.username,
+                image: source?.image,
+                color: source?.color,
+              };
+            })}
             highlightMessageId={highlightMessageId}
             hasMore={hasMore}
             loadingOlder={loadingOlder}

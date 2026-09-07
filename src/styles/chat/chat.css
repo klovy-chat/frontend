@@ -678,10 +678,34 @@
 }
 
 .typing-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-size: 0.8rem;
   color: var(--text-muted);
-  font-style: italic;
   margin: 0;
+  padding: 5px 0 2px;
+}
+
+.typing-indicator__avatars {
+  display: inline-flex;
+  align-items: center;
+}
+
+.typing-indicator__avatars .avatar + .avatar {
+  margin-left: -6px;
+  box-shadow: 0 0 0 2px var(--bg);
+}
+
+.typing-indicator__dots {
+  letter-spacing: 2px;
+  font-weight: 700;
+  animation: typing-dots 1.2s ease-in-out infinite;
+}
+
+@keyframes typing-dots {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
 }
 
 .avatar {
