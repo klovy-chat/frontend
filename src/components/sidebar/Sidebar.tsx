@@ -11,7 +11,7 @@ import { cloneElement, isValidElement, useCallback, useEffect, useRef, useState,
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { getContactsForList, searchContacts, toggleContactMute, toggleContactBlock } from "../../api/contacts";
-import { removeFriend } from "../../api/friends";
+import { getReceivedFriendRequests, removeFriend } from "../../api/friends";
 import {
   getUserChannels,
   getChannelDetails,
@@ -57,6 +57,12 @@ import {
   getMentionSources,
   subscribeMentionSources,
 } from "../../utils/sync/mentions";
+import {
+  getReceivedFriendRequestCount,
+  resetReceivedFriendRequestCount,
+  setReceivedFriendRequestCount,
+  subscribeReceivedFriendRequestCount,
+} from "../../utils/sync/friendRequests";
 import { playNotificationSound } from "../../utils/media/notifySound";
 import { settingsPath } from "../../settings/routes";
 import { Nav } from "../layout/Nav";
@@ -241,9 +247,40 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
   const ws = useWebSocket();
   const wsConnected = useWebSocketConnected();
   const seedPresence = usePresenceSeed();
+  const receivedFriendRequests = useSyncExternalStore(
+    subscribeReceivedFriendRequestCount,
+    getReceivedFriendRequestCount,
+    getReceivedFriendRequestCount,
+  );
 
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [channels, setChannels] = useState<Channel[]>([]);
+
+  useEffect(() => {
+    if (!user) {
+      resetReceivedFriendRequestCount();
+      return;
+    }
+
+    let cancelled = false;
+    const refreshReceivedCount = async () => {
+      try {
+        const result = await getReceivedFriendRequests();
+        if (!cancelled) setReceivedFriendRequestCount(result.requests.length);
+      } catch (error) {
+        console.error("Failed to refresh received friend requests", error);
+      }
+    };
+
+    void refreshReceivedCount();
+    const interval = window.setInterval(() => {
+      void refreshReceivedCount();
+    }, 30_000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, [user?.id]);
 
   const contactsRef = useRef(contacts);
   contactsRef.current = contacts;
@@ -2118,6 +2155,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
               setContactsModalOpen(true);
             }}
             totalUnread={totalUnread}
+            receivedFriendRequests={receivedFriendRequests}
           />
         </div>
 
@@ -2181,6 +2219,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
           <BottomNav
             active={mobileTab}
             totalUnread={totalUnread}
+            receivedFriendRequests={receivedFriendRequests}
             onChats={() => {
               setMobileTab("chats");
               setContactsModalOpen(false);

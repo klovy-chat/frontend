@@ -27,6 +27,7 @@ import {
 } from "../../context/PresenceContext";
 import { userLabel, availabilityStatusLabel } from "../../utils/user/format";
 import { getEffectiveStatus } from "../../utils/user/presence";
+import { setReceivedFriendRequestCount } from "../../utils/sync/friendRequests";
 import type { Contact, FriendRequestItem } from "../../types";
 import { useIsMobile } from "../../hooks/useIsMobile";
 import "../../styles/contacts/contacts.css";
@@ -203,6 +204,7 @@ export function Contacts({
         getBlockedContacts(),
       ]);
       setReceivedRequests(received.requests);
+      setReceivedFriendRequestCount(received.requests.length);
       setSentRequests(sent.requests);
       setFriendsList(friends.friends);
       setBlockedList(blocked.contacts);

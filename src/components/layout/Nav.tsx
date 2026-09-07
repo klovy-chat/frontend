@@ -23,6 +23,7 @@ interface NavProps {
   onOpenProfile?: () => void;
   onOpenContacts: () => void;
   totalUnread: number;
+  receivedFriendRequests?: number;
   settingsActive?: boolean;
 }
 
@@ -32,6 +33,7 @@ export function Nav({
   onOpenProfile,
   onOpenContacts,
   totalUnread,
+  receivedFriendRequests = 0,
   settingsActive = false,
 }: NavProps) {
   const { t } = useTranslation();
@@ -115,6 +117,11 @@ export function Nav({
               </svg>
             </span>
             {t("nav.items.contacts")}
+            {receivedFriendRequests > 0 && (
+              <span className="nav-rail__badge">
+                {receivedFriendRequests > 9 ? "9+" : receivedFriendRequests}
+              </span>
+            )}
           </button>
         </div>
 

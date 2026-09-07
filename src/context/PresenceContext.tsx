@@ -226,15 +226,6 @@ export function PresenceProvider({ children }: { children: ReactNode }) {
             continue;
           }
 
-          if (prevEntry?.isOnline === true && incoming.isOnline === false) {
-            next[id] = {
-              isOnline: true,
-              availabilityStatus: prevEntry.availabilityStatus,
-              lastSeen: incoming.lastSeen ?? prevEntry.lastSeen,
-            };
-            changed = true;
-            continue;
-          }
           if (prevEntry?.isOnline === true && incoming.isOnline === true) {
 
             next[id] = {
