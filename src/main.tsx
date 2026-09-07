@@ -1,5 +1,5 @@
 // main.tsx
-// Bootstrap SPA: React root, router, i18n, ErrorBoundary, DesktopOnly.
+// Bootstrap SPA: React root, router, i18n, ErrorBoundary, mobile/native gate.
 // Zakres:
 //  - AuthProvider i LocaleProvider
 //  - global CSS

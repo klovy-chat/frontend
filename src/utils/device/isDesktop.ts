@@ -12,6 +12,9 @@ declare global {
     __TAURI_INTERNALS__?: {
       invoke?: (cmd: string, args?: Record<string, unknown>) => Promise<unknown>;
     };
+    Capacitor?: {
+      isNativePlatform?: () => boolean;
+    };
   }
 }
 
@@ -22,4 +25,9 @@ function hasTauriRuntime(): boolean {
 export function isDesktop(): boolean {
   if (typeof window === "undefined") return false;
   return hasTauriRuntime();
+}
+
+export function isCapacitor(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.Capacitor?.isNativePlatform?.() === true;
 }

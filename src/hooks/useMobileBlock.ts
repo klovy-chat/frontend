@@ -1,5 +1,5 @@
 // useMobileBlock.ts
-// Blokada web na telefonie (produkt = desktop + Tauri).
+// Blokada web na telefonie; natywna powłoka Capacitor jest dozwolona.
 // Zakres:
 //  - isMobile vs isDesktop
 //  - czy schować aplikację za DesktopOnly
@@ -7,9 +7,12 @@
 // Przy zmianach: DesktopOnly.tsx, isMobile.ts.
 
 import { useEffect, useState } from "react";
+import { isCapacitor, isDesktop } from "../utils/device/isDesktop";
+import { isMobile } from "../utils/device/isMobile";
 
 export function shouldBlockMobileBrowserAccess(): boolean {
-  return false;
+  if (isDesktop() || isCapacitor()) return false;
+  return isMobile();
 }
 
 export function useMobileBlock(): boolean {
