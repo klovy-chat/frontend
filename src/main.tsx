@@ -13,7 +13,6 @@ import { BrowserRouter } from "react-router-dom";
 import { I18nextProvider } from "react-i18next";
 import App from "./App";
 import { ErrorBoundary } from "./components/common/ErrorBoundary";
-import { DesktopOnly } from "./components/common/DesktopOnly";
 import { AuthProvider } from "./context/AuthContext";
 import { LocaleProvider } from "./context/LocaleContext";
 import i18n from "./i18n/config";
@@ -29,13 +28,11 @@ createRoot(document.getElementById("root")!).render(
     <ErrorBoundary>
       <I18nextProvider i18n={i18n}>
         <AuthProvider>
-          <LocaleProvider>
-            <DesktopOnly>
-              <BrowserRouter>
-                <App />
-              </BrowserRouter>
-            </DesktopOnly>
-          </LocaleProvider>
+        <LocaleProvider>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </LocaleProvider>
         </AuthProvider>
       </I18nextProvider>
     </ErrorBoundary>

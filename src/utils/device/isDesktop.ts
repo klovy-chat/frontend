@@ -4,7 +4,7 @@
 //  - badge IPC, update notice, ominięcie mobile gate
 //  - oficjalny Tauri: badge, update, ominięcie mobile gate
 // Detekcja musi zostać wąska — fałszywy positive otworzy web na telefonie.
-// Przy zmianach: isMobile.ts, appBadge.ts, DesktopOnly.tsx.
+// Przy zmianach: appBadge.ts.
 
 declare global {
   interface Window {

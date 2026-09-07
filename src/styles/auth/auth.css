@@ -2,9 +2,8 @@
    Ekrany logowania/rejestracji (split, formularz, karuzela).
    Zakres:
     - .auth-*
-    - split, formularz, karuzela; też mobile gate DesktopOnly
-   DesktopOnly używa AuthLayout + ten plik.
-   Przy zmianach: AuthLayout.tsx, Login.tsx, DesktopOnly.tsx.
+    - split, formularz i karuzela
+   Przy zmianach: AuthLayout.tsx, Login.tsx.
  */
 
 .al-page,
