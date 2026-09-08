@@ -2180,8 +2180,19 @@ export function ChatWindow({
 
       {!wsConnected && (
         <div className="chat-offline-banner" role="status" aria-live="polite">
-          <span className="chat-offline-dot" aria-hidden="true" />
-          {t("errors.ws.reconnecting")}
+          <span className="chat-offline-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M8.5 16.5a5 5 0 0 1 0-9" />
+              <path d="M15.5 7.5a5 5 0 0 1 0 9" />
+              <path d="m8.5 4.5 0 3-3-1.5" />
+              <path d="m15.5 19.5 0-3 3 1.5" />
+            </svg>
+            <span className="chat-offline-dot" />
+          </span>
+          <span className="chat-offline-copy">
+            <strong>{t("errors.ws.connectionLost")}</strong>
+            <span>{t("errors.ws.reconnecting")}</span>
+          </span>
         </div>
       )}
 

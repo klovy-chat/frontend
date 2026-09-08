@@ -43,7 +43,8 @@
   },
   "errors": {
     "ws": {
-      "reconnecting": "Connection lost — reconnecting…"
+      "connectionLost": "Connection interrupted",
+      "reconnecting": "Reconnecting…"
     },
     "boundary": {
       "title": "Something went wrong",
