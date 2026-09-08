@@ -20,6 +20,7 @@ import {
 import { useAuth } from "./AuthContext";
 import { useWebSocket, useWebSocketConnected } from "./WebSocketContext";
 import { WsType } from "../api/protocol";
+import { getContactsForList } from "../api/contacts";
 import type { User } from "../types";
 
 export type AvailabilityStatus = "online" | "away" | "brb" | "dnd";
@@ -77,6 +78,7 @@ interface PresenceApi {
 }
 
 const PresenceApiContext = createContext<PresenceApi | null>(null);
+const PRESENCE_RECONCILIATION_INTERVAL_MS = 30_000;
 
 interface StatusChangedPayload {
   userId: string;
@@ -248,6 +250,30 @@ export function PresenceProvider({ children }: { children: ReactNode }) {
     },
     [],
   );
+
+  useEffect(() => {
+    if (!user?.id || !wsConnected) return;
+
+    let cancelled = false;
+    const reconcile = async () => {
+      try {
+        const result = await getContactsForList();
+        if (!cancelled) seed(result.contacts);
+      } catch (error) {
+        console.error("Failed to reconcile presence", error);
+      }
+    };
+
+    void reconcile();
+    const interval = window.setInterval(() => {
+      void reconcile();
+    }, PRESENCE_RECONCILIATION_INTERVAL_MS);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, [user?.id, wsConnected, seed]);
 
   const api = useMemo(() => ({ seed }), [seed]);
 

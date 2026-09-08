@@ -250,8 +250,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setActiveConversationKey(null);
       } catch {/* ignore */}
       try {
-        const { clearAllMessagePageCaches } = await import("../utils/chat/messageCache");
+        const {
+          clearAllMessagePageCaches,
+          clearDeletedMessageTombstones,
+        } = await import("../utils/chat/messageCache");
         clearAllMessagePageCaches();
+        clearDeletedMessageTombstones();
       } catch {/* ignore */}
       try {
         const { invalidateFriendshipCache } = await import("../utils/chat/friendsCache");

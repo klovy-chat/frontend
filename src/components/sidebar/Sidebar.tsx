@@ -681,6 +681,14 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
       void refresh();
     }, 750);
   }, [refresh]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    const interval = window.setInterval(() => {
+      void refresh();
+    }, 30_000);
+    return () => window.clearInterval(interval);
+  }, [user?.id, refresh]);
   const scheduleRefreshRef = useRef(scheduleRefresh);
   scheduleRefreshRef.current = scheduleRefresh;
 
@@ -1524,9 +1532,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
       );
       if (contactResult.changed) setContacts(contactResult.contacts);
       if (channelResult.changed) setChannels(channelResult.channels);
-      if (contactResult.needsRefresh || channelResult.needsRefresh) {
-        scheduleRefresh();
-      }
+      scheduleRefresh();
     };
 
     const unsubs = [

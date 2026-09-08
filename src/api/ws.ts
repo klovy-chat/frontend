@@ -69,6 +69,7 @@ export class WebSocketClient {
   private readonly resolveCrypto?: () => Promise<WsCryptoSession | undefined>;
   private frameCrypto: WsFrameCrypto | null = null;
   private activeCrypto: WsCryptoSession | null = null;
+  private sendQueue: Promise<boolean> = Promise.resolve(true);
 
   constructor(options: WebSocketClientOptions = {}) {
     this.options = {
@@ -257,7 +258,7 @@ export class WebSocketClient {
     }, delay);
   }
 
-  private async sendFrame(frame: WsFrame): Promise<boolean> {
+  private async sendFrameNow(frame: WsFrame): Promise<boolean> {
     if (this.ws?.readyState !== WebSocket.OPEN) return false;
     try {
       const raw = JSON.stringify(frame);
@@ -267,11 +268,21 @@ export class WebSocketClient {
         this.ws.send(encrypted);
         return true;
       }
+
       this.ws.send(raw);
       return true;
     } catch {
       return false;
     }
+  }
+
+  private sendFrame(frame: WsFrame): Promise<boolean> {
+    const next = this.sendQueue.then(
+      () => this.sendFrameNow(frame),
+      () => this.sendFrameNow(frame),
+    );
+    this.sendQueue = next.catch(() => false);
+    return next;
   }
 
   private dispatch(type: string, payload: unknown) {

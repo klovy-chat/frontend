@@ -51,6 +51,8 @@ import {
   ensureOptimisticInCache,
   patchMessagePageCacheLive as patchCacheLive,
   patchCachedMessageEverywhere,
+  markMessageDeleted,
+  isMessageDeleted,
   subscribePendingDrop,
 } from "../../utils/chat/messageCache";
 import { isPendingAged } from "../../utils/chat/resend";
@@ -118,8 +120,11 @@ function mergeHttpWithLive(
   currentUserId: string,
 ): Message[] {
   const map = new Map<string, Message>();
-  for (const m of http) map.set(m._id, m);
+  for (const m of http) {
+    if (!isMessageDeleted(m._id)) map.set(m._id, m);
+  }
   for (const m of live) {
+    if (isMessageDeleted(m._id)) continue;
     if (m.pending) {
       const serverList = [...map.values(), ...live.filter((x) => !x.pending)];
       const acked = serverList.some(
@@ -1123,6 +1128,7 @@ export function ChatWindow({
     };
 
     const onDeleted = (data: { _id: string }) => {
+      markMessageDeleted(data._id);
       const target = targetRef.current;
       setMessages((prev) => {
         const updated = prev

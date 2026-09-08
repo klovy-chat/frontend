@@ -21,6 +21,7 @@ import {
   patchMessagePageCacheLive,
   removeCachedMessageEverywhere,
   removeMessagePageCache,
+  markMessageDeleted,
   scrubStalePendingInAllCaches,
 } from "../../utils/chat/messageCache";
 import { resendPendingOnReconnect } from "../../utils/chat/resend";
@@ -110,6 +111,7 @@ export function MessageCache() {
     };
 
     const onDeleted = (data: { _id: string }) => {
+      markMessageDeleted(data._id);
       removeCachedMessageEverywhere(data._id);
     };
 

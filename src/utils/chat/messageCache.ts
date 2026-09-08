@@ -23,6 +23,26 @@ export const PENDING_MESSAGE_TTL_MS = 45_000;
 
 const messagePageCache = new Map<string, MessagePageCacheEntry>();
 const MAX_MESSAGE_CACHE_ENTRIES = 50;
+const deletedMessageIds = new Map<string, number>();
+const DELETED_MESSAGE_TOMBSTONE_TTL_MS = 5 * 60_000;
+
+export function markMessageDeleted(messageId: string) {
+  deletedMessageIds.set(messageId, Date.now());
+}
+
+export function isMessageDeleted(messageId: string): boolean {
+  const deletedAt = deletedMessageIds.get(messageId);
+  if (deletedAt == null) return false;
+  if (Date.now() - deletedAt >= DELETED_MESSAGE_TOMBSTONE_TTL_MS) {
+    deletedMessageIds.delete(messageId);
+    return false;
+  }
+  return true;
+}
+
+export function clearDeletedMessageTombstones() {
+  deletedMessageIds.clear();
+}
 
 function storeMessagePageCache(key: string, entry: MessagePageCacheEntry) {
   if (!messagePageCache.has(key) && messagePageCache.size >= MAX_MESSAGE_CACHE_ENTRIES) {
@@ -282,6 +302,7 @@ export function appendCachedMessage(
   message: Message,
   opts?: { currentUserId?: string },
 ) {
+  if (isMessageDeleted(message._id)) return;
   const cached = messagePageCache.get(key);
   if (!cached) return;
 
