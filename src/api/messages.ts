@@ -26,7 +26,7 @@ export interface MessagePage {
 
 export function getMessages(
   contactId: string,
-  opts?: { before?: string; limit?: number },
+  opts?: { before?: string; limit?: number; signal?: AbortSignal },
 ) {
   return apiRequest<MessagePage>("/api/messages/get-messages", {
     method: "POST",
@@ -35,6 +35,7 @@ export function getMessages(
       ...(opts?.before ? { before: opts.before } : {}),
       ...(opts?.limit ? { limit: opts.limit } : {}),
     }),
+    signal: opts?.signal,
   });
 }
 

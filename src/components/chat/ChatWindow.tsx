@@ -291,6 +291,7 @@ export function ChatWindow({
   const activeChatKeyRef = useRef<string | null>(null);
   const lastChannelMarkReadAtRef = useRef(0);
   const channelMarkReadTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const historyAbortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     return () => {
@@ -486,6 +487,9 @@ export function ChatWindow({
 
   const loadMessages = useCallback(async () => {
     if (!target || !currentUserId) return;
+    historyAbortRef.current?.abort();
+    const controller = new AbortController();
+    historyAbortRef.current = controller;
     const gen = ++loadGenRef.current;
     const cacheKey = chatCacheKey(target);
     const cached = getMessagePageCache(cacheKey);
@@ -502,7 +506,7 @@ export function ChatWindow({
         try {
           const { messages: list, hasMore: more } = await getMessages(
             target.contact._id,
-            { limit: MESSAGE_PAGE_SIZE },
+            { limit: MESSAGE_PAGE_SIZE, signal: controller.signal },
           );
           if (gen !== loadGenRef.current) return;
           const prepared = prepareForDisplay(list);
@@ -524,7 +528,7 @@ export function ChatWindow({
         try {
           const { messages: list, hasMore: more } = await getChannelMessages(
             target.channel._id,
-            { limit: MESSAGE_PAGE_SIZE },
+            { limit: MESSAGE_PAGE_SIZE, signal: controller.signal },
           );
           if (gen !== loadGenRef.current) return;
           const prepared = prepareForDisplay(list);
@@ -561,10 +565,12 @@ export function ChatWindow({
           ? await getMessages(targetSnapshot.contact._id, {
               before: oldest,
               limit: MESSAGE_PAGE_SIZE,
+              signal: historyAbortRef.current?.signal,
             })
           : await getChannelMessages(targetSnapshot.channel._id, {
               before: oldest,
               limit: MESSAGE_PAGE_SIZE,
+              signal: historyAbortRef.current?.signal,
             });
       if (gen !== loadGenRef.current) return;
       const older = prepareForDisplay(page.messages);
@@ -612,6 +618,9 @@ export function ChatWindow({
     void loadMessagesRef.current();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => {
+      historyAbortRef.current?.abort();
+    };
   }, [targetKey, seedPresence]);
 
   useEffect(() => {

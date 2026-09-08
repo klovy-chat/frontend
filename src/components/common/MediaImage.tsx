@@ -25,6 +25,16 @@ interface MediaImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, "src
 }
 
 const resolvedSrcCache = new Map<string, string>();
+const MAX_RESOLVED_SRC_CACHE_ENTRIES = 500;
+
+function cacheResolvedSrc(key: string, src: string) {
+  resolvedSrcCache.delete(key);
+  if (resolvedSrcCache.size >= MAX_RESOLVED_SRC_CACHE_ENTRIES) {
+    const oldestKey = resolvedSrcCache.keys().next().value;
+    if (typeof oldestKey === "string") resolvedSrcCache.delete(oldestKey);
+  }
+  resolvedSrcCache.set(key, src);
+}
 
 const MAX_CONCURRENT_LOADS = 10;
 let activeLoads = 0;
@@ -227,7 +237,7 @@ export function MediaImage({
     if (loadedSrcRef.current === key) return;
     loadedSrcRef.current = key;
     if (src) {
-      resolvedSrcCache.set(cacheKey, src);
+      cacheResolvedSrc(cacheKey, src);
     }
     if (slotHeld.current) {
       releaseLoadSlot();

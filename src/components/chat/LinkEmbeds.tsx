@@ -19,6 +19,16 @@ import "../../styles/chat/embeds.css";
 
 const previewCache = new Map<string, LinkPreviewCard>();
 const previewInflight = new Map<string, Promise<LinkPreviewCard | null>>();
+const MAX_PREVIEW_CACHE_ENTRIES = 200;
+
+function cachePreview(url: string, preview: LinkPreviewCard) {
+  previewCache.delete(url);
+  if (previewCache.size >= MAX_PREVIEW_CACHE_ENTRIES) {
+    const oldestUrl = previewCache.keys().next().value;
+    if (typeof oldestUrl === "string") previewCache.delete(oldestUrl);
+  }
+  previewCache.set(url, preview);
+}
 
 function safePreviewImage(url?: string): string | undefined {
   if (!url) return undefined;
@@ -43,7 +53,7 @@ async function loadPreview(url: string): Promise<LinkPreviewCard | null> {
 
   const request = fetchLinkPreview(url)
     .then((preview) => {
-      previewCache.set(url, preview);
+      cachePreview(url, preview);
       return preview;
     })
     .catch(() => null)

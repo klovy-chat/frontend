@@ -171,6 +171,8 @@ export class WebSocketClient {
       return;
     }
 
+    if (this.closed) return;
+
     if (usesDirectBackendUrl && !this.activeCrypto?.token) {
       this.scheduleReconnect();
       return;

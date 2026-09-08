@@ -22,6 +22,15 @@ export const MESSAGE_CACHE_FRESH_MS = 20_000;
 export const PENDING_MESSAGE_TTL_MS = 45_000;
 
 const messagePageCache = new Map<string, MessagePageCacheEntry>();
+const MAX_MESSAGE_CACHE_ENTRIES = 50;
+
+function storeMessagePageCache(key: string, entry: MessagePageCacheEntry) {
+  if (!messagePageCache.has(key) && messagePageCache.size >= MAX_MESSAGE_CACHE_ENTRIES) {
+    const oldestKey = messagePageCache.keys().next().value;
+    if (typeof oldestKey === "string") messagePageCache.delete(oldestKey);
+  }
+  messagePageCache.set(key, entry);
+}
 
 function senderIdOf(message: Message): string | undefined {
   const sender = message.sender;
@@ -104,7 +113,11 @@ export function channelCacheKey(channelId: string): string {
 export function getMessagePageCache(
   key: string,
 ): MessagePageCacheEntry | undefined {
-  return messagePageCache.get(key);
+  const entry = messagePageCache.get(key);
+  if (!entry) return undefined;
+  messagePageCache.delete(key);
+  messagePageCache.set(key, entry);
+  return entry;
 }
 
 export function setMessagePageCache(
@@ -112,7 +125,7 @@ export function setMessagePageCache(
   messages: Message[],
   hasMore: boolean,
 ) {
-  messagePageCache.set(key, {
+  storeMessagePageCache(key, {
     messages,
     hasMore,
     fetchedAt: Date.now(),
@@ -125,7 +138,7 @@ export function writeMessagePageCache(
   hasMore?: boolean,
 ) {
   const cached = messagePageCache.get(key);
-  messagePageCache.set(key, {
+  storeMessagePageCache(key, {
     messages,
     hasMore: hasMore ?? cached?.hasMore ?? false,
     fetchedAt: Date.now(),
@@ -139,14 +152,14 @@ export function patchMessagePageCacheLive(
 ) {
   const cached = messagePageCache.get(key);
   if (!cached) {
-    messagePageCache.set(key, {
+    storeMessagePageCache(key, {
       messages,
       hasMore: hasMore ?? false,
       fetchedAt: Date.now() - MESSAGE_CACHE_FRESH_MS - 1,
     });
     return;
   }
-  messagePageCache.set(key, {
+  storeMessagePageCache(key, {
     ...cached,
     messages,
     hasMore: hasMore ?? cached.hasMore,
@@ -218,7 +231,7 @@ export function dropPendingNonceFromCache(key: string, clientNonce: string) {
 export function ensureOptimisticInCache(key: string, message: Message) {
   const cached = messagePageCache.get(key);
   if (!cached) {
-    messagePageCache.set(key, {
+    storeMessagePageCache(key, {
       messages: [message],
       hasMore: false,
       fetchedAt: 0,
@@ -237,7 +250,7 @@ export function ensureOptimisticInCache(key: string, message: Message) {
 export function staleAllMessagePageCaches() {
   const now = Date.now();
   for (const [key, entry] of messagePageCache) {
-    messagePageCache.set(key, {
+    storeMessagePageCache(key, {
       ...entry,
       fetchedAt: now - MESSAGE_CACHE_FRESH_MS - 1,
     });
@@ -249,7 +262,7 @@ function patchLive(
   entry: MessagePageCacheEntry,
   messages: Message[],
 ) {
-  messagePageCache.set(key, {
+  storeMessagePageCache(key, {
     ...entry,
     messages,
     fetchedAt: entry.fetchedAt,

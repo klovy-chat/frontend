@@ -26,6 +26,16 @@ type InvitePreview = NonNullable<
 
 const inviteCache = new Map<string, InvitePreview>();
 const inviteInflight = new Map<string, Promise<InvitePreview | null>>();
+const MAX_INVITE_CACHE_ENTRIES = 200;
+
+function cacheInvite(inviteId: string, invite: InvitePreview) {
+  inviteCache.delete(inviteId);
+  if (inviteCache.size >= MAX_INVITE_CACHE_ENTRIES) {
+    const oldestId = inviteCache.keys().next().value;
+    if (typeof oldestId === "string") inviteCache.delete(oldestId);
+  }
+  inviteCache.set(inviteId, invite);
+}
 
 async function loadInvitePreview(inviteId: string): Promise<InvitePreview | null> {
   const cached = inviteCache.get(inviteId);
@@ -36,7 +46,7 @@ async function loadInvitePreview(inviteId: string): Promise<InvitePreview | null
 
   const request = getChannelInvite(inviteId)
     .then((res) => {
-      inviteCache.set(inviteId, res.invite);
+      if (res.invite) cacheInvite(inviteId, res.invite);
       return res.invite;
     })
     .catch(() => null)

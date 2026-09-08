@@ -16,7 +16,7 @@ export function getUserChannels() {
 
 export function getChannelMessages(
   channelId: string,
-  opts?: { before?: string; limit?: number },
+  opts?: { before?: string; limit?: number; signal?: AbortSignal },
 ) {
   const params = new URLSearchParams();
   if (opts?.before) params.set("before", opts.before);
@@ -24,6 +24,7 @@ export function getChannelMessages(
   const qs = params.toString();
   return apiRequest<{ messages: Message[]; hasMore?: boolean }>(
     `/api/channel/get-channel-messages/${channelId}${qs ? `?${qs}` : ""}`,
+    { signal: opts?.signal },
   );
 }
 

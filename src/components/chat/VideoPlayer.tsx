@@ -49,7 +49,7 @@ export function VideoPlayer({
         src={mimeType ? undefined : url}
         controls
         playsInline
-        preload="metadata"
+        preload="none"
         aria-label={fileName ?? t("messages.video")}
         onError={() => {
           if (fallbackUrl && url !== fallbackUrl) setUrl(fallbackUrl);

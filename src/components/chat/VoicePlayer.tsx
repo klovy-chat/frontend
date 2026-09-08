@@ -149,7 +149,7 @@ export function VoicePlayer({
       <audio
         ref={audioRef}
         src={url}
-        preload="metadata"
+        preload="none"
         onError={() => {
           if (fallbackUrl && url !== fallbackUrl) setUrl(fallbackUrl);
         }}
