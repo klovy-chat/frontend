@@ -76,6 +76,7 @@ async function fetchUserInfoWithRetry(): Promise<User | null> {
 let sessionRestorePromise: Promise<User | null> | null = null;
 let lastSuccessfulRestoreAt = 0;
 let cachedUser: User | null = null;
+let restoreGeneration = 0;
 
 export function restoreSession(force = false): Promise<User | null> {
   const now = Date.now();
@@ -91,8 +92,12 @@ export function restoreSession(force = false): Promise<User | null> {
     return sessionRestorePromise;
   }
 
+  const generation = ++restoreGeneration;
   sessionRestorePromise = fetchUserInfoWithRetry()
     .then((user) => {
+      if (generation !== restoreGeneration) {
+        return null;
+      }
       if (user) {
         cachedUser = user;
         lastSuccessfulRestoreAt = Date.now();
@@ -100,7 +105,9 @@ export function restoreSession(force = false): Promise<User | null> {
       return user;
     })
     .finally(() => {
-      sessionRestorePromise = null;
+      if (generation === restoreGeneration) {
+        sessionRestorePromise = null;
+      }
     });
 
   return sessionRestorePromise;
@@ -109,4 +116,6 @@ export function restoreSession(force = false): Promise<User | null> {
 export function clearCachedSessionUser(): void {
   cachedUser = null;
   lastSuccessfulRestoreAt = 0;
+  restoreGeneration += 1;
+  sessionRestorePromise = null;
 }

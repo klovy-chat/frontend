@@ -103,6 +103,17 @@ export function PresenceProvider({ children }: { children: ReactNode }) {
   const disconnectOfflineTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
+    if (!user?.id) {
+      clearPresenceSnapshot();
+      return;
+    }
+
+    if (userIdRef.current && userIdRef.current !== user.id) {
+      clearPresenceSnapshot();
+    }
+  }, [user?.id]);
+
+  useEffect(() => {
     const was = wasConnectedRef.current;
     wasConnectedRef.current = wsConnected;
 

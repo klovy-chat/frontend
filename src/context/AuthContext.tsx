@@ -53,6 +53,69 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+async function clearSessionState() {
+  try {
+    const { clearAllMentionSources } = await import("../utils/sync/mentions");
+    clearAllMentionSources();
+  } catch {
+    /* ignore */
+  }
+  try {
+    const { clearPendingHangup } = await import("../utils/sync/hangup");
+    clearPendingHangup();
+  } catch {
+    /* ignore */
+  }
+  try {
+    const mute = await import("../utils/sync/muted");
+    mute.setMutedConversationsUserId(null);
+    mute.setMutedConversationKeys([], { broadcast: false, skipGuards: true });
+  } catch {
+    /* ignore */
+  }
+  try {
+    const unreadSync = (await import("../utils/sync/unread")).default;
+    unreadSync.resetCount({ broadcast: false });
+    unreadSync.setUserId(null);
+  } catch {
+    /* ignore */
+  }
+  try {
+    const { setActiveConversationKey } = await import("../utils/sync/activeChat");
+    setActiveConversationKey(null);
+  } catch {
+    /* ignore */
+  }
+  try {
+    const {
+      clearAllMessagePageCaches,
+      clearDeletedMessageTombstones,
+    } = await import("../utils/chat/messageCache");
+    clearAllMessagePageCaches();
+    clearDeletedMessageTombstones();
+  } catch {
+    /* ignore */
+  }
+  try {
+    const { invalidateFriendshipCache } = await import("../utils/chat/friendsCache");
+    invalidateFriendshipCache();
+  } catch {
+    /* ignore */
+  }
+  try {
+    const { clearPendingMarkReads } = await import("../utils/sync/markRead");
+    clearPendingMarkReads();
+  } catch {
+    /* ignore */
+  }
+  try {
+    const { clearPresenceSnapshot } = await import("./PresenceContext");
+    clearPresenceSnapshot();
+  } catch {
+    /* ignore */
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -85,28 +148,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         if (!cancelled) setUser(info);
       })
-      .catch(() => {
+      .catch((err) => {
         if (!cancelled) {
+          if (import.meta.env.DEV) {
+            console.warn("[auth] Restore session failed:", err);
+          }
           setUser(null);
-          void import("../utils/sync/markRead")
-            .then((m) => m.clearPendingMarkReads())
-            .catch(() => {});
-          void import("../utils/sync/hangup")
-            .then((m) => m.clearPendingHangup())
-            .catch(() => {});
-          void import("../utils/sync/unread")
-            .then((m) => {
-              m.default.resetCount({ broadcast: false });
-              m.default.setUserId(null);
-            })
-            .catch(() => {});
-          void import("../utils/sync/muted")
-            .then((m) => {
-
-              m.setMutedConversationsUserId(null);
-              m.setMutedConversationKeys([], { broadcast: false, skipGuards: true });
-            })
-            .catch(() => {});
+          void clearSessionState();
         }
       })
       .finally(() => {
@@ -225,50 +273,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await authApi.logout();
     } catch (err) {
-      if (!(err instanceof ApiError) || err.status !== 401) throw err;
+      if (!(err instanceof ApiError) || err.status !== 401) {
+        if (import.meta.env.DEV) {
+          console.warn("[auth] Logout request failed:", err);
+        }
+      }
     } finally {
       clearCsrfToken();
       clearCachedSessionUser();
       clearAutoIdleBrbFlag();
-      try {
-        const { clearAllMentionSources } = await import("../utils/sync/mentions");
-        clearAllMentionSources();
-      } catch {/* ignore */}
-      try {
-        const mute = await import("../utils/sync/muted");
-        mute.setMutedConversationsUserId(null);
-        mute.setMutedConversationKeys([], { broadcast: false, skipGuards: true });
-      } catch {/* ignore */}
-      try {
-        const unreadSync = (await import("../utils/sync/unread")).default;
-        unreadSync.resetCount({ broadcast: false });
-        unreadSync.setUserId(null);
-      } catch {/* ignore */}
-
-      try {
-        const { setActiveConversationKey } = await import("../utils/sync/activeChat");
-        setActiveConversationKey(null);
-      } catch {/* ignore */}
-      try {
-        const {
-          clearAllMessagePageCaches,
-          clearDeletedMessageTombstones,
-        } = await import("../utils/chat/messageCache");
-        clearAllMessagePageCaches();
-        clearDeletedMessageTombstones();
-      } catch {/* ignore */}
-      try {
-        const { invalidateFriendshipCache } = await import("../utils/chat/friendsCache");
-        invalidateFriendshipCache();
-      } catch {/* ignore */}
-      try {
-        const { clearPendingMarkReads } = await import("../utils/sync/markRead");
-        clearPendingMarkReads();
-      } catch {/* ignore */}
-      try {
-        const { clearPresenceSnapshot } = await import("./PresenceContext");
-        clearPresenceSnapshot();
-      } catch {/* ignore */}
+      await clearSessionState();
       setUser(null);
     }
   }, []);

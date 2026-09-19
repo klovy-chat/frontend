@@ -60,9 +60,9 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
       if (!usesDirectBackendUrl) {
         const ready = await waitBackend();
         if (!ready) {
-        if (import.meta.env.DEV) {
-          console.warn(`[ws] Backend niedostępny. ${getBackendStartHint()}`);
-        }
+          if (import.meta.env.DEV) {
+            console.warn(`[ws] Backend niedostępny. ${getBackendStartHint()}`);
+          }
           return;
         }
       }
@@ -147,12 +147,17 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
       );
       unsubs.push(
         instance.subscribe(WsType.SESSION_REVOKED, () => {
-
           void (async () => {
             try {
               await logoutRef.current();
+            } catch (err) {
+              if (import.meta.env.DEV) {
+                console.warn("[ws] Błąd przy wylogowaniu po session:revoked", err);
+              }
             } finally {
-              instance?.close();
+              if (!cancelled) {
+                instance?.close();
+              }
             }
           })();
         }),

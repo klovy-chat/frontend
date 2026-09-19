@@ -70,6 +70,7 @@ export class WebSocketClient {
   private frameCrypto: WsFrameCrypto | null = null;
   private activeCrypto: WsCryptoSession | null = null;
   private sendQueue: Promise<boolean> = Promise.resolve(true);
+  private connectInFlight = false;
 
   constructor(options: WebSocketClientOptions = {}) {
     this.options = {
@@ -79,6 +80,16 @@ export class WebSocketClient {
     };
     this.resolveCrypto = options.resolveCrypto;
     void this.connect();
+  }
+
+  private logWarn(message: string, detail?: unknown) {
+    if (import.meta.env.DEV) {
+      if (detail === undefined) {
+        console.warn(message);
+      } else {
+        console.warn(message, detail);
+      }
+    }
   }
 
   private setStatus(status: WsStatus) {
@@ -158,24 +169,33 @@ export class WebSocketClient {
   }
 
   private async connect() {
-    if (this.closed) return;
+    if (this.closed || this.connectInFlight) return;
+    this.connectInFlight = true;
 
     this.setStatus("connecting");
     try {
       await this.ensureFrameCrypto();
     } catch (err) {
-
-      if (import.meta.env.DEV) {
-        console.warn("[ws] Nie udało się pobrać klucza szyfrującego:", err);
-      }
+      this.logWarn("[ws] Nie udało się pobrać klucza szyfrującego:", err);
+      this.connectInFlight = false;
       this.scheduleReconnect();
       return;
     }
 
-    if (this.closed) return;
+    if (this.closed) {
+      this.connectInFlight = false;
+      return;
+    }
 
     if (usesDirectBackendUrl && !this.activeCrypto?.token) {
+      this.logWarn("[ws] Brak tokenu szyfrowania dla połączenia z backendem.");
+      this.connectInFlight = false;
       this.scheduleReconnect();
+      return;
+    }
+
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      this.connectInFlight = false;
       return;
     }
 
@@ -183,6 +203,7 @@ export class WebSocketClient {
     this.ws.binaryType = "arraybuffer";
 
     this.ws.onopen = () => {
+      this.connectInFlight = false;
       this.reconnectAttempts = 0;
       this.setStatus("open");
       this.bumpIdleTimer();
@@ -193,18 +214,22 @@ export class WebSocketClient {
       void this.handleMessage(ev.data);
     };
 
-    this.ws.onclose = () => {
+    this.ws.onclose = (event) => {
       this.clearIdleTimer();
       this.clearPingTimer();
       this.ws = null;
+      this.connectInFlight = false;
       if (!this.closed) {
+        this.logWarn(
+          `[ws] Połączenie zamknięte (code=${event.code}, reason=${event.reason || "brak"})`,
+        );
         this.setStatus("connecting");
         this.scheduleReconnect();
       }
     };
 
     this.ws.onerror = () => {
-
+      this.logWarn("[ws] Wystąpił błąd połączenia WebSocket.");
     };
   }
 
@@ -238,11 +263,16 @@ export class WebSocketClient {
 
   private scheduleReconnect() {
     if (this.closed) return;
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
     if (
       this.options.reconnectionAttempts !== Infinity &&
       this.reconnectAttempts >= this.options.reconnectionAttempts
     ) {
       this.setStatus("closed");
+      this.logWarn("[ws] Osiągnięto limit reconnectów.");
       return;
     }
 
