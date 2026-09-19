@@ -94,6 +94,8 @@
     "noSessions": "Brak aktywnych sesji do wyświetlenia.",
     "revokeOthers": "Wyloguj się ze wszystkich sesji poza obecną",
     "revokeOthersHint": "Wyloguje Cię ze wszystkich urządzeń oprócz tego.",
+    "revokeAllSessions": "Wyloguj wszystkie sesje",
+    "revokeAllSessionsHint": "Natychmiast wyloguje Cię ze wszystkich aktywnych urządzeń.",
     "revokeDevice": "Wyloguj",
     "revokeDeviceAria": "Wyloguj z tego urządzenia",
     "revokeDeviceModal": {

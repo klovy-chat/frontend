@@ -344,3 +344,10 @@ export function revokeOtherSessions() {
     { method: "POST" },
   );
 }
+
+export function revokeAllSessions() {
+  return apiRequest<{ message: string; revokedCount: number }>(
+    "/api/auth/sessions/revoke-all",
+    { method: "POST" },
+  );
+}

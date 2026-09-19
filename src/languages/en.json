@@ -94,6 +94,8 @@
     "noSessions": "No active sessions to display.",
     "revokeOthers": "Log out of all sessions except this one",
     "revokeOthersHint": "This will log you out of all devices except this one.",
+    "revokeAllSessions": "Log out of all sessions",
+    "revokeAllSessionsHint": "This will immediately log you out of every active device.",
     "revokeDevice": "Log out",
     "revokeDeviceAria": "Log out of this device",
     "revokeDeviceModal": {

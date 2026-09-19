@@ -22,6 +22,7 @@ import {
   removeProfileImage,
   requestAccountDeletion,
   cancelAccountDeletion,
+  revokeAllSessions,
   revokeOtherSessions,
   revokeSession,
   updateProfile,
@@ -153,6 +154,7 @@ export function Panel({
   const [sessionRevokeTarget, setSessionRevokeTarget] = useState<UserSessionRow | null>(null);
   const [sessionRevokeError, setSessionRevokeError] = useState("");
   const [revokeOthersBusy, setRevokeOthersBusy] = useState(false);
+  const [revokeAllBusy, setRevokeAllBusy] = useState(false);
   const [profilePreviewOpen, setProfilePreviewOpen] = useState(false);
 
   const formatWarningDate = useCallback(
@@ -488,6 +490,22 @@ export function Panel({
       );
     } finally {
       setRevokeOthersBusy(false);
+    }
+  };
+
+  const handleRevokeAllSessions = async () => {
+    setRevokeAllBusy(true);
+    setSessionsError("");
+    try {
+      await revokeAllSessions();
+      await logout();
+      requestClose();
+    } catch (err) {
+      setSessionsError(
+        err instanceof ApiError ? err.message : t("settings.account.revokeOthersFailed"),
+      );
+    } finally {
+      setRevokeAllBusy(false);
     }
   };
 
@@ -1582,7 +1600,7 @@ export function Panel({
                 <button
                   type="button"
                   className="as-action-row"
-                  disabled={revokeOthersBusy || sessionsLoading}
+                  disabled={revokeOthersBusy || revokeAllBusy || sessionsLoading}
                   onClick={() => void handleRevokeOtherSessions()}
                 >
                   <span className="as-action-row-icon as-action-row-icon--danger">
@@ -1599,6 +1617,26 @@ export function Panel({
                   <span className="as-action-row-chevron" aria-hidden>›</span>
                 </button>
               ) : null}
+
+              <button
+                type="button"
+                className="as-action-row"
+                disabled={revokeAllBusy || revokeOthersBusy || sessionsLoading}
+                onClick={() => void handleRevokeAllSessions()}
+              >
+                <span className="as-action-row-icon as-action-row-icon--danger">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <path d="M17 9l4 4-4 4"/>
+                    <path d="M21 13H9"/>
+                  </svg>
+                </span>
+                <span className="as-action-row-copy">
+                  <strong>{t("session.revokeAllSessions")}</strong>
+                  <span>{t("session.revokeAllSessionsHint")}</span>
+                </span>
+                <span className="as-action-row-chevron" aria-hidden>›</span>
+              </button>
 
               <div className="as-info-banner">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
