@@ -8,9 +8,14 @@
  */
 
 .settings-page {
-  --settings-nav-width: 200px;
-  --settings-content-min: 720px;
+  --settings-nav-width: 250px;
+  --settings-content-min: 760px;
   --settings-column-gap: 20px;
+  --bg-settings-nav: var(--bg-panel);
+  --bg-settings-surface: var(--bg-shell);
+  --bg-settings-card: var(--bg-panel);
+  --bg-settings-card-hover: var(--bg-hover);
+  --bg-settings-active: var(--accent-dim);
   width: 100%;
   height: 100%;
   background: var(--bg-settings-nav);
@@ -59,16 +64,16 @@
 
 .settings-page .as-nav--inline {
   background: var(--bg-settings-nav);
-  padding: 36px 12px 20px 14px;
+  padding: 26px 16px 20px;
   gap: 2px;
   border-right: none;
   align-items: stretch;
 }
 
 .settings-page .as-nav-title {
-  font-size: 0.95rem;
-  margin: 0 0 16px;
-  padding: 0 6px 0 2px;
+  font-size: 18px;
+  margin: 0 0 22px;
+  padding: 0 8px;
   text-align: left;
   color: var(--text-muted);
   font-weight: 500;
@@ -76,7 +81,7 @@
 
 .settings-page .as-nav-label {
   display: block;
-  padding: 0 8px 6px 8px;
+  padding: 0 12px 6px;
   margin: 0;
   font-size: 11px;
   font-weight: 600;
@@ -91,10 +96,10 @@
 }
 
 .settings-page .as-nav-item {
-  padding: 9px 10px;
-  border-radius: 9px;
-  font-size: 13px;
-  gap: 0.5rem;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  gap: 11px;
   margin-bottom: 2px;
   justify-content: flex-start;
   text-align: left;
@@ -124,17 +129,17 @@
 .settings-page .as-content-inner {
   max-width: var(--settings-content-min);
   margin: 0;
-  padding: 34px 36px 52px 32px;
+  padding: 38px 48px 56px;
 }
 
 .settings-page .as-section-title {
-  font-size: 1.45rem;
-  margin-bottom: 2px;
+  font-size: 23px;
+  margin-bottom: 8px;
 }
 
 .settings-page .as-section-subtitle {
-  margin: 0 0 16px;
-  font-size: 12px;
+  margin: 0 0 28px;
+  font-size: 13.5px;
 }
 
 .settings-page .as-account-hero {
@@ -149,8 +154,8 @@
 .settings-page .as-setting-card,
 .settings-page .as-data-card {
   margin-bottom: 4px;
-  padding: 14px 16px;
-  border-radius: 12px;
+  padding: 16px 20px;
+  border-radius: 14px;
   background: var(--bg-settings-card);
   border-color: transparent;
 }

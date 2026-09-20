@@ -634,18 +634,20 @@
 }
 
 .contacts-modal--inline .contacts-modal__header {
-  padding: calc(12px + var(--safe-top)) 16px 10px;
+  padding: 22px 24px 10px;
   flex-shrink: 0;
   border-bottom: none;
 }
 
 .contacts-modal--inline .contacts-modal__header p {
-  display: none;
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
 }
 
 .contacts-modal--inline .contacts-modal__header h2 {
-  font-size: 1.35rem;
-  letter-spacing: -0.03em;
+  font-size: 22px;
+  letter-spacing: normal;
 }
 
 .contacts-modal--inline .contacts-modal__tabs-row {
@@ -733,9 +735,8 @@
 .contacts-modal--inline .contacts-modal__body {
   flex: 1;
   min-height: 0;
-  display: flex;
-  flex-direction: column;
-  grid-template-columns: none;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
   overflow: hidden;
   background: var(--bg-panel);
 }
@@ -744,12 +745,24 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 0 16px 12px;
+  padding: 0 24px 24px;
   -webkit-overflow-scrolling: touch;
 }
 
+.contacts-modal--inline .contacts-modal__search {
+  margin-bottom: 12px;
+}
+
+.contacts-modal--inline .contacts-modal__search input {
+  height: 40px;
+  border-radius: 12px;
+}
+
 .contacts-modal--inline .contacts-modal__side {
-  display: none;
+  display: block;
+  padding: 20px 24px 24px;
+  border-left: 1px solid var(--border);
+  background: var(--bg-shell);
 }
 
 .contacts-modal--inline .contacts-modal__side-label {
@@ -801,6 +814,19 @@
     font-size: 11.5px;
     min-height: 32px;
     padding: 6px 10px;
+  }
+
+  .contacts-modal--inline .contacts-modal__body {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .contacts-modal--inline .contacts-modal__main {
+    padding: 0 16px 12px;
+  }
+
+  .contacts-modal--inline .contacts-modal__side {
+    display: none;
   }
 
   /* Modal kontaktów (desktop overlay na mobile) — spójny wygląd listy */
