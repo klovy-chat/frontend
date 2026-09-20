@@ -54,6 +54,7 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
 
     let cancelled = false;
     let instance: WebSocketClient | null = null;
+    let backendRetryTimer: ReturnType<typeof setTimeout> | null = null;
     const unsubs: (() => void)[] = [];
 
     const connect = async () => {
@@ -62,6 +63,12 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
         if (!ready) {
           if (import.meta.env.DEV) {
             console.warn(`[ws] Backend niedostępny. ${getBackendStartHint()}`);
+          }
+          if (!cancelled) {
+            backendRetryTimer = setTimeout(() => {
+              backendRetryTimer = null;
+              void connect();
+            }, 2000);
           }
           return;
         }
@@ -184,6 +191,7 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
 
     return () => {
       cancelled = true;
+      if (backendRetryTimer) clearTimeout(backendRetryTimer);
       unsubs.forEach((u) => u());
       instance?.close();
       setConnected(false);

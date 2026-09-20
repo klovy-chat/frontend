@@ -65,10 +65,12 @@
   border: 1px solid var(--border);
   border-radius: 11px;
   transition: border-color 0.15s;
+  box-shadow: none;
 }
 
 .chat-list-pane__search-wrap:focus-within {
   border-color: var(--accent);
+  box-shadow: none;
 }
 
 .chat-list-pane__search-input {
@@ -79,6 +81,9 @@
   color: var(--text);
   font-size: 13px;
   padding: 0;
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
 }
 
 .chat-list-pane__search-input::placeholder {
