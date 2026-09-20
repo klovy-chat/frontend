@@ -128,11 +128,12 @@ export function formatLastSeen(
   lastSeen?: string | null,
   options: { isOnline?: boolean; blocked?: boolean } = {},
 ): string {
-  if (options.blocked || !lastSeen) return i18n.t("user.lastSeen.longAgo");
+  if (options.blocked) return i18n.t("user.lastSeen.longAgo");
   if (options.isOnline) return i18n.t("user.availability.online");
+  if (!lastSeen) return i18n.t("user.availability.offline");
 
   const date = new Date(lastSeen);
-  if (Number.isNaN(date.getTime())) return i18n.t("user.lastSeen.longAgo");
+  if (Number.isNaN(date.getTime())) return i18n.t("user.availability.offline");
 
   const now = new Date();
   const time = formatClockTime(date);
