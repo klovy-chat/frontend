@@ -554,6 +554,42 @@
     "empty": {
       "selectChat": "Select a chat to start a conversation."
     },
+    "details": {
+      "noBio": "No description added yet.",
+      "noDescription": "No channel description added yet.",
+      "members": "members",
+      "about": "About",
+      "description": "Description",
+      "quickInfo": "Quick info",
+      "type": "Type",
+      "direct": "Direct message",
+      "channel": "Channel",
+      "admin": "Admin"
+    },
+    "home": {
+      "title": "Good to see you",
+      "subtitle": "Pick up where you left off or start something new.",
+      "unread": "unread",
+      "contacts": "contacts",
+      "channels": "channels",
+      "recent": "Recent conversations",
+      "noRecent": "Your recent conversations will appear here.",
+      "noMessages": "No messages yet"
+    },
+    "calls": {
+      "title": "Calls",
+      "subtitle": "Voice and video calls stay connected to your conversations.",
+      "active": "Call in progress",
+      "ready": "Ready to call",
+      "openChat": "Open a chat to start a call.",
+      "note": "Call history is represented by call messages inside each conversation."
+    },
+    "communities": {
+      "title": "Communities",
+      "subtitle": "Your channels, gathered in one place.",
+      "empty": "No channels available yet.",
+      "noDescription": "No channel description"
+    },
     "inviteEmbed": {
       "label": "Channel invite",
       "established": "Est. {{date}}",
@@ -688,8 +724,11 @@
       "account": "Account"
     },
     "items": {
+      "home": "Home",
       "chats": "Chats",
       "contacts": "Contacts",
+      "calls": "Calls",
+      "communities": "Communities",
       "settings": "Settings",
       "viewProfile": "View profile"
     }

@@ -21,13 +21,13 @@
   top: 76px;
   right: 24px;
   z-index: 30;
-  width: min(360px, calc(100% - 48px));
+  width: min(382px, calc(100% - 48px));
   max-height: calc(100vh - 96px);
   display: flex;
   flex-direction: column;
   background: var(--bg-panel);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 14px;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
   overflow: hidden;
 }
@@ -36,7 +36,7 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 16px 16px 12px;
+  padding: 18px 18px 14px;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }

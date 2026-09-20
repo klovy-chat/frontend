@@ -7,6 +7,7 @@
 // Przy zmianach: pages/Chat.tsx, UnreadBadge.tsx, styles/nav/nav.css.
 
 import { useEffect, useRef, useState } from "react";
+import { Globe2, Home, Moon, Phone, Sun } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { updateAvailabilityStatus } from "../../api/auth";
 import { clearAutoIdleBrbFlag } from "../../hooks/useIdle";
@@ -15,6 +16,7 @@ import { Avatar } from "../common/Avatar";
 import { userLabel, formatLiveDateTime, availabilityStatusLabel } from "../../utils/user/format";
 import { LOGO_NONE_URL } from "../../constants/branding";
 import { presenceColor } from "../../utils/user/presence";
+import { useTheme } from "../../context/ThemeContext";
 import "../../styles/nav/nav.css";
 
 interface NavProps {
@@ -25,6 +27,13 @@ interface NavProps {
   totalUnread: number;
   receivedFriendRequests?: number;
   settingsActive?: boolean;
+  contactsActive?: boolean;
+  homeActive?: boolean;
+  onOpenHome: () => void;
+  callsActive?: boolean;
+  communitiesActive?: boolean;
+  onOpenCalls: () => void;
+  onOpenCommunities: () => void;
 }
 
 export function Nav({
@@ -35,9 +44,17 @@ export function Nav({
   totalUnread,
   receivedFriendRequests = 0,
   settingsActive = false,
+  contactsActive = false,
+  homeActive = false,
+  onOpenHome,
+  callsActive = false,
+  communitiesActive = false,
+  onOpenCalls,
+  onOpenCommunities,
 }: NavProps) {
   const { t } = useTranslation();
   const { user, logout, updateUser } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [statusMenuOpen, setStatusMenuOpen] = useState(false);
   const [now, setNow] = useState(() => new Date());
   const statusMenuRef = useRef<HTMLDivElement>(null);
@@ -96,7 +113,15 @@ export function Nav({
           <div className="nav-rail__group-label">{t("nav.groups.workspace")}</div>
           <button
             type="button"
-            className={`nav-rail__item${settingsActive ? "" : " active"}`}
+            className={`nav-rail__item${homeActive ? " active" : ""}`}
+            onClick={onOpenHome}
+          >
+            <span className="nav-rail__icon"><Home size={18} strokeWidth={1.8} /></span>
+            {t("nav.items.home")}
+          </button>
+          <button
+            type="button"
+            className={`nav-rail__item${!homeActive && !settingsActive && !contactsActive && !callsActive && !communitiesActive ? " active" : ""}`}
             onClick={onOpenChats}
           >
             <span className="nav-rail__icon">
@@ -107,7 +132,7 @@ export function Nav({
             {t("nav.items.chats")}
             {totalUnread > 0 && <span className="nav-rail__badge">{totalUnread > 99 ? "99+" : totalUnread}</span>}
           </button>
-          <button type="button" className="nav-rail__item" onClick={onOpenContacts}>
+          <button type="button" className={`nav-rail__item${contactsActive ? " active" : ""}`} onClick={onOpenContacts}>
             <span className="nav-rail__icon">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
@@ -122,6 +147,14 @@ export function Nav({
                 {receivedFriendRequests > 9 ? "9+" : receivedFriendRequests}
               </span>
             )}
+          </button>
+          <button type="button" className={`nav-rail__item${callsActive ? " active" : ""}`} onClick={onOpenCalls}>
+            <span className="nav-rail__icon"><Phone size={18} strokeWidth={1.8} /></span>
+            {t("nav.items.calls")}
+          </button>
+          <button type="button" className={`nav-rail__item${communitiesActive ? " active" : ""}`} onClick={onOpenCommunities}>
+            <span className="nav-rail__icon"><Globe2 size={18} strokeWidth={1.8} /></span>
+            {t("nav.items.communities")}
           </button>
         </div>
 
@@ -204,6 +237,15 @@ export function Nav({
               <polyline points="16 17 21 12 16 7" />
               <line x1="21" y1="12" x2="9" y2="12" />
             </svg>
+          </button>
+          <button
+            type="button"
+            className="nav-rail__theme-toggle"
+            title={theme === "dark" ? "Light theme" : "Dark theme"}
+            aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+            onClick={toggleTheme}
+          >
+            {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
           </button>
         </div>
       </div>

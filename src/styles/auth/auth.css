@@ -20,16 +20,37 @@
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
-  background: var(--bg-deep);
+  background:
+    radial-gradient(circle at 16% 16%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 32%),
+    var(--bg-deep);
   position: relative;
   overflow: hidden;
 }
 
-.al-lang-switch {
+.al-page-actions {
   position: absolute;
   top: 1.25rem;
   right: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   z-index: 10;
+}
+
+.al-theme-toggle {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--bg-panel);
+  color: var(--text-muted);
+}
+
+.al-theme-toggle:hover {
+  border-color: var(--accent-border);
+  color: var(--accent);
 }
 
 .al-lang-switch-select {
@@ -62,11 +83,11 @@
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: 400px 400px;
+  grid-template-columns: minmax(380px, 440px) minmax(360px, 440px);
   min-height: 540px;
   background: var(--bg-panel);
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: 20px;
   overflow: hidden;
   box-shadow: var(--shadow);
   animation: klovy-slide-in 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -84,12 +105,12 @@
 }
 
 .al-left {
-  padding: 44px 40px;
+  padding: 48px 44px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   border-right: 1px solid var(--border-light);
-  background: var(--bg-panel);
+  background: color-mix(in srgb, var(--bg-panel) 94%, var(--accent) 6%);
 }
 
 .al-brand {
@@ -138,8 +159,8 @@
 }
 
 .al-title {
-  font-size: 1.35rem;
-  font-weight: 600;
+  font-size: 1.6rem;
+  font-weight: 700;
   color: var(--text);
   letter-spacing: -0.01em;
   margin: 0 0 2rem;
@@ -203,7 +224,7 @@
   width: 100%;
   background: var(--bg-deep);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 11px;
   padding: 11px 14px;
   color: var(--text);
   font-size: 0.875rem;
@@ -257,7 +278,7 @@
   padding: 13px;
   background: var(--accent);
   border: none;
-  border-radius: 8px;
+  border-radius: 11px;
   font-size: 0.9rem;
   font-weight: 600;
   color: #fff;

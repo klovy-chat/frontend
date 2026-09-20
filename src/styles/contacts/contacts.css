@@ -19,6 +19,16 @@
   box-shadow: var(--shadow);
 }
 
+.contacts-modal--inline.klovy-shell {
+  width: 100%;
+  max-width: none;
+  min-height: 0;
+  height: 100%;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
 .contacts-modal__header {
   display: flex;
   align-items: flex-start;
@@ -200,6 +210,10 @@
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
+}
+
+.contacts-modal--inline .contacts-modal__list {
+  max-height: none;
 }
 
 .contacts-modal__list::-webkit-scrollbar {

@@ -8,37 +8,37 @@
  */
 
 :root {
-  --bg-shell: #0B0B0E;
+  --bg-shell: #18191C;
   --bg-chat: var(--bg-panel);
   --bg-deep: var(--bg-shell);
-  --bg-panel: #0F0F11;
-  --bg-elevated: #131316;
-  --bg-card: #131316;
-  --bg-hover: #1A1A20;
-  --bg-active: rgba(124, 92, 255, 0.12);
-  --border: #1C1C22;
-  --border-light: #18181C;
-  --text: #FFFFFF;
-  --text-muted: #8E8E93;
-  --text-dim: #50505A;
-  --accent: #7C5CFF;
-  --accent-hover: #6E52EE;
-  --accent-dim: rgba(124, 92, 255, 0.14);
-  --accent-border: rgba(124, 92, 255, 0.32);
-  --danger: #FF3B30;
-  --danger-dim: rgba(255, 59, 48, 0.08);
-  --danger-border: rgba(255, 59, 48, 0.25);
-  --success: #4ADE80;
-  --success-dim: rgba(74, 222, 128, 0.08);
-  --success-border: rgba(74, 222, 128, 0.28);
-  --warning: #FF9F0A;
-  --warning-dim: rgba(255, 159, 10, 0.12);
-  --warning-border: rgba(255, 159, 10, 0.28);
+  --bg-panel: #1E2023;
+  --bg-elevated: #2C2E33;
+  --bg-card: #25272B;
+  --bg-hover: #2C2E33;
+  --bg-active: rgba(123, 92, 250, 0.16);
+  --border: rgba(255, 255, 255, 0.07);
+  --border-light: rgba(255, 255, 255, 0.045);
+  --text: #ECEDEE;
+  --text-muted: #9BA0A6;
+  --text-dim: #6B7076;
+  --accent: #7B5CFA;
+  --accent-hover: #6C4EE9;
+  --accent-dim: rgba(123, 92, 250, 0.18);
+  --accent-border: rgba(123, 92, 250, 0.38);
+  --danger: #E5484D;
+  --danger-dim: rgba(229, 72, 77, 0.1);
+  --danger-border: rgba(229, 72, 77, 0.28);
+  --success: #3FBF8F;
+  --success-dim: rgba(63, 191, 143, 0.1);
+  --success-border: rgba(63, 191, 143, 0.28);
+  --warning: #D69B47;
+  --warning-dim: rgba(214, 155, 71, 0.12);
+  --warning-border: rgba(214, 155, 71, 0.3);
   --radius: 12px;
   --radius-sm: 8px;
   --radius-pill: 999px;
-  --nav-width: 220px;
-  --list-width: 300px;
+  --nav-width: 232px;
+  --list-width: 345px;
   --detail-width: 300px;
   --settings-nav-width: 200px;
   --settings-content-min: 720px;
@@ -59,7 +59,7 @@
   --bp-mobile-layout: 768px;
   --shadow: 0 32px 80px rgba(0, 0, 0, 0.6);
   --shadow-sm: 0 8px 24px rgba(0, 0, 0, 0.4);
-  --font-sans: "Space Grotesk", system-ui, sans-serif;
+  --font-sans: Inter, ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
   /* Hotspot 0 0 = czubek strzałki (grafika przesunięta). Bez tego klik szedł w (0,0) canvasu. */
   --cursor-auto: url("/assets/cursor.png") 0 0, auto;
@@ -69,7 +69,27 @@
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-  letter-spacing: -0.01em;
+  letter-spacing: normal;
+}
+
+:root[data-theme="light"] {
+  --bg-shell: #f7f6fb;
+  --bg-chat: var(--bg-shell);
+  --bg-deep: #f1eefb;
+  --bg-panel: #ffffff;
+  --bg-elevated: #ffffff;
+  --bg-card: #f1eefb;
+  --bg-hover: #e9e4fa;
+  --bg-active: rgba(123, 92, 250, 0.14);
+  --border: rgba(23, 17, 54, 0.09);
+  --border-light: rgba(23, 17, 54, 0.06);
+  --text: #1a1626;
+  --text-muted: #6b6580;
+  --text-dim: #9a94ad;
+  --accent-dim: rgba(123, 92, 250, 0.12);
+  --accent-border: rgba(123, 92, 250, 0.3);
+  --shadow: 0 24px 70px rgba(23, 17, 54, 0.14);
+  --shadow-sm: 0 8px 24px rgba(23, 17, 54, 0.1);
 }
 
 @media (hover: none) and (pointer: coarse) {
@@ -104,7 +124,7 @@ body {
   color: var(--text);
   line-height: 1.45;
   font-family: var(--font-sans);
-  letter-spacing: -0.01em;
+  letter-spacing: normal;
   cursor: var(--cursor-auto);
 }
 

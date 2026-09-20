@@ -58,8 +58,11 @@ export function Settings() {
       {isMobile && (
         <BottomNav
           active="settings"
+          onHome={() => navigate("/")}
           onChats={() => navigate("/")}
           onContacts={() => navigate("/", { state: { openContacts: true } })}
+          onCalls={() => navigate("/")}
+          onCommunities={() => navigate("/")}
           onSettings={() => navigate(settingsPath("konto"))}
         />
       )}

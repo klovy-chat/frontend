@@ -177,9 +177,9 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  height: 56px;
-  min-height: 56px;
-  padding: 0 20px;
+  height: 64px;
+  min-height: 64px;
+  padding: 0 24px;
   padding-top: var(--safe-top);
   border-bottom: 1px solid var(--border);
   background: var(--bg-shell);
@@ -341,8 +341,8 @@
 
 .chat-header__name {
   margin: 0;
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 0.95rem;
+  font-weight: 700;
   color: var(--text);
   white-space: nowrap;
   overflow: hidden;

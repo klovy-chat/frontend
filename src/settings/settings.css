@@ -14,6 +14,7 @@
   width: 100%;
   height: 100%;
   background: var(--bg-settings-nav);
+  color: var(--text);
   animation: klovy-fade-in 0.18s ease both;
 }
 
@@ -58,7 +59,7 @@
 
 .settings-page .as-nav--inline {
   background: var(--bg-settings-nav);
-  padding: 52px 8px 20px 14px;
+  padding: 36px 12px 20px 14px;
   gap: 2px;
   border-right: none;
   align-items: stretch;
@@ -90,8 +91,8 @@
 }
 
 .settings-page .as-nav-item {
-  padding: 7px 8px 7px 8px;
-  border-radius: 6px;
+  padding: 9px 10px;
+  border-radius: 9px;
   font-size: 13px;
   gap: 0.5rem;
   margin-bottom: 2px;
@@ -105,7 +106,7 @@
 }
 
 .settings-page .as-nav-item.active {
-  background: var(--bg-settings-active);
+  background: var(--accent-dim);
   color: var(--text);
   font-weight: 600;
 }
@@ -123,7 +124,7 @@
 .settings-page .as-content-inner {
   max-width: var(--settings-content-min);
   margin: 0;
-  padding: 28px 32px 48px 28px;
+  padding: 34px 36px 52px 32px;
 }
 
 .settings-page .as-section-title {
@@ -139,7 +140,7 @@
 .settings-page .as-account-hero {
   margin-bottom: 6px;
   padding: 14px 16px;
-  border-radius: 10px;
+  border-radius: 14px;
   background: var(--bg-settings-card);
   border-color: transparent;
 }
@@ -149,7 +150,7 @@
 .settings-page .as-data-card {
   margin-bottom: 4px;
   padding: 14px 16px;
-  border-radius: 10px;
+  border-radius: 12px;
   background: var(--bg-settings-card);
   border-color: transparent;
 }
@@ -162,7 +163,7 @@
   margin-top: 4px;
   margin-bottom: 0;
   padding: 13px 16px;
-  border-radius: 10px;
+  border-radius: 12px;
   background: var(--bg-settings-card);
   border-color: transparent;
 }
@@ -265,7 +266,7 @@
 .settings-page .as-session-row {
   margin-bottom: 0;
   padding: 14px 16px;
-  border-radius: 12px;
+  border-radius: 14px;
   background: var(--bg-settings-card);
   border: 1px solid var(--border);
 }

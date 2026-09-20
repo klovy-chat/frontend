@@ -554,6 +554,42 @@
     "empty": {
       "selectChat": "Wybierz czat, aby rozpocząć rozmowę."
     },
+    "details": {
+      "noBio": "Brak opisu.",
+      "noDescription": "Brak opisu kanału.",
+      "members": "członków",
+      "about": "O osobie",
+      "description": "Opis",
+      "quickInfo": "Szybkie informacje",
+      "type": "Typ",
+      "direct": "Wiadomość prywatna",
+      "channel": "Kanał",
+      "admin": "Administrator"
+    },
+    "home": {
+      "title": "Dobrze Cię widzieć",
+      "subtitle": "Wróć do ostatniej rozmowy albo zacznij coś nowego.",
+      "unread": "nieprzeczytane",
+      "contacts": "kontakty",
+      "channels": "kanały",
+      "recent": "Ostatnie rozmowy",
+      "noRecent": "Ostatnie rozmowy pojawią się tutaj.",
+      "noMessages": "Brak wiadomości"
+    },
+    "calls": {
+      "title": "Połączenia",
+      "subtitle": "Połączenia głosowe i wideo są powiązane z rozmowami.",
+      "active": "Połączenie w toku",
+      "ready": "Gotowe do połączenia",
+      "openChat": "Otwórz rozmowę, aby rozpocząć połączenie.",
+      "note": "Historia połączeń jest widoczna jako wiadomości połączeń w poszczególnych rozmowach."
+    },
+    "communities": {
+      "title": "Społeczności",
+      "subtitle": "Twoje kanały zebrane w jednym miejscu.",
+      "empty": "Brak dostępnych kanałów.",
+      "noDescription": "Brak opisu kanału"
+    },
     "inviteEmbed": {
       "label": "Zaproszenie do kanału",
       "established": "Zał. {{date}}",
@@ -688,8 +724,11 @@
       "account": "Konto"
     },
     "items": {
+      "home": "Start",
       "chats": "Czaty",
       "contacts": "Kontakty",
+      "calls": "Połączenia",
+      "communities": "Społeczności",
       "settings": "Ustawienia",
       "viewProfile": "Zobacz profil"
     }

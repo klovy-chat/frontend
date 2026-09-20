@@ -15,6 +15,7 @@ import App from "./App";
 import { ErrorBoundary } from "./components/common/ErrorBoundary";
 import { AuthProvider } from "./context/AuthContext";
 import { LocaleProvider } from "./context/LocaleContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import i18n from "./i18n/config";
 import "./styles/base/global.css";
 import "./styles/base/layout.css";
@@ -29,9 +30,11 @@ createRoot(document.getElementById("root")!).render(
       <I18nextProvider i18n={i18n}>
         <AuthProvider>
         <LocaleProvider>
-          <BrowserRouter>
-            <App />
-          </BrowserRouter>
+          <ThemeProvider>
+            <BrowserRouter>
+              <App />
+            </BrowserRouter>
+          </ThemeProvider>
         </LocaleProvider>
         </AuthProvider>
       </I18nextProvider>

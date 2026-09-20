@@ -11,7 +11,7 @@
   display: flex;
   align-items: flex-end;
   gap: 8px;
-  padding: 2px 0;
+  padding: 3px 0;
   flex-shrink: 0;
 }
 
@@ -264,8 +264,8 @@
 .message-row.other .message-bubble {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 18px 18px 18px 6px;
-  padding: 11px 14px 9px;
+  border-radius: 16px 16px 16px 6px;
+  padding: 10px 14px 8px;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -290,8 +290,8 @@
 .message-bubble.own {
   background: var(--accent);
   border: none;
-  border-radius: 18px 18px 6px 18px;
-  padding: 11px 14px 9px;
+  border-radius: 16px 16px 6px 16px;
+  padding: 10px 14px 8px;
   display: flex;
   flex-direction: column;
   gap: 4px;

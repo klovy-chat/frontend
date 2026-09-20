@@ -11,7 +11,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: 20px 14px 16px;
+  padding: 18px 12px 12px;
   overflow: hidden;
 }
 
@@ -19,7 +19,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 0 6px 20px;
+  padding: 4px 8px 18px;
   border-bottom: 1px solid var(--border);
   margin-bottom: 16px;
 }
@@ -79,8 +79,8 @@
   align-items: center;
   gap: 10px;
   width: 100%;
-  padding: 10px 12px;
-  border-radius: 10px;
+  padding: 9px 12px;
+  border-radius: 9px;
   color: var(--text-muted);
   font-size: 13.5px;
   font-weight: 500;
@@ -226,6 +226,23 @@
 .nav-rail__logout:hover {
   background: var(--danger-dim);
   color: var(--danger);
+}
+
+.nav-rail__theme-toggle {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 8px;
+  color: var(--text-muted);
+  transition: background 0.15s, color 0.15s;
+}
+
+.nav-rail__theme-toggle:hover {
+  background: var(--accent-dim);
+  color: var(--accent);
 }
 
 .nav-rail__status-menu {
