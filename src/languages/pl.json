@@ -335,7 +335,7 @@
     },
     "fields": {
       "username": "Nazwa użytkownika",
-      "usernamePlaceholder": "np. jan_kowalski",
+      "usernamePlaceholder": "",
       "password": "Hasło",
       "showPassword": "Pokaż hasło",
       "hidePassword": "Ukryj hasło",
@@ -358,7 +358,6 @@
       "submit": "Zarejestruj się",
       "submitting": "Tworzenie konta…",
       "passwordPlaceholder": "Utwórz silne hasło",
-      "passwordHint": "Min. 8 znaków, wielka i mała litera, cyfra oraz znak specjalny (@$!%*?&).",
       "confirmPassword": "Potwierdź hasło",
       "confirmPasswordPlaceholder": "Powtórz hasło",
       "termsPrefix": "Oświadczam, że zapoznałem/am się z",
@@ -874,7 +873,7 @@
   "profile": {
     "form": {
       "displayNameRequired": "Główna nazwa *",
-      "displayNamePlaceholder": "np. Jan Kowalski",
+      "displayNamePlaceholder": "",
       "displayNameHint": "Widoczna dla innych w czacie. Maks. {{max}} znaków.",
       "bioPlaceholderOptional": "Krótki opis o sobie (opcjonalnie)",
       "bioLabel": "Opis",
@@ -973,6 +972,12 @@
       "brb": "Zaraz wracam",
       "dnd": "Nie przeszkadzać",
       "offline": "Niedostępny"
+    },
+    "lastSeen": {
+      "longAgo": "Ostatnio widziano dawno temu",
+      "today": "Ostatnio widziano dzisiaj o {{time}}",
+      "yesterday": "Ostatnio widziano wczoraj o {{time}}",
+      "date": "Ostatnio widziano {{date}} o {{time}}"
     },
     "sessionRelative": {
       "justNow": "Przed chwilą",

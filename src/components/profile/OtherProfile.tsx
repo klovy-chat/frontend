@@ -11,9 +11,8 @@ import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { getContactProfile } from "../../api/contacts";
 import { Avatar } from "../common/Avatar";
-import { userLabel, formatJoinedDate, availabilityStatusLabel } from "../../utils/user/format";
+import { userLabel, formatJoinedDate, formatLastSeen } from "../../utils/user/format";
 import { renderFormattedText } from "../../utils/chat/format";
-import { presenceColor } from "../../utils/user/presence";
 import { useProfileBannerStyle } from "../../hooks/useMediaCache";
 import { useModal } from "../../hooks/useModal";
 import { useUserPresence } from "../../context/PresenceContext";
@@ -160,17 +159,6 @@ export function OtherProfile({
                 color={displayedUser.color}
                 size={64}
               />
-              <span
-                className="presence-dot"
-                title={
-                  displayedUser.isOnline
-                    ? availabilityStatusLabel(displayedUser.availabilityStatus ?? "online")
-                    : availabilityStatusLabel("offline")
-                }
-                style={{
-                  background: presenceColor(displayedUser),
-                }}
-              />
             </div>
           </div>
 
@@ -182,6 +170,12 @@ export function OtherProfile({
               {displayedUser.username && (
                 <p className="up-profile-handle">@{displayedUser.username}</p>
               )}
+              <p className="up-profile-status">
+                {formatLastSeen(displayedUser.lastSeen, {
+                  isOnline: displayedUser.isOnline,
+                  blocked: isBlockedByMe,
+                })}
+              </p>
             </div>
           </div>
 

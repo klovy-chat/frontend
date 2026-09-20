@@ -180,7 +180,6 @@ export function Signup() {
                   )}
                 </button>
               </div>
-              <p className="al-field-hint">{t("auth.signup.passwordHint")}</p>
             </div>
 
             <div className="al-field">

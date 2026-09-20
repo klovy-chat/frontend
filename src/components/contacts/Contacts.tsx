@@ -25,7 +25,7 @@ import {
   usePresenceSeed,
   useUserPresence,
 } from "../../context/PresenceContext";
-import { userLabel, availabilityStatusLabel } from "../../utils/user/format";
+import { userLabel, formatLastSeen } from "../../utils/user/format";
 import { getEffectiveStatus } from "../../utils/user/presence";
 import { setReceivedFriendRequestCount } from "../../utils/sync/friendRequests";
 import type { Contact, FriendRequestItem } from "../../types";
@@ -63,7 +63,10 @@ function FriendPresenceRow({
         <div className="contacts-modal__meta">
           {friend.username ? `@${friend.username}` : t("common.contact")}
           {" · "}
-          {availabilityStatusLabel(status)}
+          {formatLastSeen(live?.lastSeen ?? friend.lastSeen, {
+            isOnline: status === "online",
+            blocked: friend.isBlockedByMe,
+          })}
         </div>
       </div>
       <div className="contacts-modal__actions">

@@ -132,6 +132,34 @@ export function availabilityStatusLabel(status: AvailabilityStatus): string {
   });
 }
 
+export function formatLastSeen(
+  lastSeen?: string | null,
+  options: { isOnline?: boolean; blocked?: boolean } = {},
+): string {
+  if (options.blocked || !lastSeen) return i18n.t("user.lastSeen.longAgo");
+  if (options.isOnline) return i18n.t("user.availability.online");
+
+  const date = new Date(lastSeen);
+  if (Number.isNaN(date.getTime())) return i18n.t("user.lastSeen.longAgo");
+
+  const now = new Date();
+  const time = formatClockTime(date);
+  if (isSameLocalDay(date, now)) return i18n.t("user.lastSeen.today", { time });
+
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  if (isSameLocalDay(date, yesterday)) return i18n.t("user.lastSeen.yesterday", { time });
+
+  return i18n.t("user.lastSeen.date", {
+    date: date.toLocaleDateString(formattingLocale(), {
+      day: "2-digit",
+      month: "2-digit",
+      year: "2-digit",
+    }),
+    time,
+  });
+}
+
 export function formatLiveDateTime(date: Date): string {
   const locale = formattingLocale();
   const datePart = date.toLocaleDateString(locale, {

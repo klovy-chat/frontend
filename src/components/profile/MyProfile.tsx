@@ -12,9 +12,8 @@ import { useTranslation } from "react-i18next";
 import { Avatar } from "../common/Avatar";
 import { useAuth } from "../../context/AuthContext";
 import { useUserPresence } from "../../context/PresenceContext";
-import { userLabel, formatJoinedDate, availabilityStatusLabel } from "../../utils/user/format";
+import { userLabel, formatJoinedDate, formatLastSeen } from "../../utils/user/format";
 import { renderFormattedText } from "../../utils/chat/format";
-import { presenceColor } from "../../utils/user/presence";
 import { useProfileBannerStyle } from "../../hooks/useMediaCache";
 import { useModal } from "../../hooks/useModal";
 import type { User } from "../../types";
@@ -121,23 +120,15 @@ export function MyProfile({
                 color={user.color}
                 size={64}
               />
-              <span
-                className="presence-dot"
-                title={
-                  user.isOnline
-                    ? availabilityStatusLabel(user.availabilityStatus ?? "online")
-                    : availabilityStatusLabel("offline")
-                }
-                style={{
-                  background: presenceColor(user),
-                }}
-              />
             </div>
           </div>
 
           <div className="up-identity">
             <h2 className="up-display-name">{name}</h2>
             <p className="up-profile-handle">@{user.username}</p>
+            <p className="up-profile-status">
+              {formatLastSeen(user.lastSeen, { isOnline: user.isOnline })}
+            </p>
           </div>
 
           {bioText ? (

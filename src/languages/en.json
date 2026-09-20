@@ -335,7 +335,7 @@
     },
     "fields": {
       "username": "Username",
-      "usernamePlaceholder": "e.g. john_doe",
+      "usernamePlaceholder": "",
       "password": "Password",
       "showPassword": "Show password",
       "hidePassword": "Hide password",
@@ -358,7 +358,6 @@
       "submit": "Sign up",
       "submitting": "Creating account…",
       "passwordPlaceholder": "Create a strong password",
-      "passwordHint": "Min. 8 characters, upper and lowercase letter, digit and special character (@$!%*?&).",
       "confirmPassword": "Confirm password",
       "confirmPasswordPlaceholder": "Repeat password",
       "termsPrefix": "I confirm that I have read the",
@@ -874,7 +873,7 @@
   "profile": {
     "form": {
       "displayNameRequired": "Display name *",
-      "displayNamePlaceholder": "e.g. John Smith",
+      "displayNamePlaceholder": "",
       "displayNameHint": "Visible to others in chat. Max {{max}} characters.",
       "bioPlaceholderOptional": "Short bio (optional)",
       "bioLabel": "Description",
@@ -973,6 +972,12 @@
       "brb": "Be right back",
       "dnd": "Do not disturb",
       "offline": "Unavailable"
+    },
+    "lastSeen": {
+      "longAgo": "Last seen a long time ago",
+      "today": "Last seen today at {{time}}",
+      "yesterday": "Last seen yesterday at {{time}}",
+      "date": "Last seen {{date}} at {{time}}"
     },
     "sessionRelative": {
       "justNow": "Just now",
