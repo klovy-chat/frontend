@@ -8,9 +8,9 @@
  */
 
 .contacts-modal.klovy-shell {
-  width: min(920px, 98vw);
-  max-width: 920px;
-  min-height: 460px;
+  width: min(1080px, calc(100vw - 48px));
+  max-width: 1080px;
+  min-height: 520px;
   padding: 0;
   overflow: hidden;
   position: relative;
@@ -195,7 +195,7 @@
 .contacts-modal__side {
   padding: 20px 24px 24px;
   border-left: 1px solid var(--border);
-  background: var(--bg-shell);
+  background: var(--bg-panel);
 }
 
 .contacts-modal__search {
@@ -327,6 +327,10 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.contacts-modal__meta-online {
+  color: var(--success);
 }
 
 .contacts-modal__actions {

@@ -209,6 +209,7 @@
 .nav-rail__profile-status {
   font-size: 11px;
   margin-top: 1px;
+  color: var(--success);
 }
 
 .nav-rail__logout {

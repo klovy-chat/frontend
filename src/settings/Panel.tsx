@@ -6,7 +6,7 @@
 // Plik jest duży — nową sekcję wyciągaj do components/account.
 // Przy zmianach: api/auth.ts, settings/routes.ts.
 
-import { CSSProperties, FormEvent, useCallback, useMemo, useRef, useState, useEffect } from "react";
+import { CSSProperties, FormEvent, useCallback, useRef, useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import {
   acknowledgeMyWarnings,
@@ -43,7 +43,6 @@ import {
 import { TwoFactorSetup } from "../components/auth/TwoFactorSetup";
 import { VoiceSettings } from "../components/account/VoiceSettings";
 import { LanguageSettings } from "../components/account/LanguageSettings";
-import { MyProfile } from "../components/profile/MyProfile";
 import { useAuth } from "../context/AuthContext";
 import { useLocale } from "../context/LocaleContext";
 import { useToast } from "../context/ToastContext";
@@ -149,7 +148,6 @@ export function Panel({
   const [sessionRevokeError, setSessionRevokeError] = useState("");
   const [revokeOthersBusy, setRevokeOthersBusy] = useState(false);
   const [revokeAllBusy, setRevokeAllBusy] = useState(false);
-  const [profilePreviewOpen, setProfilePreviewOpen] = useState(false);
 
   const formatWarningDate = useCallback(
     (value: string | null): string => {
@@ -281,17 +279,6 @@ export function Panel({
 
   const accentColor = avatarColor(activeColorIndex, user?.username ?? "");
   const accentStyle = { "--as-accent": accentColor } as CSSProperties;
-
-  const profilePreviewOverride = useMemo(
-    () => ({
-      displayName: profileValues.displayName.trim() || null,
-      bio: profileValues.bio.trim() || null,
-      color: profileValues.color,
-      image: avatarPreview,
-      banner: bannerPreview,
-    }),
-    [profileValues, avatarPreview, bannerPreview],
-  );
 
   const handleSave = async (e: FormEvent) => {
     e.preventDefault();
@@ -919,17 +906,6 @@ export function Panel({
               <p className="as-section-subtitle">
                 {t("settings.profile.subtitle")}
               </p>
-
-              <div className="as-profile-preview-actions">
-                <button
-                  type="button"
-                  className="as-btn-secondary"
-                  onClick={() => setProfilePreviewOpen(true)}
-                >
-                  {t("settings.profile.viewProfile")}
-                </button>
-                <p className="as-hint">{t("settings.profile.viewProfileHint")}</p>
-              </div>
 
               <input
                 ref={avatarFileRef}
@@ -1747,11 +1723,6 @@ export function Panel({
           setSessionRevokeTarget(null);
           setSessionRevokeError("");
         }}
-      />
-      <MyProfile
-        isOpen={profilePreviewOpen}
-        onClose={() => setProfilePreviewOpen(false)}
-        previewOverride={profilePreviewOverride}
       />
     </>
   );

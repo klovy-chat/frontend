@@ -2135,7 +2135,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
     !active && "app-shell--no-detail",
     showMobileChat && "app-shell--show-chat",
     showMobileContacts && "app-shell--show-contacts",
-    showDesktopContacts && "app-shell--show-contacts",
   ]
     .filter(Boolean)
     .join(" ");
@@ -2211,7 +2210,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
             : children}
         </div>
 
-        {((isMobile && mobileTab === "contacts") || showDesktopContacts) && (
+        {isMobile && mobileTab === "contacts" && (
           <div className="app-shell__contacts">
             <Contacts
               variant="inline"
@@ -2245,6 +2244,19 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
           />
         )}
       </div>
+
+      {!isMobile && (contactsModalOpen || contactsModalClosing) && (
+        <Contacts
+          isOpen={contactsModalOpen}
+          isClosing={contactsModalClosing}
+          onClose={handleCloseContactsModal}
+          onSelectContact={(c) => {
+            handleSelectContact(c);
+            handleCloseContactsModal();
+          }}
+          onRefreshContacts={refresh}
+        />
+      )}
 
       <MyProfile
         isOpen={profileOpen}
@@ -2284,15 +2296,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
             : undefined
         }
       />
-      {contactsModalClosing && !isMobile && (
-        <Contacts
-          isOpen={false}
-          isClosing
-          onClose={handleCloseContactsModal}
-          onSelectContact={handleSelectContact}
-          onRefreshContacts={refresh}
-        />
-      )}
 
       {contextMenu && (
         <div

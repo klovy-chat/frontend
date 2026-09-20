@@ -63,10 +63,12 @@ function FriendPresenceRow({
         <div className="contacts-modal__meta">
           {friend.username ? `@${friend.username}` : t("common.contact")}
           {" · "}
-          {formatLastSeen(live?.lastSeen ?? friend.lastSeen, {
-            isOnline: status === "online",
-            blocked: friend.isBlockedByMe,
-          })}
+          <span className={status === "online" ? "contacts-modal__meta-online" : undefined}>
+            {formatLastSeen(live?.lastSeen ?? friend.lastSeen, {
+              isOnline: status === "online",
+              blocked: friend.isBlockedByMe,
+            })}
+          </span>
         </div>
       </div>
       <div className="contacts-modal__actions">

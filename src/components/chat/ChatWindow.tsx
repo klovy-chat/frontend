@@ -2055,7 +2055,7 @@ export function ChatWindow({
         <div className="chat-header__info">
           <h3 className="chat-header__name">{title}</h3>
           {target.type === "dm" ? (
-            <span className="chat-header__desc">
+            <span className={`chat-header__desc${(dmContact?.isOnline ?? target.contact.isOnline) ? " chat-header__desc--online" : ""}`}>
               {formatLastSeen(dmContact?.lastSeen ?? target.contact.lastSeen, {
                 isOnline: dmContact?.isOnline ?? target.contact.isOnline,
                 blocked: Boolean(target.contact.isBlockedByMe),
