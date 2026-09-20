@@ -666,4 +666,12 @@
     margin-left: calc(10px + var(--safe-left));
     margin-right: calc(10px + var(--safe-right));
   }
+
+  .mi-bar {
+    padding-bottom: max(8px, var(--safe-bottom));
+  }
+
+  .mi-row {
+    min-height: 52px;
+  }
 }

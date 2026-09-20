@@ -16,6 +16,7 @@
 
 .al-page {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -453,8 +454,9 @@
 
 @media (max-width: 860px) {
   .al-card {
-    grid-template-columns: 1fr;
     max-width: 420px;
+    max-height: calc(100dvh - 32px);
+    overflow-y: auto;
   }
   .al-card--solo {
     max-width: 480px;
@@ -464,12 +466,16 @@
 }
 
 @media (max-width: 480px) {
-  .al-page { padding: 0; align-items: flex-end; }
-  .al-card { border-radius: 14px 14px 0 0; min-height: auto; max-width: 100%; }
+  .al-page {
+    align-items: center;
+    padding: calc(4rem + var(--safe-top)) max(12px, var(--safe-right)) calc(16px + var(--safe-bottom)) max(12px, var(--safe-left));
+    overflow-y: auto;
+  }
+  .al-card { border-radius: 16px; min-height: auto; max-width: 100%; max-height: none; }
   .al-card--solo { max-width: 100%; }
-  .al-left { padding: 2rem 1.5rem; }
-  .al-card--solo .al-left { padding: 2rem 1.75rem; }
-  .al-title { font-size: 1.2rem; }
+  .al-left { padding: 2rem 1.25rem; }
+  .al-card--solo .al-left { padding: 2rem 1.25rem; }
+  .al-title { font-size: 1.2rem; margin-bottom: 1.5rem; }
 }
 
 .al-input-wrap input:-webkit-autofill,

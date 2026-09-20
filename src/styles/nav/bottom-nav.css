@@ -15,8 +15,8 @@
     align-items: stretch;
     justify-content: space-around;
     gap: 4px;
-    height: calc(56px + var(--safe-bottom));
-    padding: 6px 8px var(--safe-bottom);
+    height: calc(64px + var(--safe-bottom));
+    padding: 6px max(8px, var(--safe-right)) var(--safe-bottom) max(8px, var(--safe-left));
     background: var(--bg-panel);
     border-top: 1px solid var(--border);
     z-index: 200;
@@ -30,7 +30,7 @@
     align-items: center;
     justify-content: center;
     gap: 3px;
-    padding: 4px 8px;
+    padding: 4px 4px;
     border-radius: 10px;
     color: var(--text-muted);
     font-size: 10px;
