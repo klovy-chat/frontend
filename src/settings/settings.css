@@ -111,7 +111,8 @@
 }
 
 .settings-page .as-nav-item.active {
-  background: var(--accent-dim);
+  background: var(--bg-settings-card);
+  box-shadow: inset 3px 0 0 var(--accent);
   color: var(--text);
   font-weight: 600;
 }
@@ -119,6 +120,11 @@
 .settings-page .as-nav-item.active svg {
   color: var(--accent);
   opacity: 1;
+}
+
+.settings-page .as-nav-item:not(.active) svg {
+  color: var(--text-muted);
+  opacity: 0.8;
 }
 
 .settings-page .as-nav-spacer {
@@ -162,6 +168,23 @@
 
 .settings-page .as-setting-card:hover {
   background: var(--bg-settings-card-hover);
+}
+
+.settings-page .as-btn-primary,
+.settings-page .as-btn-secondary,
+.settings-page .as-btn-ghost {
+  box-shadow: none;
+}
+
+.settings-page .as-btn-secondary,
+.settings-page .as-btn-ghost {
+  background: transparent;
+}
+
+.settings-page .as-btn-secondary:hover:not(:disabled),
+.settings-page .as-btn-ghost:hover:not(:disabled) {
+  background: var(--bg-settings-card-hover);
+  border-color: var(--border);
 }
 
 .settings-page .as-action-row {

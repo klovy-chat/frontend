@@ -54,6 +54,7 @@ interface MessageInputProps {
   onCancelReply?: () => void;
   mentionCandidates?: MentionCandidate[];
   allowMentionEveryone?: boolean;
+  surface?: "dm" | "channel";
 }
 
 type MentionItem =
@@ -81,6 +82,7 @@ export function MessageInput({
   onCancelReply,
   mentionCandidates = [],
   allowMentionEveryone = false,
+  surface = "channel",
 }: MessageInputProps) {
   const { t } = useTranslation();
   const { dateLocale } = useLocale();
@@ -545,6 +547,7 @@ export function MessageInput({
       ref={formRef}
       className={[
         "mi-bar",
+        surface === "dm" ? "mi-bar--dm" : "",
         isFocused ? "mi-bar--focused" : "",
         disabled ? "mi-bar--disabled" : "",
       ]

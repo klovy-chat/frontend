@@ -96,6 +96,16 @@
   background: var(--bg-card);
 }
 
+.mi-bar--dm .mi-row {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.mi-bar--dm .mi-row:focus-within {
+  border-color: transparent;
+}
+
 .mi-bar--disabled .mi-row {
   opacity: 0.45;
   pointer-events: none;

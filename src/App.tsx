@@ -27,7 +27,6 @@ import { Invite } from "./pages/Invite";
 import { Settings } from "./settings/Settings";
 import { setAppBadge } from "./utils/device/appBadge";
 import { UpdateNotice } from "./components/common/UpdateNotice";
-import { ConnectionOverlay } from "./components/common/ConnectionOverlay";
 import { ToastProvider } from "./context/ToastContext";
 
 function AuthOnlyRoute({ children }: { children: React.ReactNode }) {
@@ -87,7 +86,6 @@ function AuthenticatedShell() {
             <CallOverlay />
             <Warning />
             <Announcements />
-            <ConnectionOverlay />
           </CallProvider>
         </PresenceProvider>
       </WebSocketProvider>
