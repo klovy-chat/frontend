@@ -17,7 +17,7 @@
 }
 
 .app-shell--chat {
-  grid-template-columns: var(--nav-width) var(--list-width) 1fr var(--detail-width);
+  grid-template-columns: var(--nav-width) var(--list-width) 1fr;
 }
 
 .app-shell--chat.app-shell--no-detail {
@@ -89,15 +89,6 @@
   position: relative;
 }
 
-.app-shell__detail {
-  min-width: 0;
-  min-height: 0;
-  overflow: hidden;
-  background: var(--bg-panel);
-  border-left: 1px solid var(--border);
-  z-index: 1;
-}
-
 .app-shell__settings-nav {
   border-right: 1px solid var(--border-light);
   background: var(--bg-settings-nav, var(--bg-panel));
@@ -116,10 +107,6 @@
   .app-shell--chat,
   .app-shell--chat.app-shell--no-detail {
     grid-template-columns: var(--nav-width) var(--list-width) 1fr;
-  }
-
-  .app-shell--chat .app-shell__detail {
-    display: none;
   }
 }
 
@@ -586,12 +573,10 @@
     display: flex;
   }
 
-  .app-shell--chat.app-shell--show-home .app-shell__list,
   .app-shell--chat.app-shell--show-directory .app-shell__list {
     display: none;
   }
 
-  .app-shell--chat.app-shell--show-home .app-shell__main,
   .app-shell--chat.app-shell--show-directory .app-shell__main {
     display: flex;
   }

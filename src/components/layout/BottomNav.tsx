@@ -5,19 +5,17 @@
 //  - safe-area padding
 
 import { useTranslation } from "react-i18next";
-import { Globe2, Home, Phone } from "lucide-react";
+import { Globe2 } from "lucide-react";
 import "../../styles/nav/bottom-nav.css";
 
-export type BottomNavTab = "home" | "chats" | "contacts" | "calls" | "communities" | "settings";
+export type BottomNavTab = "chats" | "contacts" | "communities" | "settings";
 
 interface BottomNavProps {
   active: BottomNavTab;
   totalUnread?: number;
   receivedFriendRequests?: number;
-  onHome: () => void;
   onChats: () => void;
   onContacts: () => void;
-  onCalls: () => void;
   onCommunities: () => void;
   onSettings: () => void;
 }
@@ -26,10 +24,8 @@ export function BottomNav({
   active,
   totalUnread = 0,
   receivedFriendRequests = 0,
-  onHome,
   onChats,
   onContacts,
-  onCalls,
   onCommunities,
   onSettings,
 }: BottomNavProps) {
@@ -41,7 +37,7 @@ export function BottomNav({
       <button
         type="button"
         className={`bottom-nav__item${active === "chats" ? " active" : ""}`}
-        onClick={onHome}
+        onClick={onChats}
         aria-current={active === "chats" ? "page" : undefined}
       >
         <span className="bottom-nav__icon">
@@ -53,16 +49,6 @@ export function BottomNav({
           )}
         </span>
         <span className="bottom-nav__label">{t("nav.items.chats")}</span>
-      </button>
-
-      <button
-        type="button"
-        className={`bottom-nav__item${active === "home" ? " active" : ""}`}
-        onClick={onChats}
-        aria-current={active === "home" ? "page" : undefined}
-      >
-        <span className="bottom-nav__icon"><Home size={20} /></span>
-        <span className="bottom-nav__label">{t("nav.items.home")}</span>
       </button>
 
       <button
@@ -85,16 +71,6 @@ export function BottomNav({
           )}
         </span>
         <span className="bottom-nav__label">{t("nav.items.contacts")}</span>
-      </button>
-
-      <button
-        type="button"
-        className={`bottom-nav__item${active === "calls" ? " active" : ""}`}
-        onClick={onCalls}
-        aria-current={active === "calls" ? "page" : undefined}
-      >
-        <span className="bottom-nav__icon"><Phone size={20} /></span>
-        <span className="bottom-nav__label">{t("nav.items.calls")}</span>
       </button>
 
       <button

@@ -68,7 +68,6 @@ import { settingsPath } from "../../settings/routes";
 import { Nav } from "../layout/Nav";
 import { BottomNav, type BottomNavTab } from "../layout/BottomNav";
 import { ChatList, type ChatListTab } from "../layout/ChatList";
-import { ConversationDetails } from "../layout/ConversationDetails";
 import { ConversationHome } from "../layout/ConversationHome";
 import { WorkspaceDirectory } from "../layout/WorkspaceDirectory";
 import { useIsMobile } from "../../hooks/useIsMobile";
@@ -340,7 +339,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
   const [contactProfileOpenKey, setContactProfileOpenKey] = useState(0);
   const [contactsModalOpen, setContactsModalOpen] = useState(false);
   const [contactsModalClosing, setContactsModalClosing] = useState(false);
-  const [directoryView, setDirectoryView] = useState<"calls" | "communities" | null>(null);
+  const [directoryView, setDirectoryView] = useState<"communities" | null>(null);
   const [removeContactInfo, setRemoveContactInfo] = useState<Contact | null>(null);
   const [removeContactClosing, setRemoveContactClosing] = useState(false);
   const [removeContactSending, setRemoveContactSending] = useState(false);
@@ -2140,8 +2139,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
 
   const showMobileChat = isMobile && mobileTab === "chats" && active !== null;
   const showMobileContacts = isMobile && mobileTab === "contacts";
-  const showMobileDirectory = isMobile && (mobileTab === "calls" || mobileTab === "communities");
-  const showMobileHome = isMobile && mobileTab === "home";
+  const showMobileDirectory = isMobile && mobileTab === "communities";
   const showDesktopContacts = !isMobile && contactsModalOpen;
   const shellClass = [
     "app-shell",
@@ -2150,7 +2148,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
     showMobileChat && "app-shell--show-chat",
     showMobileContacts && "app-shell--show-contacts",
     showMobileDirectory && "app-shell--show-directory",
-    showMobileHome && "app-shell--show-home",
     showDesktopContacts && "app-shell--show-contacts",
   ]
     .filter(Boolean)
@@ -2161,18 +2158,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
       <div className={shellClass}>
         <div className="app-shell__nav">
           <Nav
-            onOpenHome={() => {
-              onSelect(null);
-              setDirectoryView(null);
-              openChats();
-            }}
-            onOpenCalls={() => {
-              onSelect(null);
-              setDirectoryView("calls");
-              setContactsModalOpen(false);
-              setContactsModalClosing(false);
-              setMobileTab("calls");
-            }}
             onOpenCommunities={() => {
               onSelect(null);
               setDirectoryView("communities");
@@ -2197,14 +2182,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
             totalUnread={totalUnread}
             receivedFriendRequests={receivedFriendRequests}
             contactsActive={showDesktopContacts || showMobileContacts}
-            homeActive={
-              !active &&
-              !showDesktopContacts &&
-              !showMobileContacts &&
-              directoryView === null &&
-              !showMobileDirectory
-            }
-            callsActive={!active && directoryView === "calls"}
             communitiesActive={!active && directoryView === "communities"}
           />
         </div>
@@ -2237,7 +2214,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
         <div className="app-shell__main">
           {!active && (directoryView || showMobileDirectory) ? (
             <WorkspaceDirectory
-              mode={directoryView ?? (mobileTab === "calls" ? "calls" : "communities")}
               channels={channels}
               onSelectChannel={handleSelectChannel}
             />
@@ -2263,10 +2239,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
             : children}
         </div>
 
-          {active && (
-            <ConversationDetails target={active} />
-          )}
-
         {((isMobile && mobileTab === "contacts") || showDesktopContacts) && (
           <div className="app-shell__contacts">
             <Contacts
@@ -2291,22 +2263,13 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
             active={mobileTab}
             totalUnread={totalUnread}
             receivedFriendRequests={receivedFriendRequests}
-            onHome={() => {
-              onSelect(null);
-              setDirectoryView(null);
-              setMobileTab("home");
-            }}
             onChats={() => {
+              onSelect(null);
               setMobileTab("chats");
               setDirectoryView(null);
               setContactsModalOpen(false);
             }}
             onContacts={() => setMobileTab("contacts")}
-            onCalls={() => {
-              onSelect(null);
-              setDirectoryView("calls");
-              setMobileTab("calls");
-            }}
             onCommunities={() => {
               onSelect(null);
               setDirectoryView("communities");

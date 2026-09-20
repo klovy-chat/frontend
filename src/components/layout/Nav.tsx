@@ -7,7 +7,7 @@
 // Przy zmianach: pages/Chat.tsx, UnreadBadge.tsx, styles/nav/nav.css.
 
 import { useEffect, useRef, useState } from "react";
-import { Globe2, Home, Moon, Phone, Sun } from "lucide-react";
+import { Globe2, Moon, Sun } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { updateAvailabilityStatus } from "../../api/auth";
 import { clearAutoIdleBrbFlag } from "../../hooks/useIdle";
@@ -28,11 +28,7 @@ interface NavProps {
   receivedFriendRequests?: number;
   settingsActive?: boolean;
   contactsActive?: boolean;
-  homeActive?: boolean;
-  onOpenHome: () => void;
-  callsActive?: boolean;
   communitiesActive?: boolean;
-  onOpenCalls: () => void;
   onOpenCommunities: () => void;
 }
 
@@ -45,11 +41,7 @@ export function Nav({
   receivedFriendRequests = 0,
   settingsActive = false,
   contactsActive = false,
-  homeActive = false,
-  onOpenHome,
-  callsActive = false,
   communitiesActive = false,
-  onOpenCalls,
   onOpenCommunities,
 }: NavProps) {
   const { t } = useTranslation();
@@ -113,15 +105,7 @@ export function Nav({
           <div className="nav-rail__group-label">{t("nav.groups.workspace")}</div>
           <button
             type="button"
-            className={`nav-rail__item${homeActive ? " active" : ""}`}
-            onClick={onOpenHome}
-          >
-            <span className="nav-rail__icon"><Home size={18} strokeWidth={1.8} /></span>
-            {t("nav.items.home")}
-          </button>
-          <button
-            type="button"
-            className={`nav-rail__item${!homeActive && !settingsActive && !contactsActive && !callsActive && !communitiesActive ? " active" : ""}`}
+            className={`nav-rail__item${!settingsActive && !contactsActive && !communitiesActive ? " active" : ""}`}
             onClick={onOpenChats}
           >
             <span className="nav-rail__icon">
@@ -147,10 +131,6 @@ export function Nav({
                 {receivedFriendRequests > 9 ? "9+" : receivedFriendRequests}
               </span>
             )}
-          </button>
-          <button type="button" className={`nav-rail__item${callsActive ? " active" : ""}`} onClick={onOpenCalls}>
-            <span className="nav-rail__icon"><Phone size={18} strokeWidth={1.8} /></span>
-            {t("nav.items.calls")}
           </button>
           <button type="button" className={`nav-rail__item${communitiesActive ? " active" : ""}`} onClick={onOpenCommunities}>
             <span className="nav-rail__icon"><Globe2 size={18} strokeWidth={1.8} /></span>

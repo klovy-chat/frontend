@@ -517,7 +517,7 @@ export function Contacts({
               }
             />
           ) : (
-            <div className="contacts-modal__list">
+            <div className="contacts-modal__list contacts-modal__list--friends">
               {filteredFriends.map((f, i) => (
                 <FriendPresenceRow
                   key={f._id}

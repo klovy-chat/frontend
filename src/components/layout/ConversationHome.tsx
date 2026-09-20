@@ -35,7 +35,6 @@ export function ConversationHome({
     <section className="conversation-home">
       <header className="conversation-home__header">
         <div>
-          <span className="conversation-home__eyebrow">Klovy Chat</span>
           <h1>{t("chat.home.title")}</h1>
           <p>{t("chat.home.subtitle")}</p>
         </div>

@@ -29,6 +29,39 @@
   box-shadow: none;
 }
 
+@media (min-width: 1024px) {
+  .contacts-modal--inline .contacts-modal__body {
+    width: min(100%, 1180px);
+    margin: 0 auto;
+  }
+
+  .contacts-modal--inline .contacts-modal__main {
+    padding: 24px 32px 32px;
+  }
+
+  .contacts-modal--inline .contacts-modal__side {
+    padding: 24px 28px 32px;
+  }
+
+  .contacts-modal--inline .contacts-modal__list--friends {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(260px, 1fr));
+    gap: 10px;
+  }
+
+  .contacts-modal--inline .contacts-modal__list--friends .contacts-modal__row {
+    min-height: 68px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    background: var(--bg-panel);
+  }
+
+  .contacts-modal--inline .contacts-modal__list--friends .contacts-modal__row:hover {
+    background: var(--bg-hover);
+    border-color: var(--accent-border);
+  }
+}
+
 .contacts-modal__header {
   display: flex;
   align-items: flex-start;
@@ -583,6 +616,12 @@
 
   .contacts-modal__tabs::-webkit-scrollbar {
     display: none;
+  }
+}
+
+@media (min-width: 681px) and (max-width: 1080px) {
+  .contacts-modal--inline .contacts-modal__list--friends {
+    grid-template-columns: 1fr;
   }
 }
 
