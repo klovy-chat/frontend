@@ -72,7 +72,7 @@ import { ConversationHome } from "../layout/ConversationHome";
 import { useIsMobile } from "../../hooks/useIsMobile";
 import { MyProfile } from "../profile/MyProfile";
 import { OtherProfile } from "../profile/OtherProfile";
-import { userLabel, availabilityStatusLabel } from "../../utils/user/format";
+import { userLabel, formatLastSeen } from "../../utils/user/format";
 import { channelMemberCount, channelMemberCountLabel, getEffectiveStatus } from "../../utils/user/presence";
 import {
   patchChannelsFromEditedMessage,
@@ -289,9 +289,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
   channelsRef.current = channels;
   const currentUserIdRef = useRef(user?.id);
   currentUserIdRef.current = user?.id;
-
-  const availabilityRef = useRef(user?.availabilityStatus);
-  availabilityRef.current = user?.availabilityStatus;
 
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<Contact[]>([]);
@@ -1498,7 +1495,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
       const senderId = getSenderId(msg);
       if (!senderId || senderId === currentUserIdRef.current) return;
       if (isConversationMuted("dm", senderId)) return;
-      if (availabilityRef.current === "dnd") return;
       playNotificationSound();
     };
 
@@ -1509,7 +1505,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
       if (!senderId || senderId === currentUserIdRef.current) return;
       const channelId = msg?.channelId ?? msg?.channel;
       if (typeof channelId === "string" && isConversationMuted("channel", channelId)) return;
-      if (availabilityRef.current === "dnd") return;
       playNotificationSound();
     };
 
@@ -1581,7 +1576,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
     if (!ws) return;
     const onMention = (payload: MentionEvent) => {
       if (!payload?.sourceId) return;
-      if (availabilityRef.current === "dnd") return;
       const muted =
         payload.scope === "dm"
           ? isConversationMuted("dm", payload.sourceId)
@@ -1935,7 +1929,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
     e.preventDefault(); e.stopPropagation();
     const live = { ...contact, ...(getPresenceSnapshot(contact._id) ?? {}) };
     const status = getEffectiveStatus(live);
-    const statusLabel = availabilityStatusLabel(status);
+    const statusLabel = formatLastSeen(live.lastSeen, { isOnline: status === "online", blocked: contact.isBlockedByMe });
     setContextMenu({
       kind: "dm",
       id: contact._id,

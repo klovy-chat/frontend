@@ -302,15 +302,6 @@
   background: var(--success);
 }
 
-.contacts-modal__status-dot--away,
-.contacts-modal__status-dot--brb {
-  background: var(--warning);
-}
-
-.contacts-modal__status-dot--dnd {
-  background: var(--danger);
-}
-
 .contacts-modal__status-dot--offline {
   background: var(--text-dim);
 }

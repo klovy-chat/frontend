@@ -26,7 +26,6 @@ import {
   revokeOtherSessions,
   revokeSession,
   updateProfile,
-  updateAvailabilityStatus,
   type OwnWarning,
   type UserSessionRow,
 } from "../api/auth";
@@ -64,9 +63,7 @@ import {
   useProfileAvatarStyle,
   useProfileBannerStyle,
 } from "../hooks/useMediaCache";
-import { userLabel, WARNING_SEVERITY_LABELS, availabilityStatusLabel } from "../utils/user/format";
-import { clearAutoIdleBrbFlag } from "../hooks/useIdle";
-import { presenceColor } from "../utils/user/presence";
+import { userLabel, WARNING_SEVERITY_LABELS } from "../utils/user/format";
 import { validatePasswordStrength } from "../utils/auth/password";
 import {
   checkPasswordBreach,
@@ -85,8 +82,6 @@ import { useIsMobile } from "../hooks/useIsMobile";
 import "./settings.css";
 import "../styles/account/account.css";
 import "../styles/account/profile.css";
-
-const AVAILABILITY_STATUSES = ["online", "away", "brb", "dnd"] as const;
 
 export type { SettingsSection };
 
@@ -124,7 +119,6 @@ export function Panel({
   const [usernameError, setUsernameError] = useState("");
   const [avatarLoading, setAvatarLoading] = useState(false);
   const [mobileKontoView, setMobileKontoView] = useState<"hub" | "account">("hub");
-  const [statusBusy, setStatusBusy] = useState(false);
   const [cropTarget, setCropTarget] = useState<{
     file: File;
     kind: "avatar" | "banner";
@@ -670,25 +664,8 @@ export function Panel({
   };
 
   const navName = userLabel(user);
-  const ownStatus = user?.availabilityStatus ?? "online";
   const warningCount = warnings.length;
   const unacknowledgedCount = warnings.filter((w) => !w.acknowledged).length;
-
-  const handleAvailabilityChange = async (status: (typeof AVAILABILITY_STATUSES)[number]) => {
-    if (!user || statusBusy || ownStatus === status) return;
-    setStatusBusy(true);
-    try {
-      clearAutoIdleBrbFlag();
-      const updated = await updateAvailabilityStatus(status);
-      updateUser(updated);
-    } catch (err) {
-      toast.error(
-        err instanceof ApiError ? err.message : t("settings.status.updateFailed"),
-      );
-    } finally {
-      setStatusBusy(false);
-    }
-  };
 
   const renderAvatarContent = (size: "sm" | "lg") => (
     <>
@@ -803,7 +780,6 @@ export function Panel({
     const titles: Record<SettingsSection, string> = {
       profil: t("settings.nav.profile"),
       konto: t("settings.nav.myAccount"),
-      status: t("settings.nav.status"),
       sesje: t("settings.nav.sessions"),
       glos: t("settings.nav.voice"),
       jezyk: t("settings.language.title"),
@@ -851,17 +827,6 @@ export function Panel({
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                   <circle cx="12" cy="7" r="4" />
-                </svg>
-              ),
-            },
-            {
-              id: "status" as const,
-              label: t("settings.nav.status"),
-              meta: availabilityStatusLabel(ownStatus),
-              icon: (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10" />
-                  <circle cx="12" cy="12" r="3" fill="currentColor" stroke="none" />
                 </svg>
               ),
             },
@@ -921,9 +886,6 @@ export function Panel({
           >
             <span className="settings-mobile-menu__icon">{item.icon}</span>
             <span className="settings-mobile-menu__label">{item.label}</span>
-            {"meta" in item && item.meta ? (
-              <span className="settings-mobile-menu__meta">{item.meta}</span>
-            ) : null}
             {"badge" in item && item.badge > 0 ? (
               <span className={`settings-mobile-menu__badge${item.alert ? " settings-mobile-menu__badge--alert" : ""}`}>
                 {item.badge}
@@ -1467,54 +1429,6 @@ export function Panel({
               ) : null}
               </>
               )}
-            </>
-          )}
-
-          {section === "status" && isMobile && (
-            <>
-              <p className="as-hint settings-status-lead">{t("settings.status.subtitle")}</p>
-              <div className="settings-status-list" role="listbox" aria-label={t("settings.nav.status")}>
-                {AVAILABILITY_STATUSES.map((status) => (
-                  <button
-                    key={status}
-                    type="button"
-                    role="option"
-                    aria-selected={ownStatus === status}
-                    className={`settings-status-option${ownStatus === status ? " active" : ""}`}
-                    disabled={statusBusy}
-                    onClick={() => void handleAvailabilityChange(status)}
-                  >
-                    <span
-                      className="settings-status-option__dot"
-                      style={{
-                        background: presenceColor({
-                          isOnline: true,
-                          availabilityStatus: status,
-                        }),
-                      }}
-                    />
-                    <span className="settings-status-option__label">
-                      {availabilityStatusLabel(status)}
-                    </span>
-                    {ownStatus === status ? (
-                      <svg
-                        className="settings-status-option__check"
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        aria-hidden
-                      >
-                        <path d="M20 6 9 17l-5-5" />
-                      </svg>
-                    ) : null}
-                  </button>
-                ))}
-              </div>
             </>
           )}
 

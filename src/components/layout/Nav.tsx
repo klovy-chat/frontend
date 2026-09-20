@@ -6,16 +6,13 @@
 // Nowa pozycja nav: tu + i18n + ewentualnie App route.
 // Przy zmianach: pages/Chat.tsx, UnreadBadge.tsx, styles/nav/nav.css.
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { updateAvailabilityStatus } from "../../api/auth";
-import { clearAutoIdleBrbFlag } from "../../hooks/useIdle";
 import { useAuth } from "../../context/AuthContext";
 import { Avatar } from "../common/Avatar";
-import { userLabel, formatLiveDateTime, availabilityStatusLabel } from "../../utils/user/format";
+import { userLabel, formatLiveDateTime } from "../../utils/user/format";
 import { LOGO_NONE_URL } from "../../constants/branding";
-import { presenceColor } from "../../utils/user/presence";
 import { useTheme } from "../../context/ThemeContext";
 import "../../styles/nav/nav.css";
 
@@ -41,41 +38,14 @@ export function Nav({
   contactsActive = false,
 }: NavProps) {
   const { t } = useTranslation();
-  const { user, logout, updateUser } = useAuth();
+  const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
-  const [statusMenuOpen, setStatusMenuOpen] = useState(false);
   const [now, setNow] = useState(() => new Date());
-  const statusMenuRef = useRef<HTMLDivElement>(null);
-  const ownStatus = user?.availabilityStatus ?? "online";
 
   useEffect(() => {
     const id = window.setInterval(() => setNow(new Date()), 1000);
     return () => window.clearInterval(id);
   }, []);
-
-  useEffect(() => {
-    if (!statusMenuOpen) return;
-    const onDoc = (e: MouseEvent) => {
-      if (statusMenuRef.current && !statusMenuRef.current.contains(e.target as Node)) {
-        setStatusMenuOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
-  }, [statusMenuOpen]);
-
-  const handleStatusChange = async (status: "online" | "away" | "brb" | "dnd") => {
-    if (!user) return;
-    try {
-      clearAutoIdleBrbFlag();
-
-      const updated = await updateAvailabilityStatus(status);
-      updateUser(updated);
-    } catch {
-      /**/
-    }
-    setStatusMenuOpen(false);
-  };
 
   return (
     <nav className="nav-rail">
@@ -149,24 +119,6 @@ export function Nav({
       </div>
 
       <div className="nav-rail__footer nav-rail__footer-wrap">
-        {statusMenuOpen && (
-          <div ref={statusMenuRef} className="nav-rail__status-menu">
-            {(["online", "away", "brb", "dnd"] as const).map((status) => (
-              <button
-                key={status}
-                type="button"
-                className={`nav-rail__status-item${ownStatus === status ? " active" : ""}`}
-                onClick={() => handleStatusChange(status)}
-              >
-                <span
-                  className="nav-rail__status-dot"
-                  style={{ background: presenceColor({ isOnline: true, availabilityStatus: status }) }}
-                />
-                {availabilityStatusLabel(status)}
-              </button>
-            ))}
-          </div>
-        )}
         <div className="nav-rail__profile">
           <button
             type="button"
@@ -175,34 +127,19 @@ export function Nav({
             aria-label={t("nav.items.viewProfile")}
             onClick={() => onOpenProfile?.()}
           >
-            <div style={{ position: "relative", display: "inline-flex" }}>
-              <Avatar
-                displayName={user?.displayName}
-                username={user?.username}
-                image={user?.image}
-                color={user?.color}
-              />
-              <span
-                className="presence-dot"
-                style={{ background: presenceColor({ isOnline: true, availabilityStatus: ownStatus }) }}
-              />
-            </div>
+            <Avatar
+              displayName={user?.displayName}
+              username={user?.username}
+              image={user?.image}
+              color={user?.color}
+            />
           </button>
-          <button
-            type="button"
-            className="nav-rail__profile-status-btn"
-            onClick={() => setStatusMenuOpen((v) => !v)}
-          >
+          <div className="nav-rail__profile-status-btn">
             <div className="nav-rail__profile-info">
               <div className="nav-rail__profile-name">{userLabel(user)}</div>
-              <div
-                className="nav-rail__profile-status"
-                style={{ color: presenceColor({ isOnline: true, availabilityStatus: ownStatus }) }}
-              >
-                {availabilityStatusLabel(ownStatus)}
-              </div>
+              <div className="nav-rail__profile-status">{t("user.availability.online")}</div>
             </div>
-          </button>
+          </div>
           <button type="button" className="nav-rail__logout" title={t("common.logoutTitle")} onClick={() => logout()}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />

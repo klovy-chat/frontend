@@ -1,41 +1,33 @@
 // presence.ts
-// Pomocnicze mapowanie availability → UI/dźwięki.
+// Pomocnicze mapowanie technicznej obecności na kolor UI.
 // Zakres:
-//  - online/away/brb/dnd
-//  - availability → UI/dźwięki; live jest w PresenceContext
+//  - online/offline; live jest w PresenceContext
 // Źródło live: PresenceContext, nie ten plik.
 // Przy zmianach: PresenceContext.tsx, notifySound.ts.
 
 import i18n from "../../i18n/config";
 
-export type AvailabilityStatus = "online" | "away" | "brb" | "dnd" | "offline";
+export type AvailabilityStatus = "online" | "offline";
 
 export const PRESENCE_COLORS: Record<AvailabilityStatus, string> = {
   online: "#4CD964",
-  away: "#8E8E93",
-  brb: "#FF9500",
-  dnd: "#FF3B30",
   offline: "#8E8E93",
 };
 
 function effectivePresenceStatus(entity: {
   isOnline?: boolean;
-  availabilityStatus?: "online" | "away" | "brb" | "dnd";
 }): AvailabilityStatus {
-  if (!entity.isOnline) return "offline";
-  return entity.availabilityStatus ?? "online";
+  return entity.isOnline ? "online" : "offline";
 }
 
 export function getEffectiveStatus(entity: {
   isOnline?: boolean;
-  availabilityStatus?: "online" | "away" | "brb" | "dnd";
 }): AvailabilityStatus {
   return effectivePresenceStatus(entity);
 }
 
 export function presenceColor(entity: {
   isOnline?: boolean;
-  availabilityStatus?: "online" | "away" | "brb" | "dnd";
 }): string {
   return PRESENCE_COLORS[effectivePresenceStatus(entity)];
 }

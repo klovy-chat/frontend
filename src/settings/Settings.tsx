@@ -44,10 +44,6 @@ export function Settings() {
     return <Navigate to={settingsPath(DEFAULT_SETTINGS_SECTION)} replace />;
   }
 
-  if (!isMobile && section === "status") {
-    return <Navigate to={settingsPath(DEFAULT_SETTINGS_SECTION)} replace />;
-  }
-
   return (
     <div className="app-shell app-shell--settings-standalone settings-page">
       <Panel

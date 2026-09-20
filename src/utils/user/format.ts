@@ -124,14 +124,6 @@ export function getUserId(user: { _id?: string; id?: string } | string): string 
   return user._id ?? user.id ?? "";
 }
 
-export type AvailabilityStatus = "online" | "away" | "brb" | "dnd" | "offline";
-
-export function availabilityStatusLabel(status: AvailabilityStatus): string {
-  return i18n.t(`user.availability.${status}`, {
-    defaultValue: i18n.t("user.availability.offline"),
-  });
-}
-
 export function formatLastSeen(
   lastSeen?: string | null,
   options: { isOnline?: boolean; blocked?: boolean } = {},

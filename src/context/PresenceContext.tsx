@@ -1,5 +1,5 @@
 // PresenceContext.tsx
-// Statusy online/away/dnd znajomych.
+// Techniczna obecność online/offline i czas ostatniej aktywności.
 // Zakres:
 //  - seed HTTP, delty WS
 //  - usePresenceSeed bez re-renderu, useUserPresence z subskrypcją
@@ -21,13 +21,9 @@ import { useAuth } from "./AuthContext";
 import { useWebSocket, useWebSocketConnected } from "./WebSocketContext";
 import { WsType } from "../api/protocol";
 import { getContactsForList } from "../api/contacts";
-import type { User } from "../types";
-
-export type AvailabilityStatus = "online" | "away" | "brb" | "dnd";
 
 export interface Presence {
   isOnline?: boolean;
-  availabilityStatus?: AvailabilityStatus;
   lastSeen?: string | null;
 }
 
@@ -71,7 +67,6 @@ interface PresenceApi {
       _id?: string;
       id?: string;
       isOnline?: boolean;
-      availabilityStatus?: string | null;
       lastSeen?: string | null;
     }>,
   ) => void;
@@ -85,20 +80,15 @@ interface StatusChangedPayload {
   status: {
     isOnline: boolean;
     lastSeen?: string | number | null;
-    availabilityStatus?: AvailabilityStatus;
   };
 }
 
 export function PresenceProvider({ children }: { children: ReactNode }) {
   const ws = useWebSocket();
   const wsConnected = useWebSocketConnected();
-  const { user, updateUser } = useAuth();
+  const { user } = useAuth();
   const userIdRef = useRef(user?.id);
-  const userRef = useRef(user);
   userIdRef.current = user?.id;
-  userRef.current = user;
-  const updateUserRef = useRef(updateUser);
-  updateUserRef.current = updateUser;
   const wasConnectedRef = useRef(wsConnected);
   const disconnectOfflineTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
@@ -157,10 +147,6 @@ export function PresenceProvider({ children }: { children: ReactNode }) {
           ...prev,
           [payload.userId]: {
             isOnline: payload.status.isOnline,
-            availabilityStatus:
-              payload.status.availabilityStatus ??
-              previous.availabilityStatus ??
-              "online",
             lastSeen:
               payload.status.lastSeen != null
                 ? new Date(payload.status.lastSeen).toISOString()
@@ -169,18 +155,6 @@ export function PresenceProvider({ children }: { children: ReactNode }) {
         };
       });
 
-      if (
-        payload.userId === userIdRef.current &&
-        payload.status.availabilityStatus
-      ) {
-        const current = userRef.current;
-        if (current) {
-          updateUserRef.current({
-            ...current,
-            availabilityStatus: payload.status.availabilityStatus,
-          } satisfies User);
-        }
-      }
     };
     const unsub = ws.subscribe(WsType.USER_STATUS_CHANGED, onStatusChanged);
     const unsubFriend = ws.subscribe(
@@ -208,7 +182,6 @@ export function PresenceProvider({ children }: { children: ReactNode }) {
         _id?: string;
         id?: string;
         isOnline?: boolean;
-        availabilityStatus?: string | null;
         lastSeen?: string | null;
       }>,
     ) => {
@@ -223,17 +196,12 @@ export function PresenceProvider({ children }: { children: ReactNode }) {
           if (typeof u.isOnline !== "boolean") continue;
           const incoming = {
             isOnline: u.isOnline,
-            availabilityStatus:
-              (u.availabilityStatus as AvailabilityStatus | undefined) ??
-              prev[id]?.availabilityStatus ??
-              "online",
             lastSeen: u.lastSeen ?? prev[id]?.lastSeen ?? null,
           };
           const prevEntry = next[id];
           if (
             prevEntry &&
             prevEntry.isOnline === incoming.isOnline &&
-            prevEntry.availabilityStatus === incoming.availabilityStatus &&
             prevEntry.lastSeen === incoming.lastSeen
           ) {
             continue;
@@ -243,14 +211,11 @@ export function PresenceProvider({ children }: { children: ReactNode }) {
 
             next[id] = {
               isOnline: true,
-              availabilityStatus:
-                incoming.availabilityStatus ?? prevEntry.availabilityStatus,
               lastSeen: incoming.lastSeen ?? prevEntry.lastSeen,
             };
             changed =
               changed ||
-              prevEntry.lastSeen !== next[id].lastSeen ||
-              prevEntry.availabilityStatus !== next[id].availabilityStatus;
+              prevEntry.lastSeen !== next[id].lastSeen;
             continue;
           }
           next[id] = incoming;

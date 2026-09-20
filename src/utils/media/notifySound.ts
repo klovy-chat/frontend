@@ -1,5 +1,5 @@
 // notifySound.ts
-// Pinging nowej wiadomości (nie przy mute, DND, focus otwartego czatu).
+// Pinging nowej wiadomości (nie przy mute ani focus otwartego czatu).
 // Zakres:
 //  - Sidebar / powłoka
 //  - ping nowej wiadomości; mute SoT = muted.ts

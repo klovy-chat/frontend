@@ -44,8 +44,6 @@ export function MyProfile({
     ? {
         ...baseUser,
         isOnline: live?.isOnline ?? baseUser.isOnline,
-        availabilityStatus:
-          live?.availabilityStatus ?? baseUser.availabilityStatus,
         lastSeen: live?.lastSeen ?? baseUser.lastSeen,
       }
     : null;

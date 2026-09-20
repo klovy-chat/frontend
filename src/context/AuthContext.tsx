@@ -18,7 +18,6 @@ import {
 import * as authApi from "../api/auth";
 import { isTwoFactorLoginResponse } from "../api/auth";
 import { ApiError, clearCsrfToken } from "../api/client";
-import { clearAutoIdleBrbFlag } from "../hooks/useIdle";
 import { restoreSession, clearCachedSessionUser } from "../utils/user/restore";
 import type { User } from "../types";
 
@@ -281,7 +280,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       clearCsrfToken();
       clearCachedSessionUser();
-      clearAutoIdleBrbFlag();
       await clearSessionState();
       setUser(null);
     }

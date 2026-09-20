@@ -10,7 +10,6 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Avatar } from "../common/Avatar";
 import { userLabel } from "../../utils/user/format";
-import { useAuth } from "../../context/AuthContext";
 import { useCall } from "../../context/CallContext";
 import {
   startIncomingCallSound,
@@ -24,17 +23,14 @@ const C = {
 
 export function IncomingCall() {
   const { t } = useTranslation();
-  const { user } = useAuth();
   const { state, mode, peer, acceptCall, rejectCall, acceptInFlight } = useCall();
-  const isDnd = user?.availabilityStatus === "dnd";
-
   useEffect(() => {
-    if (state === "incoming" && !isDnd) {
+    if (state === "incoming") {
       startIncomingCallSound();
       return () => stopIncomingCallSound();
     }
     stopIncomingCallSound();
-  }, [state, isDnd]);
+  }, [state]);
 
   if (state !== "incoming" || !peer) return null;
 

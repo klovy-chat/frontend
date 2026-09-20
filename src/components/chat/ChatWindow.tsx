@@ -22,7 +22,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useWebSocket, useWebSocketConnected } from "../../context/WebSocketContext";
 import { WsType } from "../../api/protocol";
 import { useCall, type CallPeer } from "../../context/CallContext";
-import { userLabel, availabilityStatusLabel } from "../../utils/user/format";
+import { userLabel, formatLastSeen } from "../../utils/user/format";
 import { stripFormatting } from "../../utils/chat/format";
 import {
   isVoiceAttachment,
@@ -35,7 +35,6 @@ import {
 } from "../../utils/media/mediaLinks";
 import { isAllowedGifMediaUrl } from "../../utils/media/allowedMedia";
 import { useProfileSync } from "../../hooks/useProfileSync";
-import { presenceColor } from "../../utils/user/presence";
 import {
   usePresenceSeed,
   useUserPresence,
@@ -2049,28 +2048,22 @@ export function ChatWindow({
         )}
 
         {target.type === "dm" ? (
-          <div style={{ position: "relative", display: "inline-flex" }}>
-            <Avatar {...avatarProps} size={34} />
-            <span
-              className="presence-dot"
-              title={
-                dmContact?.isOnline
-                  ? availabilityStatusLabel(dmContact.availabilityStatus ?? "online")
-                  : availabilityStatusLabel("offline")
-              }
-              style={{
-                background: presenceColor(dmContact ?? target.contact),
-              }}
-            />
-          </div>
+          <Avatar {...avatarProps} size={34} />
         ) : (
           <Avatar {...avatarProps} size={34} />
         )}
         <div className="chat-header__info">
           <h3 className="chat-header__name">{title}</h3>
-          {target.type === "channel" && target.channel.description && (
+          {target.type === "dm" ? (
+            <span className="chat-header__desc">
+              {formatLastSeen(dmContact?.lastSeen ?? target.contact.lastSeen, {
+                isOnline: dmContact?.isOnline ?? target.contact.isOnline,
+                blocked: Boolean(target.contact.isBlockedByMe),
+              })}
+            </span>
+          ) : target.channel.description ? (
             <span className="chat-header__desc">{target.channel.description}</span>
-          )}
+          ) : null}
         </div>
 
         <div className="chat-header__actions">

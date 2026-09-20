@@ -17,7 +17,6 @@ export interface User {
   color?: number | null;
   isOnline?: boolean;
   lastSeen?: string | null;
-  availabilityStatus?: "online" | "away" | "brb" | "dnd";
   createdAt?: string;
   twoFactorEnabled?: boolean;
   isDisabled?: boolean;
@@ -35,7 +34,6 @@ export interface Contact {
   color?: number;
   isOnline?: boolean;
   lastSeen?: string | null;
-  availabilityStatus?: "online" | "away" | "brb" | "dnd";
   createdAt?: string;
   lastMessageTime?: string;
   lastMessage?: string;

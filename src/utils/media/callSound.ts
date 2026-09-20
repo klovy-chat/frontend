@@ -1,10 +1,10 @@
 // callSound.ts
-// Dźwięk ringtone; stop przy accept/reject; szacunek DND.
+// Dźwięk ringtone; stop przy accept/reject.
 // Zakres:
 //  - IncomingCall
-//  - ringtone; stop przy accept/reject; szacunek DND
+//  - ringtone; stop przy accept/reject
 // Nowy plik audio: public/ + ten loader.
-// Przy zmianach: IncomingCall.tsx, presence (dnd).
+// Przy zmianach: IncomingCall.tsx.
 
 const INCOMING_CALL_SOUND_URL = "/assets/call-incoming.mp3";
 

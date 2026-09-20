@@ -968,9 +968,6 @@
     },
     "availability": {
       "online": "Dostępny",
-      "away": "Niedostępny",
-      "brb": "Zaraz wracam",
-      "dnd": "Nie przeszkadzać",
       "offline": "Niedostępny"
     },
     "lastSeen": {

@@ -18,7 +18,6 @@ import { UnreadSync } from "./components/chat/UnreadSync";
 import { Mentions } from "./components/chat/Mentions";
 import { Warning } from "./components/common/Warning";
 import { Announcements } from "./components/common/Announcements";
-import { useIdle } from "./hooks/useIdle";
 import { Login } from "./pages/Login";
 import { Signup } from "./pages/Signup";
 import { ProfileSetup } from "./pages/ProfileSetup";
@@ -72,7 +71,6 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 }
 
 function AuthenticatedShell() {
-  useIdle();
   return (
     <ProtectedRoute>
       <WebSocketProvider>

@@ -232,15 +232,6 @@ export function changeUsername(
   });
 }
 
-export function updateAvailabilityStatus(
-  availabilityStatus: "online" | "away" | "brb" | "dnd",
-) {
-  return apiRequest<User>("/api/auth/availability-status", {
-    method: "POST",
-    body: JSON.stringify({ availabilityStatus }),
-  });
-}
-
 export function addProfileImage(file: File) {
   assertAvatarSize(file);
   const form = new FormData();

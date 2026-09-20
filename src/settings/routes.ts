@@ -9,7 +9,6 @@
 export type SettingsSection =
   | "profil"
   | "konto"
-  | "status"
   | "sesje"
   | "glos"
   | "jezyk"
@@ -18,7 +17,6 @@ export type SettingsSection =
 export const SECTION_SLUGS: Record<SettingsSection, string> = {
   profil: "profile",
   konto: "account",
-  status: "status",
   sesje: "sessions",
   glos: "voice",
   jezyk: "language",

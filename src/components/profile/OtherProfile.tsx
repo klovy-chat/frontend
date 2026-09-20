@@ -82,8 +82,6 @@ export function OtherProfile({
     ? {
         ...base,
         isOnline: live?.isOnline ?? base.isOnline,
-        availabilityStatus:
-          live?.availabilityStatus ?? base.availabilityStatus,
         lastSeen: live?.lastSeen ?? base.lastSeen,
       }
     : null;
