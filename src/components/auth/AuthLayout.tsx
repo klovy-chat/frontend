@@ -1,10 +1,10 @@
 // AuthLayout.tsx
-// Szablon ekranów auth (formularz + karuzela).
+// Wspólny layout ekranów auth (formularz, motyw i język).
 // Zakres:
 //  - Login, Signup, Invite, setup
-//  - split: formularz + karuzela; nowe publiczne strony owijaj tym
+//  - jednokolumnowy formularz na wspólnym tle; nowe publiczne strony owijaj tym
 // Nowa strona publiczna: owijaj tym layoutem + auth.css.
-// Przy zmianach: Carousel.tsx, auth.css.
+// Przy zmianach: auth.css.
 
 import type { ReactNode } from "react";
 import { Moon, Sun } from "lucide-react";

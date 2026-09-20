@@ -60,7 +60,6 @@ export function Settings() {
           active="settings"
           onChats={() => navigate("/")}
           onContacts={() => navigate("/", { state: { openContacts: true } })}
-          onCommunities={() => navigate("/")}
           onSettings={() => navigate(settingsPath("konto"))}
         />
       )}

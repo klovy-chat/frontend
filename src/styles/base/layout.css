@@ -573,14 +573,6 @@
     display: flex;
   }
 
-  .app-shell--chat.app-shell--show-directory .app-shell__list {
-    display: none;
-  }
-
-  .app-shell--chat.app-shell--show-directory .app-shell__main {
-    display: flex;
-  }
-
   /* Panel: kontakty */
   .app-shell--chat.app-shell--show-contacts .app-shell__list {
     display: none;

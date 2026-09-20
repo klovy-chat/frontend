@@ -18,8 +18,6 @@ import {
   type CaptchaHandle,
 } from "../components/auth/Captcha";
 import { AuthLayout } from "../components/auth/AuthLayout";
-import { Carousel, useAuthSlides } from "../components/auth/Carousel";
-import { LOGO_COLOUR_URL } from "../constants/branding";
 import { normalizeUsernameInput, sanitizeUsernameInput } from "../utils/auth/username";
 import "../styles/auth/auth.css";
 
@@ -48,7 +46,6 @@ export function Login() {
   const [useBackupCode, setUseBackupCode] = useState(false);
   const turnstileRef = useRef<CaptchaHandle>(null);
   const twoFactorTurnstileRef = useRef<CaptchaHandle>(null);
-  const slides = useAuthSlides();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -134,15 +131,6 @@ export function Login() {
     <AuthLayout>
       <div className="al-card">
         <div className="al-left">
-          <div className="al-brand">
-            <div className="al-logo">
-              <img src={LOGO_COLOUR_URL} alt="" />
-            </div>
-            <div>
-              <strong>Klovy Chat</strong>
-              <span>{t("auth.brand.tagline")}</span>
-            </div>
-          </div>
           {step === "credentials" ? (
             <>
               <h1 className="al-title">{t("auth.login.title")}</h1>
@@ -316,7 +304,6 @@ export function Login() {
             </>
           )}
         </div>
-        <Carousel slides={slides} />
       </div>
     </AuthLayout>
   );

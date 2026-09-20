@@ -312,32 +312,6 @@
     }
   },
   "auth": {
-    "brand": {
-      "tagline": "Secure conversations"
-    },
-    "carousel": {
-      "slideAria": "Slide {{n}}",
-      "privacy": {
-        "tag": "Privacy",
-        "title": "Your chats stay with you",
-        "desc": "Messages are protected on the server and only reach the people you talk to."
-      },
-      "encryption": {
-        "tag": "Security",
-        "title": "2FA login and password protection",
-        "desc": "Two-factor authentication, device sessions, and leaked-password blocking."
-      },
-      "calls": {
-        "tag": "Calls",
-        "title": "Voice, video, and channels",
-        "desc": "Call friends or join a voice channel in one click."
-      },
-      "community": {
-        "tag": "Community",
-        "title": "Channels, invites, friends",
-        "desc": "Create spaces, invite people, and keep contacts in one place."
-      }
-    },
     "password": {
       "minLength": "Password must be at least 8 characters.",
       "lowercase": "Password must contain a lowercase letter.",
@@ -584,12 +558,6 @@
       "openChat": "Open a chat to start a call.",
       "note": "Call history is represented by call messages inside each conversation."
     },
-    "communities": {
-      "title": "Communities",
-      "subtitle": "Your channels, gathered in one place.",
-      "empty": "No channels available yet.",
-      "noDescription": "No channel description"
-    },
     "inviteEmbed": {
       "label": "Channel invite",
       "established": "Est. {{date}}",
@@ -728,7 +696,6 @@
       "chats": "Chats",
       "contacts": "Contacts",
       "calls": "Calls",
-      "communities": "Communities",
       "settings": "Settings",
       "viewProfile": "View profile"
     }

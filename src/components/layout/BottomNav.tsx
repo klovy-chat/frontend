@@ -5,10 +5,9 @@
 //  - safe-area padding
 
 import { useTranslation } from "react-i18next";
-import { Globe2 } from "lucide-react";
 import "../../styles/nav/bottom-nav.css";
 
-export type BottomNavTab = "chats" | "contacts" | "communities" | "settings";
+export type BottomNavTab = "chats" | "contacts" | "settings";
 
 interface BottomNavProps {
   active: BottomNavTab;
@@ -16,7 +15,6 @@ interface BottomNavProps {
   receivedFriendRequests?: number;
   onChats: () => void;
   onContacts: () => void;
-  onCommunities: () => void;
   onSettings: () => void;
 }
 
@@ -26,7 +24,6 @@ export function BottomNav({
   receivedFriendRequests = 0,
   onChats,
   onContacts,
-  onCommunities,
   onSettings,
 }: BottomNavProps) {
   const { t } = useTranslation();
@@ -71,16 +68,6 @@ export function BottomNav({
           )}
         </span>
         <span className="bottom-nav__label">{t("nav.items.contacts")}</span>
-      </button>
-
-      <button
-        type="button"
-        className={`bottom-nav__item${active === "communities" ? " active" : ""}`}
-        onClick={onCommunities}
-        aria-current={active === "communities" ? "page" : undefined}
-      >
-        <span className="bottom-nav__icon"><Globe2 size={20} /></span>
-        <span className="bottom-nav__label">{t("nav.items.communities")}</span>
       </button>
 
       <button

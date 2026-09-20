@@ -312,32 +312,6 @@
     }
   },
   "auth": {
-    "brand": {
-      "tagline": "Bezpieczne rozmowy"
-    },
-    "carousel": {
-      "slideAria": "Slajd {{n}}",
-      "privacy": {
-        "tag": "Prywatność",
-        "title": "Twoje rozmowy zostają u Ciebie",
-        "desc": "Wiadomości są chronione na serwerze i trafiają tylko do osób, z którymi rozmawiasz."
-      },
-      "encryption": {
-        "tag": "Bezpieczeństwo",
-        "title": "Logowanie z 2FA i ochroną haseł",
-        "desc": "Dwuskładnikowe uwierzytelnianie, sesje urządzeń i blokada wycieków haseł."
-      },
-      "calls": {
-        "tag": "Rozmowy",
-        "title": "Głos, wideo i kanały",
-        "desc": "Dzwoń do znajomych albo dołącz do kanału głosowego jednym kliknięciem."
-      },
-      "community": {
-        "tag": "Społeczność",
-        "title": "Kanały, zaproszenia, znajomi",
-        "desc": "Twórz przestrzenie, zapraszaj ludzi i trzymaj kontakty w jednym miejscu."
-      }
-    },
     "password": {
       "minLength": "Hasło musi mieć co najmniej 8 znaków.",
       "lowercase": "Hasło musi zawierać małą literę.",
@@ -584,12 +558,6 @@
       "openChat": "Otwórz rozmowę, aby rozpocząć połączenie.",
       "note": "Historia połączeń jest widoczna jako wiadomości połączeń w poszczególnych rozmowach."
     },
-    "communities": {
-      "title": "Społeczności",
-      "subtitle": "Twoje kanały zebrane w jednym miejscu.",
-      "empty": "Brak dostępnych kanałów.",
-      "noDescription": "Brak opisu kanału"
-    },
     "inviteEmbed": {
       "label": "Zaproszenie do kanału",
       "established": "Zał. {{date}}",
@@ -728,7 +696,6 @@
       "chats": "Czaty",
       "contacts": "Kontakty",
       "calls": "Połączenia",
-      "communities": "Społeczności",
       "settings": "Ustawienia",
       "viewProfile": "Zobacz profil"
     }

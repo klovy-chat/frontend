@@ -20,9 +20,12 @@
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
-  background:
-    radial-gradient(circle at 16% 16%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 32%),
-    var(--bg-deep);
+  background-image:
+    linear-gradient(135deg, color-mix(in srgb, var(--bg-shell) 88%, var(--accent) 12%), color-mix(in srgb, var(--bg-deep) 78%, transparent)),
+    url("https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=2200&q=82");
+  background-position: center;
+  background-size: cover;
+  background-attachment: fixed;
   position: relative;
   overflow: hidden;
 }
@@ -82,10 +85,12 @@
 .al-card {
   position: relative;
   z-index: 1;
-  display: grid;
-  grid-template-columns: minmax(380px, 440px) minmax(360px, 440px);
-  min-height: 540px;
-  background: var(--bg-panel);
+  display: block;
+  width: min(500px, 100%);
+  min-height: 0;
+  background: color-mix(in srgb, var(--bg-panel) 94%, transparent);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
   border: 1px solid var(--border);
   border-radius: 20px;
   overflow: hidden;
@@ -109,53 +114,8 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  border-right: 1px solid var(--border-light);
-  background: color-mix(in srgb, var(--bg-panel) 94%, var(--accent) 6%);
-}
-
-.al-brand {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  margin-bottom: 2rem;
-}
-
-.al-logo {
-  width: 34px;
-  height: 34px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--accent-dim);
-  border: 1px solid var(--accent-border);
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
-  color: #fff;
-  flex-shrink: 0;
-  overflow: hidden;
-}
-
-.al-logo img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-.al-brand strong {
-  display: block;
-  font-size: 0.9rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text);
-}
-
-.al-brand span {
-  display: block;
-  font-size: 0.72rem;
-  color: var(--text-dim);
-  margin-top: 1px;
+  border-right: none;
+  background: transparent;
 }
 
 .al-title {
@@ -411,119 +371,6 @@
 
 .al-footer { margin-top: 0; }
 
-.al-right {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  background: linear-gradient(180deg, var(--bg-deep) 0%, var(--bg-elevated) 100%);
-  border-left: 1px solid var(--border-light);
-}
-
-.al-slides {
-  flex: 1;
-  position: relative;
-  padding: 1.5rem 2rem 1rem;
-}
-
-.al-slide {
-  position: absolute; inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 2.5rem 2rem 1.5rem;
-  opacity: 0;
-  transform: translateX(40px);
-  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-  pointer-events: none;
-}
-
-.al-slide.active {
-  opacity: 1;
-  transform: translateX(0);
-  pointer-events: auto;
-}
-
-.al-slide.exit {
-  opacity: 0;
-  transform: translateX(-40px);
-}
-
-.al-slide-icon {
-  width: 46px;
-  height: 46px;
-  min-width: 46px;
-  min-height: 46px;
-  border-radius: 50%;
-  background: var(--accent-dim);
-  border: 1px solid var(--accent-border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 1.3rem;
-}
-
-.al-slide-icon svg {
-  width: 28px;
-  height: 28px;
-  color: var(--accent);
-}
-
-.al-slide-tag {
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 0.6rem;
-  opacity: 0.8;
-}
-
-.al-slide-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: var(--text);
-  text-align: center;
-  line-height: 1.2;
-  margin: 0 0 1rem;
-  letter-spacing: -0.01em;
-}
-
-.al-slide-desc {
-  font-size: 0.86rem;
-  color: var(--text-muted);
-  text-align: center;
-  line-height: 1.75;
-  max-width: 300px;
-  margin: 0;
-}
-
-.al-dots {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  padding: 0 2rem 2.5rem;
-  position: relative;
-  z-index: 2;
-}
-
-.al-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--border);
-  border: none;
-  cursor: var(--cursor-pointer);
-  transition: background 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  padding: 0;
-}
-
-.al-dot.active {
-  background: var(--accent);
-  transform: scale(1.5);
-}
-
 .turnstile-wrap {
   width: 100%;
   min-height: 65px;
@@ -612,7 +459,6 @@
   .al-card--solo {
     max-width: 480px;
   }
-  .al-right { display: none; }
   .al-left { border-right: none; padding: 2.5rem 2rem; }
   .al-card--solo .al-left { padding: 2.5rem 2rem; }
 }

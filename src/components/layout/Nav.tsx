@@ -7,7 +7,7 @@
 // Przy zmianach: pages/Chat.tsx, UnreadBadge.tsx, styles/nav/nav.css.
 
 import { useEffect, useRef, useState } from "react";
-import { Globe2, Moon, Sun } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { updateAvailabilityStatus } from "../../api/auth";
 import { clearAutoIdleBrbFlag } from "../../hooks/useIdle";
@@ -28,8 +28,6 @@ interface NavProps {
   receivedFriendRequests?: number;
   settingsActive?: boolean;
   contactsActive?: boolean;
-  communitiesActive?: boolean;
-  onOpenCommunities: () => void;
 }
 
 export function Nav({
@@ -41,8 +39,6 @@ export function Nav({
   receivedFriendRequests = 0,
   settingsActive = false,
   contactsActive = false,
-  communitiesActive = false,
-  onOpenCommunities,
 }: NavProps) {
   const { t } = useTranslation();
   const { user, logout, updateUser } = useAuth();
@@ -105,7 +101,7 @@ export function Nav({
           <div className="nav-rail__group-label">{t("nav.groups.workspace")}</div>
           <button
             type="button"
-            className={`nav-rail__item${!settingsActive && !contactsActive && !communitiesActive ? " active" : ""}`}
+            className={`nav-rail__item${!settingsActive && !contactsActive ? " active" : ""}`}
             onClick={onOpenChats}
           >
             <span className="nav-rail__icon">
@@ -131,10 +127,6 @@ export function Nav({
                 {receivedFriendRequests > 9 ? "9+" : receivedFriendRequests}
               </span>
             )}
-          </button>
-          <button type="button" className={`nav-rail__item${communitiesActive ? " active" : ""}`} onClick={onOpenCommunities}>
-            <span className="nav-rail__icon"><Globe2 size={18} strokeWidth={1.8} /></span>
-            {t("nav.items.communities")}
           </button>
         </div>
 

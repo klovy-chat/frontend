@@ -17,8 +17,6 @@ import {
   type CaptchaHandle,
 } from "../components/auth/Captcha";
 import { AuthLayout } from "../components/auth/AuthLayout";
-import { Carousel, useAuthSlides } from "../components/auth/Carousel";
-import { LOGO_COLOUR_URL } from "../constants/branding";
 import {
   normalizeUsernameInput,
   sanitizeUsernameInput,
@@ -48,7 +46,6 @@ export function Signup() {
   const [accepted, setAccepted] = useState(false);
   const [registrationOpen, setRegistrationOpen] = useState<boolean | null>(null);
   const turnstileRef = useRef<CaptchaHandle>(null);
-  const slides = useAuthSlides();
 
   useEffect(() => {
     getRegistrationStatus()
@@ -116,15 +113,6 @@ export function Signup() {
     <AuthLayout>
       <div className="al-card">
         <div className="al-left">
-          <div className="al-brand">
-            <div className="al-logo">
-              <img src={LOGO_COLOUR_URL} alt="" />
-            </div>
-            <div>
-              <strong>Klovy Chat</strong>
-              <span>{t("auth.brand.tagline")}</span>
-            </div>
-          </div>
           <h1 className="al-title">{t("auth.signup.title")}</h1>
 
           {registrationOpen === false ? (
@@ -312,7 +300,6 @@ export function Signup() {
             </Link>
           </p>
         </div>
-        <Carousel slides={slides} />
       </div>
     </AuthLayout>
   );
