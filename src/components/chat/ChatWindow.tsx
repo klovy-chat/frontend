@@ -2341,7 +2341,6 @@ export function ChatWindow({
               onVoiceNote={handleVoiceNote}
               onGif={handleGif}
               onSticker={handleSticker}
-              surface={target.type}
               disabled={
                 !canSendChannel ||
                 !wsConnected ||

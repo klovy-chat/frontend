@@ -92,10 +92,12 @@ function ContactRow({
           image={c.image}
           color={c.color}
         />
-        <span
-          className="presence-dot"
-          style={{ background: PRESENCE_COLORS[status] }}
-        />
+        {status === "online" ? (
+          <span
+            className="presence-dot"
+            style={{ background: PRESENCE_COLORS.online }}
+          />
+        ) : null}
       </div>
       <div className="chat-list-item__inner">
         <span className="chat-list-item__name">{userLabel(c)}</span>

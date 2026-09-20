@@ -11,8 +11,8 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 12px 18px 16px;
+  gap: 6px;
+  padding: 10px 14px 12px;
   background: transparent;
 }
 
@@ -81,29 +81,21 @@
 .mi-row {
   display: flex;
   align-items: flex-end;
-  gap: 8px;
+  gap: 6px;
   background: var(--bg-card);
   border: 1.5px solid rgba(255, 255, 255, 0.14);
-  border-radius: 14px;
-  padding: 8px 8px 8px 16px;
-  box-shadow: none;
+  border-radius: 12px;
+  padding: 8px 8px 8px 14px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
   transition: border-color 0.18s, box-shadow 0.18s;
 }
 
 .mi-bar--focused .mi-row {
-  border-color: var(--accent-border);
-  box-shadow: none;
+  border-color: rgba(124, 92, 255, 0.45);
+  box-shadow:
+    0 0 0 3px var(--accent-dim),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
   background: var(--bg-card);
-}
-
-.mi-bar--dm .mi-row {
-  background: transparent;
-  border-color: transparent;
-  box-shadow: none;
-}
-
-.mi-bar--dm .mi-row:focus-within {
-  border-color: transparent;
 }
 
 .mi-bar--disabled .mi-row {
@@ -638,10 +630,7 @@
 }
 
 @media (max-width: 400px) {
-  .mi-icon-btn {
-    width: 34px;
-    height: 34px;
-  }
+  .mi-sticker { display: none; }
 }
 
 @media (max-width: 768px) {

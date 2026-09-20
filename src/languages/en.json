@@ -967,7 +967,7 @@
       "high": "Serious violation"
     },
     "availability": {
-      "online": "Available",
+      "online": "Online",
       "offline": "Unavailable"
     },
     "lastSeen": {
