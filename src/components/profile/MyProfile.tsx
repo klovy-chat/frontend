@@ -7,6 +7,7 @@
 // Przy zmianach: ProfileFields.tsx, Panel.tsx.
 
 import { useEffect } from "react";
+import { X } from "lucide-react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { Avatar } from "../common/Avatar";
@@ -20,6 +21,7 @@ import type { User } from "../../types";
 import "../../styles/account/profile.css";
 
 interface MyProfileProps {
+  variant?: "modal" | "sheet";
   isOpen: boolean;
   onClose: () => void;
   onOpenSettings?: () => void;
@@ -28,6 +30,7 @@ interface MyProfileProps {
 }
 
 export function MyProfile({
+  variant = "modal",
   isOpen,
   onClose,
   onOpenSettings,
@@ -71,6 +74,26 @@ export function MyProfile({
   const name = userLabel(user);
   const joinedLabel = user.createdAt ? formatJoinedDate(user.createdAt) : t("common.emDash");
   const bioText = user.bio?.trim();
+
+  if (variant === "sheet") return createPortal(
+    <div className="contact-sheet-backdrop" onMouseDown={event => { if (event.target === event.currentTarget) requestClose(); }}>
+      <aside className="contact-sheet" role="dialog" aria-modal="true" aria-label={t("nav.items.profile")}>
+        <header><strong>{t("nav.items.profile")}</strong><button type="button" autoFocus aria-label={t("common.close")} onClick={requestClose}><X size={18} /></button></header>
+        <div className="contact-sheet__banner" style={bannerStyle} aria-hidden="true" />
+        <div className="contact-sheet__identity contact-sheet__identity--banner">
+          <Avatar displayName={user.displayName} username={user.username} image={user.image} color={user.color} size={96} />
+          <h2>{name}</h2><span>@{user.username}</span>
+          <span className={user.isOnline ? "contact-sheet__online" : ""}>{formatLastSeen(user.lastSeen, { isOnline: user.isOnline })}</span>
+          {bioText && <p>{renderFormattedText(bioText)}</p>}
+        </div>
+        <section className="contact-sheet__facts">
+          <h3>{t("chat.details.quickInfo")}</h3>
+          <span>{t("modals.userProfile.joined")}</span><p>{joinedLabel}</p>
+        </section>
+        {onOpenSettings && <div className="contact-sheet__actions"><button type="button" className="contact-sheet__write" onClick={() => { onClose(); onOpenSettings(); }}>{t("modals.userProfile.editProfile")}</button></div>}
+      </aside>
+    </div>, document.body,
+  );
 
   return createPortal(
     <div

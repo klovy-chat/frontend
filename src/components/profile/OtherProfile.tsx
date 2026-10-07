@@ -119,7 +119,8 @@ export function OtherProfile({
     <div className="contact-sheet-backdrop" onMouseDown={event => { if (event.target === event.currentTarget) requestClose(); }}>
       <aside className="contact-sheet" role="dialog" aria-modal="true" aria-label={t("nav.items.profile")}>
         <header><strong>{t("nav.items.profile")}</strong><button type="button" autoFocus aria-label={t("common.close")} onClick={requestClose}><X size={18} /></button></header>
-        <div className="contact-sheet__identity">
+        <div className="contact-sheet__banner" style={bannerStyle} aria-hidden="true" />
+        <div className="contact-sheet__identity contact-sheet__identity--banner">
           <Avatar displayName={displayedUser.displayName} username={displayedUser.username} image={displayedUser.image} color={displayedUser.color} size={96} />
           <h2>{name}</h2><span>@{displayedUser.username}</span>
           <span className={displayedUser.isOnline ? "contact-sheet__online" : ""}>{formatLastSeen(displayedUser.lastSeen, { isOnline: displayedUser.isOnline })}</span>
@@ -127,8 +128,10 @@ export function OtherProfile({
         </div>
         <div className="contact-sheet__actions">
           <button type="button" className="contact-sheet__write" onClick={requestClose}><MessageCircle size={16} />{t("chat.sheet.write")}</button>
-          <button type="button" disabled={!canCall} onClick={() => { requestClose(); onCall?.("audio"); }}><Phone size={16} />{t("chat.window.call")}</button>
-          <button type="button" disabled={!canCall} onClick={() => { requestClose(); onCall?.("video"); }}><Video size={16} />{t("chat.window.videoCall")}</button>
+          {onCall && <>
+            <button type="button" disabled={!canCall} onClick={() => { requestClose(); onCall("audio"); }}><Phone size={16} />{t("chat.window.call")}</button>
+            <button type="button" disabled={!canCall} onClick={() => { requestClose(); onCall("video"); }}><Video size={16} />{t("chat.window.videoCall")}</button>
+          </>}
         </div>
       </aside>
     </div>, document.body,

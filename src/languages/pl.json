@@ -676,6 +676,7 @@
       "about": "O osobie",
       "description": "Opis",
       "quickInfo": "Szybkie informacje",
+      "hidePanel": "Ukryj panel informacji",
       "type": "Typ",
       "direct": "Wiadomość prywatna",
       "channel": "Kanał",

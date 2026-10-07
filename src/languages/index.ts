@@ -35,9 +35,5 @@ function getDateLocale(locale: AppLocale): string {
 }
 
 export function getFormattingLocale(appLocale?: AppLocale): string {
-  if (typeof navigator !== "undefined") {
-    const browserLocale = navigator.language?.trim();
-    if (browserLocale) return browserLocale;
-  }
   return getDateLocale(appLocale ?? DEFAULT_LOCALE);
 }

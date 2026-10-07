@@ -18,7 +18,7 @@ import { useTranslation } from "react-i18next";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { MessageBubble } from "./MessageBubble";
 import { Avatar } from "../common/Avatar";
-import type { Message } from "../../types";
+import type { Message, MessageUser } from "../../types";
 import {
   formatMessageDateSeparator,
   isSameLocalDay,
@@ -26,6 +26,7 @@ import {
 } from "../../utils/user/format";
 
 interface MessageListProps {
+  onOpenUserProfile?: (user: MessageUser) => void;
   messages: Message[];
   currentUserId: string;
   typingUsers?: TypingUser[];
@@ -67,6 +68,7 @@ function isNearBottom(el: HTMLElement): boolean {
 }
 
 export function MessageList({
+  onOpenUserProfile,
   messages,
   currentUserId,
   typingUsers = [],
@@ -188,6 +190,7 @@ export function MessageList({
 
   const bubbleProps = useMemo(
     () => ({
+      onOpenUserProfile,
       currentUserId,
       canReact,
       onReact,
@@ -203,6 +206,7 @@ export function MessageList({
       onUnpin,
     }),
     [
+      onOpenUserProfile,
       currentUserId,
       canReact,
       onReact,
@@ -248,7 +252,7 @@ export function MessageList({
           ref={virtualListRef}
           className="message-list-virtual"
           style={{
-            height: Math.max(0, virtualizer.getTotalSize() - scrollMargin),
+            height: virtualizer.getTotalSize(),
             width: "100%",
             position: "relative",
             flexShrink: 0,

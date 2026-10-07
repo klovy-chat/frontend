@@ -32,6 +32,7 @@ import type { Message, MessageUser } from "../../types";
 import "../../styles/chat/bubble.css";
 
 interface MessageBubbleProps {
+  onOpenUserProfile?: (user: MessageUser) => void;
   message: Message;
   currentUserId: string;
   highlighted?: boolean;
@@ -66,6 +67,7 @@ function formatCallDuration(totalSecs: number): string {
 }
 
 export const MessageBubble = memo(function MessageBubble({
+  onOpenUserProfile,
   message,
   currentUserId,
   highlighted = false,
@@ -270,6 +272,7 @@ export const MessageBubble = memo(function MessageBubble({
       }}
     >
       {!isOwn && (
+        <button type="button" className="message-avatar-button" disabled={!onOpenUserProfile} onClick={() => onOpenUserProfile?.(sender)} aria-label={t("nav.items.viewProfile")}>
         <Avatar
           displayName={sender.displayName}
           username={sender.username}
@@ -277,13 +280,14 @@ export const MessageBubble = memo(function MessageBubble({
           color={sender.color}
           size={32}
         />
+        </button>
       )}
 
       <div className="message-bubble-wrap">
         {showSenderName && (
-          <span className="message-sender-name">
+          <button type="button" className="message-sender-name" disabled={!onOpenUserProfile} onClick={() => onOpenUserProfile?.(sender)}>
             {senderName}
-          </span>
+          </button>
         )}
 
         <div className="message-bubble-row">

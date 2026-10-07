@@ -695,3 +695,16 @@
 .mi-reply-banner { background: var(--bg-panel); border-color: var(--border); border-left-color: var(--accent); }
 .mi-reply-banner__label { color: var(--accent); }
 .mi-reply-banner__preview { color: var(--text); }
+
+@media (max-width: 480px) {
+  .app-shell--chat .mi-bar { padding: 8px max(10px, var(--safe-right)) max(10px, var(--safe-bottom)) max(10px, var(--safe-left)); background: var(--bg-chat); border-top: none; }
+  .app-shell--chat .mi-row, .app-shell--chat .mi-bar--focused .mi-row { display: grid; grid-template-columns: 44px minmax(0, 1fr); padding: 4px 6px 6px; gap: 2px 6px; min-width: 0; border: 1px solid var(--border); border-radius: 18px; background: var(--bg-card); }
+  .app-shell--chat .mi-bar--focused .mi-row { border-color: var(--accent-border); }
+  .app-shell--chat .mi-attach { grid-column: 1; grid-row: 2; align-self: center; }
+  .app-shell--chat .mi-textarea { grid-column: 1 / -1; grid-row: 1; width: 100%; min-width: 0; font-size: 16px; min-height: 44px; }
+  .app-shell--chat .mi-actions { grid-column: 2; grid-row: 2; width: 100%; min-width: 0; justify-content: flex-end; gap: 4px; }
+  .app-shell--chat .mi-icon-btn { width: 44px; height: 44px; }
+  .app-shell--chat .mi-sticker { display: inline-flex; }
+  .app-shell--chat .mi-send { margin-left: auto; border-radius: 14px; background: linear-gradient(110deg, color-mix(in srgb, var(--accent) 80%, white), var(--accent)); }
+  .app-shell--chat .mi-reply-banner__preview { min-width: 0; overflow-wrap: anywhere; }
+}

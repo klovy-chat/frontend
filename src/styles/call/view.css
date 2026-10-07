@@ -392,3 +392,11 @@
     height: 48px;
   }
 }
+
+@media (max-width: 768px) {
+  .call-view:not(.call-view--expanded):not(.call-view--fullscreen) { max-width: calc(100vw - 24px); max-height: calc(100dvh - 100px - var(--safe-top) - var(--safe-bottom)); }
+  .call-view:not(.call-view--dragged):not(.call-view--expanded):not(.call-view--fullscreen) { right: 12px; bottom: calc(80px + var(--safe-bottom)); }
+  .call-view__controls { flex-wrap: wrap; gap: 8px; }
+  .call-view__header-text { min-width: 0; }
+  .call-view__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
