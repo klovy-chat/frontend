@@ -81,7 +81,7 @@
   overflow-y: auto;
   padding: 16px 18px 18px;
   scrollbar-width: thin;
-  scrollbar-color: rgba(124, 92, 255, 0.4) transparent;
+  scrollbar-color: color-mix(in srgb, var(--accent) 40%, transparent) transparent;
 }
 
 .cs-content-scroll::-webkit-scrollbar {
@@ -94,12 +94,12 @@
 }
 
 .cs-content-scroll::-webkit-scrollbar-thumb {
-  background: rgba(124, 92, 255, 0.35);
+  background: color-mix(in srgb, var(--accent) 35%, transparent);
   border-radius: 4px;
 }
 
 .cs-content-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(124, 92, 255, 0.55);
+  background: color-mix(in srgb, var(--accent) 55%, transparent);
 }
 
 .cs-header {

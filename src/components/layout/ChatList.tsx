@@ -7,10 +7,11 @@
 // Przy zmianach: Sidebar.tsx, styles/chat/list.css.
 
 ﻿import { useTranslation } from "react-i18next";
+import { LastMessagePreview } from "./LastMessagePreview";
 import { Avatar } from "../common/Avatar";
+import { Plus } from "lucide-react";
 import { UnreadBadge } from "../common/UnreadBadge";
 import { userLabel, formatTime } from "../../utils/user/format";
-import { formatListLastMessage } from "../../utils/chat/messages";
 import {
   getEffectiveStatus,
   PRESENCE_COLORS,
@@ -19,7 +20,7 @@ import { useUserPresence } from "../../context/PresenceContext";
 import type { Channel, ChatTarget, Contact } from "../../types";
 import "../../styles/chat/list.css";
 
-export type ChatListTab = "dm" | "channels";
+export type ChatListTab = "all" | "dm" | "channels";
 
 function foldSearch(value: string): string {
   return value
@@ -103,7 +104,7 @@ function ContactRow({
         <span className="chat-list-item__name">{userLabel(c)}</span>
         {c.lastMessage && (
           <span className="chat-list-item__preview">
-            {formatListLastMessage(c.lastMessage)}
+            <LastMessagePreview kind="dm" entry={c} />
           </span>
         )}
       </div>
@@ -190,7 +191,7 @@ export function ChatList({
           <span className="chat-list-item__name">{ch.name}</span>
           {(ch.lastMessage || ch.description) && (
             <span className="chat-list-item__preview">
-              {ch.lastMessage ? formatListLastMessage(ch.lastMessage) : ch.description}
+              {ch.lastMessage ? <LastMessagePreview kind="channel" entry={ch} /> : ch.description}
             </span>
           )}
         </div>
@@ -222,6 +223,7 @@ export function ChatList({
   };
 
   const tabLabels: Record<ChatListTab, string> = {
+    all: t("chat.list.tabs.all", { defaultValue: "All" }),
     dm: t("chat.list.tabs.dm"),
     channels: t("chat.list.tabs.channels"),
   };
@@ -231,7 +233,7 @@ export function ChatList({
       <div className="chat-list-pane__header">
         <h2 className="chat-list-pane__title">{t("chat.list.title")}</h2>
         <button type="button" className="chat-list-pane__add-btn" title={t("chat.list.newChannel")} onClick={onNewChannel}>
-          +
+          <Plus size={18} strokeWidth={1.75} aria-hidden="true" />
         </button>
       </div>
 
@@ -259,6 +261,7 @@ export function ChatList({
 
       <div className="chat-list-pane__tabs">
         {([
+          ["all", contacts.length + channels.length],
           ["dm", contacts.length],
           ["channels", channels.length],
         ] as const).map(([key, count]) => (
@@ -276,7 +279,9 @@ export function ChatList({
 
       <div className="chat-list-pane__scroll">
         {showSearch ? (
-          activeTab === "channels" ? (
+          activeTab === "all" ? (
+            <>{searchResults.map(renderContact)}{searchedChannels.map(renderChannel)}{searchResults.length === 0 && searchedChannels.length === 0 && <p className="chat-list-pane__empty">{t("chat.list.searchEmpty")}</p>}</>
+          ) : activeTab === "channels" ? (
             searchedChannels.length === 0 ? (
               <p className="chat-list-pane__empty">{t("chat.list.searchEmptyChannels")}</p>
             ) : (

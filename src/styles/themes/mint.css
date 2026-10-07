@@ -1,0 +1,46 @@
+/* Theme byl wprowadzony testowo obecnie nie jest uzywany */
+
+:root[data-theme="mint"] {
+  --bg-shell: linear-gradient(135deg, #030806 0%, #06110D 45%, #092019 100%);
+  --bg-chat: radial-gradient(circle at 75% 70%, rgba(17, 94, 70, 0.32) 0%, rgba(8, 45, 34, 0.18) 32%, transparent 62%), linear-gradient(135deg, #030806 0%, #06110D 48%, #0A1D17 100%);
+  --bg-deep: #040A08;
+  --bg-panel: #07110E;
+  --bg-elevated: #0C1B16;
+  --bg-card: #091712;
+  --bg-hover: #10251D;
+  --bg-active: rgba(27, 130, 94, 0.13);
+
+  --border: rgba(105, 190, 157, 0.10);
+  --border-light: rgba(105, 190, 157, 0.055);
+
+  --text: #EDF7F3;
+  --quote-text: #78BFA5;
+  --text-muted: #839E94;
+  --text-dim: #526B62;
+
+  --accent: #1B825E;
+  --accent-hover: #20966D;
+  --accent-dim: rgba(27, 130, 94, 0.16);
+  --accent-border: rgba(38, 151, 110, 0.34);
+
+  --danger: #E85B62;
+  --danger-dim: rgba(232, 91, 98, 0.09);
+  --danger-border: rgba(232, 91, 98, 0.25);
+
+  --success: #35B77C;
+  --success-dim: rgba(53, 183, 124, 0.09);
+  --success-border: rgba(53, 183, 124, 0.25);
+
+  --warning: #C99D48;
+  --warning-dim: rgba(201, 157, 72, 0.10);
+  --warning-border: rgba(201, 157, 72, 0.26);
+
+  --bg-settings-nav: linear-gradient(180deg, #030806 0%, #07140F 100%);
+  --bg-settings-surface: radial-gradient(circle at 80% 80%, rgba(17, 94, 70, 0.24) 0%, transparent 55%), linear-gradient(135deg, #050B09 0%, #091812 100%);
+  --bg-settings-card: #0A1813;
+  --bg-settings-card-hover: #10261E;
+  --bg-settings-active: #143126;
+
+  --shadow: 0 32px 80px rgba(0, 0, 0, 0.72);
+  --shadow-sm: 0 8px 24px rgba(0, 0, 0, 0.52);
+}

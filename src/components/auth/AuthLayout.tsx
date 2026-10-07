@@ -10,30 +10,38 @@ import type { ReactNode } from "react";
 import { Moon, Sun } from "lucide-react";
 import { LanguageSwitcher } from "../common/LanguageSwitcher";
 import { useTheme } from "../../context/ThemeContext";
+import { AuthPromoPanel, type AuthPromoVariant } from "./AuthPromoPanel";
 import "../../styles/auth/auth.css";
 
 interface AuthLayoutProps {
   children: ReactNode;
+  promo?: AuthPromoVariant;
 }
 
-export function AuthLayout({ children }: AuthLayoutProps) {
+export function AuthLayout({ children, promo = "login" }: AuthLayoutProps) {
   const { theme, toggleTheme } = useTheme();
 
   return (
     <div className="al-page">
-      <div className="al-page-actions">
-        <button
-          type="button"
-          className="al-theme-toggle"
-          onClick={toggleTheme}
-          aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
-          title={theme === "dark" ? "Light theme" : "Dark theme"}
-        >
-          {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
-        </button>
-        <LanguageSwitcher />
+      <AuthPromoPanel variant={promo} />
+
+      <div className="al-auth-form-col">
+        <div className="al-page-actions">
+          <button
+            type="button"
+            className="al-theme-toggle"
+            onClick={toggleTheme}
+            aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+            title={theme === "dark" ? "Light theme" : "Dark theme"}
+          >
+            {theme === "dark" ? <Sun size={18} strokeWidth={1.75} /> : <Moon size={18} strokeWidth={1.75} />}
+          </button>
+
+          <LanguageSwitcher />
+        </div>
+
+        <div className="al-auth-form-wrap">{children}</div>
       </div>
-      {children}
     </div>
   );
 }

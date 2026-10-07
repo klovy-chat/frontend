@@ -36,6 +36,7 @@
     "closeSettings": "Close settings",
     "logoutTitle": "Log out",
     "language": {
+      "ru": "Russian",
       "pl": "Polish",
       "en": "English",
       "label": "Language"
@@ -135,7 +136,7 @@
       "failed": "Recording failed."
     },
     "settings": {
-      "title": "Voice settings",
+      "title": "Voice Settings",
       "subtitle": "Choose microphone and speakers for calls and recordings.",
       "infoBanner": "Settings apply to voice messages, calls, and screen sharing.",
       "microphone": "Microphone",
@@ -173,6 +174,9 @@
     "recordMessage": "Record voice message",
     "tooShort": "Recording is too short (min. 0.5 s).",
     "tooLarge": "Recording is too large. Maximum size is {{limit}}."
+  },
+  "sheet": {
+    "write": "Message"
   },
   "media": {
     "invalidUrl": "Invalid file address.",
@@ -335,7 +339,7 @@
     },
     "fields": {
       "username": "Username",
-      "usernamePlaceholder": "",
+      "usernamePlaceholder": "e.g. john_doe",
       "password": "Password",
       "showPassword": "Show password",
       "hidePassword": "Hide password",
@@ -346,18 +350,59 @@
       "confirmPassword": "Confirm new password",
       "twoFactorCode": "2FA code"
     },
+    "promo": {
+      "ariaLabel": "About Klovy Chat",
+      "login": {
+        "badge": "🔒 End-to-end encryption",
+        "titleLine1": "Conversations that stay",
+        "titleLine2": "between you.",
+        "body": "Sign in and return to secure conversations, calls and files - without ads or tracking.",
+        "footer": "Your data matters most to us - the Klovy team"
+      },
+      "register": {
+        "badge": "✨ Join in 30 seconds",
+        "titleLine1": "A messenger built",
+        "titleLine2": "around privacy.",
+        "features": {
+          "encryption": "End-to-end encryption for messages, calls and files",
+          "noAds": "No ads and no selling your data",
+          "rust": "Rust backend - blazing-fast performance",
+          "openSource": "Open-source project (coming soon)"
+        },
+        "footer": "Join the growing Klovy community"
+      }
+    },
     "login": {
       "title": "Sign in",
       "submit": "Sign in",
       "submitting": "Signing in…",
+      "subtitle": "Nice to see you again in Klovy Chat",
+      "identity": "Username",
+      "identityPlaceholder": "e.g. john_doe",
+      "rememberMe": "Remember me",
+      "forgotPassword": "Forgot your password?",
+      "secureSubmit": "Sign in securely",
+      "continueWith": "or continue with",
       "noAccount": "Don't have an account?",
-      "signupLink": "Sign up"
+      "signupLink": "Sign up",
+      "validation": {
+        "identityRequired": "Enter your username",
+        "passwordRequired": "Enter your password",
+        "passwordMinLength": "Password must be at least 8 characters"
+      }
     },
     "signup": {
       "title": "Create account",
+      "subtitle": "It takes less than a minute",
+      "email": "E-mail",
+      "emailPlaceholder": "you@klovy.chat",
+      "usernamePlaceholder": "e.g. john_doe",
+      "usernameAvailable": "Username available",
+      "usernameUnavailable": "Username unavailable",
       "submit": "Sign up",
       "submitting": "Creating account…",
       "passwordPlaceholder": "Create a strong password",
+      "passwordHint": "Min. 8 characters, upper and lowercase letter, digit and special character (@$!%*?&).",
       "confirmPassword": "Confirm password",
       "confirmPasswordPlaceholder": "Repeat password",
       "termsPrefix": "I confirm that I have read the",
@@ -367,7 +412,16 @@
       "hasAccount": "Already have an account?",
       "loginLink": "Sign in",
       "success": "Account created. You can sign in.",
-      "closed": "New account registration is currently disabled."
+      "closed": "New account registration is currently disabled.",
+      "validation": {
+        "usernameRequired": "Enter a username",
+        "usernameInvalid": "Min. 3 characters: letters, numbers, underscore",
+        "emailRequired": "Enter an e-mail address",
+        "emailInvalid": "Enter a valid e-mail address",
+        "passwordRequired": "Enter a password",
+        "passwordMinLength": "Password must be at least 8 characters",
+        "termsRequired": "Accept the terms to continue"
+      }
     },
     "setup": {
       "title": "Complete your profile",
@@ -429,18 +483,34 @@
     }
   },
   "settings": {
+    "contactsDirectory": {
+      "empty": "No contacts found.",
+      "error": "Could not load contacts.",
+      "search": "Search contacts…",
+      "add": "Add contact",
+      "loading": "Loading contacts…",
+      "subtitle": "Your contacts — message them or start a call."
+    },
     "nav": {
-      "account": "User settings",
-      "myAccount": "My account",
+      "account": "Account",
+      "myAccount": "My Account",
       "profile": "Profile",
       "sessions": "Devices",
-      "voice": "Voice settings",
+      "appearance": "Appearance",
+      "voice": "Voice Settings",
       "warnings": "Warnings",
       "status": "Status",
-      "app": "Client settings",
+      "app": "Application",
       "logout": "Log out"
     },
     "profile": {
+      "directory": {
+        "joined": "Joined",
+        "username": "Username",
+        "password": "Confirm with password",
+        "code": "2FA code",
+        "defaults": "Default avatars"
+      },
       "subtitle": "Manage your profile and information visible to other users.",
       "personalData": "Personal data",
       "editProfile": "Edit profile",
@@ -511,9 +581,56 @@
       "empty": "You have no warnings. Keep it up!",
       "unread": "Unread"
     },
+    "appearance": {
+      "title": "Appearance",
+      "subtitle": "Customize how Klovy Chat looks on your device.",
+      "theme": "Theme",
+      "themes": {
+        "dark": {
+          "name": "Dark",
+          "description": "The default Klovy dark theme."
+        },
+        "light": {
+          "name": "Light",
+          "description": "A bright and clean Klovy theme."
+        },
+        "black": {
+          "name": "Black",
+          "description": "A black and modern dark theme."
+        },
+        "blue": {
+          "name": "Blue",
+          "description": "A dark theme with deep blue colors."
+        },
+        "forest": {
+          "name": "Forest",
+          "description": "A dark theme with deep forest greens."
+        },
+        "desert": {
+          "name": "Desert",
+          "description": "A warm dark theme inspired by desert sunsets."
+        }
+      },
+      "textSize": {
+        "section": "Font and size",
+        "title": "Message text size",
+        "s": "Small",
+        "m": "Medium",
+        "l": "Large"
+      }
+    },
     "language": {
       "title": "Language",
-      "chooseLanguage": "Choose your language"
+      "chooseLanguage": "Choose your language",
+      "supportGood": "Good",
+      "qualityLegend": "Translation quality legend",
+      "supportMedium": "Medium",
+      "supportPoor": "Poor",
+      "supportDescription": {
+        "good": "Most of the interface is translated and polished.",
+        "medium": "The translation may contain errors or unnatural wording.",
+        "poor": "The translation is incomplete and needs many improvements."
+      }
     },
     "accountExtra": {
       "authGroup": "Authentication",
@@ -521,13 +638,38 @@
       "usernamePasswordRequired": "Enter your current password to confirm the change.",
       "cancelDeletionHint": "Enter your password{{twoFactor}} to cancel deletion marking.",
       "bannerUpdated": "Profile banner updated."
+    },
+    "devices": {
+      "active": "Active sessions",
+      "danger": "Danger zone",
+      "logout": "Log out"
     }
   },
   "chat": {
     "empty": {
       "selectChat": "Select a chat to start a conversation."
     },
+    "sheet": {
+      "write": "Message"
+    },
+    "media": {
+      "loading": "Loading attachments…",
+      "download": "Download",
+      "empty": "No attachments in the loaded messages.",
+      "title": "Media and files",
+      "error": "Could not load or download attachments. Try again.",
+      "preview": "Open preview",
+      "file": "File",
+      "older": "Search older messages",
+      "video": "Video",
+      "refresh": "Refresh attachments"
+    },
     "details": {
+      "more": "Conversation actions",
+      "lastActivity": "Last activity",
+      "notifications": "Notifications",
+      "enabled": "Enabled",
+      "username": "User",
       "noBio": "No description added yet.",
       "noDescription": "No channel description added yet.",
       "members": "members",
@@ -540,7 +682,10 @@
       "admin": "Admin"
     },
     "home": {
+      "channelsTitle": "Channels",
       "title": "Good to see you",
+      "conversations": "conversations",
+      "openList": "open list",
       "subtitle": "Pick up where you left off or start something new.",
       "unread": "unread",
       "contacts": "contacts",
@@ -550,6 +695,12 @@
       "noMessages": "No messages yet"
     },
     "calls": {
+      "historySubtitle": "Call history from your conversations.",
+      "refresh": "Refresh history",
+      "loadError": "Some conversations could not be loaded. Refresh to retry.",
+      "loading": "Loading call history…",
+      "emptyHistory": "No calls found in the loaded messages.",
+      "loadOlder": "Search older messages",
       "title": "Calls",
       "subtitle": "Voice and video calls stay connected to your conversations.",
       "active": "Call in progress",
@@ -566,8 +717,10 @@
       "loadFailed": "Could not load invite"
     },
     "list": {
+      "ownPreview": "You: {{message}}",
       "title": "Chats",
       "tabs": {
+        "all": "All",
         "dm": "Chats",
         "channels": "Channels"
       },
@@ -653,6 +806,7 @@
       }
     },
     "window": {
+      "groupCall": "Group call",
       "call": "Call",
       "videoCall": "Video call",
       "channelSettings": "Channel settings",
@@ -682,12 +836,21 @@
       "mentionedYou": " mentioned you"
     }
   },
+  "contactsDirectory": {
+    "empty": "No contacts found.",
+    "error": "Could not load contacts.",
+    "search": "Search contacts…",
+    "add": "Add contact",
+    "loading": "Loading contacts…",
+    "subtitle": "Your contacts — message them or start a call."
+  },
   "nav": {
     "brand": {
       "title": "Klovy Chat"
     },
     "groups": {
       "workspace": "Workspace",
+      "messages": "Messages",
       "account": "Account"
     },
     "items": {
@@ -696,7 +859,8 @@
       "contacts": "Contacts",
       "calls": "Calls",
       "settings": "Settings",
-      "viewProfile": "View profile"
+      "viewProfile": "View profile",
+      "profile": "Profile"
     }
   },
   "sidebar": {
@@ -751,6 +915,7 @@
       "title": "Channel settings",
       "generalSubtitle": "Manage the channel, invite members and report violations.",
       "tabs": {
+        "all": "All",
         "general": "General",
         "members": "Members",
         "moderation": "Moderation"
@@ -816,6 +981,7 @@
       "title": "Contacts",
       "subtitle": "Manage invites and your contact list.",
       "tabs": {
+        "all": "All",
         "invites": "Invites",
         "friends": "My contacts",
         "sent": "Sent",
@@ -872,7 +1038,7 @@
   },
   "profile": {
     "form": {
-      "displayNameRequired": "Display name *",
+      "displayNameRequired": "Display Name",
       "displayNamePlaceholder": "",
       "displayNameHint": "Visible to others in chat. Max {{max}} characters.",
       "bioPlaceholderOptional": "Short bio (optional)",

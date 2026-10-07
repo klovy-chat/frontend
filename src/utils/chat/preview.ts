@@ -142,6 +142,7 @@ export function patchContactsFromMessage(
     lastMessage: getMessagePreview(unwrapIncomingMessage(msg)),
     lastMessageTime: messageTime(msg),
     lastMessageId: msg._id,
+    lastMessageSenderId: senderId(msg),
   });
 }
 
@@ -160,6 +161,7 @@ export function patchChannelsFromMessage(
     lastMessage: getMessagePreview(unwrapIncomingMessage(msg)),
     lastMessageTime: messageTime(msg),
     lastMessageId: msg._id,
+    lastMessageSenderId: senderId(msg),
   });
 }
 
@@ -182,6 +184,7 @@ export function patchContactsFromEditedMessage(
     ...next[index],
     lastMessage: getMessagePreview(unwrapIncomingMessage(msg)),
     lastMessageId: msg._id,
+    lastMessageSenderId: senderId(msg),
   };
   return next;
 }
@@ -204,6 +207,7 @@ export function patchChannelsFromEditedMessage(
     ...next[index],
     lastMessage: getMessagePreview(unwrapIncomingMessage(msg)),
     lastMessageId: msg._id,
+    lastMessageSenderId: senderId(msg),
   };
   return next;
 }
@@ -224,6 +228,7 @@ export function patchContactsOnMessageDeleted(
     lastMessage: tip?.lastMessage,
     lastMessageTime: tip?.lastMessageTime,
     lastMessageId: tip?.lastMessageId,
+    lastMessageSenderId: tip?.lastMessageSenderId,
   };
   return { contacts: next, changed: true, needsRefresh: !tip };
 }
@@ -243,6 +248,7 @@ export function patchChannelsOnMessageDeleted(
     lastMessage: tip?.lastMessage,
     lastMessageTime: tip?.lastMessageTime,
     lastMessageId: tip?.lastMessageId,
+    lastMessageSenderId: tip?.lastMessageSenderId,
   };
   return { channels: next, changed: true, needsRefresh: !tip };
 }

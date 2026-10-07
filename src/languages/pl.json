@@ -36,6 +36,7 @@
     "closeSettings": "Zamknij ustawienia",
     "logoutTitle": "Wyloguj",
     "language": {
+      "ru": "Rosyjski",
       "pl": "Polski",
       "en": "Angielski",
       "label": "Język"
@@ -173,6 +174,9 @@
     "recordMessage": "Nagraj wiadomość głosową",
     "tooShort": "Nagranie jest za krótkie (min. 0,5 s).",
     "tooLarge": "Nagranie jest za duże. Maksymalny rozmiar to {{limit}}."
+  },
+  "sheet": {
+    "write": "Napisz"
   },
   "media": {
     "invalidUrl": "Niedozwolony adres pliku.",
@@ -335,7 +339,7 @@
     },
     "fields": {
       "username": "Nazwa użytkownika",
-      "usernamePlaceholder": "",
+      "usernamePlaceholder": "np. Jan Kowalski",
       "password": "Hasło",
       "showPassword": "Pokaż hasło",
       "hidePassword": "Ukryj hasło",
@@ -346,18 +350,54 @@
       "confirmPassword": "Potwierdź nowe hasło",
       "twoFactorCode": "Kod 2FA"
     },
+    "promo": {
+      "ariaLabel": "Informacje o Klovy Chat",
+      "login": {
+        "badge": "🔒 Szyfrowanie end-to-end",
+        "titleLine1": "Rozmowy, które zostają",
+        "titleLine2": "tylko między Wami.",
+        "body": "Zaloguj się i wróć do bezpiecznych rozmów, połączeń i plików - bez reklam i bez śledzenia.",
+        "footer": "Twoje dane są dla nas najważniejsze - zespół Klovy"
+      },
+      "register": {
+        "badge": "✨ Dołącz w 30 sekund",
+        "titleLine1": "Komunikator zbudowany",
+        "titleLine2": "wokół prywatności.",
+        "features": {
+          "encryption": "Szyfrowanie end-to-end wiadomości, połączeń i plików",
+          "noAds": "Zero reklam i zero sprzedaży danych",
+          "rust": "Backend na Ruście - błyskawiczne działanie",
+          "openSource": "Projekt open-source (wkrótce)"
+        },
+        "footer": "Dołącz do rosnącej społeczności Klovy"
+      }
+    },
     "login": {
       "title": "Zaloguj się",
       "submit": "Zaloguj się",
       "submitting": "Logowanie…",
       "noAccount": "Nie masz konta?",
-      "signupLink": "Zarejestruj się"
+      "signupLink": "Zarejestruj się",
+      "subtitle": "Miło Cię widzieć ponownie w Klovy Chat",
+      "identity": "Nazwa użytkownika",
+      "identityPlaceholder": "np. jan_kowalski",
+      "rememberMe": "Zapamiętaj mnie",
+      "forgotPassword": "Nie pamiętasz hasła?",
+      "secureSubmit": "Zaloguj się bezpiecznie",
+      "continueWith": "lub kontynuuj przez",
+      "validation": {
+        "identityRequired": "Wpisz nazwę użytkownika",
+        "passwordRequired": "Podaj hasło",
+        "passwordMinLength": "Hasło musi mieć min. 8 znaków"
+      }
     },
     "signup": {
       "title": "Utwórz konto",
+      "subtitle": "Zajmie to mniej niż minutę",
       "submit": "Zarejestruj się",
       "submitting": "Tworzenie konta…",
       "passwordPlaceholder": "Utwórz silne hasło",
+      "passwordHint": "Min. 8 znaków, wielka i mała litera, cyfra i znak specjalny (@$!%*?&).",
       "confirmPassword": "Potwierdź hasło",
       "confirmPasswordPlaceholder": "Powtórz hasło",
       "termsPrefix": "Oświadczam, że zapoznałem/am się z",
@@ -367,7 +407,21 @@
       "hasAccount": "Masz już konto?",
       "loginLink": "Zaloguj się",
       "success": "Konto utworzone. Możesz się zalogować.",
-      "closed": "Rejestracja nowych kont jest obecnie wyłączona."
+      "closed": "Rejestracja nowych kont jest obecnie wyłączona.",
+      "email": "E-mail",
+      "emailPlaceholder": "ty@klovy.chat",
+      "usernamePlaceholder": "np. Jan Kowalski",
+      "usernameAvailable": "Nazwa dostępna",
+      "usernameUnavailable": "Nazwa niedostępna",
+      "validation": {
+        "usernameRequired": "Podaj nazwę użytkownika",
+        "usernameInvalid": "Min. 3 znaki: litery, cyfry, podkreślenie",
+        "emailRequired": "Podaj adres e-mail",
+        "emailInvalid": "Podaj poprawny adres e-mail",
+        "passwordRequired": "Podaj hasło",
+        "passwordMinLength": "Hasło musi mieć min. 8 znaków",
+        "termsRequired": "Zaakceptuj regulamin, aby kontynuować"
+      }
     },
     "setup": {
       "title": "Uzupełnij profil",
@@ -429,18 +483,34 @@
     }
   },
   "settings": {
+    "contactsDirectory": {
+      "empty": "Brak kontaktów.",
+      "error": "Nie udało się pobrać kontaktów.",
+      "search": "Szukaj kontaktów…",
+      "add": "Dodaj kontakt",
+      "loading": "Ładowanie kontaktów…",
+      "subtitle": "Twoje kontakty — napisz lub rozpocznij rozmowę."
+    },
     "nav": {
-      "account": "Ustawienia użytkownika",
+      "account": "Konto",
       "myAccount": "Moje konto",
       "profile": "Profil",
       "sessions": "Urządzenia",
+      "appearance": "Wygląd",
       "voice": "Ustawienia głosu",
       "warnings": "Ostrzeżenia",
       "status": "Status",
-      "app": "Ustawienia klienta",
+      "app": "Aplikacja",
       "logout": "Wyloguj się"
     },
     "profile": {
+      "directory": {
+        "joined": "Dołączył",
+        "username": "Nazwa użytkownika",
+        "password": "Potwierdź hasłem",
+        "code": "Kod 2FA",
+        "defaults": "Domyślne avatary"
+      },
       "subtitle": "Zarządzaj swoim profilem i informacjami widocznymi dla innych użytkowników.",
       "personalData": "Dane osobowe",
       "editProfile": "Edytuj profil",
@@ -511,9 +581,56 @@
       "empty": "Nie masz żadnych ostrzeżeń. Tak trzymaj!",
       "unread": "Nieprzeczytane"
     },
+    "appearance": {
+      "title": "Wygląd",
+      "subtitle": "Dostosuj wygląd Klovy Chat na swoim urządzeniu.",
+      "theme": "Motyw",
+      "themes": {
+        "dark": {
+          "name": "Ciemny",
+          "description": "Domyślny ciemny motyw Klovy."
+        },
+        "light": {
+          "name": "Jasny",
+          "description": "Jasny i przejrzysty motyw Klovy."
+        },
+        "black": {
+          "name": "Czarny",
+          "description": "Czarny i nowoczesny motyw Klovy."
+        },
+        "blue": {
+          "name": "Niebieski",
+          "description": "Ciemny motyw w głębokich odcieniach niebieskiego."
+        },
+        "forest": {
+          "name": "Las",
+          "description": "Ciemny motyw w odcieniach leśnej zieleni."
+        },
+        "desert": {
+          "name": "Pustynia",
+          "description": "Ciepły ciemny motyw inspirowany pustynnym zachodem słońca."
+        }
+      },
+      "textSize": {
+        "section": "Czcionka i rozmiar",
+        "title": "Rozmiar tekstu wiadomości",
+        "s": "Mały",
+        "m": "Średni",
+        "l": "Duży"
+      }
+    },
     "language": {
       "title": "Język",
-      "chooseLanguage": "Wybierz swój język"
+      "chooseLanguage": "Wybierz swój język",
+      "supportGood": "Dobre",
+      "qualityLegend": "Legenda jakości tłumaczenia",
+      "supportMedium": "Średnie",
+      "supportPoor": "Słabe",
+      "supportDescription": {
+        "good": "Większość interfejsu jest przetłumaczona i dopracowana.",
+        "medium": "Tłumaczenie może zawierać błędy lub nienaturalne sformułowania.",
+        "poor": "Tłumaczenie jest niepełne i wymaga wielu poprawek."
+      }
     },
     "accountExtra": {
       "authGroup": "Uwierzytelnianie",
@@ -521,13 +638,38 @@
       "usernamePasswordRequired": "Podaj aktualne hasło, aby potwierdzić zmianę.",
       "cancelDeletionHint": "Wprowadź hasło{{twoFactor}}, aby cofnąć oznaczenie do usunięcia.",
       "bannerUpdated": "Baner profilu zaktualizowany."
+    },
+    "devices": {
+      "active": "Aktywne sesje",
+      "danger": "Strefa niebezpieczna",
+      "logout": "Wyloguj"
     }
   },
   "chat": {
     "empty": {
       "selectChat": "Wybierz czat, aby rozpocząć rozmowę."
     },
+    "sheet": {
+      "write": "Napisz"
+    },
+    "media": {
+      "loading": "Ładowanie załączników…",
+      "download": "Pobierz",
+      "empty": "Brak załączników w pobranych wiadomościach.",
+      "title": "Multimedia i pliki",
+      "error": "Nie udało się pobrać załączników. Spróbuj ponownie.",
+      "preview": "Otwórz podgląd",
+      "file": "Plik",
+      "older": "Przeszukaj starsze wiadomości",
+      "video": "Film",
+      "refresh": "Odśwież załączniki"
+    },
     "details": {
+      "more": "Opcje rozmowy",
+      "lastActivity": "Ostatnia aktywność",
+      "notifications": "Powiadomienia",
+      "enabled": "Włączone",
+      "username": "Użytkownik",
       "noBio": "Brak opisu.",
       "noDescription": "Brak opisu kanału.",
       "members": "członków",
@@ -540,7 +682,10 @@
       "admin": "Administrator"
     },
     "home": {
+      "channelsTitle": "Kanały",
       "title": "Dobrze Cię widzieć",
+      "conversations": "rozmowy",
+      "openList": "otwórz listę",
       "subtitle": "Wróć do ostatniej rozmowy albo zacznij coś nowego.",
       "unread": "nieprzeczytane",
       "contacts": "kontakty",
@@ -550,6 +695,12 @@
       "noMessages": "Brak wiadomości"
     },
     "calls": {
+      "historySubtitle": "Historia połączeń z Twoich rozmów.",
+      "refresh": "Odśwież historię",
+      "loadError": "Nie udało się pobrać części rozmów. Odśwież, aby spróbować ponownie.",
+      "loading": "Ładowanie historii połączeń…",
+      "emptyHistory": "Brak połączeń w pobranych wiadomościach.",
+      "loadOlder": "Przeszukaj starsze wiadomości",
       "title": "Połączenia",
       "subtitle": "Połączenia głosowe i wideo są powiązane z rozmowami.",
       "active": "Połączenie w toku",
@@ -566,8 +717,10 @@
       "loadFailed": "Nie udało się wczytać zaproszenia"
     },
     "list": {
+      "ownPreview": "Ty: {{message}}",
       "title": "Czaty",
       "tabs": {
+        "all": "Wszystkie",
         "dm": "Czaty",
         "channels": "Kanały"
       },
@@ -653,6 +806,7 @@
       }
     },
     "window": {
+      "groupCall": "Rozmowa grupowa",
       "call": "Zadzwoń",
       "videoCall": "Wideorozmowa",
       "channelSettings": "Ustawienia kanału",
@@ -682,6 +836,14 @@
       "mentionedYou": " wspomniał(a) Cię"
     }
   },
+  "contactsDirectory": {
+    "empty": "Brak kontaktów.",
+    "error": "Nie udało się pobrać kontaktów.",
+    "search": "Szukaj kontaktów…",
+    "add": "Dodaj kontakt",
+    "loading": "Ładowanie kontaktów…",
+    "subtitle": "Twoje kontakty — napisz lub rozpocznij rozmowę."
+  },
   "nav": {
     "brand": {
       "title": "Klovy Chat"
@@ -696,7 +858,8 @@
       "contacts": "Kontakty",
       "calls": "Połączenia",
       "settings": "Ustawienia",
-      "viewProfile": "Zobacz profil"
+      "viewProfile": "Zobacz profil",
+      "profile": "Profil"
     }
   },
   "sidebar": {
@@ -711,6 +874,7 @@
     },
     "context": {
       "viewProfile": "Zobacz profil",
+      "profile": "Profil",
       "removeContact": "Usuń z kontaktów",
       "channelSettings": "Ustawienia kanału",
       "deleteChannel": "Usuń kanał"
@@ -751,6 +915,7 @@
       "title": "Ustawienia kanału",
       "generalSubtitle": "Zarządzaj kanałem, zapraszaj członków i zgłaszaj naruszenia.",
       "tabs": {
+        "all": "Wszystkie",
         "general": "Ogólne",
         "members": "Członkowie",
         "moderation": "Moderacja"
@@ -816,6 +981,7 @@
       "title": "Kontakty",
       "subtitle": "Zarządzaj zaproszeniami i listą kontaktów.",
       "tabs": {
+        "all": "Wszystkie",
         "invites": "Zaproszenia",
         "friends": "Moje kontakty",
         "sent": "Wysłane",
@@ -872,7 +1038,7 @@
   },
   "profile": {
     "form": {
-      "displayNameRequired": "Główna nazwa *",
+      "displayNameRequired": "Główna nazwa",
       "displayNamePlaceholder": "",
       "displayNameHint": "Widoczna dla innych w czacie. Maks. {{max}} znaków.",
       "bioPlaceholderOptional": "Krótki opis o sobie (opcjonalnie)",

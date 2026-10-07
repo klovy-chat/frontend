@@ -1,0 +1,46 @@
+/* Theme byl wprowadzony testowo obecnie nie jest uzywany */
+
+:root[data-theme="desert"] {
+  --bg-shell: #1C0F0A;
+  --bg-chat: radial-gradient(circle at 78% 72%, rgba(232, 116, 59, 0.13) 0%, rgba(192, 57, 43, 0.07) 30%, transparent 60%), linear-gradient(135deg, #1B0E09 0%, #2B1810 52%, #321A10 100%);
+  --bg-deep: #160B07;
+  --bg-panel: #2B1810;
+  --bg-elevated: #3A2116;
+  --bg-card: #342017;
+  --bg-hover: #4A2A1A;
+  --bg-active: rgba(232, 116, 59, 0.15);
+
+  --border: rgba(212, 165, 106, 0.16);
+  --border-light: rgba(212, 165, 106, 0.09);
+
+  --text: #F7E6CF;
+  --quote-text: #E6B87B;
+  --text-muted: #C7AA8A;
+  --text-dim: #876D59;
+
+  --accent: #E8743B;
+  --accent-hover: #D96530;
+  --accent-dim: rgba(232, 116, 59, 0.16);
+  --accent-border: rgba(232, 116, 59, 0.38);
+
+  --danger: #C0392B;
+  --danger-dim: rgba(192, 57, 43, 0.12);
+  --danger-border: rgba(192, 57, 43, 0.32);
+
+  --success: #8FB86B;
+  --success-dim: rgba(143, 184, 107, 0.10);
+  --success-border: rgba(143, 184, 107, 0.28);
+
+  --warning: #D4A56A;
+  --warning-dim: rgba(212, 165, 106, 0.13);
+  --warning-border: rgba(212, 165, 106, 0.32);
+
+  --bg-settings-nav: #1C0F0A;
+  --bg-settings-surface: radial-gradient(circle at 82% 78%, rgba(232, 116, 59, 0.10) 0%, transparent 55%), linear-gradient(135deg, #211109 0%, #301B12 100%);
+  --bg-settings-card: #382117;
+  --bg-settings-card-hover: #47291C;
+  --bg-settings-active: #553020;
+
+  --shadow: 0 32px 80px rgba(10, 4, 2, 0.68);
+  --shadow-sm: 0 8px 24px rgba(10, 4, 2, 0.46);
+}

@@ -7,19 +7,24 @@
 // Przy zmianach: pages/Chat.tsx, UnreadBadge.tsx, styles/nav/nav.css.
 
 import { useEffect, useState } from "react";
-import { Moon, Sun } from "lucide-react";
+import { Home, Phone, User, MessageCircle, Users, Settings, LogOut } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../context/AuthContext";
 import { Avatar } from "../common/Avatar";
-import { userLabel, formatLiveDateTime } from "../../utils/user/format";
-import { LOGO_NONE_URL } from "../../constants/branding";
+import { userLabel } from "../../utils/user/format";
 import { useTheme } from "../../context/ThemeContext";
+import { LOGO_COLOUR_URL, LOGO_FOREST_URL } from "../../constants/branding";
 import "../../styles/nav/nav.css";
 
 interface NavProps {
+  onOpenCalls?: () => void;
+  callsActive?: boolean;
+  onOpenHome?: () => void;
+  homeActive?: boolean;
   onOpenChats: () => void;
   onOpenSettings: () => void;
   onOpenProfile?: () => void;
+  profileActive?: boolean;
   onOpenContacts: () => void;
   totalUnread: number;
   receivedFriendRequests?: number;
@@ -28,9 +33,14 @@ interface NavProps {
 }
 
 export function Nav({
+  onOpenCalls,
+  callsActive = false,
+  onOpenHome,
+  homeActive = false,
   onOpenChats,
   onOpenSettings,
   onOpenProfile,
+  profileActive = false,
   onOpenContacts,
   totalUnread,
   receivedFriendRequests = 0,
@@ -39,11 +49,12 @@ export function Nav({
 }: NavProps) {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme();
+
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
-    const id = window.setInterval(() => setNow(new Date()), 1000);
+    const id = window.setInterval(() => setNow(new Date()), 60000);
     return () => window.clearInterval(id);
   }, []);
 
@@ -51,45 +62,48 @@ export function Nav({
     <nav className="nav-rail">
       <div className="nav-rail__brand">
         <img
-          src={LOGO_NONE_URL}
+          src={theme === "forest" ? LOGO_FOREST_URL : LOGO_COLOUR_URL}
           alt=""
           className="nav-rail__brand-logo"
-          width={36}
-          height={36}
+          width={32}
+          height={32}
           decoding="async"
         />
         <div className="nav-rail__brand-text">
           <div className="nav-rail__title">{t("nav.brand.title")}</div>
           <div className="nav-rail__subtitle nav-rail__subtitle--clock">
-            {formatLiveDateTime(now)}
+            {now.toLocaleDateString("pl-PL", { day: "2-digit", month: "2-digit", year: "numeric" })}{" "}
+            {now.toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit", hour12: false })}
           </div>
         </div>
       </div>
 
       <div className="nav-rail__scroll">
         <div>
-          <div className="nav-rail__group-label">{t("nav.groups.workspace")}</div>
+          <div className="nav-rail__group-label">{t("nav.groups.messages")}</div>
+          {onOpenHome && (
+            <button type="button" className={`nav-rail__item${homeActive && !contactsActive ? " active" : ""}`} onClick={onOpenHome} aria-current={homeActive && !contactsActive ? "page" : undefined}>
+              <span className="nav-rail__icon"><Home size={18} strokeWidth={1.75} /></span>
+              {t("nav.items.home")}
+            </button>
+          )}
           <button
             type="button"
-            className={`nav-rail__item${!settingsActive && !contactsActive ? " active" : ""}`}
+            className={`nav-rail__item${!settingsActive && !contactsActive && !homeActive && !callsActive && !profileActive ? " active" : ""}`}
             onClick={onOpenChats}
           >
             <span className="nav-rail__icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-              </svg>
+              <MessageCircle size={18} strokeWidth={1.75} />
             </span>
             {t("nav.items.chats")}
             {totalUnread > 0 && <span className="nav-rail__badge">{totalUnread > 99 ? "99+" : totalUnread}</span>}
           </button>
+          {onOpenCalls && <button type="button" className={`nav-rail__item${callsActive && !contactsActive ? " active" : ""}`} onClick={onOpenCalls} aria-current={callsActive && !contactsActive ? "page" : undefined}>
+            <span className="nav-rail__icon"><Phone size={18} strokeWidth={1.75} /></span>{t("nav.items.calls")}
+          </button>}
           <button type="button" className={`nav-rail__item${contactsActive ? " active" : ""}`} onClick={onOpenContacts}>
             <span className="nav-rail__icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-              </svg>
+              <Users size={18} strokeWidth={1.75} />
             </span>
             {t("nav.items.contacts")}
             {receivedFriendRequests > 0 && (
@@ -102,16 +116,19 @@ export function Nav({
 
         <div>
           <div className="nav-rail__group-label">{t("nav.groups.account")}</div>
+          {onOpenProfile && (
+            <button type="button" className={`nav-rail__item${profileActive ? " active" : ""}`} aria-current={profileActive ? "page" : undefined} onClick={onOpenProfile}>
+              <span className="nav-rail__icon"><User size={18} strokeWidth={1.75} /></span>
+              {t("nav.items.profile")}
+            </button>
+          )}
           <button
             type="button"
             className={`nav-rail__item${settingsActive ? " active" : ""}`}
             onClick={onOpenSettings}
           >
             <span className="nav-rail__icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="3" />
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-              </svg>
+              <Settings size={18} strokeWidth={1.75} />
             </span>
             {t("nav.items.settings")}
           </button>
@@ -141,20 +158,7 @@ export function Nav({
             </div>
           </div>
           <button type="button" className="nav-rail__logout" title={t("common.logoutTitle")} onClick={() => logout()}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-              <polyline points="16 17 21 12 16 7" />
-              <line x1="21" y1="12" x2="9" y2="12" />
-            </svg>
-          </button>
-          <button
-            type="button"
-            className="nav-rail__theme-toggle"
-            title={theme === "dark" ? "Light theme" : "Dark theme"}
-            aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
-            onClick={toggleTheme}
-          >
-            {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+            <LogOut size={16} strokeWidth={1.75} />
           </button>
         </div>
       </div>

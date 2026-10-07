@@ -7,6 +7,8 @@
 // Przy zmianach: api/auth.ts, settings/routes.ts.
 
 import { CSSProperties, FormEvent, useCallback, useRef, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { ColorPicker } from "../components/account/ColorPicker";
 import { useTranslation } from "react-i18next";
 import {
   acknowledgeMyWarnings,
@@ -22,7 +24,6 @@ import {
   removeProfileImage,
   requestAccountDeletion,
   cancelAccountDeletion,
-  revokeAllSessions,
   revokeOtherSessions,
   revokeSession,
   updateProfile,
@@ -30,8 +31,8 @@ import {
   type UserSessionRow,
 } from "../api/auth";
 import { ApiError } from "../api/client";
-import { BrowserIcon } from "../components/account/BrowserIcon";
-import { OsIcon } from "../components/account/OsIcon";
+import { Monitor, Smartphone, X, Pencil } from "lucide-react";
+
 import { RevokeSession } from "../components/account/RevokeSession";
 import { ImageCrop } from "../components/common/ImageCrop";
 import {
@@ -43,11 +44,11 @@ import {
 import { TwoFactorSetup } from "../components/auth/TwoFactorSetup";
 import { VoiceSettings } from "../components/account/VoiceSettings";
 import { LanguageSettings } from "../components/account/LanguageSettings";
+import { AppearanceSettings } from "../components/account/AppearanceSettings";
 import { useAuth } from "../context/AuthContext";
 import { useLocale } from "../context/LocaleContext";
 import { useToast } from "../context/ToastContext";
 import {
-  ProfileFields,
   profileValuesFromUser,
   type ProfileFormValues,
 } from "../components/profile/ProfileFields";
@@ -64,11 +65,7 @@ import {
 } from "../hooks/useMediaCache";
 import { userLabel, WARNING_SEVERITY_LABELS } from "../utils/user/format";
 import { validatePasswordStrength } from "../utils/auth/password";
-import {
-  checkPasswordBreach,
-  isPasswordBreachError,
-  passwordBreachMessage,
-} from "../utils/auth/leakedPassword";
+import { checkPasswordBreach, isPasswordBreachError, passwordBreachMessage} from "../utils/auth/leakedPassword";
 import { normalizeUsernameInput, validateUsernameInput } from "../utils/auth/username";
 import {
   formatSessionAbsoluteTime,
@@ -81,6 +78,7 @@ import { useIsMobile } from "../hooks/useIsMobile";
 import "./settings.css";
 import "../styles/account/account.css";
 import "../styles/account/profile.css";
+
 
 export type { SettingsSection };
 
@@ -96,6 +94,8 @@ export function Panel({
   onClose,
 }: PanelProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const openProfileEditor = () => navigate("/", { state: { workspaceTab: "profile" } });
   const isMobile = useIsMobile();
   const { dateLocale } = useLocale();
   const { user, updateUser, logout, refreshUser } = useAuth();
@@ -111,6 +111,8 @@ export function Panel({
   const [bannerLoading, setBannerLoading] = useState(false);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [usernameEditorOpen, setUsernameEditorOpen] = useState(false);
+  const [passwordEditorOpen, setPasswordEditorOpen] = useState(false);
   const [usernameValue, setUsernameValue] = useState(user?.username ?? "");
   const [usernamePassword, setUsernamePassword] = useState("");
   const [usernameCode, setUsernameCode] = useState("");
@@ -147,7 +149,6 @@ export function Panel({
   const [sessionRevokeTarget, setSessionRevokeTarget] = useState<UserSessionRow | null>(null);
   const [sessionRevokeError, setSessionRevokeError] = useState("");
   const [revokeOthersBusy, setRevokeOthersBusy] = useState(false);
-  const [revokeAllBusy, setRevokeAllBusy] = useState(false);
 
   const formatWarningDate = useCallback(
     (value: string | null): string => {
@@ -474,21 +475,6 @@ export function Panel({
     }
   };
 
-  const handleRevokeAllSessions = async () => {
-    setRevokeAllBusy(true);
-    setSessionsError("");
-    try {
-      await revokeAllSessions();
-      await logout();
-      requestClose();
-    } catch (err) {
-      setSessionsError(
-        err instanceof ApiError ? err.message : t("settings.account.revokeOthersFailed"),
-      );
-    } finally {
-      setRevokeAllBusy(false);
-    }
-  };
 
   const resetAccountAction = () => {
     setAccountAction(null);
@@ -672,6 +658,7 @@ export function Panel({
 
   const navPanel = (
     <aside className="as-nav as-nav--inline">
+      <h1 className="as-nav-title">{t("nav.items.settings")}</h1>
       <p className="as-nav-label">{t("settings.nav.account")}</p>
 
       <button
@@ -696,19 +683,50 @@ export function Panel({
         {t("settings.nav.profile")}
       </button>
 
+
+
       <button
-        className={`as-nav-item${section === "sesje" ? " active" : ""}`}
-        onClick={() => onSectionChange("sesje")}
+        className={`as-nav-item${section === "ostrzezenia" ? " active" : ""}`}
+        onClick={() => onSectionChange("ostrzezenia")}
       >
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="2" y="3" width="20" height="14" rx="2"/>
-          <line x1="8" y1="21" x2="16" y2="21"/>
-          <line x1="12" y1="17" x2="12" y2="21"/>
+          <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
         </svg>
-        {t("settings.nav.sessions")}
+        {t("settings.nav.warnings")}
+        {warningCount > 0 ? (
+          <span className={`as-nav-count${unacknowledgedCount > 0 ? " as-nav-count--alert" : ""}`}>
+            {warningCount}
+          </span>
+        ) : null}
       </button>
 
       <p className="as-nav-label as-nav-label--spaced">{t("settings.nav.app")}</p>
+
+      <button
+        className={`as-nav-item${section === "wyglad" ? " active" : ""}`}
+        onClick={() => onSectionChange("wyglad")}
+      >
+        <svg
+          width="15"
+          height="15"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <circle cx="13.5" cy="6.5" r=".5" />
+          <circle cx="17.5" cy="10.5" r=".5" />
+          <circle cx="8.5" cy="7.5" r=".5" />
+          <circle cx="6.5" cy="12.5" r=".5" />
+          <path d="M12 2a10 10 0 0 0 0 20c1.1 0 2-.9 2-2 0-.5-.2-.9-.5-1.3-.3-.4-.5-.8-.5-1.2 0-1.1.9-2 2-2h2c2.8 0 5-2.2 5-5C22 5.8 17.5 2 12 2Z" />
+        </svg>
+
+        {t("settings.nav.appearance")}
+      </button>
 
       <button
         className={`as-nav-item${section === "glos" ? " active" : ""}`}
@@ -734,32 +752,22 @@ export function Panel({
         {t("settings.language.title")}
       </button>
 
+
+
       <button
-        className={`as-nav-item${section === "ostrzezenia" ? " active" : ""}`}
-        onClick={() => onSectionChange("ostrzezenia")}
+        className={`as-nav-item${section === "sesje" ? " active" : ""}`}
+        onClick={() => onSectionChange("sesje")}
       >
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-          <line x1="12" y1="9" x2="12" y2="13"/>
-          <line x1="12" y1="17" x2="12.01" y2="17"/>
+          <rect x="2" y="3" width="20" height="14" rx="2"/>
+          <line x1="8" y1="21" x2="16" y2="21"/>
+          <line x1="12" y1="17" x2="12" y2="21"/>
         </svg>
-        {t("settings.nav.warnings")}
-        {warningCount > 0 ? (
-          <span className={`as-nav-count${unacknowledgedCount > 0 ? " as-nav-count--alert" : ""}`}>
-            {warningCount}
-          </span>
-        ) : null}
+        {t("settings.nav.sessions")}
       </button>
 
       <div className="as-nav-spacer" />
-      <button className="as-nav-item as-nav-danger" onClick={handleLogout}>
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-          <polyline points="16 17 21 12 16 7"/>
-          <line x1="21" y1="12" x2="9" y2="12"/>
-        </svg>
-        {t("settings.nav.logout")}
-      </button>
+
     </aside>
   );
 
@@ -768,6 +776,7 @@ export function Panel({
       profil: t("settings.nav.profile"),
       konto: t("settings.nav.myAccount"),
       sesje: t("settings.nav.sessions"),
+      wyglad: t("settings.nav.appearance"),
       glos: t("settings.nav.voice"),
       jezyk: t("settings.language.title"),
       ostrzezenia: t("settings.nav.warnings"),
@@ -825,6 +834,28 @@ export function Panel({
                   <rect x="2" y="3" width="20" height="14" rx="2" />
                   <line x1="8" y1="21" x2="16" y2="21" />
                   <line x1="12" y1="17" x2="12" y2="21" />
+                </svg>
+              ),
+            },
+            {
+              id: "wyglad" as const,
+              label: t("settings.nav.appearance"),
+              icon: (
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="13.5" cy="6.5" r=".5" />
+                  <circle cx="17.5" cy="10.5" r=".5" />
+                  <circle cx="8.5" cy="7.5" r=".5" />
+                  <circle cx="6.5" cy="12.5" r=".5" />
+                  <path d="M12 2a10 10 0 0 0 0 20c1.1 0 2-.9 2-2 0-.5-.2-.9-.5-1.3-.3-.4-.5-.8-.5-1.2 0-1.1.9-2 2-2h2c2.8 0 5-2.2 5-5C22 5.8 17.5 2 12 2Z" />
                 </svg>
               ),
             },
@@ -901,7 +932,7 @@ export function Panel({
   const settingsSections = (
     <div key={section}>
           {section === "profil" && (
-            <>
+            <div className="settings-profile-overview">
               <h2 className="as-section-title">{t("settings.nav.profile")}</h2>
               <p className="as-section-subtitle">
                 {t("settings.profile.subtitle")}
@@ -1004,39 +1035,28 @@ export function Panel({
                 </div>
               </div>
 
-              <div className="as-card as-data-card">
-                <p className="as-card-label">{t("settings.profile.personalData")}</p>
-                <div className="as-data-row">
+              <p className="as-group-label">{t("settings.profile.personalData")}</p>
+              <form className="as-card as-data-card settings-profile-data" onSubmit={handleSave} noValidate>
+                <button type="button" className="as-data-row settings-profile-link" onClick={openProfileEditor}>
                   <span className="as-data-label">{t("common.displayName")}</span>
-                  <span className="as-data-value">{profileValues.displayName || navName}</span>
-                </div>
+                  <span className="as-data-value">{profileValues.displayName || navName} <span aria-hidden="true">✎</span></span>
+                </button>
                 <div className="as-data-row">
                   <span className="as-data-label">{t("common.username")}</span>
                   <span className="as-data-value">@{user?.username}</span>
                 </div>
-                <div className="as-data-row">
-                  <span className="as-data-label">{t("common.bio")}</span>
-                  <span className="as-data-value">{profileValues.bio || t("common.emDash")}</span>
+                <div className="as-data-row settings-profile-color">
+                  <span className="as-data-label">{t("profile.form.avatarColor")}</span>
+                  <ColorPicker value={profileValues.color} onChange={color => setProfileValues(prev => ({ ...prev, color }))} />
+                  {error && <div className="as-error" role="alert">{error}</div>}
+                  {profileValues.color !== (user?.color ?? 0) && <button type="submit" className="as-btn-secondary" disabled={saving}>{saving ? t("common.saving") : t("settings.profile.saveChanges")}</button>}
                 </div>
-              </div>
-
-              <form className="as-card" onSubmit={handleSave} noValidate>
-                <p className="as-card-label">{t("settings.profile.editProfile")}</p>
-                {error && <div className="as-error" role="alert">{error}</div>}
-                <ProfileFields
-                  values={profileValues}
-                  onChange={(patch) =>
-                    setProfileValues((prev) => ({ ...prev, ...patch }))
-                  }
-                  variant="settings"
-                  actions={
-                    <button type="submit" className="as-btn-primary as-profile-save-btn" disabled={saving}>
-                      {saving ? t("common.saving") : t("settings.profile.saveChanges")}
-                    </button>
-                  }
-                />
+                <button type="button" className="as-data-row settings-profile-link settings-profile-bio" onClick={openProfileEditor}>
+                  <span className="as-data-label">{t("common.bio")}</span>
+                  <span className="as-data-value">{profileValues.bio || t("profile.form.bioPlaceholderOptional")}</span>
+                </button>
               </form>
-            </>
+            </div>
           )}
 
           {section === "konto" && (
@@ -1078,11 +1098,11 @@ export function Panel({
               ) : null}
 
               <div className="as-card">
-                <p className="as-card-label">{t("common.username")}</p>
+                <div className="account-edit-heading"><div><p className="as-card-label">{t("common.username")}</p><strong>@{user?.username}</strong></div><button type="button" className="account-edit-button" aria-label={t("settings.account.changeUsername")} aria-expanded={usernameEditorOpen} onClick={() => setUsernameEditorOpen(open => !open)}><Pencil size={16} /></button></div>
                 <p className="as-hint" style={{ marginBottom: "1rem" }}>
                   {t("settings.account.usernameHint", { username: user?.username ?? "" })}
                 </p>
-                <form className="as-form" onSubmit={handleChangeUsername} noValidate>
+                {usernameEditorOpen && <form className="as-form" onSubmit={handleChangeUsername} noValidate>
                   <div className="as-field">
                     <label htmlFor="as-username">{t("settings.account.newUsername")}</label>
                     <input
@@ -1122,7 +1142,7 @@ export function Panel({
                   <button type="submit" className="as-btn-primary" disabled={usernameBusy}>
                     {usernameBusy ? t("common.saving") : t("settings.account.changeUsername")}
                   </button>
-                </form>
+                </form>}
               </div>
 
               <p className="as-group-label">{t("settings.accountExtra.authGroup")}</p>
@@ -1165,8 +1185,9 @@ export function Panel({
                     <div className="as-setting-title">{t("settings.account.changePassword")}</div>
                     <div className="as-setting-desc">{t("settings.account.changePasswordHint")}</div>
                   </div>
+                  <button type="button" className="as-btn-secondary" aria-expanded={passwordEditorOpen} onClick={() => setPasswordEditorOpen(open => !open)}>{t("settings.account.changePassword")}</button>
                 </div>
-                <form className="as-form as-form--inset" onSubmit={handleChangePassword} noValidate>
+                {passwordEditorOpen && <form className="as-form as-form--inset" onSubmit={handleChangePassword} noValidate>
                   <div className="as-field">
                     <label htmlFor="as-current-password">{t("auth.fields.currentPassword")}</label>
                     <input
@@ -1214,7 +1235,7 @@ export function Panel({
                   <button type="submit" className="as-btn-primary" disabled={passwordBusy}>
                     {passwordBusy ? t("common.saving") : t("settings.account.changePasswordSubmit")}
                   </button>
-                </form>
+                </form>}
               </div>
 
               {user?.twoFactorEnabled && (
@@ -1409,9 +1430,10 @@ export function Panel({
           )}
 
           {section === "sesje" && (
-            <>
+            <div className="devices-settings">
               <h2 className="as-section-title">{t("settings.account.sessionsTitle")}</h2>
-              <p className="as-group-label">{t("settings.account.activeSessions")}</p>
+              <p className="as-section-subtitle">{t("settings.account.activeSessions")}</p>
+              <p className="as-group-label">{t("settings.devices.active")}</p>
 
               {sessionsError && <div className="as-error" role="alert">{sessionsError}</div>}
 
@@ -1436,18 +1458,14 @@ export function Panel({
                       className={`as-session-row${session.isCurrent ? " as-session-row--current" : ""}`}
                       title={sessionHint}
                     >
-                      {session.isCurrent ? (
+                      {session.isCurrent && (
                         <span className="as-session-device-badge">
                           {t("session.thisDeviceLabel")}
                         </span>
-                      ) : null}
+                      )}
                       <div className="as-session-main">
-                        <div className="as-session-icon-stack">
-                          <BrowserIcon
-                            browser={session.browser}
-                            isKnown={session.isKnown}
-                          />
-                          <OsIcon os={session.os} className="as-session-icon-stack__os" />
+                        <div className="as-session-device-icon">
+                          {/android|ios|iphone|ipad/i.test(session.os) ? <Smartphone size={16} /> : <Monitor size={16} />}
                         </div>
                         <div className="as-session-copy">
                           <p className="as-session-device">{sessionTitle}</p>
@@ -1475,7 +1493,7 @@ export function Panel({
                             {sessionActionId === session.id ? (
                               <span className="as-session-revoke-spinner" aria-hidden />
                             ) : (
-                              t("session.revokeDevice")
+                              <X size={14} aria-hidden="true" />
                             )}
                           </button>
                         ) : null}
@@ -1486,11 +1504,12 @@ export function Panel({
                 </div>
               )}
 
-              {sessions.some((s) => !s.isCurrent) ? (
+              <p className="as-group-label devices-danger-label">{t("settings.devices.danger")}</p>
+              {(
                 <button
                   type="button"
                   className="as-action-row"
-                  disabled={revokeOthersBusy || revokeAllBusy || sessionsLoading}
+                  disabled={revokeOthersBusy || sessionsLoading || !sessions.some(s => !s.isCurrent)}
                   onClick={() => void handleRevokeOtherSessions()}
                 >
                   <span className="as-action-row-icon as-action-row-icon--danger">
@@ -1504,42 +1523,15 @@ export function Panel({
                     <strong>{t("session.revokeOthers")}</strong>
                     <span>{t("session.revokeOthersHint")}</span>
                   </span>
-                  <span className="as-action-row-chevron" aria-hidden>›</span>
+                  <span className="devices-logout-button">{t("settings.devices.logout")}</span>
                 </button>
-              ) : null}
+              )}
 
-              <button
-                type="button"
-                className="as-action-row"
-                disabled={revokeAllBusy || revokeOthersBusy || sessionsLoading}
-                onClick={() => void handleRevokeAllSessions()}
-              >
-                <span className="as-action-row-icon as-action-row-icon--danger">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                    <path d="M17 9l4 4-4 4"/>
-                    <path d="M21 13H9"/>
-                  </svg>
-                </span>
-                <span className="as-action-row-copy">
-                  <strong>{t("session.revokeAllSessions")}</strong>
-                  <span>{t("session.revokeAllSessionsHint")}</span>
-                </span>
-                <span className="as-action-row-chevron" aria-hidden>›</span>
-              </button>
 
-              <div className="as-info-banner">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <line x1="12" y1="16" x2="12" y2="12"/>
-                  <line x1="12" y1="8" x2="12.01" y2="8"/>
-                </svg>
-                <p>
-                  {t("session.securityHint")}
-                </p>
-              </div>
-            </>
+            </div>
           )}
+
+          {section === "wyglad" && (<AppearanceSettings />)}
 
           {section === "jezyk" && <LanguageSettings />}
 
@@ -1696,7 +1688,7 @@ export function Panel({
             </button>
             {!isMobile && <span className="as-close-hint">ESC</span>}
           </div>
-          <div className="as-content-inner settings-section-panel" key={section}>
+          <div className={`as-content-inner settings-section-panel settings-section--${section}`} key={section}>
             {settingsSections}
           </div>
         </div>

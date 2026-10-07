@@ -21,7 +21,7 @@ export interface User {
   twoFactorEnabled?: boolean;
   isDisabled?: boolean;
   deletionScheduledAt?: string | null;
-  language?: "pl" | "en";
+  language?: "pl" | "en" | "ru";
 }
 
 export interface Contact {
@@ -39,6 +39,7 @@ export interface Contact {
   lastMessage?: string;
 
   lastMessageId?: string;
+  lastMessageSenderId?: string;
   unreadCount?: number;
   isMuted?: boolean;
   isBlockedByMe?: boolean;
@@ -66,6 +67,7 @@ export interface Channel {
   lastMessage?: string;
 
   lastMessageId?: string;
+  lastMessageSenderId?: string;
   unreadCount?: number;
   isMuted?: boolean;
   rateLimitPerUser?: number;

@@ -368,3 +368,37 @@
     padding: 0 16px calc(16px + var(--safe-bottom));
   }
 }
+
+
+.contact-sheet-backdrop { position: fixed; inset: 0; z-index: 1600; background: rgba(0,0,0,.55); }
+.contact-sheet { position: absolute; right: 0; top: 0; bottom: 0; width: min(380px, 100%); overflow-y: auto; background: var(--bg-panel); color: var(--text); border-left: 1px solid var(--border); font-family: Inter, ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif; }
+.contact-sheet header { height: 65px; padding: 0 18px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); font-size: 16px; }
+.contact-sheet header button { color: var(--text-muted); padding: 8px; }
+.contact-sheet__identity { padding: 28px 20px 24px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
+.contact-sheet__identity h2 { margin: 10px 0 0; font-size: 20px; font-weight: 700; }
+.contact-sheet__identity span, .contact-sheet__identity p { color: var(--text-muted); font-size: 13px; }
+.contact-sheet__identity p { margin: 10px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.contact-sheet__identity .contact-sheet__online { color: var(--success); }
+.contact-sheet__online::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: currentColor; margin-right: 6px; }
+.contact-sheet__actions { padding: 0 20px 24px; display: flex; flex-direction: column; gap: 8px; }
+.contact-sheet__actions button { min-height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 6px; color: var(--text); background: var(--accent-dim); font: 600 14px Inter, ui-sans-serif, system-ui, sans-serif; }
+.contact-sheet__actions .contact-sheet__write { background: linear-gradient(90deg, #957cfd, var(--accent)); color: white; }
+.contact-sheet__actions button:disabled { opacity: .4; }
+.contact-sheet button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.contact-sheet,
+.contact-sheet button,
+.contact-sheet__actions button { font-family: "Space Grotesk", system-ui, sans-serif; }
+.contact-sheet button:not(:disabled), .contact-sheet button:not(:disabled) * { cursor: pointer; }
+.contact-sheet__identity { gap: 3px; }
+.contact-sheet__identity h2 { margin: 18px 0 0; }
+.contact-sheet__identity h2 + span { margin: 0; }
+.contact-sheet__identity h2 + span + span { margin-top: 10px; }
+.contact-sheet__identity p { margin: 0; }
+.profile-setup .al-title { margin-bottom: 22px; }
+.profile-setup .al-form { gap: 14px; }
+.profile-setup .al-field { gap: 6px; }
+.profile-setup .profile-bio-field { margin-top: 0; }
+.profile-setup .profile-field-hint { margin: 2px 0 0; }
+.profile-setup .profile-bio-field textarea { min-height: 96px; height: 96px; }
+.profile-setup .profile-bio-counter { margin-top: 2px; }
+.profile-setup .al-btn-submit { margin-top: 4px; }

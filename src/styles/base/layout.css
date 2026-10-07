@@ -82,7 +82,7 @@
 }
 
 .app-shell__main {
-  background: var(--bg-shell);
+  background: var(--bg-chat);
   display: flex;
   flex-direction: column;
   min-width: 0;
@@ -657,3 +657,11 @@
 .error-boundary-reload:hover {
   filter: brightness(1.1);
 }
+
+
+.app-shell--chat {
+  --font-sans: Inter, ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-sans);
+  letter-spacing: normal;
+}
+.app-shell--chat button, .app-shell--chat input, .app-shell--chat textarea { font-family: var(--font-sans); }

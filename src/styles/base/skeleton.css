@@ -1,0 +1,11 @@
+.loading-skeleton { width: 100%; padding: 16px 0; }
+.loading-skeleton__row { display: flex; align-items: center; gap: 12px; padding: 12px; }
+.loading-skeleton__avatar { width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; }
+.loading-skeleton__lines { display: flex; flex-direction: column; gap: 8px; }
+.loading-skeleton__lines div { height: 10px; width: 200px; max-width: 45vw; border-radius: 6px; }
+.loading-skeleton__lines div:first-child { width: 140px; }
+.loading-skeleton__avatar, .loading-skeleton__lines div { background: color-mix(in srgb, var(--text) 6%, var(--bg-panel)); animation: skeleton-pulse 1.6s ease-in-out infinite; }
+.loading-skeleton--messages .loading-skeleton__row:nth-child(odd) { flex-direction: row-reverse; }
+.loading-skeleton__sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+@keyframes skeleton-pulse { 50% { opacity: .45; } }
+@media (prefers-reduced-motion: reduce) { .loading-skeleton__avatar, .loading-skeleton__lines div { animation: none; } }

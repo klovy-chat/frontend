@@ -432,6 +432,7 @@ export function getCachedTipPreview(
   lastMessage?: string;
   lastMessageTime?: string;
   lastMessageId?: string;
+  lastMessageSenderId?: string;
 } | null {
   const cached = messagePageCache.get(key);
   if (!cached || cached.messages.length === 0) return null;
@@ -442,6 +443,7 @@ export function getCachedTipPreview(
     if (excludeId && m._id === excludeId) continue;
     return {
       lastMessageId: m._id,
+      lastMessageSenderId: typeof m.sender === "string" ? m.sender : m.sender?._id ?? m.sender?.id,
       lastMessageTime: m.timestamp,
       lastMessage: getMessagePreview(m),
     };

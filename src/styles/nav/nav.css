@@ -25,10 +25,10 @@
 }
 
 .nav-rail__brand-logo {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   flex-shrink: 0;
-  object-fit: contain;
+  object-fit: cover;
   border-radius: 10px;
 }
 
@@ -53,6 +53,7 @@
 }
 
 .nav-rail__subtitle--clock {
+  color: var(--text-dim);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -86,6 +87,10 @@
   font-weight: 500;
   text-align: left;
   transition: background 0.15s, color 0.15s;
+}
+
+.nav-rail__item + .nav-rail__item {
+  margin-top: 4px;
 }
 
 .nav-rail__item:hover {
@@ -354,4 +359,39 @@
     bottom: 0;
     min-width: 180px;
   }
+}
+
+.nav-rail { font-family: "Space Grotesk", system-ui, sans-serif; letter-spacing: normal; }
+.nav-rail__title { font-size: 15px; font-weight: 700; letter-spacing: normal; }
+.nav-rail__subtitle { font-size: 11px; font-weight: 400; }
+.nav-rail__brand { border-bottom: 0; margin-bottom: 4px; }
+.nav-rail__scroll { gap: 24px; padding: 0 2px; }
+.nav-rail__group-label { font-size: 11px; font-weight: 500; letter-spacing: .08em; padding-bottom: 6px; }
+.nav-rail__item { position: relative; font-family: inherit; font-size: 13px; font-weight: 500; border-radius: 10px; }
+.nav-rail__item.active { font-weight: 600; background: var(--bg-hover); }
+.nav-rail__item.active .nav-rail__icon::after { display: none; }
+.nav-rail__item.active::before { content: ""; position: absolute; left: 0; top: 8px; bottom: 8px; width: 3px; border-radius: 0 2px 2px 0; background: var(--accent); }
+@media (max-width: 960px) and (min-width: 641px) { .nav-rail__item { font-size: 0; } }
+
+.nav-rail__brand { margin-bottom: 0; }
+.nav-rail__brand-text { display: flex; flex-direction: column; gap: 2px; }
+.nav-rail__subtitle { margin-top: 0; font-size: 12px; line-height: 16px; letter-spacing: normal; }
+.nav-rail__scroll { gap: 18px; }
+.nav-rail__item + .nav-rail__item { margin-top: 2px; }
+.nav-rail__item { line-height: 20px; }
+.nav-rail__subtitle--clock { font-size: 12.5px; line-height: 17px; }
+
+
+.app-shell--chat .nav-rail__title { font-weight: 700; letter-spacing: normal; }
+.app-shell--chat .nav-rail__group-label { font-weight: 600; }
+.app-shell--chat .nav-rail__item { font-weight: 500; }
+.app-shell--chat .nav-rail__item.active { font-weight: 600; }
+.app-shell--chat .nav-rail__group-label { font-weight: 500; }
+.app-shell--chat .nav-rail__subtitle { font-weight: 400; }
+
+:root[data-theme="dark"] .nav-rail__group-label { color: var(--text-dim); }
+
+.app-shell .nav-rail,
+.app-shell .nav-rail button {
+  font-family: "Space Grotesk", system-ui, sans-serif;
 }

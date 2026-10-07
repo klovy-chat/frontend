@@ -7,89 +7,51 @@
    Przy zmianach: layout.css, całe UI.
  */
 
+/* Zeroday: Importowanie motywow z themes */
+
+@import "../themes/dark.css";
+@import "../themes/light.css";
+@import "../themes/black.css";
+@import "../themes/blue.css";
+@import "../themes/forest.css";
+@import "../themes/desert.css";
+
 :root {
-  --bg-shell: #18191C;
-  --bg-chat: var(--bg-panel);
-  --bg-deep: var(--bg-shell);
-  --bg-panel: #1E2023;
-  --bg-elevated: #2C2E33;
-  --bg-card: #25272B;
-  --bg-hover: #2C2E33;
-  --bg-active: rgba(123, 92, 250, 0.16);
-  --border: rgba(255, 255, 255, 0.07);
-  --border-light: rgba(255, 255, 255, 0.045);
-  --text: #ECEDEE;
-  --text-muted: #9BA0A6;
-  --text-dim: #6B7076;
-  --accent: #7B5CFA;
-  --accent-hover: #6C4EE9;
-  --accent-dim: rgba(123, 92, 250, 0.18);
-  --accent-border: rgba(123, 92, 250, 0.38);
-  --danger: #E5484D;
-  --danger-dim: rgba(229, 72, 77, 0.1);
-  --danger-border: rgba(229, 72, 77, 0.28);
-  --success: #3FBF8F;
-  --success-dim: rgba(63, 191, 143, 0.1);
-  --success-border: rgba(63, 191, 143, 0.28);
-  --warning: #D69B47;
-  --warning-dim: rgba(214, 155, 71, 0.12);
-  --warning-border: rgba(214, 155, 71, 0.3);
   --radius: 12px;
   --radius-sm: 8px;
   --radius-pill: 999px;
-  --nav-width: 232px;
-  --list-width: 345px;
+
+  --nav-width: 220px;
+  --list-width: 300px;
   --detail-width: 300px;
+
   --settings-nav-width: 200px;
   --settings-content-min: 720px;
   --settings-modal-width: 1320px;
   --settings-modal-height: 840px;
-  --bg-settings-nav: var(--bg-shell);
-  --bg-settings-surface: #17171E;
-  --bg-settings-card: #1C1C26;
-  --bg-settings-card-hover: #22222E;
-  --bg-settings-active: #242430;
+
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
+
   --bp-tablet: 960px;
   --bp-mobile: 640px;
   --bp-mobile-sm: 480px;
   --bp-mobile-layout: 768px;
-  --shadow: 0 32px 80px rgba(0, 0, 0, 0.6);
-  --shadow-sm: 0 8px 24px rgba(0, 0, 0, 0.4);
-  --font-sans: Inter, ui-sans-serif, system-ui, sans-serif;
+
+  --font-sans: "Space Grotesk", system-ui, sans-serif;
   --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  /* Hotspot 0 0 = czubek strzałki (grafika przesunięta). Bez tego klik szedł w (0,0) canvasu. */
+
   --cursor-auto: url("/assets/cursor.png") 0 0, auto;
   --cursor-pointer: url("/assets/cursor.png") 0 0, pointer;
   --cursor-text: url("/assets/cursor.png") 0 0, text;
+
   font-family: var(--font-sans);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-  letter-spacing: normal;
-}
-
-:root[data-theme="light"] {
-  --bg-shell: #f7f6fb;
-  --bg-chat: var(--bg-shell);
-  --bg-deep: #f1eefb;
-  --bg-panel: #ffffff;
-  --bg-elevated: #ffffff;
-  --bg-card: #f1eefb;
-  --bg-hover: #e9e4fa;
-  --bg-active: rgba(123, 92, 250, 0.14);
-  --border: rgba(23, 17, 54, 0.09);
-  --border-light: rgba(23, 17, 54, 0.06);
-  --text: #1a1626;
-  --text-muted: #6b6580;
-  --text-dim: #9a94ad;
-  --accent-dim: rgba(123, 92, 250, 0.12);
-  --accent-border: rgba(123, 92, 250, 0.3);
-  --shadow: 0 24px 70px rgba(23, 17, 54, 0.14);
-  --shadow-sm: 0 8px 24px rgba(23, 17, 54, 0.1);
+  letter-spacing: -0.01em;
 }
 
 @media (hover: none) and (pointer: coarse) {
@@ -124,7 +86,7 @@ body {
   color: var(--text);
   line-height: 1.45;
   font-family: var(--font-sans);
-  letter-spacing: normal;
+  letter-spacing: -0.01em;
   cursor: var(--cursor-auto);
 }
 

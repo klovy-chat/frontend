@@ -1,0 +1,95 @@
+:root[data-theme="forest"] {
+  --bg-shell: #141A17;
+  --bg-chat: #141A17;
+  --bg-deep: #101512;
+  --bg-panel: #1A211D;
+  --bg-elevated: #242C27;
+  --bg-card: #222A25;
+  --bg-hover: #2B352E;
+  --bg-active: rgba(79, 128, 94, 0.18);
+
+  --border: rgba(224, 235, 227, 0.08);
+  --border-light: rgba(224, 235, 227, 0.045);
+
+  --text: #E9EDEA;
+  --quote-text: #B0C6B6;
+  --text-muted: #A0ABA4;
+  --text-dim: #76837B;
+
+  --accent: #4F805E;
+  --accent-hover: #5B916C;
+  --accent-dim: rgba(79, 128, 94, 0.16);
+  --accent-border: rgba(79, 128, 94, 0.38);
+
+  --danger: #E85B62;
+  --danger-dim: rgba(232, 91, 98, 0.09);
+  --danger-border: rgba(232, 91, 98, 0.25);
+
+  --success: #35B77C;
+  --success-dim: rgba(53, 183, 124, 0.09);
+  --success-border: rgba(53, 183, 124, 0.25);
+
+  --warning: #C99D48;
+  --warning-dim: rgba(201, 157, 72, 0.10);
+  --warning-border: rgba(201, 157, 72, 0.26);
+
+  --bg-settings-nav: #141A17;
+  --bg-settings-surface: #1A211D;
+  --bg-settings-card: #222A25;
+  --bg-settings-card-hover: #2B352E;
+  --bg-settings-active: #2D3C32;
+
+  --shadow: 0 32px 80px rgba(0, 0, 0, 0.72);
+  --shadow-sm: 0 8px 24px rgba(0, 0, 0, 0.52);
+}
+
+:root[data-theme="forest"] .app-shell--chat .workspace-home,
+:root[data-theme="forest"] .app-shell--chat .chat-window {
+  background-color: #0C140F;
+  background-image: linear-gradient(rgba(6, 15, 9, .48), rgba(6, 15, 9, .58)), url("../../assets/themes/forest-background.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+:root[data-theme="forest"] .app-shell--chat .chat-main {
+  background: transparent;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  :root[data-theme="forest"] {
+    --cursor-auto: url("/assets/green_cursor.png") 0 0, auto;
+    --cursor-pointer: url("/assets/green_cursor.png") 0 0, pointer;
+    --cursor-text: url("/assets/green_cursor.png") 0 0, text;
+  }
+}
+
+:root[data-theme="forest"] .mi-edit-banner {
+  background: var(--bg-card);
+  border-color: var(--accent-border);
+  color: var(--quote-text);
+}
+:root[data-theme="forest"] .mi-edit-cancel {
+  color: var(--quote-text);
+}
+:root[data-theme="forest"] .mi-edit-cancel:hover {
+  background: var(--accent-dim);
+  color: var(--text);
+}
+[data-theme="forest"] .msg-mention { color: #b9e0c3; background: rgba(93, 154, 110, .22); }
+[data-theme="forest"] .message-bubble.own .msg-mention { color: #f0faf2; background: rgba(13, 40, 23, .32); }
+[data-theme="forest"] .msg-mention--self { color: #e2f4d2; background: rgba(123, 164, 85, .25); }
+[data-theme="forest"] .message-bubble.own .msg-mention--self { color: #f1f9df; background: rgba(30, 60, 19, .38); }
+[data-theme="forest"] .mi-attachment:not(.mi-attachment--error) {
+  background: var(--accent-dim);
+  border-color: var(--accent-border);
+  color: var(--text);
+}
+[data-theme="forest"] .mi-attachment__remove {
+  background: var(--accent-dim);
+  color: var(--text-muted);
+}
+[data-theme="forest"] .mi-attachment__remove:hover {
+  background: color-mix(in srgb, var(--danger) 15%, transparent);
+  color: var(--danger);
+}

@@ -16,7 +16,7 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, MoreVertical } from "lucide-react";
 import "../../styles/common/action-menu.css";
 
 export type ActionMenuItem = {
@@ -29,11 +29,12 @@ export type ActionMenuItem = {
 };
 
 type ActionMenuProps = {
+  iconOnly?: boolean;
   label: string;
   items: ActionMenuItem[];
 };
 
-export function ActionMenu({ label, items }: ActionMenuProps) {
+export function ActionMenu({ label, items, iconOnly = false }: ActionMenuProps) {
   const [open, setOpen] = useState(false);
   const [menuStyle, setMenuStyle] = useState<CSSProperties>({
     position: "fixed",
@@ -147,17 +148,17 @@ export function ActionMenu({ label, items }: ActionMenuProps) {
       <button
         ref={triggerRef}
         type="button"
-        className="action-menu-trigger"
+        className={`action-menu-trigger${iconOnly ? " action-menu-trigger--icon" : ""}`}
+        aria-label={label}
         aria-expanded={open}
         aria-haspopup="menu"
         aria-controls={menuId}
         onClick={() => setOpen((v) => !v)}
       >
-        {label}
-        <ChevronDown
+        {iconOnly ? <MoreVertical size={18} /> : <>{label}<ChevronDown
           size={14}
           className={`action-menu-chevron${open ? " action-menu-chevron--open" : ""}`}
-        />
+        /></>}
       </button>
       {menu}
     </div>
