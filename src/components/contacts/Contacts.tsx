@@ -98,7 +98,7 @@ interface ContactsProps {
   variant?: "modal" | "inline";
 }
 
-const DESKTOP_TABS: ContactsTab[] = ["invite", "myContacts", "sent", "blocked"];
+const DESKTOP_TABS: ContactsTab[] = ["invite", "sent", "blocked", "send"];
 const MOBILE_TABS: ContactsTab[] = ["myContacts", "sent", "blocked", "send"];
 
 function EmptyState({
@@ -161,7 +161,7 @@ export function Contacts({
   const isMobileInline = isMobile && variant === "inline";
   const tabs = isMobileInline ? MOBILE_TABS : DESKTOP_TABS;
   const toast = useToast();
-  const [tab, setTab] = useState<ContactsTab>(() => (isMobileInline ? "myContacts" : "invite"));
+  const [tab, setTab] = useState<ContactsTab>(() => (isMobileInline ? "myContacts" : "send"));
   const [inviteUsername, setInviteUsername] = useState("");
   const [inviteError, setInviteError] = useState<string | null>(null);
   const [inviteSending, setInviteSending] = useState(false);
@@ -433,7 +433,7 @@ export function Contacts({
       return (
         <>
           {renderInvitePanel()}
-          {renderReceivedInvites()}
+          {isMobileInline && renderReceivedInvites()}
         </>
       );
     }
@@ -701,11 +701,6 @@ export function Contacts({
       <div className="contacts-modal__body">
         <div className="contacts-modal__main">{renderMain()}</div>
 
-        {!isMobileInline && (
-          <div className="contacts-modal__side">
-            {renderInvitePanel()}
-          </div>
-        )}
       </div>
     </div>
   );

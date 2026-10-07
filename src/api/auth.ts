@@ -210,7 +210,7 @@ export function updateProfile(data: {
   });
 }
 
-export function updateLanguage(language: "pl" | "en") {
+export function updateLanguage(language: "pl" | "en" | "ru") {
   return apiRequest<User>("/api/auth/language", {
     method: "PATCH",
     body: JSON.stringify({ language }),

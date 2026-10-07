@@ -1,0 +1,238 @@
+.appearance-section {
+  margin-top: 28px;
+}
+
+.appearance-section-label {
+  margin: 0 0 10px;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.appearance-theme-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(140px, 165px));
+  justify-content: start;
+  gap: 12px;
+}
+
+.appearance-theme-card {
+  min-width: 0;
+  padding: 10px;
+
+  background: var(--bg-settings-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+
+  color: var(--text);
+  text-align: left;
+
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    transform 0.15s ease;
+}
+
+.appearance-theme-card:hover {
+  background: var(--bg-settings-card-hover);
+  border-color: var(--accent-border);
+}
+
+.appearance-theme-card.active {
+  border-color: var(--accent);
+}
+
+.appearance-theme-preview {
+  position: relative;
+
+  display: flex;
+
+  width: 100%;
+  height: 110px;
+
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.appearance-theme-preview-sidebar {
+  width: 28%;
+}
+
+.appearance-theme-preview-content {
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 6px;
+
+  padding: 12px;
+}
+
+.appearance-theme-preview-message {
+  width: 72%;
+  height: 12px;
+
+  border-radius: 6px;
+}
+
+.appearance-theme-preview-message.short {
+  width: 48%;
+}
+
+/* DARK PREVIEW */
+
+.appearance-theme-preview--dark {
+  background: #1e2023;
+}
+
+.appearance-theme-preview--dark
+.appearance-theme-preview-sidebar {
+  background: #18191c;
+}
+
+.appearance-theme-preview--dark
+.appearance-theme-preview-message {
+  background: #7b5cfa;
+}
+
+/* LIGHT PREVIEW */
+
+.appearance-theme-preview--light {
+  background: #ffffff;
+}
+
+.appearance-theme-preview--light
+.appearance-theme-preview-sidebar {
+  background: #f1eefb;
+}
+
+.appearance-theme-preview--light
+.appearance-theme-preview-message {
+  background: #7b5cfa;
+}
+
+/* BLACK PREVIEW */
+.appearance-theme-preview--black {
+  background: #0F0F11;
+}
+
+.appearance-theme-preview--black
+.appearance-theme-preview-sidebar {
+  background: #0B0B0E;
+}
+
+.appearance-theme-preview--black
+.appearance-theme-preview-message {
+  background: #7C5CFF;
+}
+
+/* DESERT PREVIEW */
+
+.appearance-theme-preview--desert { background: #2B1810; }
+.appearance-theme-preview--desert .appearance-theme-preview-sidebar { background: #1C0F0A; }
+.appearance-theme-preview--desert .appearance-theme-preview-message { background: #E8743B; }
+
+/* BLUE PREVIEW */
+
+.appearance-theme-preview--blue {
+  background: #101a2c;
+}
+
+.appearance-theme-preview--blue
+.appearance-theme-preview-sidebar {
+  background: #0b1220;
+}
+
+.appearance-theme-preview--blue
+.appearance-theme-preview-message {
+  background: #3b82f6;
+}
+
+.appearance-theme-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+
+  margin-top: 10px;
+}
+
+.appearance-theme-info > div {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.appearance-theme-info strong {
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.appearance-theme-info span {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.appearance-theme-radio {
+  flex: 0 0 auto;
+
+  width: 16px;
+  height: 16px;
+
+  border: 2px solid var(--text-dim);
+  border-radius: 50%;
+}
+
+.appearance-theme-radio.active {
+  border: 5px solid var(--accent);
+}
+
+.appearance-theme-preview--forest {
+  background: #141A17;
+}
+
+.appearance-theme-preview--forest
+.appearance-theme-preview-sidebar {
+  background: #1A211D;
+}
+
+.appearance-theme-preview--forest
+.appearance-theme-preview-message {
+  background: #4F805E;
+}
+
+@media (max-width: 900px) {
+  .appearance-theme-grid {
+    grid-template-columns: 1fr;
+  }
+}.appearance-theme-grid { grid-template-columns: repeat(4, 148px); gap: 14px; }
+.appearance-section-label { text-transform: uppercase; font-size: 10px; font-weight: 500; letter-spacing: .05em; margin-bottom: 14px; }
+.appearance-theme-card { padding: 0; border-radius: 14px; overflow: hidden; }
+.appearance-theme-card.active { box-shadow: 0 0 0 1px var(--accent); }
+.appearance-theme-preview { height: 84px; border-radius: 0; }
+.appearance-theme-preview-sidebar { width: 30%; background: #25272b; }
+.appearance-theme-preview-content { justify-content: flex-start; gap: 6px; padding: 10px; }
+.appearance-theme-preview-message { height: 5px; border-radius: 3px; width: 84%; background: #35383e; }
+.appearance-theme-preview-message.accent { width: 58%; }
+.appearance-theme-preview-message.short { width: 42%; }
+.appearance-theme-preview:not(.unused) .appearance-theme-preview-message:not(.accent) { background: #35383e; }
+.appearance-theme-preview--light .appearance-theme-preview-message:not(.accent) { background: #e7e7ec !important; }
+.appearance-theme-info { margin: 0; padding: 10px 12px; }
+.appearance-theme-info strong { font-size: 11px; }
+.appearance-theme-radio { width: 15px; height: 15px; border: none; display: flex; align-items: center; justify-content: center; }
+.appearance-theme-radio.active { border: none; background: var(--accent); color: white; }
+.appearance-text-size-row { display: flex; align-items: center; gap: 14px; padding: 20px; min-height: 84px; background: var(--bg-settings-card); border: 1px solid var(--border); border-radius: 14px; }
+.appearance-text-size-icon { display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 10px; background: var(--bg-hover); color: var(--text-muted); flex-shrink: 0; }
+.appearance-text-size-copy { display: flex; flex-direction: column; gap: 10px; }
+.appearance-text-size-copy strong { font-size: 13px; font-weight: 600; }
+.appearance-text-size-copy span { font-size: 11px; color: var(--text-dim); }
+.appearance-text-size-options { display: flex; gap: 6px; margin-left: auto; }
+.appearance-text-size-options button { width: 36px; height: 34px; border-radius: 8px; background: var(--bg-hover); color: var(--text-muted); font-size: 11px; border: 1px solid transparent; }
+.appearance-text-size-options button.active { background: color-mix(in srgb, var(--accent) 15%, var(--bg-settings-card)); border-color: var(--accent); color: var(--accent); }
+@media (max-width: 1150px) { .appearance-theme-grid { grid-template-columns: repeat(2, minmax(120px, 148px)); } }
+@media (max-width: 480px) { .appearance-text-size-row { padding: 14px; gap: 10px; flex-wrap: wrap; } .appearance-text-size-options { margin-left: auto; } }

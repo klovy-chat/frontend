@@ -99,7 +99,7 @@ export function getMessagePreview(
 
 export function formatListLastMessage(raw?: string): string {
   if (!raw?.trim()) return "";
-  const text = stripFormatting(readableContentForPreview(raw)).trim();
+  const text = stripFormatting(readableContentForPreview(raw).replace(/^[ \t]{0,3}#{1,3}[ \t]+/gm, "")).replace(/\s*\n\s*/g, " ").trim();
   if (!text) return i18n.t("messages.default");
   return text.length > 120 ? `${text.slice(0, 120)}…` : text;
 }

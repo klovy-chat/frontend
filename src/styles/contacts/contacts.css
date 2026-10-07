@@ -8,9 +8,9 @@
  */
 
 .contacts-modal.klovy-shell {
-  width: min(1080px, calc(100vw - 48px));
-  max-width: 1080px;
-  min-height: 520px;
+  width: min(680px, calc(100vw - 48px));
+  max-width: 680px;
+  min-height: 0;
   padding: 0;
   overflow: hidden;
   position: relative;
@@ -182,8 +182,8 @@
 
 .contacts-modal__body {
   display: grid;
-  grid-template-columns: 1fr 280px;
-  min-height: 340px;
+  grid-template-columns: 1fr;
+  min-height: 0;
   background: var(--bg-panel);
 }
 

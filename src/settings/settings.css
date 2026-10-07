@@ -33,6 +33,7 @@
 }
 
 .settings-page-left-spacer {
+  display: none;
   flex: 0 0 auto;
   width: max(
     0px,
@@ -47,7 +48,8 @@
   overflow: hidden;
   background: var(--bg-settings-nav);
   border-right: none;
-  padding-right: var(--settings-column-gap);
+  padding-right: 0;
+  border-right: 1px solid var(--border);
 }
 
 .settings-page .app-shell__settings-content,
@@ -75,8 +77,8 @@
   margin: 0 0 22px;
   padding: 0 8px;
   text-align: left;
-  color: var(--text-muted);
-  font-weight: 500;
+  color: var(--text);
+  font-weight: 700;
 }
 
 .settings-page .as-nav-label {
@@ -145,7 +147,12 @@
 
 .settings-page .as-section-subtitle {
   margin: 0 0 28px;
-  font-size: 13.5px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.55;
+  letter-spacing: normal;
+  color: var(--text-muted);
 }
 
 .settings-page .as-account-hero {
@@ -627,4 +634,117 @@
     flex: 1;
     justify-content: center;
   }
+}
+.settings-page.app-shell--settings-tab { grid-template-columns: var(--nav-width) minmax(0, 1fr); }
+.settings-page .as-content-inner { box-sizing: content-box; max-width: 760px; padding-top: 44px; }
+.settings-page .as-nav-label { text-transform: uppercase; font-size: 10px; letter-spacing: .07em; padding-bottom: 12px; }
+.settings-page .as-nav-label--spaced { margin-top: 22px; }
+
+.settings-page .devices-settings .as-group-label { font-size: 10px; letter-spacing: .05em; margin-bottom: 12px; }
+.settings-page .devices-settings .as-sessions-list { gap: 0; padding: 4px 20px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-settings-card); }
+.settings-page .devices-settings .as-session-row { position: relative; padding: 18px 0; min-height: 76px; border: none; border-bottom: 1px solid var(--border); border-radius: 0; background: transparent; box-shadow: none; }
+.settings-page .devices-settings .as-session-row:last-child { border-bottom: none; }
+.settings-page .devices-settings .as-session-main { gap: 13px; }
+.as-session-device-icon { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; flex-shrink: 0; border-radius: 10px; color: var(--text-dim); background: var(--bg-hover); }
+.settings-page .devices-settings .as-session-device { font-size: 13px; font-weight: 600; }
+.settings-page .devices-settings .as-session-meta { font-size: 11px; color: var(--text-dim); margin-top: 8px; }
+.settings-page .devices-settings .as-session-row--current .as-session-copy { padding-right: 95px; }
+.settings-page .devices-settings .as-session-device-badge { position: absolute; top: 50%; right: 0; transform: translateY(-50%); font-size: 9px; border-radius: 20px; padding: 4px 9px; color: var(--success, #39c987); background: color-mix(in srgb, var(--success, #39c987) 12%, transparent); }
+.settings-page .devices-settings .as-session-revoke-action { width: 30px; min-width: 30px; height: 30px; padding: 0; margin-left: auto; background: transparent; border: none; color: var(--text-dim); }
+.settings-page .devices-settings .as-session-revoke-action:hover { color: var(--danger); background: var(--bg-hover); }
+.settings-page .devices-danger-label { margin-top: 32px; }
+.settings-page .devices-settings .as-action-row { min-height: 84px; border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent); padding: 18px 20px; margin-bottom: 12px; }
+.settings-page .devices-settings .as-action-row-copy strong { font-size: 13px; }
+.settings-page .devices-settings .as-action-row-copy > span { font-size: 11px; margin-top: 8px; }
+.settings-page .devices-settings .as-action-row-chevron { color: var(--danger); }
+.settings-page .devices-settings .as-info-banner { font-size: 12px; margin-top: 20px; }
+@media (max-width: 1100px) and (min-width: 769px) { .settings-page { --settings-nav-width: 210px; } .settings-page .as-content-inner { padding-left: 28px; padding-right: 28px; } }
+@media (max-width: 768px) { .settings-page.app-shell--settings-tab { grid-template-columns: minmax(0, 1fr); } .settings-page .as-content-inner { box-sizing: border-box; padding: 12px 16px calc(80px + var(--safe-bottom)); } .settings-page .devices-settings .as-session-meta { overflow-wrap: anywhere; } }
+.settings-page { --bg-settings-nav: var(--bg-shell); font-family: var(--font-sans); }
+.settings-page button, .settings-page input, .settings-page textarea { font-family: var(--font-sans); }
+.settings-page .as-nav-item.active { background: var(--bg-hover); box-shadow: none; }
+.settings-page .as-nav--inline { padding-top: 28px; }
+
+.settings-page .devices-logout-button { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; margin-left: auto; height: 38px; padding: 0 16px; border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent); border-radius: 9px; color: var(--danger); background: color-mix(in srgb, var(--danger) 10%, transparent); font-size: 12px; font-weight: 600; }
+.settings-page .devices-settings .as-action-row:disabled { opacity: .55; cursor: default; }
+.settings-page button:not(:disabled),
+.settings-page button:not(:disabled) * {
+  cursor: pointer;
+}
+.settings-page .devices-settings .as-action-row:hover:not(:disabled) {
+  background: var(--bg-settings-card);
+  border-color: color-mix(in srgb, var(--danger) 35%, transparent);
+}
+.settings-page .settings-profile-overview .as-banner-preview { height: 140px; }
+.settings-page .settings-profile-overview .as-banner-block { margin-bottom: 18px; }
+.settings-page .settings-profile-overview .as-profile-header-row { margin-bottom: 30px; gap: 20px; }
+.settings-page .settings-profile-overview .as-avatar-lg { width: 76px; height: 76px; }
+.settings-page .settings-profile-overview .as-profile-header-actions { flex-direction: row; align-items: center; flex-wrap: wrap; gap: 10px; }
+.settings-page .settings-profile-overview .as-upload-hint { font-size: 11px; }
+.settings-page .settings-profile-overview .as-group-label { font-size: 10px; margin-bottom: 14px; }
+.settings-page .settings-profile-data { padding: 0; border: 1px solid var(--border); overflow: hidden; }
+.settings-page .settings-profile-data .as-data-row { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 10px; padding: 18px 20px; min-height: 72px; width: 100%; border-bottom: 1px solid var(--border); }
+.settings-page .settings-profile-data .as-data-row:last-child { border-bottom: none; }
+.settings-page .settings-profile-data .as-data-label { font-size: 11px; color: var(--text-dim); }
+.settings-page .settings-profile-data .as-data-value { font-size: 13px; font-weight: 600; white-space: pre-wrap; overflow-wrap: anywhere; text-align: left; }
+.settings-profile-link { background: transparent; text-align: left; }
+.settings-profile-link:hover { background: var(--bg-hover); }
+.settings-page .settings-profile-link:not(.settings-profile-bio) .as-data-value { color: var(--accent); }
+.settings-profile-color .as-btn-secondary { margin-top: 4px; }
+.settings-page .settings-section--konto .as-card,
+.settings-page .settings-section--konto .as-setting-card,
+.settings-page .settings-section--ostrzezenia .as-card,
+.settings-page .settings-section--glos .as-card { border: 1px solid var(--border); border-radius: 14px; margin-bottom: 16px; padding: 20px; }
+.settings-page .settings-section--konto .as-account-hero { background: transparent; padding: 0; margin: 24px 0 30px; border: none; }
+.settings-page .settings-section--konto .as-account-hero-id { font-size: 10px; color: var(--text-dim); }
+.settings-page .as-card-label, .settings-page .as-group-label { font-size: 10px; letter-spacing: .05em; color: var(--text-dim); }
+.settings-page .as-setting-title { font-size: 13px; font-weight: 600; }
+.settings-page .as-setting-desc, .settings-page .as-hint { font-size: 12px; line-height: 1.6; color: var(--text-muted); }
+.settings-page .as-setting-icon { width: 36px; height: 36px; border-radius: 10px; background: var(--bg-hover); color: var(--text-muted); }
+.account-edit-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.account-edit-heading strong { font-size: 13px; }
+.account-edit-button { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 8px; background: var(--bg-hover); color: var(--accent); }
+.account-edit-button:hover { background: var(--accent-dim); }
+.settings-page .settings-section--konto .as-form { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--border); }
+.settings-page .settings-section--konto .as-field label,
+.settings-page .settings-section--glos .as-field label { font-size: 11px; text-transform: none; letter-spacing: 0; font-weight: 500; }
+.settings-page .settings-section--konto .as-field input,
+.settings-page .settings-section--glos .as-select { font-size: 13px; background: var(--bg-shell); border: 1px solid var(--border); border-radius: 10px; }
+.settings-page .settings-section--glos .as-voice-field-spaced { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); }
+.settings-page .settings-section--glos .as-voice-hint,
+.settings-page .settings-section--glos .as-voice-footer { font-size: 11px; color: var(--text-dim); }
+.settings-page .settings-section--ostrzezenia .as-setting-row { padding: 18px 0; }
+.settings-page .settings-section--glos .as-voice-permission-btn {
+  width: 100%; max-width: 412px; min-height: 0; height: 48px; padding: 0 20px;
+  border: none; border-radius: 12px; font-size: 12px; font-weight: 600;
+  background: linear-gradient(110deg, color-mix(in srgb, var(--accent) 75%, white), var(--accent)); box-shadow: none;
+}
+.settings-page .settings-section--glos .as-voice-permission-btn:hover:not(:disabled) { filter: brightness(1.06); }
+.settings-page .settings-section--glos .as-voice-banner {
+  padding: 12px 14px; gap: 10px; border-radius: 12px; font-size: 12px; line-height: 1.5; margin-bottom: 12px;
+}
+.settings-page .settings-section--glos .as-voice-banner__icon { width: 16px; height: 16px; flex: 0 0 16px; }
+.settings-page .settings-section--glos .as-voice-banner__icon svg { width: 16px; height: 16px; }
+.settings-page .settings-section--konto .as-account-mgmt-lead { font-size: 12px; line-height: 1.6; color: var(--text-muted); margin-bottom: 16px; }
+.settings-page .settings-section--konto .as-account-mgmt-card {
+  min-height: 84px; padding: 18px 20px; gap: 14px; border-radius: 14px;
+  background: var(--bg-settings-card); border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
+}
+.settings-page .settings-section--konto .as-account-mgmt-card:hover:not(:disabled),
+.settings-page .settings-section--konto .as-account-mgmt-card--active {
+  background: var(--bg-settings-card); border-color: color-mix(in srgb, var(--danger) 55%, transparent);
+}
+.settings-page .settings-section--konto .as-account-mgmt-icon { width: 38px; height: 38px; border-radius: 10px; flex: 0 0 38px; }
+.settings-page .settings-section--konto .as-account-mgmt-icon svg { width: 18px; height: 18px; }
+.settings-page .settings-section--konto .as-account-mgmt-copy strong { font-size: 13px; font-weight: 600; }
+.settings-page .settings-section--konto .as-account-mgmt-copy > span { font-size: 11px; line-height: 1.6; margin-top: 8px; color: var(--text-dim); }
+.settings-page .settings-section--konto .as-account-mgmt-chevron { color: var(--danger); }
+.settings-page .as-section-title {
+  font-family: var(--font-sans);
+  font-size: 23px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+  color: var(--text);
+  margin: 0 0 8px;
 }

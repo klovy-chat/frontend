@@ -316,16 +316,109 @@ function parseInline(
 
 const CODE_BLOCK_REGEX = /```([\s\S]*?)```/g;
 
-export function renderFormattedText(
-  text: string | undefined | null,
-  options?: MentionRenderOptions,
-): ReactNode {
+// Zeroday: Dodanie renderowania nagłówków [h1,h2,h3]
+function renderHeading(line: string, key: string, rules: InlineRule[]): ReactNode | null {
+  const match = line.match(/^(#{1,3})\s+(.+)$/);
+
+  if (!match) return null;
+
+  const level = match[1].length;
+  const content = match[2];
+
+  const inner = parseInline(content, `${key}-heading`, rules);
+
+  switch (level) {
+    case 1:
+      return <h1 key={key}>{inner}</h1>;
+    case 2:
+      return <h2 key={key}>{inner}</h2>;
+    case 3:
+      return <h3 key={key}>{inner}</h3>;
+    default:
+      return null;
+  }
+}
+
+// Zeroday: Renderowanie cytatów [>]
+function renderQuote(
+  line: string,
+  key: string,
+  rules: InlineRule[],
+): ReactNode | null {
+  const match = line.match(/^>\s+(.+)$/);
+
+  if (!match) return null;
+
+  const content = match[1];
+  const inner = parseInline(content, `${key}-quote`, rules);
+
+  return (
+    <blockquote key={key} className="msg-blockquote">
+      {inner}
+    </blockquote>
+  );
+}
+
+// Zeroday: Renderowanie tekstu linia po linii
+function renderTextBlocks(text: string,keyBase: string,rules: InlineRule[]): ReactNode[] {
+  const nodes: ReactNode[] = [];
+  const lines = text.split("\n");
+
+  let previousWasBlock = false;
+
+  lines.forEach((line, index) => {
+    const lineKey = `${keyBase}-${index}`;
+
+    const heading = renderHeading(line, lineKey, rules);
+    const quote = renderQuote(line, lineKey, rules);
+
+    const isBlockElement = heading !== null || quote !== null;
+    const isEmptyLine = line.trim() === "";
+
+    /*
+     * Dodajemy <br> tylko pomiędzy zwykłymi liniami tekstu.
+     *
+     * Block elementy (header/quote) same tworzą nową linię,
+     * więc nie potrzebują dodatkowego <br>.
+     *
+     * Pusta linia nadal tworzy odstęp celowo.
+     */
+    if (
+      index > 0 &&
+      !isBlockElement &&
+      !previousWasBlock &&
+      !isEmptyLine
+    ) {
+      nodes.push(<br key={`${lineKey}-br`} />);
+    }
+
+    if (isEmptyLine) {
+      nodes.push(<br key={`${lineKey}-empty`} />);
+      previousWasBlock = false;
+      return;
+    }
+
+    if (heading) {
+      nodes.push(heading);
+    } else if (quote) {
+      nodes.push(quote);
+    } else {
+      nodes.push(
+        ...parseInline(line, lineKey, rules),
+      );
+    }
+
+    previousWasBlock = isBlockElement;
+  });
+
+  return nodes;
+}
+
+export function renderFormattedText(text: string | undefined | null, options?: MentionRenderOptions): ReactNode {
   if (!text) return text ?? "";
 
   const mentionRule = options ? buildMentionRule(options) : null;
-  const rules = mentionRule
-    ? [mentionRule, ...BASE_INLINE_RULES]
-    : BASE_INLINE_RULES;
+  const rules = mentionRule ? [mentionRule, ...BASE_INLINE_RULES] : BASE_INLINE_RULES;
 
   const nodes: ReactNode[] = [];
   let lastIndex = 0;
@@ -333,23 +426,41 @@ export function renderFormattedText(
   let match: RegExpExecArray | null;
 
   CODE_BLOCK_REGEX.lastIndex = 0;
+
   while ((match = CODE_BLOCK_REGEX.exec(text)) !== null) {
     if (match.index > lastIndex) {
       nodes.push(
-        ...parseInline(text.slice(lastIndex, match.index), `p${key++}`, rules),
+        ...renderTextBlocks(
+          text
+            .slice(lastIndex, match.index)
+            .replace(/\n$/, ""),
+          `p${key++}`,
+          rules,
+        ),
       );
     }
-    const code = match[1].replace(/^\n/, "").replace(/\n+$/, "");
+
+    const code = match[1]
+      .replace(/^\n/, "")
+      .replace(/\n+$/, "");
+
     nodes.push(
       <pre key={`cb${key++}`} className="msg-codeblock">
         <code>{code}</code>
       </pre>,
     );
+
     lastIndex = CODE_BLOCK_REGEX.lastIndex;
   }
 
   if (lastIndex < text.length) {
-    nodes.push(...parseInline(text.slice(lastIndex), `p${key++}`, rules));
+    nodes.push(
+      ...renderTextBlocks(
+        text.slice(lastIndex),
+        `p${key++}`,
+        rules,
+      ),
+    );
   }
 
   return nodes;

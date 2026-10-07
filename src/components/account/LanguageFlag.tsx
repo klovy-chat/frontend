@@ -14,6 +14,9 @@ interface LanguageFlagProps {
 }
 
 export function LanguageFlag({ locale, className = "" }: LanguageFlagProps) {
+  if (locale === "ru") {
+    return <span className={`as-lang-flag ${className}`.trim()} aria-hidden="true"><svg viewBox="0 0 28 20" xmlns="http://www.w3.org/2000/svg"><rect width="28" height="20" fill="#FFFFFF" /><rect y="6.667" width="28" height="6.667" fill="#0039A6" /><rect y="13.333" width="28" height="6.667" fill="#D52B1E" /></svg></span>;
+  }
   if (locale === "pl") {
     return (
       <span className={`as-lang-flag ${className}`.trim()} aria-hidden="true">

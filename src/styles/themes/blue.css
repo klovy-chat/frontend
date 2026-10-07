@@ -1,0 +1,46 @@
+/* Theme byl wprowadzony testowo obecnie nie jest uzywany */
+
+:root[data-theme="blue"] {
+  --bg-shell: #0B1220;
+  --bg-chat: var(--bg-panel);
+  --bg-deep: #080E19;
+  --bg-panel: #101A2C;
+  --bg-elevated: #192842;
+  --bg-card: #142238;
+  --bg-hover: #1B2C48;
+  --bg-active: rgba(59, 130, 246, 0.18);
+
+  --border: rgba(147, 197, 253, 0.10);
+  --border-light: rgba(147, 197, 253, 0.06);
+
+  --text: #EFF6FF;
+  --quote-text: #b0c8fc;
+  --text-muted: #9CAFC9;
+  --text-dim: #647A98;
+
+  --accent: #3B82F6;
+  --accent-hover: #2563EB;
+  --accent-dim: rgba(59, 130, 246, 0.18);
+  --accent-border: rgba(59, 130, 246, 0.40);
+
+  --danger: #F05D64;
+  --danger-dim: rgba(240, 93, 100, 0.10);
+  --danger-border: rgba(240, 93, 100, 0.28);
+
+  --success: #3CCB9A;
+  --success-dim: rgba(60, 203, 154, 0.10);
+  --success-border: rgba(60, 203, 154, 0.28);
+
+  --warning: #E0A84F;
+  --warning-dim: rgba(224, 168, 79, 0.12);
+  --warning-border: rgba(224, 168, 79, 0.30);
+
+  --bg-settings-nav: var(--bg-shell);
+  --bg-settings-surface: #0D1626;
+  --bg-settings-card: #122038;
+  --bg-settings-card-hover: #192B48;
+  --bg-settings-active: #1B3153;
+
+  --shadow: 0 32px 80px rgba(0, 0, 0, 0.62);
+  --shadow-sm: 0 8px 24px rgba(0, 0, 0, 0.42);
+}

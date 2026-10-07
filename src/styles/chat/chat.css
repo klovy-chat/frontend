@@ -402,7 +402,7 @@
   flex-direction: column;
   gap: 0.65rem;
   scrollbar-width: thin;
-  scrollbar-color: rgba(124, 92, 255, 0.45) transparent;
+  scrollbar-color: color-mix(in srgb, var(--accent) 45%, transparent) transparent;
 }
 
 .message-list--virtual {
@@ -429,12 +429,12 @@
 }
 
 .message-list::-webkit-scrollbar-thumb {
-  background: rgba(124, 92, 255, 0.35);
+  background: color-mix(in srgb, var(--accent) 35%, transparent);
   border-radius: 4px;
 }
 
 .message-list::-webkit-scrollbar-thumb:hover {
-  background: rgba(124, 92, 255, 0.55);
+  background: color-mix(in srgb, var(--accent) 55%, transparent);
 }
 
 .message-list-spacer {
@@ -664,7 +664,7 @@
   overflow-wrap: anywhere;
   white-space: pre-wrap;
   scrollbar-width: thin;
-  scrollbar-color: rgba(124, 92, 255, 0.35) transparent;
+  scrollbar-color: color-mix(in srgb, var(--accent) 35%, transparent) transparent;
 }
 
 .delete-msg-modal__preview::-webkit-scrollbar {
@@ -672,7 +672,7 @@
 }
 
 .delete-msg-modal__preview::-webkit-scrollbar-thumb {
-  background: rgba(124, 92, 255, 0.35);
+  background: color-mix(in srgb, var(--accent) 35%, transparent);
   border-radius: 3px;
 }
 
@@ -831,3 +831,45 @@
     max-width: none;
   }
 }
+
+
+.app-shell--chat .chat-header__name { font-weight: 600; }
+.app-shell--chat .message-row { padding: 3px 0; gap: 10px; }
+.app-shell--chat .message-bubble-wrap { gap: 4px; }
+.app-shell--chat .message-bubble { box-shadow: none; }
+.app-shell--chat .message-row.other .message-bubble { border: 0; padding: 10px 14px; }
+.app-shell--chat .message-bubble.own { border: 0; box-shadow: none; padding: 10px 14px; color: #fff; }
+.app-shell--chat .message-text { margin: 0; font-size: var(--message-text-size, 14px); font-weight: 400; line-height: 1.45; }
+.app-shell--chat .message-bubble.own .message-text { color: #fff; }
+.app-shell--chat .message-sender-name { font-size: 11px; font-weight: 600; color: var(--text-muted); letter-spacing: normal; }
+.app-shell--chat .message-meta { padding: 0; color: var(--text-dim); gap: 4px; }
+.app-shell--chat .message-time, .app-shell--chat .message-edited { color: var(--text-dim); font-size: 11px; }
+.app-shell--chat .message-read-receipt { color: var(--text-muted); }
+.app-shell--chat .message-read-receipt--read { color: var(--accent); }
+.app-shell--chat .message-list-date { text-transform: none; letter-spacing: normal; font-weight: 500; }
+.app-shell--chat .chat-header__info { text-align: left; padding: 0; gap: 3px; background: transparent; color: inherit; }
+.app-shell--chat .chat-header__avatar-button { padding: 0; flex-shrink: 0; border-radius: 50%; background: transparent; }
+.app-shell--chat .chat-header__desc--online::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: currentColor; margin-right: 6px; }
+.app-shell--chat .chat-header__toolbar-btn--call { background: var(--accent-dim); color: var(--accent); }
+.app-shell--chat .chat-header__toolbar-btn--call:hover { background: var(--accent-border); }
+.app-shell--chat .chat-header__toolbar-btn--call svg { width: 18px; height: 18px; }
+.app-shell--chat .chat-header__toolbar-btn--group { width: auto; height: 36px; min-width: 104px; border-radius: 999px; padding: 0 14px; gap: 8px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.app-shell--chat .chat-header__toolbar-btn--group svg { width: 14px; height: 14px; }
+.app-shell--chat .chat-header__name {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  letter-spacing: normal;
+}
+.app-shell--chat .chat-header__desc {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 18px;
+  letter-spacing: normal;
+}
+.app-shell--chat .chat-header__avatar-button,
+.app-shell--chat .chat-header__avatar-button *,
+.app-shell--chat .chat-header__info,
+.app-shell--chat .chat-header__info * { cursor: pointer; }

@@ -87,7 +87,7 @@
   margin-bottom: 1.2rem;
   padding-right: 2px;
   scrollbar-width: thin;
-  scrollbar-color: rgba(124, 92, 255, 0.35) transparent;
+  scrollbar-color: color-mix(in srgb, var(--accent) 35%, transparent) transparent;
 }
 
 .ann-list::-webkit-scrollbar {
@@ -99,12 +99,12 @@
 }
 
 .ann-list::-webkit-scrollbar-thumb {
-  background: rgba(124, 92, 255, 0.35);
+  background: color-mix(in srgb, var(--accent) 35%, transparent);
   border-radius: 3px;
 }
 
 .ann-list::-webkit-scrollbar-thumb:hover {
-  background: rgba(124, 92, 255, 0.55);
+  background: color-mix(in srgb, var(--accent) 55%, transparent);
 }
 
 .ann-item {

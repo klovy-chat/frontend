@@ -1,3 +1,4 @@
+import { LoadingSkeleton } from "../common/LoadingSkeleton";
 // ChatWindow.tsx
 // Otwarta rozmowa: historia, wysyłka, edit, react, mark-read, przyjaźń.
 // Zakres:
@@ -19,6 +20,7 @@ import { getChannelMessages, getChannelDetails } from "../../api/channels";
 import { checkFriendship } from "../../api/friends";
 import { toggleContactBlock } from "../../api/contacts";
 import { useAuth } from "../../context/AuthContext";
+import { ActionMenu } from "../common/ActionMenu";
 import { useWebSocket, useWebSocketConnected } from "../../context/WebSocketContext";
 import { WsType } from "../../api/protocol";
 import { useCall, type CallPeer } from "../../context/CallContext";
@@ -35,10 +37,7 @@ import {
 } from "../../utils/media/mediaLinks";
 import { isAllowedGifMediaUrl } from "../../utils/media/allowedMedia";
 import { useProfileSync } from "../../hooks/useProfileSync";
-import {
-  usePresenceSeed,
-  useUserPresence,
-} from "../../context/PresenceContext";
+import { usePresenceSeed, useUserPresence } from "../../context/PresenceContext";
 import {
   chatCacheKey,
   findPendingReplaceIndex,
@@ -219,6 +218,10 @@ function toCallPeer(contact: Contact): CallPeer {
 }
 
 interface ChatWindowProps {
+  onToggleDetails?: () => void;
+  onOpenDetails?: () => void;
+  onToggleNotifications?: () => void;
+  notificationsMuted?: boolean;
   target: ChatTarget | null;
   onClose?: () => void;
   showBack?: boolean;
@@ -237,18 +240,24 @@ function IconBtn({
   title,
   active = false,
   danger = false,
+  call = false,
+  group = false,
   children,
 }: {
   onClick?: () => void;
   title?: string;
   active?: boolean;
   danger?: boolean;
+  call?: boolean;
+  group?: boolean;
   children: React.ReactNode;
 }) {
   const className = [
     "chat-header__toolbar-btn",
     active && "chat-header__toolbar-btn--active",
     danger && "chat-header__toolbar-btn--danger",
+    call && "chat-header__toolbar-btn--call",
+    group && "chat-header__toolbar-btn--group",
   ]
     .filter(Boolean)
     .join(" ");
@@ -266,6 +275,9 @@ export function ChatWindow({
   showBack = false,
   onOpenChannelSettings,
   onRemoveContact,
+  onToggleDetails,
+  onToggleNotifications,
+  notificationsMuted = false,
 }: ChatWindowProps) {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
@@ -2047,13 +2059,9 @@ export function ChatWindow({
           </button>
         )}
 
-        {target.type === "dm" ? (
-          <Avatar {...avatarProps} size={34} />
-        ) : (
-          <Avatar {...avatarProps} size={34} />
-        )}
-        <div className="chat-header__info">
-          <h3 className="chat-header__name">{title}</h3>
+        <button type="button" className="chat-header__avatar-button" onClick={() => setProfileOpen(true)} aria-label={t("chat.window.contactProfile")}><Avatar {...avatarProps} size={40} /></button>
+        <button type="button" className="chat-header__info" onClick={() => setProfileOpen(true)}>
+          <h3 className="chat-header__name" style={{ fontFamily: '"Space Grotesk", system-ui, sans-serif' }}>{title}</h3>
           {target.type === "dm" ? (
             <span className={`chat-header__desc${(dmContact?.isOnline ?? target.contact.isOnline) ? " chat-header__desc--online" : ""}`}>
               {formatLastSeen(dmContact?.lastSeen ?? target.contact.lastSeen, {
@@ -2064,14 +2072,21 @@ export function ChatWindow({
           ) : target.channel.description ? (
             <span className="chat-header__desc">{target.channel.description}</span>
           ) : null}
-        </div>
+        </button>
 
         <div className="chat-header__actions">
 
           <div className="chat-header__toolbar">
+            <ActionMenu iconOnly label={t("chat.details.more", { defaultValue: "More" })} items={[
+              { key: "info", label: t("chat.details.quickInfo"), icon: null, onClick: () => onToggleDetails?.() },
+              { key: "mute", label: t(notificationsMuted ? "chat.notifications.unmute" : "chat.notifications.mute"), icon: null, onClick: () => onToggleNotifications?.() },
+              { key: "search", label: t("chat.tools.search"), icon: null, onClick: () => setToolsPanel("search") },
+              ...(onClose ? [{ key: "close", label: t("chat.window.closeChat"), icon: null, onClick: onClose }] : []),
+            ]} />
             {target.type === "dm" && !friendshipLoading && canSendDm && (
               <IconBtn
                 title={t("chat.window.call")}
+                call
                 onClick={() =>
                   callState === "idle" &&
                   startCall(toCallPeer(target.contact), "audio")
@@ -2085,6 +2100,8 @@ export function ChatWindow({
 
             {target.type === "channel" && (
               <IconBtn
+                call
+                group
                 title={
                   isInChannelVoice(target.channel._id)
                     ? t("call.channel.leave")
@@ -2105,12 +2122,14 @@ export function ChatWindow({
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.41 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.78a16 16 0 0 0 6.29 6.29l1.14-.95a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
                 </svg>
+                <span>{t("chat.window.groupCall")}</span>
               </IconBtn>
             )}
 
             {target.type === "dm" && !friendshipLoading && canSendDm && (
               <IconBtn
                 title={t("chat.window.videoCall")}
+                call
                 onClick={() =>
                   callState === "idle" &&
                   startCall(toCallPeer(target.contact), "video")
@@ -2161,14 +2180,7 @@ export function ChatWindow({
               </IconBtn>
             )}
 
-            {target.type === "dm" && (
-              <IconBtn title={t("chat.window.contactProfile")} onClick={() => setProfileOpen(true)}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                  <circle cx="12" cy="7" r="4"/>
-                </svg>
-              </IconBtn>
-            )}
+            
 
             {!isMobile && onClose && (
               <>
@@ -2217,9 +2229,7 @@ export function ChatWindow({
         )}
 
         {loading ? (
-          <div className="chat-loading">
-            <div className="spinner" />
-          </div>
+          <LoadingSkeleton label={t("common.loading")} messages />
         ) : (
           <MessageList
             messages={messages}
@@ -2377,6 +2387,9 @@ export function ChatWindow({
 
       {target.type === "dm" && (
         <OtherProfile
+          variant="sheet"
+          canCall={!friendshipLoading && canSendDm && callState === "idle"}
+          onCall={kind => { if (callState === "idle" && canSendDm) startCall(toCallPeer(target.contact), kind); }}
           isOpen={profileOpen}
           onClose={() => setProfileOpen(false)}
           user={target.contact}

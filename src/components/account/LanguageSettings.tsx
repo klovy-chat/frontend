@@ -42,6 +42,9 @@ export function LanguageSettings() {
             >
               <LanguageFlag locale={loc} />
               <span className="as-lang-name">{t(`common.language.${loc}`)}</span>
+              <span className={`as-lang-support as-lang-support--${loc === "ru" ? "poor" : "good"}`}>
+                {t(`settings.language.${loc === "ru" ? "supportPoor" : "supportGood"}`)}
+              </span>
               <span
                 className={`as-lang-mark${selected ? " as-lang-mark--selected" : " as-lang-mark--idle"}`}
                 aria-hidden="true"
@@ -55,6 +58,17 @@ export function LanguageSettings() {
             </button>
           );
         })}
+      </div>
+      <div className="as-lang-legend">
+        <span className="as-lang-legend-title">{t("settings.language.qualityLegend")}</span>
+        {(["good", "medium", "poor"] as const).map(level => (
+          <div key={level} className="as-lang-legend-row">
+            <span className={`as-lang-support as-lang-support--${level}`}>
+              {t(`settings.language.support${level[0].toUpperCase()}${level.slice(1)}`)}
+            </span>
+            <span>{t(`settings.language.supportDescription.${level}`)}</span>
+          </div>
+        ))}
       </div>
     </>
   );

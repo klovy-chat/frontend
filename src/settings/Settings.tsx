@@ -8,6 +8,7 @@
 
 import { useCallback } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { Nav } from "../components/layout/Nav";
 import { Panel } from "./Panel";
 import { BottomNav } from "../components/layout/BottomNav";
 import { useIsMobile } from "../hooks/useIsMobile";
@@ -45,7 +46,16 @@ export function Settings() {
   }
 
   return (
-    <div className="app-shell app-shell--settings-standalone settings-page">
+    <div className="app-shell app-shell--settings-tab settings-page">
+      {!isMobile && <div className="app-shell__nav"><Nav
+        settingsActive totalUnread={0}
+        onOpenHome={() => navigate("/")}
+        onOpenChats={() => navigate("/", { state: { workspaceTab: "chats" } })}
+        onOpenCalls={() => navigate("/", { state: { workspaceTab: "calls" } })}
+        onOpenProfile={() => navigate("/", { state: { workspaceTab: "profile" } })}
+        onOpenContacts={() => navigate("/", { state: { workspaceTab: "contacts", openContacts: true } })}
+        onOpenSettings={() => navigate(settingsPath(section))}
+      /></div>}
       <Panel
         section={section}
         onSectionChange={handleSectionChange}

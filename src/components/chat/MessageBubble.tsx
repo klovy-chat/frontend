@@ -8,11 +8,12 @@
 
 import { useState, useRef, useEffect, useLayoutEffect, memo } from "react";
 import { createPortal } from "react-dom";
+import { useTheme } from "../../context/ThemeContext";
 import { useTranslation } from "react-i18next";
 import { Avatar } from "../common/Avatar";
 import { Reaction } from "./pickers/Reaction";
 import { Quote } from "./Quote";
-import { ReadReceipt } from "./ReadReceipt";
+
 import { formatMessageTime, getUserId, userLabel } from "../../utils/user/format";
 import { renderFormattedText } from "../../utils/chat/format";
 import { getReactionEntries, hasUserReacted } from "../../utils/chat/reactions";
@@ -74,7 +75,7 @@ export const MessageBubble = memo(function MessageBubble({
   onReply,
   onJumpToMessage,
   onImageClick,
-  showReadReceipt = false,
+
   onEdit,
   onDelete,
   canPin = false,
@@ -82,6 +83,7 @@ export const MessageBubble = memo(function MessageBubble({
   onUnpin,
 }: MessageBubbleProps) {
   const { t } = useTranslation();
+  const { messageTextSize } = useTheme();
   const [hovered, setHovered] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [reactionPickerOpen, setReactionPickerOpen] = useState(false);
@@ -499,7 +501,7 @@ export const MessageBubble = memo(function MessageBubble({
               <>
                 {!shouldHideTextForExternalMedia(message.content) &&
                   !isOnlyInviteLinkContent(message.content) && (
-                  <p className="message-text">
+                  <p className="message-text" style={{ fontSize: { s: 12, m: 14, l: 16 }[messageTextSize] }}>
                     {renderFormattedText(message.content, {
                       mentions: message.mentions,
                       currentUserId,
@@ -522,14 +524,13 @@ export const MessageBubble = memo(function MessageBubble({
               </>
             )}
 
+          </div>
+        </div>
             <div className="message-meta">
               <span className="message-time">{formatMessageTime(message.timestamp)}</span>
               {message.edited && <span className="message-edited">· {t("chat.bubble.edited")}</span>}
-              {isOwn && showReadReceipt && <ReadReceipt read={message.read} />}
+              
             </div>
-          </div>
-        </div>
-
         {reactionEntries.length > 0 && (
           <div className={`message-reactions${isOwn ? " message-reactions--own" : ""}`}>
             {reactionEntries.map(([emoji, users]) => {

@@ -6,7 +6,7 @@
 // Logout nie musi czyścić — język UI może zostać.
 // Przy zmianach: LocaleContext.tsx.
 
-import { DEFAULT_LOCALE, type AppLocale } from "../../languages";
+import { DEFAULT_LOCALE, isAppLocale, type AppLocale } from "../../languages";
 
 const STORAGE_KEY = "klovy.locale";
 
@@ -14,7 +14,7 @@ export function readStoredLocale(): AppLocale | null {
   if (typeof window === "undefined") return null;
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw === "pl" || raw === "en") return raw;
+    if (isAppLocale(raw)) return raw;
     return null;
   } catch {
     return null;

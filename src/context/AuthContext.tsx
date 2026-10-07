@@ -278,6 +278,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
     } finally {
+      localStorage.setItem("klovy-theme", "dark");
+      document.documentElement.dataset.theme = "dark";
       clearCsrfToken();
       clearCachedSessionUser();
       await clearSessionState();

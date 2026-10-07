@@ -67,6 +67,12 @@ export function IncomingCall() {
         >
           <div
             style={{
+              width: 84,
+              height: 84,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
               borderRadius: "50%",
               animation: "call-pulse 1.8s ease-in-out infinite",
               marginBottom: 16,

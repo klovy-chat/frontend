@@ -10,7 +10,8 @@ import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import pl from "../languages/pl.json";
 import en from "../languages/en.json";
-import { DEFAULT_LOCALE, type AppLocale } from "../languages";
+import ru from "../languages/ru.json";
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES, normalizeLocale, type AppLocale } from "../languages";
 import { applyDocumentLocale, loadStoredLocale } from "../utils/locale/storage";
 
 const initialLocale = loadStoredLocale();
@@ -20,8 +21,10 @@ void i18n.use(initReactI18next).init({
   resources: {
     pl: { translation: pl },
     en: { translation: en },
+    ru: { translation: ru },
   },
   lng: initialLocale,
+  supportedLngs: [...SUPPORTED_LOCALES],
   fallbackLng: DEFAULT_LOCALE,
   interpolation: {
     escapeValue: false,
@@ -30,8 +33,9 @@ void i18n.use(initReactI18next).init({
 });
 
 export function changeAppLanguage(locale: AppLocale): void {
-  void i18n.changeLanguage(locale);
-  applyDocumentLocale(locale);
+  const normalized = normalizeLocale(locale);
+  void i18n.changeLanguage(normalized);
+  applyDocumentLocale(normalized);
 }
 
 export default i18n;
