@@ -838,3 +838,8 @@
 .message-quote-text { color: var(--text); }
 .message-quote--own { background: rgba(0, 0, 0, .25); border-left-color: rgba(255,255,255,.8); }
 .message-quote--own .message-quote-author, .message-quote--own .message-quote-text { color: #fff; }
+.message-avatar-button { display: inline-flex; align-items: center; padding: 0; border: 0; border-radius: 50%; background: transparent; flex-shrink: 0; align-self: flex-end; }
+.message-sender-name { border: 0; background: transparent; font-family: inherit; text-align: left; align-self: flex-start; }
+.message-avatar-button:disabled, .message-sender-name:disabled { opacity: 1; }
+.message-avatar-button:not(:disabled), .message-avatar-button:not(:disabled) *, .message-sender-name:not(:disabled) { cursor: pointer; }
+.message-avatar-button:focus-visible, .message-sender-name:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }

@@ -24,7 +24,7 @@ import { ActionMenu } from "../common/ActionMenu";
 import { useWebSocket, useWebSocketConnected } from "../../context/WebSocketContext";
 import { WsType } from "../../api/protocol";
 import { useCall, type CallPeer } from "../../context/CallContext";
-import { userLabel, formatLastSeen } from "../../utils/user/format";
+import { userLabel, formatLastSeen, getUserId } from "../../utils/user/format";
 import { stripFormatting } from "../../utils/chat/format";
 import {
   isVoiceAttachment,
@@ -276,6 +276,7 @@ export function ChatWindow({
   onOpenChannelSettings,
   onRemoveContact,
   onToggleDetails,
+  onOpenDetails,
   onToggleNotifications,
   notificationsMuted = false,
 }: ChatWindowProps) {
@@ -332,6 +333,8 @@ export function ChatWindow({
   isBlockedByOtherRef.current = isBlockedByOther;
   const [friendshipLoading, setFriendshipLoading] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [channelUserProfile, setChannelUserProfile] = useState<Contact | null>(null);
+  useEffect(() => { setChannelUserProfile(null); }, [target?.type === "channel" ? target.channel._id : null]);
   const [dmError, setDmError] = useState<string | null>(null);
   const [toolsPanel, setToolsPanel] = useState<ToolsPanelMode>(null);
   const [highlightMessageId, setHighlightMessageId] = useState<string | null>(null);
@@ -2059,8 +2062,8 @@ export function ChatWindow({
           </button>
         )}
 
-        <button type="button" className="chat-header__avatar-button" onClick={() => setProfileOpen(true)} aria-label={t("chat.window.contactProfile")}><Avatar {...avatarProps} size={40} /></button>
-        <button type="button" className="chat-header__info" onClick={() => setProfileOpen(true)}>
+        <button type="button" className="chat-header__avatar-button" onClick={() => target.type === "channel" ? onOpenDetails?.() : setProfileOpen(true)} aria-label={t(target.type === "channel" ? "chat.details.quickInfo" : "chat.window.contactProfile")}><Avatar {...avatarProps} size={40} /></button>
+        <button type="button" className="chat-header__info" onClick={() => target.type === "channel" ? onOpenDetails?.() : setProfileOpen(true)}>
           <h3 className="chat-header__name" style={{ fontFamily: '"Space Grotesk", system-ui, sans-serif' }}>{title}</h3>
           {target.type === "dm" ? (
             <span className={`chat-header__desc${(dmContact?.isOnline ?? target.contact.isOnline) ? " chat-header__desc--online" : ""}`}>
@@ -2232,6 +2235,12 @@ export function ChatWindow({
           <LoadingSkeleton label={t("common.loading")} messages />
         ) : (
           <MessageList
+            onOpenUserProfile={target.type === "channel" ? sender => {
+              const id = getUserId(sender);
+              if (!id) return;
+              const member = target.channel.members.find(member => member._id === id);
+              setChannelUserProfile({ ...sender, ...member, _id: id, image: sender.image ?? member?.image ?? null });
+            } : undefined}
             messages={messages}
             currentUserId={currentUserId}
             typingUsers={typingUserIds.map((id) => {
@@ -2416,6 +2425,14 @@ export function ChatWindow({
           }
         />
       )}
+
+      {target.type === "channel" && channelUserProfile && <OtherProfile
+        variant="sheet"
+        isOpen={true}
+        onClose={() => setChannelUserProfile(null)}
+        user={channelUserProfile}
+        isFriend={false}
+      />}
 
       <DeleteMessage
         isOpen={Boolean(deleteConfirm)}

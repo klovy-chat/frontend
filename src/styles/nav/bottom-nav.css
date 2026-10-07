@@ -100,3 +100,10 @@
     line-height: 1;
   }
 }
+
+@media (max-width: 768px) {
+  .bottom-nav { gap: 2px; height: auto; min-height: calc(64px + var(--safe-bottom)); padding: 6px max(4px, var(--safe-right)) max(6px, var(--safe-bottom)) max(4px, var(--safe-left)); font-family: "Space Grotesk", system-ui, sans-serif; }
+  .bottom-nav__item { min-height: 50px; padding: 4px 2px; font-size: 10px; touch-action: manipulation; }
+  .bottom-nav__item.active { background: var(--accent-dim); }
+  .bottom-nav__item:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+}

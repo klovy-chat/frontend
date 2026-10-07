@@ -464,7 +464,7 @@
   .settings-mobile-menu__row--danger {
     color: var(--danger);
     margin-top: 8px;
-    border-top: 1px solid var(--border);
+    border-top: none;
     border-bottom: none;
   }
 
@@ -748,3 +748,34 @@
   color: var(--text);
   margin: 0 0 8px;
 }
+
+@media (max-width: 768px) {
+  .settings-page .as-content-inner { box-sizing: border-box; width: 100%; max-width: none; padding: 16px max(16px, var(--safe-right)) 24px max(16px, var(--safe-left)); }
+  .settings-page .settings-mobile-bar { min-height: calc(56px + var(--safe-top)); }
+  .settings-page .settings-section--konto .as-card,
+  .settings-page .settings-section--konto .as-setting-card,
+  .settings-page .settings-section--ostrzezenia .as-card,
+  .settings-page .settings-section--glos .as-card { padding: 16px; }
+  .settings-page .as-setting-row { flex-wrap: wrap; gap: 10px; }
+  .settings-page .as-setting-info { flex: 1 1 170px; }
+  .settings-page .as-setting-row > button { margin-left: auto; min-height: 44px; }
+  .settings-page .settings-section--konto .as-field input,
+  .settings-page .settings-section--glos .as-select,
+  .settings-page .as-field input, .settings-page .as-field select { font-size: 16px; max-width: 100%; min-height: 44px; }
+  .settings-page .settings-section--konto .as-account-mgmt-card { padding: 14px; gap: 10px; }
+  .settings-page .settings-section--konto .as-account-mgmt-copy { min-width: 0; overflow-wrap: anywhere; }
+  .settings-page .devices-settings .as-session-copy { min-width: 0; padding-right: 0; }
+  .settings-page .devices-settings .as-session-row--current .as-session-copy { padding-right: 0; }
+  .settings-page .devices-settings .as-session-row { flex-wrap: wrap; gap: 10px; }
+  .settings-page .devices-settings .as-session-device-badge { position: static; transform: none; order: 1; align-self: flex-start; margin-left: 46px; }
+  .settings-page .devices-settings .as-session-revoke-action { min-width: 44px; height: 44px; }
+  .settings-page .devices-settings .as-action-row { flex-wrap: wrap; padding: 16px; gap: 10px; }
+  .settings-page .devices-settings .devices-logout-button { min-height: 44px; margin-left: auto; }
+  .settings-page .settings-profile-overview .as-banner-preview { height: 112px; }
+  .settings-page .settings-profile-overview .as-profile-header-row { gap: 14px; margin-bottom: 20px; flex-wrap: wrap; }
+  .settings-page .settings-profile-data .as-data-row { padding: 16px; }
+  .settings-page .as-lang-row { min-height: 56px; gap: 10px; padding: 12px; }
+  .settings-page .as-lang-legend-row { align-items: flex-start; }
+}
+.settings-mobile-hub__profile-button { padding: 0; border: 0; background-color: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.settings-mobile-hub__profile-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }

@@ -676,6 +676,7 @@
       "about": "About",
       "description": "Description",
       "quickInfo": "Quick info",
+      "hidePanel": "Hide information panel",
       "type": "Type",
       "direct": "Direct message",
       "channel": "Channel",

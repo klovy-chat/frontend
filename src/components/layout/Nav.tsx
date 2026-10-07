@@ -11,6 +11,7 @@ import { Home, Phone, User, MessageCircle, Users, Settings, LogOut } from "lucid
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../context/AuthContext";
 import { Avatar } from "../common/Avatar";
+import { MyProfile } from "../profile/MyProfile";
 import { userLabel } from "../../utils/user/format";
 import { useTheme } from "../../context/ThemeContext";
 import { LOGO_COLOUR_URL, LOGO_FOREST_URL } from "../../constants/branding";
@@ -52,6 +53,7 @@ export function Nav({
   const { theme } = useTheme();
 
   const [now, setNow] = useState(() => new Date());
+  const [quickProfileOpen, setQuickProfileOpen] = useState(false);
 
   useEffect(() => {
     const id = window.setInterval(() => setNow(new Date()), 60000);
@@ -59,7 +61,7 @@ export function Nav({
   }, []);
 
   return (
-    <nav className="nav-rail">
+    <><nav className="nav-rail">
       <div className="nav-rail__brand">
         <img
           src={theme === "forest" ? LOGO_FOREST_URL : LOGO_COLOUR_URL}
@@ -142,7 +144,7 @@ export function Nav({
             className="nav-rail__profile-avatar-btn"
             title={t("nav.items.viewProfile")}
             aria-label={t("nav.items.viewProfile")}
-            onClick={() => onOpenProfile?.()}
+            onClick={() => setQuickProfileOpen(true)}
           >
             <Avatar
               displayName={user?.displayName}
@@ -151,17 +153,17 @@ export function Nav({
               color={user?.color}
             />
           </button>
-          <div className="nav-rail__profile-status-btn">
+          <button type="button" className="nav-rail__profile-status-btn" onClick={() => setQuickProfileOpen(true)} aria-label={t("nav.items.viewProfile")}>
             <div className="nav-rail__profile-info">
               <div className="nav-rail__profile-name">{userLabel(user)}</div>
               <div className="nav-rail__profile-status">{t("user.availability.online")}</div>
             </div>
-          </div>
+          </button>
           <button type="button" className="nav-rail__logout" title={t("common.logoutTitle")} onClick={() => logout()}>
             <LogOut size={16} strokeWidth={1.75} />
           </button>
         </div>
       </div>
-    </nav>
+    </nav><MyProfile variant="sheet" isOpen={quickProfileOpen} onClose={() => setQuickProfileOpen(false)} onOpenSettings={onOpenProfile} /></>
   );
 }

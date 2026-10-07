@@ -330,17 +330,24 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const initialWorkspaceTab = (location.state as { workspaceTab?: string } | null)?.workspaceTab;
+  const initialWorkspaceTab = (location.state as { workspaceTab?: string; openContacts?: boolean } | null)?.workspaceTab ?? ((location.state as { openContacts?: boolean } | null)?.openContacts ? "contacts" : undefined);
   const isMobile = useIsMobile();
-  const [mobileTab, setMobileTab] = useState<BottomNavTab>("chats");
   const [chatListTab, setChatListTab] = useState<ChatListTab>("all");
   const [homeOpen, setHomeOpen] = useState(!initialWorkspaceTab);
   const [callsOpen, setCallsOpen] = useState(initialWorkspaceTab === "calls");
   const [contactsPageOpen, setContactsPageOpen] = useState(initialWorkspaceTab === "contacts");
   const [profilePageOpen, setProfilePageOpen] = useState(initialWorkspaceTab === "profile");
   const [detailsOpen, setDetailsOpen] = useState(true);
+  const [mobileDetailsOpen, setMobileDetailsOpen] = useState(false);
+  useEffect(() => {
+    if (!mobileDetailsOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") setMobileDetailsOpen(false); };
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [mobileDetailsOpen]);
   const lastConversation = useRef<ChatTarget | null>(null);
   useEffect(() => {
+    setMobileDetailsOpen(false);
     if (active) { lastConversation.current = active; setHomeOpen(false); setCallsOpen(false); }
   }, [active]);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -793,22 +800,14 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
   }, [active]);
 
   useEffect(() => {
-    if (!isMobile) return;
-    const openContacts = (location.state as { openContacts?: boolean } | null)?.openContacts;
-    if (openContacts) {
-      setMobileTab("contacts");
-      navigate(location.pathname, { replace: true, state: {} });
-    }
-  }, [isMobile, location.state, location.pathname, navigate]);
-
-  useEffect(() => {
-    const tab = (location.state as { workspaceTab?: string } | null)?.workspaceTab;
+    const routeState = location.state as { workspaceTab?: string; openContacts?: boolean } | null;
+    const tab = routeState?.workspaceTab ?? (routeState?.openContacts ? "contacts" : undefined);
     if (!tab) return;
     setHomeOpen(false);
     setCallsOpen(tab === "calls");
     setContactsPageOpen(tab === "contacts");
     setProfilePageOpen(tab === "profile");
-    if (isMobile) setMobileTab(tab === "contacts" ? "contacts" : "chats");
+
     navigate(location.pathname, { replace: true, state: {} });
   }, [isMobile, location.state, location.pathname, navigate]);
 
@@ -1905,7 +1904,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
       type: "dm",
       contact: { ...contact, isMuted: storeMuted, unreadCount: 0 },
     });
-    if (isMobile) setMobileTab("chats");
+
     setSearchTerm("");
     setSearchResults([]);
     setContacts((prev) => {
@@ -1934,7 +1933,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
       type: "channel",
       channel: { ...channel, isMuted: storeMuted, unreadCount: 0 },
     });
-    if (isMobile) setMobileTab("chats");
+
     setChannels((prev) =>
       prev.map((ch) =>
         ch._id === channel._id
@@ -2133,6 +2132,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
     setHomeOpen(false);
     setContactsModalOpen(false);
     setContactsModalClosing(false);
+    if (isMobile) { onSelect(null); return; }
     if (!active) {
       const previous = lastConversation.current;
       const contact = previous?.type === "dm" ? contacts.find(c => c._id === previous.contact._id) : undefined;
@@ -2146,7 +2146,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
         else if (firstChannel) { setChatListTab("channels"); handleSelectChannel(firstChannel); }
       }
     }
-    if (isMobile) setMobileTab("chats");
+
   };
   const pendingZeroNav = new Set(peekPendingMarkReadKeys());
   const activeNavKey =
@@ -2177,9 +2177,18 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
       return s + Math.max(0, ch.unreadCount ?? 0);
     }, 0);
 
+  const mobileTab: BottomNavTab = profilePageOpen ? "profile" : contactsPageOpen ? "contacts" : callsOpen ? "calls" : homeOpen ? "home" : "chats";
   const showMobileChat = isMobile && mobileTab === "chats" && active !== null;
-  const showMobileContacts = isMobile && mobileTab === "contacts";
   const showDesktopContacts = !isMobile && contactsModalOpen;
+  const openWorkspacePage = (page: "home" | "calls" | "contacts" | "profile") => {
+    onSelect(null);
+    setHomeOpen(page === "home");
+    setCallsOpen(page === "calls");
+    setContactsPageOpen(page === "contacts");
+    setProfilePageOpen(page === "profile");
+    setContactsModalOpen(false);
+    setContactsModalClosing(false);
+  };
   const shellClass = [
     "app-shell",
     "app-shell--chat",
@@ -2187,7 +2196,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
     (homeOpen || callsOpen || contactsPageOpen || profilePageOpen) && !isMobile && "app-shell--home",
     !active && "app-shell--no-detail",
     showMobileChat && "app-shell--show-chat",
-    showMobileContacts && "app-shell--show-contacts",
+    isMobile && mobileTab !== "chats" && "app-shell--mobile-page",
   ]
     .filter(Boolean)
     .join(" ");
@@ -2214,10 +2223,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
             profileActive={profilePageOpen}
             onOpenProfile={() => { onSelect(null); setHomeOpen(false); setCallsOpen(false); setContactsPageOpen(false); setProfilePageOpen(true); setContactsModalOpen(false); }}
             onOpenContacts={() => {
-              if (isMobile) {
-                setMobileTab("contacts");
-                return;
-              }
               onSelect(null);
               setHomeOpen(false);
               setCallsOpen(false);
@@ -2225,7 +2230,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
             }}
             totalUnread={totalUnread}
             receivedFriendRequests={receivedFriendRequests}
-            contactsActive={contactsPageOpen || showDesktopContacts || showMobileContacts}
+            contactsActive={contactsPageOpen || showDesktopContacts}
           />
         </div>
 
@@ -2255,7 +2260,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
           />
         </div>
         <div className="app-shell__main">
-          {profilePageOpen ? <ProfileDirectory /> : contactsPageOpen ? <ContactsDirectory revision={contactsRevision} onAdd={() => { setContactsModalClosing(false); setContactsModalOpen(true); }} onSelect={handleSelectContact} /> : callsOpen ? <CallsView contacts={displayContacts} channels={channels} onSelect={target => { if (target.type === "dm") handleSelectContact(target.contact); else handleSelectChannel(target.channel); }} /> : homeOpen || !active ? (
+          {profilePageOpen ? <ProfileDirectory /> : contactsPageOpen ? <ContactsDirectory receivedFriendRequests={receivedFriendRequests} revision={contactsRevision} onAdd={() => { setContactsModalClosing(false); setContactsModalOpen(true); }} onSelect={handleSelectContact} /> : callsOpen ? <CallsView contacts={displayContacts} channels={channels} onSelect={target => { if (target.type === "dm") handleSelectContact(target.contact); else handleSelectChannel(target.channel); }} /> : homeOpen || !active ? (
             <ConversationHome
               onOpenCalls={() => { setProfilePageOpen(false); setContactsPageOpen(false); onSelect(null); setHomeOpen(false); setCallsOpen(true); setContactsModalOpen(false); setContactsModalClosing(false); }}
               onOpenChats={openChats}
@@ -2268,8 +2273,8 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
             />
           ) : isValidElement(children)
             ? cloneElement(children, {
-                onToggleDetails: () => setDetailsOpen(open => !open),
-                onOpenDetails: () => setDetailsOpen(true),
+                onToggleDetails: () => isMobile || active?.type === "channel" ? setMobileDetailsOpen(open => !open) : setDetailsOpen(open => !open),
+                onOpenDetails: () => isMobile || active?.type === "channel" ? setMobileDetailsOpen(true) : setDetailsOpen(true),
                 notificationsMuted: active ? isConversationMuted(active.type, active.type === "dm" ? active.contact._id : active.channel._id) : false,
                 onToggleNotifications: () => { if (active) void handleToggleMute({ kind: active.type, id: active.type === "dm" ? active.contact._id : active.channel._id }); },
                 onOpenChannelSettings: (channel: Channel) => {
@@ -2285,43 +2290,32 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
             : children}
         </div>
 
-        {active && !homeOpen && !callsOpen && detailsOpen && !isMobile && <div className="app-shell__detail"><ConversationDetails target={active} /></div>}
-        {isMobile && mobileTab === "contacts" && (
-          <div className="app-shell__contacts">
-            <Contacts
-              variant="inline"
-              isOpen
-              isClosing={false}
-              onClose={() => {
-                if (isMobile) setMobileTab("chats");
-                else handleCloseContactsModal();
-              }}
-              onSelectContact={(c) => {
-                handleSelectContact(c);
-                if (!isMobile) handleCloseContactsModal();
-              }}
-              onRefreshContacts={async () => { await refresh(); setContactsRevision(value => value + 1); }}
-            />
-          </div>
-        )}
-
+        {active && !homeOpen && !callsOpen && detailsOpen && !isMobile && <div className="app-shell__detail"><ConversationDetails target={active} onClose={() => setDetailsOpen(false)} /></div>}
         {isMobile && !showMobileChat && (
           <BottomNav
             active={mobileTab}
             totalUnread={totalUnread}
             receivedFriendRequests={receivedFriendRequests}
-            onChats={() => {
-              onSelect(null);
-              setMobileTab("chats");
-              setContactsModalOpen(false);
-            }}
-            onContacts={() => setMobileTab("contacts")}
+            onHome={() => openWorkspacePage("home")}
+            onChats={openChats}
+            onCalls={() => openWorkspacePage("calls")}
+            onContacts={() => openWorkspacePage("contacts")}
+            onProfile={() => openWorkspacePage("profile")}
             onSettings={() => navigate(settingsPath())}
           />
         )}
       </div>
 
-      {!isMobile && (contactsModalOpen || contactsModalClosing) && (
+      {(isMobile || active?.type === "channel") && mobileDetailsOpen && active && mobileTab === "chats" && (
+        <div className="klovy-backdrop" onClick={event => { if (event.target === event.currentTarget) setMobileDetailsOpen(false); }}>
+          <div className="klovy-shell mobile-conversation-details" role="dialog" aria-modal="true" aria-label={t("chat.details.quickInfo")}>
+            <button type="button" className="mobile-conversation-details__close" onClick={() => setMobileDetailsOpen(false)} aria-label={t("common.close")}><span aria-hidden="true">×</span></button>
+            <ConversationDetails target={active} />
+          </div>
+        </div>
+      )}
+
+      {(contactsModalOpen || contactsModalClosing) && (
         <Contacts
           isOpen={contactsModalOpen}
           isClosing={contactsModalClosing}

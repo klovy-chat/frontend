@@ -194,7 +194,7 @@ export function Contacts({
       myContacts: friendsList.length,
       sent: sentRequests.length,
       blocked: blockedList.length,
-      send: receivedRequests.length,
+      send: 0,
     }),
     [receivedRequests.length, friendsList.length, sentRequests.length, blockedList.length],
   );
@@ -672,7 +672,7 @@ export function Contacts({
                 onClick={() => setTab(key)}
               >
                 <span className="contacts-modal__mobile-tab-label">{tabLabels[key]}</span>
-                {(key !== "send" || counts[key] > 0) && counts[key] > 0 ? (
+                {key !== "send" && counts[key] > 0 ? (
                   <span className="contacts-modal__mobile-tab-count">{counts[key]}</span>
                 ) : null}
               </button>
@@ -689,7 +689,7 @@ export function Contacts({
                 onClick={() => setTab(key)}
               >
                 {tabLabels[key]}
-                {(key !== "send" || counts[key] > 0) && (
+                {key !== "send" && (
                   <span className="contacts-modal__tab-count">{counts[key]}</span>
                 )}
               </button>

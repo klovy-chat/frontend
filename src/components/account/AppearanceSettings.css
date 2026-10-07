@@ -236,3 +236,11 @@
 .appearance-text-size-options button.active { background: color-mix(in srgb, var(--accent) 15%, var(--bg-settings-card)); border-color: var(--accent); color: var(--accent); }
 @media (max-width: 1150px) { .appearance-theme-grid { grid-template-columns: repeat(2, minmax(120px, 148px)); } }
 @media (max-width: 480px) { .appearance-text-size-row { padding: 14px; gap: 10px; flex-wrap: wrap; } .appearance-text-size-options { margin-left: auto; } }
+
+@media (max-width: 768px) {
+  .appearance-theme-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .appearance-text-size-row { padding: 14px; gap: 10px; flex-wrap: wrap; }
+  .appearance-text-size-options button { width: 44px; height: 44px; }
+  .appearance-text-size-copy { min-width: 0; gap: 4px; }
+  .appearance-text-size-options { margin-left: auto; }
+}

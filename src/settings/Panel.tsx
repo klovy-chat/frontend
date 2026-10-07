@@ -35,6 +35,7 @@ import { Monitor, Smartphone, X, Pencil } from "lucide-react";
 
 import { RevokeSession } from "../components/account/RevokeSession";
 import { ImageCrop } from "../components/common/ImageCrop";
+import { MyProfile } from "../components/profile/MyProfile";
 import {
   MAX_AVATAR_SIZE_BYTES,
   MAX_AVATAR_SIZE_LABEL,
@@ -109,6 +110,7 @@ export function Panel({
   const [avatarPreview, setAvatarPreview] = useState(user?.image ?? null);
   const [bannerPreview, setBannerPreview] = useState(user?.banner ?? null);
   const [bannerLoading, setBannerLoading] = useState(false);
+  const [quickProfileOpen, setQuickProfileOpen] = useState(false);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const [usernameEditorOpen, setUsernameEditorOpen] = useState(false);
@@ -787,14 +789,16 @@ export function Panel({
   const mobileHub = (
     <div className="settings-mobile-hub">
       <div className="as-account-hero settings-mobile-hub__hero">
-        <div className="as-account-hero-avatar" style={avatarStyle}>
+        <button type="button" className="as-account-hero-avatar settings-mobile-hub__profile-button" style={avatarStyle} onClick={() => setQuickProfileOpen(true)} aria-label={t("nav.items.viewProfile")}>
           {renderAvatarContent("sm")}
-        </div>
-        <div className="as-account-hero-copy">
+        </button>
+        <button type="button" className="as-account-hero-copy settings-mobile-hub__profile-button" onClick={() => setQuickProfileOpen(true)} aria-label={t("nav.items.viewProfile")}>
           <strong>{navName}</strong>
           <span>@{user?.username}</span>
-        </div>
+        </button>
       </div>
+
+      <MyProfile variant="sheet" isOpen={quickProfileOpen} onClose={() => setQuickProfileOpen(false)} onOpenSettings={() => onSectionChange("profil")} />
 
       <nav className="settings-mobile-menu" aria-label={t("settings.nav.account")}>
         <button

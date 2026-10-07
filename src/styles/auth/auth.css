@@ -1376,3 +1376,21 @@
   -webkit-text-fill-color: var(--al-auth-text) !important;
   caret-color: var(--al-auth-text);
 }
+
+@media (max-width: 768px) {
+  .al-page { height: auto; min-height: 100dvh; overflow-y: auto; }
+  .al-auth-form-col { height: auto; min-height: 100dvh; padding: calc(84px + var(--safe-top)) max(20px, var(--safe-right)) calc(28px + var(--safe-bottom)) max(20px, var(--safe-left)); align-items: flex-start; }
+  .al-auth-form-wrap { margin: auto 0; max-width: 420px; }
+  .al-page-actions { top: calc(12px + var(--safe-top)); right: max(16px, var(--safe-right)); }
+  .al-theme-toggle, .al-lang-switch-select { min-height: 44px; }
+  .al-theme-toggle { width: 44px; }
+  .al-auth-form-wrap .al-left, .al-auth-form-wrap .al-card--solo .al-left { padding: 0; }
+  .al-auth-form-wrap .al-card { max-height: none; overflow: visible; }
+  .al-login-title, .al-register-title { font-size: 26px; }
+  .al-page .al-form input, .al-page .al-form textarea,
+  .al-login-input input, .al-register-input input { font-size: 16px; }
+  .al-login-input, .al-register-input { min-height: 48px; }
+  .al-login-submit, .al-register-submit, .al-btn-submit { min-height: 48px; }
+  .al-login-options { gap: 12px; }
+  .al-page .al-eye { min-width: 44px; min-height: 44px; }
+}
