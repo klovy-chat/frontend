@@ -895,3 +895,4 @@
   .app-shell--chat .message-text { overflow-wrap: anywhere; }
   .app-shell--chat .message-bubble { min-width: 0; }
 }
+:root[data-theme="light"] .avatar-text { color: var(--text); background: var(--bg-card); }

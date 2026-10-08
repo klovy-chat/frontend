@@ -8,6 +8,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Info, AlertCircle } from "lucide-react";
 import { useToast } from "../../context/ToastContext";
 import {
   describeMediaAccessError,
@@ -197,22 +198,14 @@ export function VoiceSettings() {
       {supportIssue ? (
         <div className="as-voice-banner as-voice-banner--error" role="alert">
           <span className="as-voice-banner__icon" aria-hidden="true">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="8" x2="12" y2="12" />
-              <line x1="12" y1="16" x2="12.01" y2="16" />
-            </svg>
+            <AlertCircle size={16} strokeWidth={1.75} />
           </span>
           <span>{describeMicrophoneSupportIssue(supportIssue)}</span>
         </div>
       ) : (
         <div className="as-voice-banner as-voice-banner--info" role="status">
           <span className="as-voice-banner__icon" aria-hidden="true">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="16" x2="12" y2="12" />
-              <line x1="12" y1="8" x2="12.01" y2="8" />
-            </svg>
+            <Info size={16} strokeWidth={1.75} />
           </span>
           <span>{t("voice.settings.infoBanner")}</span>
         </div>
@@ -221,11 +214,7 @@ export function VoiceSettings() {
       {needsPermission ? (
         <div className="as-voice-banner as-voice-banner--error" role="alert">
           <span className="as-voice-banner__icon" aria-hidden="true">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="8" x2="12" y2="12" />
-              <line x1="12" y1="16" x2="12.01" y2="16" />
-            </svg>
+            <AlertCircle size={16} strokeWidth={1.75} />
           </span>
           <span>
             {permissionDenied

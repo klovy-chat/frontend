@@ -395,3 +395,4 @@
 .app-shell .nav-rail button {
   font-family: "Space Grotesk", system-ui, sans-serif;
 }
+.nav-rail__profile-status::before { content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 5px; border-radius: 50%; background: currentColor; }
