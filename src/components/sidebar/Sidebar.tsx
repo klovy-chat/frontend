@@ -2273,7 +2273,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
             />
           ) : isValidElement(children)
             ? cloneElement(children, {
-                onToggleDetails: () => isMobile || active?.type === "channel" ? setMobileDetailsOpen(open => !open) : setDetailsOpen(open => !open),
+                onToggleDetails: () => isMobile ? setMobileDetailsOpen(open => !open) : setDetailsOpen(open => !open),
                 onOpenDetails: () => isMobile || active?.type === "channel" ? setMobileDetailsOpen(true) : setDetailsOpen(true),
                 notificationsMuted: active ? isConversationMuted(active.type, active.type === "dm" ? active.contact._id : active.channel._id) : false,
                 onToggleNotifications: () => { if (active) void handleToggleMute({ kind: active.type, id: active.type === "dm" ? active.contact._id : active.channel._id }); },
@@ -2290,7 +2290,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
             : children}
         </div>
 
-        {active && !homeOpen && !callsOpen && detailsOpen && !isMobile && <div className="app-shell__detail"><ConversationDetails target={active} onClose={() => setDetailsOpen(false)} /></div>}
+        {active && !homeOpen && !callsOpen && detailsOpen && !isMobile && <div className="app-shell__detail"><ConversationDetails target={active} onClose={() => setDetailsOpen(false)} onOpenChannelInfo={() => setMobileDetailsOpen(true)} /></div>}
         {isMobile && !showMobileChat && (
           <BottomNav
             active={mobileTab}

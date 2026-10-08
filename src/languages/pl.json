@@ -677,6 +677,7 @@
       "description": "Opis",
       "quickInfo": "Szybkie informacje",
       "hidePanel": "Ukryj panel informacji",
+      "showMoreMembers": "Pokaż więcej członków",
       "type": "Typ",
       "direct": "Wiadomość prywatna",
       "channel": "Kanał",
@@ -838,6 +839,9 @@
     }
   },
   "contactsDirectory": {
+    "count_one": "{{count}} kontakt",
+    "count_few": "{{count}} kontakty",
+    "count_many": "{{count}} kontaktów",
     "empty": "Brak kontaktów.",
     "error": "Nie udało się pobrać kontaktów.",
     "search": "Szukaj kontaktów…",

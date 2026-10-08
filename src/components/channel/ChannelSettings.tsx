@@ -32,7 +32,7 @@ import {
 } from "../../api/invites";
 import { checkFriendship } from "../../api/friends";
 import { ActionMenu, type ActionMenuItem } from "../common/ActionMenu";
-import { Ban, UserMinus, Volume2, VolumeX } from "lucide-react";
+import { Ban, UserMinus, Volume2, VolumeX, Pencil, UserPlus, Trash2, Flag } from "lucide-react";
 import { ImageCrop } from "../common/ImageCrop";
 import { OtherProfile } from "../profile/OtherProfile";
 import {
@@ -46,6 +46,7 @@ import {
 } from "../../utils/media/cdnVersion";
 import { userLabel } from "../../utils/user/format";
 import { mapChannelUser, mapChannelUserList } from "../../utils/chat/member";
+import { LoadingSkeleton } from "../common/LoadingSkeleton";
 import {
   CHANNEL_MOD_DURATION_OPTIONS,
   formatModerationExpiry,
@@ -209,6 +210,7 @@ export function ChannelSettings({
   const [details, setDetails] = useState<ChannelDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<SettingsTab>("general");
+  const [visibleMembers, setVisibleMembers] = useState(5);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteClosing, setInviteClosing] = useState(false);
   const [inviteLoading, setInviteLoading] = useState(false);
@@ -471,26 +473,6 @@ export function ChannelSettings({
       danger: false,
     };
   };
-
-  const toolbarBtn = (danger = false, disabled = false, active = false): React.CSSProperties => ({
-    flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-    gap: 6, padding: "14px 8px",
-    background: disabled ? "transparent" : active ? "var(--accent-dim)" : danger ? C.dangerDim : C.accentDim,
-    border: `1px solid ${disabled ? C.borderLight : active ? C.accent : danger ? C.dangerBorder : C.accentBorder}`,
-    borderRadius: 10, cursor: disabled ? "not-allowed" : "var(--cursor-pointer)",
-    color: disabled ? "#3a3a44" : danger ? C.danger : active ? "#c4b5fd" : C.accent,
-    fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.04em",
-  });
-
-  const toolbarBtnGrey = (disabled = false, active = false): React.CSSProperties => ({
-    flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-    gap: 6, padding: "14px 8px",
-    background: disabled ? "transparent" : active ? "var(--accent-dim)" : "transparent",
-    border: `1px solid ${disabled ? C.borderLight : active ? C.border : C.borderLight}`,
-    borderRadius: 10, cursor: disabled ? "not-allowed" : "var(--cursor-pointer)",
-    color: disabled ? "#3a3a44" : C.textMuted,
-    fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.04em",
-  });
 
   const handleInvite = async () => {
     if (!isAdmin) return;
@@ -775,14 +757,10 @@ export function ChannelSettings({
       <div
         key={id}
         className="cs-member-row"
-        style={{
-          display: "flex", alignItems: "center", gap: 12,
-          padding: "10px 12px", borderRadius: 8,
-          background: C.bgDeep, marginBottom: 6,
-        }}
       >
         <button
           type="button"
+          className="cs-member-identity"
           disabled={!openProfile}
           onClick={() => {
             if (!openProfile) return;
@@ -813,10 +791,10 @@ export function ChannelSettings({
             size={36}
           />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: "0.85rem", color: C.text, fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
+            <div className="cs-member-name">
               {userLabel(contact)}
               {isOwner ? (
-                <span style={{ marginLeft: 6, fontSize: "0.7rem", color: C.accent }}>{t("channel.members.ownerBadge")}</span>
+                <span className="cs-member-owner">{t("channel.members.ownerBadge")}</span>
               ) : null}
             </div>
             {contact.username ? (
@@ -855,12 +833,7 @@ export function ChannelSettings({
   ];
 
   const renderChannelHeader = () => (
-    <div className="cs-header" style={{
-      background: "linear-gradient(135deg, var(--bg-panel) 0%, var(--bg-elevated) 100%)",
-      borderBottom: `1px solid ${C.border}`,
-      padding: "22px 18px 18px",
-      display: "flex", alignItems: "flex-start", gap: 16,
-    }}>
+    <div className="cs-header">
       <div
         role="button"
         tabIndex={0}
@@ -984,7 +957,7 @@ export function ChannelSettings({
         <div className="cs-content">
           {renderChannelHeader()}
 
-          <div className="cs-content-scroll">
+          <div key={tab} className="cs-content-scroll">
             {tab === "general" && (
               <>
                 <div className="cs-general-intro">
@@ -996,23 +969,25 @@ export function ChannelSettings({
 
                 <div className="cs-toolbar-row">
                   {isAdmin && (
-                    <HoverBtn type="button" style={toolbarBtnGrey()} hoverStyle={{ background: "var(--accent-dim)" }} onClick={onEdit}>
+                    <button type="button" className="cs-toolbar-button" onClick={onEdit}>
+                      <Pencil size={15} />
                       {t("modals.channelSettings.edit")}
-                    </HoverBtn>
+                    </button>
                   )}
-                  <HoverBtn
+                  <button
                     type="button"
-                    style={toolbarBtnGrey(false, !isAdmin)}
-                    hoverStyle={{ background: "var(--accent-dim)" }}
+                    className="cs-toolbar-button"
                     disabled={!isAdmin}
                     onClick={() => void handleInvite()}
                   >
+                    <UserPlus size={15} />
                     {t("modals.channelSettings.invite")}
-                  </HoverBtn>
+                  </button>
                   {isAdmin && (
-                    <HoverBtn type="button" style={toolbarBtn(true)} hoverStyle={{ background: "rgba(239,68,68,0.15)" }} onClick={onDelete}>
+                    <button type="button" className="cs-toolbar-button cs-toolbar-button--danger" onClick={onDelete}>
+                      <Trash2 size={15} />
                       {t("modals.channelSettings.delete")}
-                    </HoverBtn>
+                    </button>
                   )}
                 </div>
 
@@ -1021,10 +996,7 @@ export function ChannelSettings({
                   className="cs-list-item"
                   onClick={() => { setReportOpen(true); setReportSuccess(false); }}
                 >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
-                    <line x1="4" y1="22" x2="4" y2="15" />
-                  </svg>
+                  <Flag size={16} />
                   {t("moderation.report.action")}
                   <span className="cs-list-chevron">›</span>
                 </button>
@@ -1037,14 +1009,10 @@ export function ChannelSettings({
                 <p className="cs-section-subtitle">
                   {t("modals.channelSettings.membersActionsHint")}
                 </p>
-                {allMembers.map((m) => renderMemberRow(m, { showKick: true, showBan: true, showMute: true, clickable: true }))}
-                <p style={{ margin: "16px 0 8px", fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: C.textDim, fontFamily: "var(--font-sans)" }}>
-                  {t("modals.channelSettings.membersAdminTitle")}
-                </p>
-                <p style={{ margin: "0 0 10px", fontSize: "0.8rem", color: C.textMuted, fontFamily: "var(--font-sans)" }}>
-                  {t("modals.channelSettings.adminNote")}
-                </p>
-                {renderMemberRow(ch.admin, { clickable: true })}
+                {loading ? <LoadingSkeleton label={t("common.loading")} /> : <>
+                  {allMembers.slice(0, visibleMembers).map((m) => renderMemberRow(m, { showKick: true, showBan: true, showMute: true, clickable: true }))}
+                  {allMembers.length > visibleMembers && <button type="button" className="cs-show-more" onClick={() => setVisibleMembers(count => count + 5)}>{t("chat.details.showMoreMembers")}</button>}
+                </>}
               </>
             )}
 
@@ -1109,27 +1077,31 @@ export function ChannelSettings({
                   </button>
                 </div>
 
-                <p style={{ margin: "18px 0 8px", fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: C.textDim, fontFamily: "var(--font-sans)" }}>
+                <section className="cs-moderation-list">
+                <h4>
                   {t("moderation.lists.banned")}
-                </p>
+                </h4>
                 {loading && bannedContacts.length === 0 ? (
-                  <p style={{ color: C.textDim, fontSize: "0.85rem", fontFamily: "var(--font-sans)" }}>{t("common.loadingList")}</p>
+                  <LoadingSkeleton label={t("common.loadingList")} />
                 ) : bannedContacts.length === 0 ? (
-                  <p style={{ color: C.textDim, fontSize: "0.85rem", fontFamily: "var(--font-sans)" }}>{t("moderation.lists.noBanned")}</p>
+                  <p className="cs-empty-list">{t("moderation.lists.noBanned")}</p>
                 ) : (
                   bannedContacts.map((m) => renderMemberRow(m, { showUnban: true }))
                 )}
+                </section>
 
-                <p style={{ margin: "18px 0 8px", fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: C.textDim, fontFamily: "var(--font-sans)" }}>
+                <section className="cs-moderation-list">
+                <h4>
                   {t("moderation.lists.muted")}
-                </p>
+                </h4>
                 {loading && mutedContacts.length === 0 ? (
-                  <p style={{ color: C.textDim, fontSize: "0.85rem", fontFamily: "var(--font-sans)" }}>{t("common.loadingList")}</p>
+                  <LoadingSkeleton label={t("common.loadingList")} />
                 ) : mutedContacts.length === 0 ? (
-                  <p style={{ color: C.textDim, fontSize: "0.85rem", fontFamily: "var(--font-sans)" }}>{t("moderation.lists.noMuted")}</p>
+                  <p className="cs-empty-list">{t("moderation.lists.noMuted")}</p>
                 ) : (
                   mutedContacts.map((m) => renderMemberRow(m, { showUnmute: true }))
                 )}
+                </section>
               </>
             )}
 

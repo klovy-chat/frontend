@@ -12,12 +12,9 @@ import { useTranslation } from "react-i18next";
 import { updateProfile } from "../api/auth";
 import { useAuth } from "../context/AuthContext";
 import { ApiError } from "../api/client";
-import {
-  ProfileFields,
-  profileValuesFromUser,
-  type ProfileFormValues,
-} from "../components/profile/ProfileFields";
+import { ProfileFields, profileValuesFromUser, type ProfileFormValues} from "../components/profile/ProfileFields";
 import { AuthLayout } from "../components/auth/AuthLayout";
+
 import "../styles/auth/auth.css";
 import "../styles/account/profile.css";
 
@@ -25,14 +22,12 @@ export function ProfileSetup() {
   const { t } = useTranslation();
   const { user, updateUser } = useAuth();
   const navigate = useNavigate();
-  const [values, setValues] = useState<ProfileFormValues>(() =>
-    profileValuesFromUser(user),
-  );
+
+  const [values, setValues] = useState<ProfileFormValues>(() => profileValuesFromUser(user));
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const patchValues = (patch: Partial<ProfileFormValues>) =>
-    setValues((prev) => ({ ...prev, ...patch }));
+  const patchValues = (patch: Partial<ProfileFormValues>) => setValues((prev) => ({ ...prev, ...patch }));
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();

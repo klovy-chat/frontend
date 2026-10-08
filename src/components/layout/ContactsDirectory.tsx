@@ -67,7 +67,7 @@ export function ContactsDirectory({ onAdd, onSelect, revision, receivedFriendReq
           <p>{t("contactsDirectory.subtitle")}</p>
         </div>
         <div className="contacts-directory__header-actions">
-          <span>{loading ? "…" : failed ? "—" : contacts.length} {t("chat.home.contacts")}</span>
+          <span>{loading ? "…" : failed ? "—" : t("contactsDirectory.count", { count: contacts.length })}</span>
           <button type="button" onClick={onAdd}>
             <UserPlus size={16} />
             {t("contactsDirectory.add")}

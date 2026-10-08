@@ -12,10 +12,13 @@ import type { ChatTarget, ChannelDetails, Contact } from "../../types";
 import { getChannelDetails } from "../../api/channels";
 import { ConversationMedia } from "./ConversationMedia";
 import { useProfileBannerStyle } from "../../hooks/useMediaCache";
+import { LoadingSkeleton } from "../common/LoadingSkeleton";
+import { mapChannelUser, mapChannelUserList } from "../../utils/chat/member";
 
 interface ConversationDetailsProps {
   target: ChatTarget | null;
   onClose?: () => void;
+  onOpenChannelInfo?: () => void;
 }
 
 function ChannelMember({ member, isAdmin, onOpen }: { member: Contact; isAdmin: boolean; onOpen: () => void }) {
@@ -29,22 +32,24 @@ function ChannelMember({ member, isAdmin, onOpen }: { member: Contact; isAdmin: 
   </button>;
 }
 
-export function ConversationDetails({ target, onClose }: ConversationDetailsProps) {
+export function ConversationDetails({ target, onClose, onOpenChannelInfo }: ConversationDetailsProps) {
   const { t } = useTranslation();
   const [profileOpen, setProfileOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<Contact | null>(null);
   const [channelDetails, setChannelDetails] = useState<ChannelDetails | null>(null);
   const [membersLoading, setMembersLoading] = useState(false);
   const [membersError, setMembersError] = useState(false);
+  const [visibleMembers, setVisibleMembers] = useState(5);
   const channelId = target?.type === "channel" ? target.channel._id : null;
   useEffect(() => {
     setChannelDetails(null);
     setMembersError(false);
+    setVisibleMembers(5);
     if (!channelId) { setMembersLoading(false); return; }
     let cancelled = false;
     setMembersLoading(true);
     void getChannelDetails(channelId).then(({ channel }) => {
-      if (!cancelled) setChannelDetails(channel);
+      if (!cancelled) setChannelDetails({ ...channel, admin: mapChannelUser(channel.admin) ?? channel.admin, members: mapChannelUserList(channel.members) });
     }).catch(() => { if (!cancelled) setMembersError(true); }).finally(() => { if (!cancelled) setMembersLoading(false); });
     return () => { cancelled = true; };
   }, [channelId, target?.type === "channel" ? target.channel.members : null]);
@@ -76,13 +81,15 @@ export function ConversationDetails({ target, onClose }: ConversationDetailsProp
     : target.channel.description || t("chat.details.noDescription");
   const channel = !isDm ? channelDetails?._id === channelId ? channelDetails : target.channel : null;
   const memberCount = channel ? channel.memberCount ?? channel.members.length : null;
+  const members = channel ? Array.from(new Map([channel.admin, ...channel.members].map(member => [member._id, member])).values()) : [];
+  const openIdentity = () => { if (isDm) setProfileOpen(true); else onOpenChannelInfo?.(); };
 
   return (
     <aside className={`conversation-details${!isDm ? " conversation-details--channel" : ""}`}>
       {onClose && <button type="button" className="conversation-details__collapse" onClick={onClose} aria-label={t("chat.details.hidePanel")} title={t("chat.details.hidePanel")}><ChevronRight size={20} /></button>}
       {isDm && <div className="conversation-details__cover" style={bannerStyle} aria-hidden="true" />}
       <div className="conversation-details__identity">
-        <button type="button" className="conversation-details__avatar-button" disabled={!isDm} onClick={() => setProfileOpen(true)} aria-label={t("chat.window.contactProfile")}>
+        <button type="button" className="conversation-details__avatar-button" disabled={!isDm && !onOpenChannelInfo} onClick={openIdentity} aria-label={t(isDm ? "chat.window.contactProfile" : "chat.details.quickInfo")}>
         <Avatar
           displayName={isDm ? target.contact.displayName : target.channel.name}
           username={isDm ? target.contact.username : undefined}
@@ -92,7 +99,7 @@ export function ConversationDetails({ target, onClose }: ConversationDetailsProp
           size={80}
         />
         </button>
-        <button type="button" className="conversation-details__name-button" disabled={!isDm} onClick={() => setProfileOpen(true)}><h2>{title}</h2></button>
+        <button type="button" className="conversation-details__name-button" disabled={!isDm && !onOpenChannelInfo} onClick={openIdentity}><h2>{title}</h2></button>
         {isDm && <span className={online ? "conversation-details__online" : ""}>{t(online ? "user.availability.online" : "user.availability.offline")}</span>}
         {!isDm && memberCount !== null && (
           <span>
@@ -101,10 +108,10 @@ export function ConversationDetails({ target, onClose }: ConversationDetailsProp
         )}
       </div>
 
-      <div className="conversation-details__section">
-        <h3>{isDm ? t("chat.details.about") : t("chat.details.description")}</h3>
+      {isDm && <div className="conversation-details__section">
+        <h3>{t("chat.details.about")}</h3>
         <p>{description}</p>
-      </div>
+      </div>}
 
       <div className="conversation-details__section">
         <h3>{t("chat.details.quickInfo")}</h3>
@@ -126,9 +133,12 @@ export function ConversationDetails({ target, onClose }: ConversationDetailsProp
       </div>
       {!isDm && <div className="conversation-details__section">
         <h3>{t("modals.channelSettings.membersTitle")}</h3>
-        {membersLoading && <p role="status">{t("common.loading")}</p>}
+        {membersLoading && <LoadingSkeleton label={t("common.loading")} />}
         {membersError && <p role="alert">{t("errors.generic")}</p>}
-        <div className="conversation-details__members">{channel?.members.map(member => <ChannelMember key={member._id} member={member} isAdmin={member._id === channel.admin._id} onOpen={() => setSelectedMember(member)} />)}</div>
+        {!membersLoading && <>
+          <div className="conversation-details__members">{members.slice(0, visibleMembers).map(member => <ChannelMember key={member._id} member={member} isAdmin={member._id === channel?.admin._id} onOpen={() => setSelectedMember(member)} />)}</div>
+          {members.length > visibleMembers && <button type="button" className="conversation-details__show-more" onClick={() => setVisibleMembers(count => count + 5)}>{t("chat.details.showMoreMembers")}</button>}
+        </>}
       </div>}
       <ConversationMedia key={mutedKey} target={target} />
       {!isDm && selectedMember && <OtherProfile variant="sheet" isOpen={true} onClose={() => setSelectedMember(null)} user={selectedMember} isFriend={false} />}

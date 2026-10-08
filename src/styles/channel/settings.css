@@ -442,3 +442,59 @@
   padding: 6px 10px;
   font-size: 0.68rem;
 }
+.cs-modal { border-radius: 16px; background: var(--bg-panel); font-family: "Space Grotesk", system-ui, sans-serif; }
+.cs-header { display: flex; align-items: center; gap: 12px; padding: 18px 20px; border-bottom: 1px solid var(--border); background: var(--bg-panel); flex-shrink: 0; }
+.cs-header h2 { font-family: "Space Grotesk", system-ui, sans-serif !important; font-size: 18px !important; line-height: 24px; }
+.cs-header p { font-family: inherit !important; font-size: 12px !important; }
+.cs-nav { padding: 18px 10px; background: var(--bg-deep); border-right-color: var(--border); }
+.cs-nav-item { min-height: 40px; font-family: inherit; font-size: 13px; border-radius: 10px; }
+.cs-nav-item.active { background: var(--accent-dim); }
+.cs-content-scroll { padding: 20px; }
+.cs-section-title { font-family: inherit; font-size: 18px; line-height: 24px; }
+.cs-section-subtitle { font-family: inherit; font-size: 13px; line-height: 20px; margin-bottom: 16px; }
+.cs-card { padding: 14px; border-radius: 12px; background: var(--bg-card); border-color: var(--border); }
+.cs-card-label { font-family: inherit; font-size: 14px; }
+.cs-card-hint { font-family: inherit; font-size: 12px; line-height: 18px; }
+.cs-card-status { font-family: inherit; font-size: 11px; padding: 4px 8px; }
+.cs-select { min-height: 40px; padding: 8px 12px; font-family: inherit; font-size: 13px; background: var(--bg-panel); }
+.cs-lock-btn { min-height: 40px; padding: 8px 12px; font-family: inherit; font-size: 13px; }
+.cs-footer { padding: 12px 20px; border-top: 1px solid var(--border); background: var(--bg-panel); }
+.cs-footer > button { min-height: 36px; font-family: "Space Grotesk", system-ui, sans-serif !important; font-size: 12px !important; letter-spacing: normal !important; }
+.cs-show-more { width: 100%; min-height: 36px; margin-top: 10px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-panel); color: var(--text); font: 600 12px "Space Grotesk", system-ui, sans-serif; cursor: pointer; }
+.cs-show-more:hover { background: var(--bg-hover); }
+.cs-show-more:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (max-width: 768px) {
+  .cs-header { padding: 14px 16px; gap: 10px; }
+  .cs-header h2 { font-size: 16px !important; }
+  .cs-content-scroll { padding: 16px; }
+  .cs-select { font-size: 16px; min-height: 44px; }
+  .cs-nav-item, .cs-lock-btn, .cs-show-more, .conversation-details__show-more { min-height: 44px; }
+  .cs-footer { padding: 12px 16px max(14px, var(--safe-bottom)); }
+}
+.cs-card-head { gap: 14px; margin-bottom: 12px; }
+.cs-card-head > div { min-width: 0; }
+.cs-card-hint { margin-top: 6px; }
+.cs-lock-btn { margin-top: 0; }
+.cs-moderation-list { margin-top: 16px; padding: 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-card); }
+.cs-moderation-list h4 { margin: 0 0 10px; font-size: 12px; font-weight: 600; color: var(--text-muted); }
+.cs-empty-list { margin: 0; font-size: 12px; line-height: 18px; color: var(--text-muted); }
+.cs-general-intro { padding-bottom: 4px; }
+.cs-toolbar-row { margin: 0 0 16px; gap: 8px; }
+.cs-toolbar-row > .cs-toolbar-button { flex: 1; display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 7px; min-height: 40px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-card); color: var(--text); font: 600 12px "Space Grotesk", system-ui, sans-serif; cursor: pointer; }
+.cs-toolbar-button:hover:not(:disabled) { background: var(--bg-hover); border-color: var(--accent-border); }
+.cs-toolbar-row > .cs-toolbar-button--danger { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 28%, var(--border)); background: var(--danger-dim); }
+.cs-toolbar-row > .cs-toolbar-button--danger:hover:not(:disabled) { background: rgba(239, 68, 68, 0.14); border-color: rgba(239, 68, 68, 0.35); color: var(--danger); }
+.cs-toolbar-button:disabled { opacity: .4; cursor: default; }
+.cs-toolbar-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.cs-content-scroll > .cs-list-item { min-height: 48px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-card); font-family: inherit; font-size: 13px; color: var(--text); }
+.cs-member-row { display: flex; align-items: center; gap: 10px; min-height: 64px; padding: 12px; margin-bottom: 8px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-card); }
+.cs-member-row:hover { background: var(--bg-hover); }
+.cs-member-identity:disabled { opacity: 1; }
+.cs-member-name { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; color: var(--text); font-size: 13px; font-weight: 600; line-height: 20px; overflow-wrap: anywhere; }
+.cs-member-owner { padding: 2px 7px; border-radius: 999px; background: var(--accent-dim); color: var(--accent); font-size: 10px; font-weight: 500; line-height: 16px; }
+.cs-member-row .action-menu-trigger { min-height: 32px; padding: 6px 10px; font-size: 11px; border-radius: 8px; }
+@media (max-width: 768px) {
+  .cs-toolbar-row > .cs-toolbar-button { min-height: 44px; }
+  .cs-member-row { gap: 8px; padding: 10px; }
+  .cs-member-row .action-menu-trigger { min-height: 44px; }
+}

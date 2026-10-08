@@ -677,6 +677,7 @@
       "description": "Description",
       "quickInfo": "Quick info",
       "hidePanel": "Hide information panel",
+      "showMoreMembers": "Show more members",
       "type": "Type",
       "direct": "Direct message",
       "channel": "Channel",
@@ -838,6 +839,8 @@
     }
   },
   "contactsDirectory": {
+    "count_one": "{{count}} contact",
+    "count_other": "{{count}} contacts",
     "empty": "No contacts found.",
     "error": "Could not load contacts.",
     "search": "Search contacts…",

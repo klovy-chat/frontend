@@ -26,15 +26,6 @@
   background: var(--accent);
 }
 .app-shell--chat .nav-rail__item.active .nav-rail__icon::after { display: none; }
-.app-shell--chat .nav-rail__profile-status::before {
-  content: "";
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  margin-right: 5px;
-  border-radius: 50%;
-  background: currentColor;
-}
 
 .workspace-home {
   width: 100%;

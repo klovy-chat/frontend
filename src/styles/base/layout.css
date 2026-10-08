@@ -694,3 +694,7 @@
 .conversation-details__collapse { position: absolute; top: 8px; right: 8px; z-index: 1; display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-panel); color: var(--text-muted); cursor: pointer; }
 .conversation-details__collapse:hover { background: var(--bg-hover); color: var(--text); }
 .conversation-details__collapse:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.conversation-details__show-more { width: 100%; margin-top: 8px; min-height: 36px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-panel); color: var(--text); font: 600 12px "Space Grotesk", system-ui, sans-serif; cursor: pointer; }
+.conversation-details__show-more:hover { background: var(--bg-hover); }
+.conversation-details__show-more:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.conversation-details__section .loading-skeleton { padding: 0; }
