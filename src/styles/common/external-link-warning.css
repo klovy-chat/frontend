@@ -78,24 +78,8 @@
   margin-bottom: 16px;
 }
 
-.external-link-warning__destination-heading {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.external-link-warning__destination-heading strong {
+.external-link-warning__destination strong {
   font-size: 0.82rem;
-}
-
-.external-link-warning__destination-heading span {
-  min-width: 0;
-  overflow: hidden;
-  color: var(--text-muted);
-  font-size: 0.78rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .external-link-warning__destination code {

@@ -193,10 +193,7 @@ export function ExternalLinkWarning() {
         </div>
 
         <div className="external-link-warning__destination">
-          <div className="external-link-warning__destination-heading">
-            <strong>{t("modals.externalLinkWarning.destination")}</strong>
-            <span>{pendingLink.hostname}</span>
-          </div>
+          <strong>{t("modals.externalLinkWarning.destination")}</strong>
           <code>{pendingLink.url}</code>
         </div>
 
