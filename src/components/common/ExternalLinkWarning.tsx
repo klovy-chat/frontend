@@ -180,18 +180,23 @@ export function ExternalLinkWarning() {
           </button>
         </header>
 
-        <div className="external-link-warning__content">
+        <div className="external-link-warning__intro">
           <span className="external-link-warning__icon" aria-hidden="true">
-            <TriangleAlert size={30} />
+            <TriangleAlert size={21} />
           </span>
-          <h3>{t("modals.externalLinkWarning.leavingTitle")}</h3>
-          <p id="external-link-warning-description">
-            {t("modals.externalLinkWarning.message")}
-          </p>
+          <div>
+            <h3>{t("modals.externalLinkWarning.leavingTitle")}</h3>
+            <p id="external-link-warning-description">
+              {t("modals.externalLinkWarning.message")}
+            </p>
+          </div>
         </div>
 
         <div className="external-link-warning__destination">
-          <strong>{t("modals.externalLinkWarning.destination")}</strong>
+          <div className="external-link-warning__destination-heading">
+            <strong>{t("modals.externalLinkWarning.destination")}</strong>
+            <span>{pendingLink.hostname}</span>
+          </div>
           <code>{pendingLink.url}</code>
         </div>
 
