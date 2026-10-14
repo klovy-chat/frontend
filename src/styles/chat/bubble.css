@@ -449,12 +449,14 @@
 
 .msg-link {
   color: #a78bfa;
-  text-decoration: none;
   word-break: break-word;
 }
 
-.message-bubble .msg-link:hover {
-  text-decoration: none;
+.message-bubble .message-text .msg-link,
+.message-bubble .message-text .msg-link:hover,
+.message-bubble .message-text .msg-link:focus,
+.message-bubble .message-text .msg-link:visited {
+  text-decoration: none !important;
 }
 
 .message-bubble.own .msg-link {
