@@ -454,17 +454,9 @@
   word-break: break-word;
 }
 
-.msg-link:hover {
-  color: #c4b5fd;
-}
-
 .message-bubble.own .msg-link {
   color: #2e1065;
   text-decoration-color: rgba(46, 16, 101, 0.5);
-}
-
-.message-bubble.own .msg-link:hover {
-  color: #1a0e35;
 }
 
 .msg-codeblock {
