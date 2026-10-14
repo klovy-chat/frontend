@@ -449,14 +449,16 @@
 
 .msg-link {
   color: #a78bfa;
-  text-decoration: underline;
-  text-underline-offset: 2px;
+  text-decoration: none;
   word-break: break-word;
+}
+
+.message-bubble .msg-link:hover {
+  text-decoration: none;
 }
 
 .message-bubble.own .msg-link {
   color: #2e1065;
-  text-decoration-color: rgba(46, 16, 101, 0.5);
 }
 
 .msg-codeblock {
