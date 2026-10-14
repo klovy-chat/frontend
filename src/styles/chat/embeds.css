@@ -52,6 +52,7 @@
 .message-link-embed--card:hover {
   background: rgba(255, 255, 255, 0.05);
   border-color: rgba(124, 92, 255, 0.35);
+  text-decoration: none;
 }
 
 .message-link-embed__image {
