@@ -917,6 +917,15 @@
     }
   },
   "modals": {
+    "externalLinkWarning": {
+      "title": "Ostrzeżenie o linku zewnętrznym",
+      "leavingTitle": "Opuszczasz Klovy Chat",
+      "message": "Linki zewnętrzne mogą być niebezpieczne. Zachowaj ostrożność.",
+      "destination": "Docelowy adres URL:",
+      "trustDomain": "Zawsze ufaj {{domain}} i pomiń to ostrzeżenie następnym razem",
+      "visit": "Odwiedź stronę",
+      "storageFailed": "Nie udało się zapisać zaufanej domeny. Ostrzeżenie będzie wyświetlane ponownie."
+    },
     "channelSettings": {
       "title": "Ustawienia kanału",
       "generalSubtitle": "Zarządzaj kanałem, zapraszaj członków i zgłaszaj naruszenia.",

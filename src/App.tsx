@@ -26,6 +26,7 @@ import { Invite } from "./pages/Invite";
 import { Settings } from "./settings/Settings";
 import { setAppBadge } from "./utils/device/appBadge";
 import { UpdateNotice } from "./components/common/UpdateNotice";
+import { ExternalLinkWarning } from "./components/common/ExternalLinkWarning";
 import { ToastProvider } from "./context/ToastContext";
 
 function AuthOnlyRoute({ children }: { children: React.ReactNode }) {
@@ -146,6 +147,7 @@ export default function App() {
     <ToastProvider>
       <AppRoutes />
       <UpdateNotice />
+      <ExternalLinkWarning />
     </ToastProvider>
   );
 }

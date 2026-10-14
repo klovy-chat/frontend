@@ -915,6 +915,15 @@
     }
   },
   "modals": {
+    "externalLinkWarning": {
+      "title": "External link warning",
+      "leavingTitle": "You are leaving Klovy Chat",
+      "message": "External links can be dangerous. Please proceed with caution.",
+      "destination": "Destination URL:",
+      "trustDomain": "Always trust {{domain}} and skip this warning next time",
+      "visit": "Visit website",
+      "storageFailed": "Could not save the trusted domain. This warning will be shown again."
+    },
     "channelSettings": {
       "title": "Channel settings",
       "generalSubtitle": "Manage the channel, invite members and report violations.",
