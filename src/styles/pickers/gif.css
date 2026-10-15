@@ -8,10 +8,10 @@
  */
 
 .gif-picker {
-  position: fixed;
-  bottom: 70px;
-  left: 50%;
-  transform: translateX(-50%);
+  position: absolute;
+  bottom: 100%;
+  left: 14px;
+  box-sizing: border-box;
   background: var(--bg-panel);
   border: 1px solid var(--border);
   border-radius: 16px;
@@ -21,19 +21,19 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  width: 360px;
-  max-height: 480px;
+  width: min(360px, calc(100% - 28px));
+  max-height: min(480px, 60dvh);
   animation: gif-picker-in 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes gif-picker-in {
   from {
     opacity: 0;
-    transform: translateX(-50%) translateY(8px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
-    transform: translateX(-50%) translateY(0);
+    transform: translateY(0);
   }
 }
 
@@ -60,9 +60,10 @@
 
 .gif-picker-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
   overflow-y: auto;
+  min-height: 0;
   max-height: 360px;
   padding-right: 4px;
 }
@@ -156,7 +157,7 @@
   .gif-picker {
     left: 0;
     right: 0;
-    bottom: 0;
+    bottom: 100%;
     width: 100%;
     max-width: 100%;
     transform: none;

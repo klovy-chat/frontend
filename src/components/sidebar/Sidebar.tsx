@@ -10,6 +10,7 @@
 import { cloneElement, isValidElement, useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { TriangleAlert } from "lucide-react";
 import { getContactsForList, searchContacts, toggleContactMute, toggleContactBlock } from "../../api/contacts";
 import { getReceivedFriendRequests, removeFriend } from "../../api/friends";
 import {
@@ -2669,10 +2670,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
                 borderRadius: 10, padding: "14px 16px",
                 display: "flex", gap: 12, alignItems: "flex-start",
               }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={C.danger} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}>
-                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                  <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-                </svg>
+                <TriangleAlert size={18} color={C.danger} style={{ flexShrink: 0, marginTop: 1 }} aria-hidden="true" />
                 <p style={{ margin: 0, fontSize: "0.84rem", color: "#fca5a5", lineHeight: 1.6 }}>
                   {t("sidebar.modals.deleteChannel.confirmWithName", { name: deleteChannelInfo?.channelName ?? "" })}{" "}
                   {t("sidebar.modals.deleteChannel.messagesDeleted")}
