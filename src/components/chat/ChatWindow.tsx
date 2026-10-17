@@ -456,9 +456,7 @@ export function ChatWindow({
       setChannelRoster([]);
       return;
     }
-    if (target.channel.members.length > 0) {
-      setChannelRoster(target.channel.members);
-    }
+    setChannelRoster(target.channel.members);
   }, [
     target?.type === "channel" ? target.channel._id : null,
     target?.type === "channel"
@@ -470,10 +468,6 @@ export function ChatWindow({
     if (target?.type !== "channel") return;
     const channelId = target.channel._id;
 
-    if (target.channel.members.length > 0) {
-      setChannelRoster(target.channel.members);
-      return;
-    }
     let cancelled = false;
     getChannelDetails(channelId)
       .then((res) => {
@@ -2245,15 +2239,29 @@ export function ChatWindow({
             currentUserId={currentUserId}
             isChannel={target.type === "channel"}
             typingUsers={typingUserIds.map((id) => {
-              const source =
-                target?.type === "dm"
-                  ? target.contact._id === id
-                    ? target.contact
-                    : undefined
-                  : (target?.channel.members.length
-                      ? target.channel.members
-                      : channelRoster
-                    ).find((member) => member._id === id);
+              let source: Contact | undefined;
+              if (target.type === "dm") {
+                source = target.contact._id === id ? target.contact : undefined;
+              } else {
+                const candidates = [
+                  ...channelRoster,
+                  ...target.channel.members,
+                  target.channel.admin,
+                ].filter((member) => member._id === id);
+                source = candidates.reduce<Contact | undefined>(
+                  (resolved, member) =>
+                    resolved
+                      ? {
+                          ...resolved,
+                          displayName: resolved.displayName || member.displayName,
+                          username: resolved.username || member.username,
+                          image: resolved.image || member.image,
+                          color: resolved.color ?? member.color,
+                        }
+                      : member,
+                  undefined,
+                );
+              }
               return {
                 id,
                 displayName: source?.displayName,
