@@ -30,6 +30,7 @@ interface MessageListProps {
   messages: Message[];
   currentUserId: string;
   typingUsers?: TypingUser[];
+  isChannel?: boolean;
   highlightMessageId?: string | null;
   hasMore?: boolean;
   loadingOlder?: boolean;
@@ -72,6 +73,7 @@ export function MessageList({
   messages,
   currentUserId,
   typingUsers = [],
+  isChannel = false,
   highlightMessageId,
   hasMore = false,
   loadingOlder = false,
@@ -330,14 +332,16 @@ export function MessageList({
             ))}
           </div>
           <span>
-            {t("chat.typingUsers", {
-              count: typingUsers.length,
-              names: typingUsers
-                .slice(0, 3)
-                .map((user) => userLabel(user))
-                .join(", ")
-                .concat(typingUsers.length > 3 ? ` +${typingUsers.length - 3}` : ""),
-            })}
+            {typingUsers.length > 1 && isChannel
+              ? t("chat.typingManyChannel")
+              : t("chat.typingUsers", {
+                  count: typingUsers.length,
+                  names: typingUsers
+                    .slice(0, 3)
+                    .map((user) => userLabel(user))
+                    .join(", ")
+                    .concat(typingUsers.length > 3 ? ` +${typingUsers.length - 3}` : ""),
+                })}
           </span>
           <span className="typing-indicator__dots" aria-hidden="true">•••</span>
         </div>

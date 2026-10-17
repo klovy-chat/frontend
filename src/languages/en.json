@@ -825,6 +825,7 @@
     "typing": "Typing…",
     "typingUsers_one": "{{names}} is typing",
     "typingUsers_other": "{{names}} are typing",
+    "typingManyChannel": "Several people are typing",
     "callLog": "Voice call · {{duration}}",
     "missedCall": "Missed call",
     "loadOlder": "Load older messages",

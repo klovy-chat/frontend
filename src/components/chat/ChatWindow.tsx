@@ -2243,13 +2243,17 @@ export function ChatWindow({
             } : undefined}
             messages={messages}
             currentUserId={currentUserId}
+            isChannel={target.type === "channel"}
             typingUsers={typingUserIds.map((id) => {
               const source =
                 target?.type === "dm"
                   ? target.contact._id === id
                     ? target.contact
                     : undefined
-                  : target?.channel.members.find((member) => member._id === id);
+                  : (target?.channel.members.length
+                      ? target.channel.members
+                      : channelRoster
+                    ).find((member) => member._id === id);
               return {
                 id,
                 displayName: source?.displayName,
