@@ -488,7 +488,9 @@ export function ChatWindow({
       : "",
   ]);
 
-  const allowMentionEveryone = target?.type === "channel";
+  const allowMentionEveryone =
+    target?.type === "channel" &&
+    target.channel.admin._id === currentUserId;
 
   const prepareForDisplay = useCallback(
     (list: Message[]) => {
@@ -2237,6 +2239,9 @@ export function ChatWindow({
             } : undefined}
             messages={messages}
             currentUserId={currentUserId}
+            channelAdminId={
+              target.type === "channel" ? target.channel.admin._id : undefined
+            }
             isChannel={target.type === "channel"}
             typingUsers={typingUserIds.map((id) => {
               let source: Contact | undefined;

@@ -29,6 +29,7 @@ interface MessageListProps {
   onOpenUserProfile?: (user: MessageUser) => void;
   messages: Message[];
   currentUserId: string;
+  channelAdminId?: string;
   typingUsers?: TypingUser[];
   isChannel?: boolean;
   highlightMessageId?: string | null;
@@ -72,6 +73,7 @@ export function MessageList({
   onOpenUserProfile,
   messages,
   currentUserId,
+  channelAdminId,
   typingUsers = [],
   isChannel = false,
   highlightMessageId,
@@ -194,6 +196,7 @@ export function MessageList({
     () => ({
       onOpenUserProfile,
       currentUserId,
+      channelAdminId,
       canReact,
       onReact,
       canReply,
@@ -210,6 +213,7 @@ export function MessageList({
     [
       onOpenUserProfile,
       currentUserId,
+      channelAdminId,
       canReact,
       onReact,
       canReply,

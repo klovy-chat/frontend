@@ -35,6 +35,7 @@ interface MessageBubbleProps {
   onOpenUserProfile?: (user: MessageUser) => void;
   message: Message;
   currentUserId: string;
+  channelAdminId?: string;
   highlighted?: boolean;
   canReact?: boolean;
   onReact?: (messageId: string, emoji: string) => void;
@@ -70,6 +71,7 @@ export const MessageBubble = memo(function MessageBubble({
   onOpenUserProfile,
   message,
   currentUserId,
+  channelAdminId,
   highlighted = false,
   canReact = false,
   onReact,
@@ -106,9 +108,13 @@ export const MessageBubble = memo(function MessageBubble({
   const senderId = getUserId(sender);
   const isOwn = senderId === currentUserId;
   const isChannel = Boolean(message.channel || message.channelId);
+  const hasAuthorizedEveryoneMention =
+    isChannel &&
+    message.mentionsEveryone === true &&
+    senderId === channelAdminId;
   const mentionsMe =
     !isOwn &&
-    ((isChannel && Boolean(message.mentionsEveryone)) ||
+    (hasAuthorizedEveryoneMention ||
       (message.mentions ?? []).some(
         (u) => getUserId(u) === currentUserId,
       ));
@@ -509,7 +515,7 @@ export const MessageBubble = memo(function MessageBubble({
                     {renderFormattedText(message.content, {
                       mentions: message.mentions,
                       currentUserId,
-                      allowEveryone: isChannel,
+                      allowEveryone: hasAuthorizedEveryoneMention,
                     })}
                   </p>
                 )}
