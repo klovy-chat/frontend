@@ -1150,9 +1150,9 @@
       "medium": "Naruszenie regulaminu",
       "high": "Poważne naruszenie"
     },
-    "availability": {
+    "presence": {
       "online": "Online",
-      "offline": "Niedostępny"
+      "offline": "Offline"
     },
     "lastSeen": {
       "longAgo": "Ostatnio widziano dawno temu",

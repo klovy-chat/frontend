@@ -1149,7 +1149,7 @@
       "medium": "Нарушение правил",
       "high": "Серьёзное нарушение"
     },
-    "availability": {
+    "presence": {
       "online": "В сети",
       "offline": "Не в сети"
     },

@@ -7,22 +7,22 @@
 
 import i18n from "../../i18n/config";
 
-export type AvailabilityStatus = "online" | "offline";
+export type PresenceStatus = "online" | "offline";
 
-export const PRESENCE_COLORS: Record<AvailabilityStatus, string> = {
+export const PRESENCE_COLORS: Record<PresenceStatus, string> = {
   online: "#4CD964",
   offline: "#8E8E93",
 };
 
 function effectivePresenceStatus(entity: {
   isOnline?: boolean;
-}): AvailabilityStatus {
+}): PresenceStatus {
   return entity.isOnline ? "online" : "offline";
 }
 
 export function getEffectiveStatus(entity: {
   isOnline?: boolean;
-}): AvailabilityStatus {
+}): PresenceStatus {
   return effectivePresenceStatus(entity);
 }
 

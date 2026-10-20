@@ -1146,9 +1146,9 @@
       "medium": "Terms violation",
       "high": "Serious violation"
     },
-    "availability": {
+    "presence": {
       "online": "Online",
-      "offline": "Unavailable"
+      "offline": "Offline"
     },
     "lastSeen": {
       "longAgo": "Last seen a long time ago",

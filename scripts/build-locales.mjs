@@ -792,12 +792,9 @@ Object.assign(pl, {
       medium: "Naruszenie regulaminu",
       high: "Poważne naruszenie",
     },
-    availability: {
-      online: "Dostępny",
-      away: "Niedostępny",
-      brb: "Zaraz wracam",
-      dnd: "Nie przeszkadzać",
-      offline: "Niedostępny",
+    presence: {
+      online: "Online",
+      offline: "Offline",
     },
     sessionRelative: {
       justNow: "Przed chwilą",

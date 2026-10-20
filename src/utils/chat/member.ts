@@ -53,6 +53,13 @@ export function mapChannelUser(raw: unknown): Contact | null {
           : null,
     color: typeof r.color === "number" ? r.color : undefined,
     bio: typeof r.bio === "string" ? r.bio : r.bio === null ? null : undefined,
+    isOnline: typeof r.isOnline === "boolean" ? r.isOnline : undefined,
+    lastSeen:
+      typeof r.lastSeen === "string"
+        ? r.lastSeen
+        : r.lastSeen === null
+          ? null
+          : undefined,
   };
 }
 

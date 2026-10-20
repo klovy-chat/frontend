@@ -5,7 +5,7 @@ import { OtherProfile } from "../profile/OtherProfile";
 import { useTranslation } from "react-i18next";
 import { Avatar } from "../common/Avatar";
 import { userLabel, formatLastSeen } from "../../utils/user/format";
-import { useUserPresence } from "../../context/PresenceContext";
+import { usePresenceSeed, useUserPresence } from "../../context/PresenceContext";
 import { useSyncExternalStore } from "react";
 import { subscribeMutedConversations, getMutedConversationKeys } from "../../utils/sync/muted";
 import type { ChatTarget, ChannelDetails, Contact } from "../../types";
@@ -40,6 +40,7 @@ export function ConversationDetails({ target, onClose, onOpenChannelInfo }: Conv
   const [membersLoading, setMembersLoading] = useState(false);
   const [membersError, setMembersError] = useState(false);
   const [visibleMembers, setVisibleMembers] = useState(5);
+  const seedPresence = usePresenceSeed();
   const channelId = target?.type === "channel" ? target.channel._id : null;
   useEffect(() => {
     setChannelDetails(null);
@@ -49,10 +50,18 @@ export function ConversationDetails({ target, onClose, onOpenChannelInfo }: Conv
     let cancelled = false;
     setMembersLoading(true);
     void getChannelDetails(channelId).then(({ channel }) => {
-      if (!cancelled) setChannelDetails({ ...channel, admin: mapChannelUser(channel.admin) ?? channel.admin, members: mapChannelUserList(channel.members) });
+      if (!cancelled) {
+        const details = {
+          ...channel,
+          admin: mapChannelUser(channel.admin) ?? channel.admin,
+          members: mapChannelUserList(channel.members),
+        };
+        setChannelDetails(details);
+        seedPresence([details.admin, ...details.members]);
+      }
     }).catch(() => { if (!cancelled) setMembersError(true); }).finally(() => { if (!cancelled) setMembersLoading(false); });
     return () => { cancelled = true; };
-  }, [channelId, target?.type === "channel" ? target.channel.members : null]);
+  }, [channelId, target?.type === "channel" ? target.channel.members : null, seedPresence]);
   useEffect(() => { setSelectedMember(null); }, [target?.type === "channel" ? target.channel._id : null]);
   const { startCall, state: callState } = useCall();
   const presence = useUserPresence(target?.type === "dm" ? target.contact._id : undefined);
@@ -100,7 +109,7 @@ export function ConversationDetails({ target, onClose, onOpenChannelInfo }: Conv
         />
         </button>
         <button type="button" className="conversation-details__name-button" disabled={!isDm && !onOpenChannelInfo} onClick={openIdentity}><h2>{title}</h2></button>
-        {isDm && <span className={online ? "conversation-details__online" : ""}>{t(online ? "user.availability.online" : "user.availability.offline")}</span>}
+        {isDm && <span className={online ? "conversation-details__online" : ""}>{t(online ? "user.presence.online" : "user.presence.offline")}</span>}
         {!isDm && memberCount !== null && (
           <span>
             {memberCount} {t("chat.details.members")}

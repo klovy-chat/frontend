@@ -156,7 +156,7 @@ export function Nav({
           <button type="button" className="nav-rail__profile-status-btn" onClick={() => setQuickProfileOpen(true)} aria-label={t("nav.items.viewProfile")}>
             <div className="nav-rail__profile-info">
               <div className="nav-rail__profile-name">{userLabel(user)}</div>
-              <div className="nav-rail__profile-status">{t("user.availability.online")}</div>
+              <div className="nav-rail__profile-status">{t("user.presence.online")}</div>
             </div>
           </button>
           <button type="button" className="nav-rail__logout" title={t("common.logoutTitle")} onClick={() => logout()}>
