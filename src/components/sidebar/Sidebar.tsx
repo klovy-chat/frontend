@@ -2223,7 +2223,7 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
             settingsActive={false}
             onOpenSettings={() => navigate(settingsPath())}
             profileActive={profilePageOpen}
-            onOpenProfile={() => { onSelect(null); setHomeOpen(false); setCallsOpen(false); setContactsPageOpen(false); setProfilePageOpen(true); setContactsModalOpen(false); }}
+            onOpenProfile={() => navigate(settingsPath("profil"))}
             onOpenContacts={() => {
               onSelect(null);
               setHomeOpen(false);

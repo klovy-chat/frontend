@@ -52,7 +52,7 @@ export function Settings() {
         onOpenHome={() => navigate("/")}
         onOpenChats={() => navigate("/", { state: { workspaceTab: "chats" } })}
         onOpenCalls={() => navigate("/", { state: { workspaceTab: "calls" } })}
-        onOpenProfile={() => navigate("/", { state: { workspaceTab: "profile" } })}
+        onOpenProfile={() => navigate(settingsPath("profil"))}
         onOpenContacts={() => navigate("/", { state: { workspaceTab: "contacts", openContacts: true } })}
         onOpenSettings={() => navigate(settingsPath(section))}
       /></div>}
