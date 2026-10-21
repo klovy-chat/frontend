@@ -1,0 +1,40 @@
+.channel-dialog {
+  font-family: "Space Grotesk", system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text);
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto !important;
+}
+
+.channel-dialog__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 20px 20px 0; }
+.channel-dialog__title { margin: 0 0 8px; font: inherit; font-size: 18px; line-height: 24px; font-weight: 700; letter-spacing: -.02em; }
+.channel-dialog__subtitle { margin: 4px 0 0; color: var(--text-muted); font-size: 12px; line-height: 18px; }
+.channel-dialog__body { padding: 20px; }
+.channel-dialog__scroll { overflow-y: auto; flex: 1; min-height: 0; }
+.channel-dialog__card { padding: 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-card); }
+.channel-dialog__create { margin-bottom: 16px; flex-shrink: 0; }
+.channel-dialog__footer { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; padding: 0 20px 20px; }
+.channel-dialog__label { display: block; margin: 16px 0 8px; font-size: 11px; font-weight: 600; color: var(--text-muted); letter-spacing: .05em; text-transform: uppercase; }
+.channel-dialog__body > .channel-dialog__label:first-child { margin-top: 0; }
+.channel-dialog__input { display: block; width: 100%; min-width: 0; min-height: 40px; box-sizing: border-box; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-card); color: var(--text); font: inherit; outline: none; transition: border-color .15s; }
+.channel-dialog__input:focus { border-color: var(--accent); }
+.channel-dialog textarea.channel-dialog__input { min-height: 112px; resize: vertical; }
+.channel-dialog__input::placeholder { color: var(--text-muted); }
+.channel-dialog input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--accent); flex-shrink: 0; }
+.channel-dialog__button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 38px; padding: 8px 14px; border: 1px solid var(--border); border-radius: 10px; font: inherit; font-weight: 600; cursor: var(--cursor-pointer); transition: background .15s, border-color .15s; }
+.channel-dialog__button--primary { background: var(--accent); border-color: var(--accent); color: white; }
+.channel-dialog__button--primary:hover:not(:disabled) { background: var(--accent-hover); }
+.channel-dialog__button--secondary { background: var(--bg-card); color: var(--text-muted); }
+.channel-dialog__button--secondary:hover:not(:disabled) { background: var(--bg-hover); color: var(--text); }
+.channel-dialog__button--danger { background: var(--danger-dim); border-color: var(--danger-border); color: var(--danger); }
+.channel-dialog__button--danger:hover:not(:disabled) { background: rgba(239, 68, 68, .2); border-color: var(--danger); }
+.channel-dialog__button:disabled { opacity: .5; cursor: var(--cursor-auto); }
+.channel-dialog button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.channel-dialog__header > button:hover { background: var(--bg-hover) !important; color: var(--text) !important; }
+
+@media (max-width: 768px) {
+  .channel-dialog__button { min-height: 44px; }
+  .channel-dialog__input { font-size: 16px; }
+  .channel-dialog__header > button { min-width: 44px; min-height: 44px; }
+}

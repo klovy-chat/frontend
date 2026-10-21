@@ -104,6 +104,7 @@ import {
   bumpPublicMediaCacheForChannel,
 } from "../../utils/media/cdnVersion";
 import "../../styles/chat/menu.css";
+import "../../styles/channel/dialogs.css";
 
 const C = {
   bgDeep:    "var(--bg-deep)",
@@ -2586,27 +2587,25 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
           role="dialog"
           aria-modal="true"
         >
-          <div className="klovy-shell" style={modalCard}>
-            <div style={modalHeader}>
+          <div className="klovy-shell channel-dialog" style={modalCard}>
+            <div className="channel-dialog__header">
               <div>
-                <p style={modalTitle}>{t("sidebar.modals.renameChannel.title")}</p>
-                <p style={modalSubtitle}>{t("sidebar.modals.renameChannel.currentLabel", { name: renameChannelInfo?.channelName ?? "" })}</p>
+                <p className="channel-dialog__title">{t("sidebar.modals.renameChannel.title")}</p>
+                <p className="channel-dialog__subtitle">{t("sidebar.modals.renameChannel.currentLabel", { name: renameChannelInfo?.channelName ?? "" })}</p>
               </div>
-              <HoverBtn type="button" style={closeBtn} hoverStyle={{ background: C.bgHover, color: C.text }} aria-label={t("common.close")} onClick={handleCloseRenameChannel}>×</HoverBtn>
+              <HoverBtn type="button" style={closeBtn} aria-label={t("common.close")} onClick={handleCloseRenameChannel}>×</HoverBtn>
             </div>
-            <div style={modalBody}>
-              <label style={fieldLabel}>{t("sidebar.modals.renameChannel.newNameLabel")}</label>
-              <input ref={channelInputRef} style={textInput} value={renameChannelName}
+            <div className="channel-dialog__body">
+              <label className="channel-dialog__label">{t("sidebar.modals.renameChannel.newNameLabel")}</label>
+              <input ref={channelInputRef} className="channel-dialog__input" value={renameChannelName}
                 onChange={(e) => setRenameChannelName(e.target.value)}
                 placeholder={t("sidebar.modals.renameChannel.placeholder")}
                 onKeyDown={(e) => e.key === "Enter" && handleRenameChannel()}
-                onFocus={(e) => { e.currentTarget.style.borderColor = C.accent; e.currentTarget.style.background = "#141414"; }}
-                onBlur={(e) => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.background = C.bgDeep; }}
               />
             </div>
-            <div style={modalFooter}>
-              <HoverBtn type="button" style={btnSecondary} hoverStyle={{ background: C.bgHover, color: C.text }} onClick={handleCloseRenameChannel}>{t("common.cancel")}</HoverBtn>
-              <HoverBtn type="button" style={btnPrimary} hoverStyle={{ background: C.accentHover }} onClick={handleRenameChannel}>{t("sidebar.modals.renameChannel.submit")}</HoverBtn>
+            <div className="channel-dialog__footer">
+              <HoverBtn type="button" className="channel-dialog__button channel-dialog__button--secondary" onClick={handleCloseRenameChannel}>{t("common.cancel")}</HoverBtn>
+              <HoverBtn type="button" className="channel-dialog__button channel-dialog__button--primary" onClick={handleRenameChannel}>{t("sidebar.modals.renameChannel.submit")}</HoverBtn>
             </div>
           </div>
         </div>
@@ -2656,15 +2655,15 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
           role="dialog"
           aria-modal="true"
         >
-          <div className="klovy-shell" style={modalCard}>
-            <div style={modalHeader}>
+          <div className="klovy-shell channel-dialog" style={modalCard}>
+            <div className="channel-dialog__header">
               <div>
-                <p style={modalTitle}>{t("sidebar.modals.deleteChannel.title")}</p>
-                <p style={modalSubtitle}>{t("sidebar.modals.deleteChannel.subtitle")}</p>
+                <p className="channel-dialog__title">{t("sidebar.modals.deleteChannel.title")}</p>
+                <p className="channel-dialog__subtitle">{t("sidebar.modals.deleteChannel.subtitle")}</p>
               </div>
-              <HoverBtn type="button" style={closeBtn} hoverStyle={{ background: C.bgHover, color: C.text }} aria-label={t("common.close")} onClick={handleCloseDeleteChannel}>×</HoverBtn>
+              <HoverBtn type="button" style={closeBtn} aria-label={t("common.close")} onClick={handleCloseDeleteChannel}>×</HoverBtn>
             </div>
-            <div style={modalBody}>
+            <div className="channel-dialog__body">
               <div style={{
                 background: C.dangerDim, border: `1px solid ${C.dangerBorder}`,
                 borderRadius: 10, padding: "14px 16px",
@@ -2677,9 +2676,9 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
                 </p>
               </div>
             </div>
-            <div style={modalFooter}>
-              <HoverBtn type="button" style={btnSecondary} hoverStyle={{ background: C.bgHover, color: C.text }} onClick={handleCloseDeleteChannel}>{t("common.cancel")}</HoverBtn>
-              <HoverBtn type="button" style={btnDanger} hoverStyle={{ background: "#dc2626" }} onClick={handleDeleteChannel}>{t("sidebar.modals.deleteChannel.submit")}</HoverBtn>
+            <div className="channel-dialog__footer">
+              <HoverBtn type="button" className="channel-dialog__button channel-dialog__button--secondary" onClick={handleCloseDeleteChannel}>{t("common.cancel")}</HoverBtn>
+              <HoverBtn type="button" className="channel-dialog__button channel-dialog__button--danger" onClick={handleDeleteChannel}>{t("sidebar.modals.deleteChannel.submit")}</HoverBtn>
             </div>
           </div>
         </div>
