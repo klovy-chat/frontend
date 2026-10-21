@@ -30,8 +30,8 @@
 :root[data-theme="dark"] .profile-directory textarea,
 :root[data-theme="black"] .profile-directory input,
 :root[data-theme="black"] .profile-directory textarea {
-  background: #151223;
-  border-color: rgba(155, 133, 221, .12);
+  background: var(--bg-panel);
+  border-color: var(--border);
 }
 
 @media (max-width: 768px) {

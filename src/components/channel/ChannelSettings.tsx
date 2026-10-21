@@ -54,6 +54,7 @@ import {
 import type { Channel, ChannelDetails, Contact } from "../../types";
 import { useToast } from "../../context/ToastContext";
 import "../../styles/channel/settings.css";
+import "../../styles/channel/dialogs.css";
 
 const C = {
   bgDeep: "var(--bg-deep)",
@@ -1258,13 +1259,13 @@ export function ChannelSettings({
           className={`klovy-backdrop klovy-backdrop--stacked${inviteClosing ? " closing" : ""}`}
           onClick={(e) => { if (e.target === e.currentTarget) closeInvite(); }}
         >
-          <div className="klovy-shell" style={{ ...modalCard, width: 460, maxWidth: "94vw", padding: 24, maxHeight: "88vh", display: "flex", flexDirection: "column" }} onClick={(e) => e.stopPropagation()}>
-            <h3 style={{ margin: "0 0 8px", color: C.text }}>{t("modals.channelSettings.inviteModal.title")}</h3>
-            <p style={{ margin: "0 0 16px", fontSize: "0.85rem", color: C.textMuted }}>
+          <div className="klovy-shell channel-dialog" style={{ ...modalCard, width: 460, maxWidth: "94vw", padding: 20, maxHeight: "88dvh", display: "flex", flexDirection: "column" }} onClick={(e) => e.stopPropagation()}>
+            <h3 className="channel-dialog__title">{t("modals.channelSettings.inviteModal.title")}</h3>
+            <p style={{ margin: "0 0 16px", fontSize: 13, color: C.textMuted }}>
               {t("modals.channelSettings.inviteModal.hint")}
             </p>
 
-            <div style={{ border: `1px solid ${C.border}`, borderRadius: 10, padding: 14, marginBottom: 16 }}>
+            <div className="channel-dialog__card channel-dialog__create">
               <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "var(--cursor-pointer)", color: C.text, fontSize: "0.85rem", fontWeight: 600 }}>
                 <input
                   type="checkbox"
@@ -1281,11 +1282,7 @@ export function ChannelSettings({
                     value={inviteLimitValue}
                     onChange={(e) => setInviteLimitValue(e.target.value)}
                     placeholder={t("modals.channelSettings.inviteModal.limitPlaceholder")}
-                    style={{
-                      width: "100%", boxSizing: "border-box",
-                      background: C.bgDeep, border: `1px solid ${C.border}`,
-                      borderRadius: 8, padding: "8px 12px", color: C.text, fontSize: "0.85rem",
-                    }}
+                    className="channel-dialog__input"
                   />
                   <p style={{ margin: "6px 0 0", fontSize: "0.72rem", color: C.textMuted }}>
                     {t("modals.channelSettings.inviteModal.limitHint")}
@@ -1297,13 +1294,13 @@ export function ChannelSettings({
                 </p>
               )}
               <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 12 }}>
-                <HoverBtn type="button" style={btnPrimary} disabled={inviteCreating} onClick={() => void handleCreateInvite()}>
+                <HoverBtn type="button" className="channel-dialog__button channel-dialog__button--primary" disabled={inviteCreating} onClick={() => void handleCreateInvite()}>
                   {inviteCreating ? t("modals.channelSettings.inviteModal.generating") : t("modals.channelSettings.inviteModal.create")}
                 </HoverBtn>
               </div>
             </div>
 
-            <div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
+            <div className="channel-dialog__scroll">
               {inviteLoading ? (
                 <p style={{ color: C.textMuted, fontSize: "0.85rem" }}>{t("modals.channelSettings.inviteModal.generating")}</p>
               ) : invites.length === 0 ? (
@@ -1311,16 +1308,12 @@ export function ChannelSettings({
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {invites.map((inv) => (
-                    <div key={inv.inviteId} style={{ border: `1px solid ${C.border}`, borderRadius: 10, padding: 12 }}>
+                    <div key={inv.inviteId} className="channel-dialog__card">
                       <input
                         readOnly
                         value={inv.url}
                         onFocus={(e) => e.currentTarget.select()}
-                        style={{
-                          width: "100%", boxSizing: "border-box",
-                          background: C.bgDeep, border: `1px solid ${C.border}`,
-                          borderRadius: 8, padding: "8px 10px", color: C.text, fontSize: "0.78rem",
-                        }}
+                        className="channel-dialog__input"
                       />
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 10, gap: 8, flexWrap: "wrap" }}>
                         <span style={{ fontSize: "0.75rem", color: C.textMuted }}>
@@ -1329,12 +1322,12 @@ export function ChannelSettings({
                             : t("modals.channelSettings.inviteModal.usesLimited", { count: inv.useCount, max: inv.maxUses })}
                         </span>
                         <div style={{ display: "flex", gap: 8 }}>
-                          <HoverBtn type="button" style={btnSecondary} onClick={() => void copyInvite(inv.url, inv.inviteId)}>
+                          <HoverBtn type="button" className="channel-dialog__button channel-dialog__button--secondary" onClick={() => void copyInvite(inv.url, inv.inviteId)}>
                             {inviteCopiedId === inv.inviteId ? t("common.copied") : t("modals.channelSettings.inviteModal.copyLink")}
                           </HoverBtn>
                           <HoverBtn
                             type="button"
-                            style={{ ...btnSecondary, color: "#f87171", borderColor: "rgba(248,113,113,0.4)" }}
+                            className="channel-dialog__button channel-dialog__button--danger"
                             disabled={inviteRevokingId === inv.inviteId}
                             onClick={() => void handleRevokeInvite(inv.inviteId)}
                           >
@@ -1349,7 +1342,7 @@ export function ChannelSettings({
             </div>
 
             <div style={{ display: "flex", gap: 8, marginTop: 16, justifyContent: "flex-end" }}>
-              <HoverBtn type="button" style={btnSecondary} onClick={closeInvite}>{t("common.close")}</HoverBtn>
+              <HoverBtn type="button" className="channel-dialog__button channel-dialog__button--secondary" onClick={closeInvite}>{t("common.close")}</HoverBtn>
             </div>
           </div>
         </div>
@@ -1478,24 +1471,19 @@ export function ChannelSettings({
           className={`klovy-backdrop klovy-backdrop--stacked${reportClosing ? " closing" : ""}`}
           onClick={(e) => { if (e.target === e.currentTarget) closeReport(); }}
         >
-          <div className="klovy-shell" style={{ ...modalCard, width: 420, padding: 24 }} onClick={(e) => e.stopPropagation()}>
-            <h3 style={{ margin: "0 0 8px", color: C.text }}>{t("moderation.report.title")}</h3>
+          <div className="klovy-shell channel-dialog" style={{ ...modalCard, width: 420, maxWidth: "94vw", padding: 20 }} onClick={(e) => e.stopPropagation()}>
+            <h3 className="channel-dialog__title">{t("moderation.report.title")}</h3>
             {reportSuccess ? (
               <p style={{ color: "#4ade80", fontSize: "0.9rem" }}>
                 {t("modals.channelSettings.reportSentAdmin")}
               </p>
             ) : (
               <>
-                <label style={fieldLabel}>{t("moderation.report.reason")}</label>
+                <label className="channel-dialog__label">{t("moderation.report.reason")}</label>
                 <select
                   value={reportReason}
                   onChange={(e) => setReportReason(e.target.value)}
-                  style={{
-                    width: "100%", marginBottom: 14,
-                    background: C.bgDeep, border: `1px solid ${C.border}`,
-                    borderRadius: 8, padding: "10px 12px", color: C.text,
-                    fontFamily: "inherit", fontSize: "0.9rem",
-                  }}
+                  className="channel-dialog__input"
                 >
                   {REPORT_REASON_KEYS.map((key) => (
                     <option key={key} value={reportReasonApiValue(key)}>
@@ -1503,25 +1491,20 @@ export function ChannelSettings({
                     </option>
                   ))}
                 </select>
-                <label style={fieldLabel}>{t("moderation.report.details")}</label>
+                <label className="channel-dialog__label">{t("moderation.report.details")}</label>
                 <textarea
                   rows={4}
                   maxLength={1000}
                   value={reportDetails}
                   onChange={(e) => setReportDetails(e.target.value.slice(0, 1000))}
                   placeholder={t("modals.channelSettings.reportDetailsPlaceholder")}
-                  style={{
-                    width: "100%", boxSizing: "border-box",
-                    background: C.bgDeep, border: `1px solid ${C.border}`,
-                    borderRadius: 8, padding: "10px 12px", color: C.text,
-                    resize: "vertical", fontFamily: "inherit",
-                  }}
+                  className="channel-dialog__input"
                 />
                 <div style={{ display: "flex", gap: 8, marginTop: 16, justifyContent: "flex-end" }}>
-                  <HoverBtn type="button" style={btnSecondary} onClick={closeReport}>{t("common.cancel")}</HoverBtn>
+                  <HoverBtn type="button" className="channel-dialog__button channel-dialog__button--secondary" onClick={closeReport}>{t("common.cancel")}</HoverBtn>
                   <HoverBtn
                     type="button"
-                    style={btnDanger}
+                    className="channel-dialog__button channel-dialog__button--primary"
                     disabled={reportSending}
                     onClick={() => void handleReport()}
                   >
@@ -1554,13 +1537,6 @@ const closeBtnStyle: React.CSSProperties = {
   display: "flex", alignItems: "center", justifyContent: "center",
   background: "transparent", border: "none", cursor: "var(--cursor-pointer)",
   color: C.textMuted, fontSize: "1.3rem", borderRadius: 8,
-};
-
-const fieldLabel: React.CSSProperties = {
-  display: "block", marginBottom: 8,
-  fontSize: "0.7rem", fontWeight: 700,
-  letterSpacing: "0.1em", textTransform: "uppercase",
-  color: C.textMuted,
 };
 
 const btnPrimary: React.CSSProperties = {
