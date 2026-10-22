@@ -61,7 +61,7 @@ export function uploadChannelAvatar(channelId: string, file: File) {
   const form = new FormData();
   form.append("avatar", file);
   return withTransientRetry(() =>
-    apiRequest<{ message: string; image: string }>(
+    apiRequest<{ message: string; image: string; cleanupPending: boolean }>(
       `/api/channel/${channelId}/avatar`,
       {
         method: "POST",
@@ -86,9 +86,12 @@ export function deleteChannel(channelId: string) {
   });
 }
 export function leaveChannel(channelId: string) {
-  return apiRequest<void>(`/api/channel/leave/${channelId}`, {
+  return apiRequest<{ message: string; cleanupPending: boolean }>(
+    `/api/channel/leave/${channelId}`,
+    {
     method: "POST",
-  });
+    },
+  );
 }
 
 export function getChannelDetails(channelId: string) {
@@ -115,19 +118,23 @@ export function reportChannel(
 }
 
 interface ChannelModerationLists {
-  bannedMembers: ChannelDetails["bannedMembers"];
-  mutedMembers: ChannelDetails["mutedMembers"];
+  bannedMembers: ChannelDetails["bannedMembers"] | null;
+  mutedMembers: ChannelDetails["mutedMembers"] | null;
 }
 
 export type ChannelModerationResponse = {
   message: string;
+  cleanupPending?: boolean;
 } & Partial<ChannelModerationLists>;
 
 export function kickChannelMember(channelId: string, userId: string) {
-  return apiRequest<{ message: string }>(`/api/channel/${channelId}/kick`, {
+  return apiRequest<{ message: string; cleanupPending: boolean }>(
+    `/api/channel/${channelId}/kick`,
+    {
     method: "POST",
     body: JSON.stringify({ userId }),
-  });
+    },
+  );
 }
 
 export function banChannelMember(

@@ -237,7 +237,7 @@ export function addProfileImage(file: File) {
   const form = new FormData();
   form.append("profile-image", file);
   return withTransientRetry(() =>
-    apiRequest<{ image: string }>("/api/auth/add-profile-image", {
+    apiRequest<{ image: string; cleanupPending: boolean }>("/api/auth/add-profile-image", {
       method: "POST",
       body: form,
     }),
@@ -245,7 +245,7 @@ export function addProfileImage(file: File) {
 }
 
 export function removeProfileImage() {
-  return apiRequest<{ message: string }>("/api/auth/remove-profile-image", {
+  return apiRequest<{ message: string; cleanupPending: boolean }>("/api/auth/remove-profile-image", {
     method: "DELETE",
   });
 }
@@ -255,7 +255,7 @@ export function addProfileBanner(file: File) {
   const form = new FormData();
   form.append("profile-banner", file);
   return withTransientRetry(() =>
-    apiRequest<{ banner: string }>("/api/auth/add-profile-banner", {
+    apiRequest<{ banner: string; cleanupPending: boolean }>("/api/auth/add-profile-banner", {
       method: "POST",
       body: form,
     }),
@@ -263,7 +263,7 @@ export function addProfileBanner(file: File) {
 }
 
 export function removeProfileBanner() {
-  return apiRequest<{ message: string }>("/api/auth/remove-profile-banner", {
+  return apiRequest<{ message: string; cleanupPending: boolean }>("/api/auth/remove-profile-banner", {
     method: "DELETE",
   });
 }
