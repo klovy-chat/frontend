@@ -1,5 +1,5 @@
 // Panel.tsx
-// UI wszystkich sekcji ustawień (profil, konto, sesje, głos, język, ostrzeżenia).
+// UI sekcji ustawień, w tym prywatności obecności.
 // Zakres:
 //  - zapis przez api/auth
 //  - odświeżenie usera po sukcesie
@@ -31,7 +31,7 @@ import {
   type UserSessionRow,
 } from "../api/auth";
 import { ApiError } from "../api/client";
-import { Monitor, Smartphone, X, Pencil, TriangleAlert, CircleCheck } from "lucide-react";
+import { Monitor, Smartphone, X, Pencil, TriangleAlert, CircleCheck, Eye } from "lucide-react";
 
 import { RevokeSession } from "../components/account/RevokeSession";
 import { ImageCrop } from "../components/common/ImageCrop";
@@ -46,6 +46,7 @@ import { TwoFactorSetup } from "../components/auth/TwoFactorSetup";
 import { VoiceSettings } from "../components/account/VoiceSettings";
 import { LanguageSettings } from "../components/account/LanguageSettings";
 import { AppearanceSettings } from "../components/account/AppearanceSettings";
+import { PresencePrivacySettings } from "./PresencePrivacySettings";
 import { useAuth } from "../context/AuthContext";
 import { useLocale } from "../context/LocaleContext";
 import { useToast } from "../context/ToastContext";
@@ -685,6 +686,14 @@ export function Panel({
         {t("settings.nav.profile")}
       </button>
 
+      <button
+        className={`as-nav-item${section === "status" ? " active" : ""}`}
+        onClick={() => onSectionChange("status")}
+      >
+        <Eye size={15} aria-hidden="true" />
+        {t("settings.nav.status")}
+      </button>
+
 
 
       <button
@@ -772,6 +781,7 @@ export function Panel({
   const mobileSectionTitle = (key: SettingsSection): string => {
     const titles: Record<SettingsSection, string> = {
       profil: t("settings.nav.profile"),
+      status: t("settings.nav.status"),
       konto: t("settings.nav.myAccount"),
       sesje: t("settings.nav.sessions"),
       wyglad: t("settings.nav.appearance"),
@@ -825,6 +835,11 @@ export function Panel({
                   <circle cx="12" cy="7" r="4" />
                 </svg>
               ),
+            },
+            {
+              id: "status" as const,
+              label: t("settings.nav.status"),
+              icon: <Eye size={18} aria-hidden="true" />,
             },
             {
               id: "sesje" as const,
@@ -1054,6 +1069,8 @@ export function Panel({
               </form>
             </div>
           )}
+
+          {section === "status" && <PresencePrivacySettings />}
 
           {section === "konto" && (
             <>

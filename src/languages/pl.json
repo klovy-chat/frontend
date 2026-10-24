@@ -533,7 +533,29 @@
       "bannerRemoveFailed": "Nie udało się usunąć banera"
     },
     "status": {
-      "subtitle": "Wybierz, jak widzą Cię inni użytkownicy.",
+      "subtitle": "Wybierz, kto widzi Twoją obecność online i kiedy była Twoja ostatnia aktywność.",
+      "whoCanSee": "Kto może widzieć moją obecność?",
+      "visibility": {
+        "everyone": "Wszyscy",
+        "friends": "Tylko znajomi",
+        "nobody": "Nikt"
+      },
+      "audienceHint": "Gdy ukrywasz obecność, inni nie zobaczą zielonej kropki ani dokładnej godziny.",
+      "exceptionsTitle": "Zawsze udostępniaj tym znajomym",
+      "exceptionsHint": "Wybrani znajomi zobaczą Twoją obecność niezależnie od głównego ustawienia. Tymczasowe ukrycie działa dla wszystkich.",
+      "exceptionsLimit": "Możesz wybrać maksymalnie 500 znajomych.",
+      "noFriends": "Nie masz jeszcze znajomych, którym możesz udostępnić obecność.",
+      "temporaryTitle": "Ukryj obecność tymczasowo",
+      "temporaryHint": "Tymczasowe ukrycie wstrzymuje udostępnianie wszystkim do wybranego czasu.",
+      "temporaryActive": "Obecność jest ukryta do {{date}}.",
+      "hideOneHour": "Ukryj na godzinę",
+      "hideEightHours": "Ukryj na 8 godzin",
+      "hideUntilEndOfDay": "Ukryj do końca dnia",
+      "stopTemporaryHide": "Wyłącz tymczasowe ukrycie",
+      "previewTitle": "Podgląd dla innych",
+      "previewHint": "Znajomi z wyjątków nadal zobaczą Twój status, o ile nie trwa tymczasowe ukrycie.",
+      "loadFailed": "Nie udało się wczytać ustawień prywatności obecności.",
+      "saved": "Ustawienia obecności zapisane.",
       "updateFailed": "Nie udało się zmienić statusu."
     },
     "account": {
@@ -1156,6 +1178,7 @@
     },
     "lastSeen": {
       "longAgo": "Ostatnio widziano dawno temu",
+      "recently": "Ostatnio widziano niedawno",
       "today": "Ostatnio widziano dzisiaj o {{time}}",
       "yesterday": "Ostatnio widziano wczoraj o {{time}}",
       "date": "Ostatnio widziano {{date}} o {{time}}"

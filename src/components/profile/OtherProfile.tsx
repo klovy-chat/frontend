@@ -89,7 +89,11 @@ export function OtherProfile({
     ? {
         ...base,
         isOnline: live?.isOnline ?? base.isOnline,
-        lastSeen: live?.lastSeen ?? base.lastSeen,
+        lastSeen: live?.isPresenceHidden || live?.isLastSeenLongAgo
+          ? null
+          : live?.lastSeen ?? base.lastSeen,
+        isPresenceHidden: live?.isPresenceHidden ?? base.isPresenceHidden,
+        isLastSeenLongAgo: live?.isLastSeenLongAgo ?? base.isLastSeenLongAgo,
       }
     : null;
   const bannerStyle = useProfileBannerStyle(
@@ -123,7 +127,11 @@ export function OtherProfile({
         <div className="contact-sheet__identity contact-sheet__identity--banner">
           <Avatar displayName={displayedUser.displayName} username={displayedUser.username} image={displayedUser.image} color={displayedUser.color} size={96} />
           <h2>{name}</h2><span>@{displayedUser.username}</span>
-          <span className={displayedUser.isOnline ? "contact-sheet__online" : ""}>{formatLastSeen(displayedUser.lastSeen, { isOnline: displayedUser.isOnline })}</span>
+          <span className={displayedUser.isOnline ? "contact-sheet__online" : ""}>{formatLastSeen(displayedUser.lastSeen, {
+            isOnline: displayedUser.isOnline,
+            hidden: displayedUser.isPresenceHidden,
+            longAgo: displayedUser.isLastSeenLongAgo,
+          })}</span>
           {bioText && <p>{bioText}</p>}
         </div>
         <div className="contact-sheet__actions">
@@ -200,6 +208,8 @@ export function OtherProfile({
                 {formatLastSeen(displayedUser.lastSeen, {
                   isOnline: displayedUser.isOnline,
                   blocked: isBlockedByMe,
+                  hidden: displayedUser.isPresenceHidden,
+                  longAgo: displayedUser.isLastSeenLongAgo,
                 })}
               </p>
             </div>

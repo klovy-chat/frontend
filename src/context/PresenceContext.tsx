@@ -1,7 +1,8 @@
 // PresenceContext.tsx
-// Techniczna obecność online/offline i czas ostatniej aktywności.
+// Obecność online/offline, ustawienia widoczności i czas ostatniej aktywności.
 // Zakres:
-//  - seed HTTP, delty WS
+//  - seed HTTP i spersonalizowane delty WS
+//  - ukryty status i próg „dawno temu” są dostarczane przez backend
 //  - usePresenceSeed bez re-renderu, useUserPresence z subskrypcją
 //  - seed pomija obiekty bez boolean isOnline (slim channel JSON)
 // Po logout wyczyść snapshot, inaczej zostaną kropki poprzedniego konta.
@@ -25,6 +26,8 @@ import { getContactsForList } from "../api/contacts";
 export interface Presence {
   isOnline?: boolean;
   lastSeen?: string | null;
+  isPresenceHidden?: boolean;
+  isLastSeenLongAgo?: boolean;
 }
 
 type PresenceMap = Record<string, Presence>;
@@ -68,6 +71,8 @@ interface PresenceApi {
       id?: string;
       isOnline?: boolean;
       lastSeen?: string | null;
+      isPresenceHidden?: boolean;
+      isLastSeenLongAgo?: boolean;
     }>,
   ) => void;
 }
@@ -80,6 +85,8 @@ interface StatusChangedPayload {
   status: {
     isOnline: boolean;
     lastSeen?: string | number | null;
+    isPresenceHidden?: boolean;
+    isLastSeenLongAgo?: boolean;
   };
 }
 
@@ -147,10 +154,13 @@ export function PresenceProvider({ children }: { children: ReactNode }) {
           ...prev,
           [payload.userId]: {
             isOnline: payload.status.isOnline,
-            lastSeen:
-              payload.status.lastSeen != null
+            lastSeen: payload.status.isPresenceHidden || payload.status.isLastSeenLongAgo
+              ? null
+              : payload.status.lastSeen != null
                 ? new Date(payload.status.lastSeen).toISOString()
                 : previous.lastSeen ?? null,
+            isPresenceHidden: payload.status.isPresenceHidden ?? false,
+            isLastSeenLongAgo: payload.status.isLastSeenLongAgo ?? false,
           },
         };
       });
@@ -183,6 +193,8 @@ export function PresenceProvider({ children }: { children: ReactNode }) {
         id?: string;
         isOnline?: boolean;
         lastSeen?: string | null;
+        isPresenceHidden?: boolean;
+        isLastSeenLongAgo?: boolean;
       }>,
     ) => {
       setPresenceMap((prev) => {
@@ -196,13 +208,19 @@ export function PresenceProvider({ children }: { children: ReactNode }) {
           if (typeof u.isOnline !== "boolean") continue;
           const incoming = {
             isOnline: u.isOnline,
-            lastSeen: u.lastSeen ?? prev[id]?.lastSeen ?? null,
+            lastSeen: u.isPresenceHidden || u.isLastSeenLongAgo
+              ? null
+              : u.lastSeen ?? prev[id]?.lastSeen ?? null,
+            isPresenceHidden: u.isPresenceHidden ?? false,
+            isLastSeenLongAgo: u.isLastSeenLongAgo ?? false,
           };
           const prevEntry = next[id];
           if (
             prevEntry &&
             prevEntry.isOnline === incoming.isOnline &&
-            prevEntry.lastSeen === incoming.lastSeen
+            prevEntry.lastSeen === incoming.lastSeen &&
+            prevEntry.isPresenceHidden === incoming.isPresenceHidden &&
+            prevEntry.isLastSeenLongAgo === incoming.isLastSeenLongAgo
           ) {
             continue;
           }
@@ -212,6 +230,8 @@ export function PresenceProvider({ children }: { children: ReactNode }) {
             next[id] = {
               isOnline: true,
               lastSeen: incoming.lastSeen ?? prevEntry.lastSeen,
+              isPresenceHidden: incoming.isPresenceHidden,
+              isLastSeenLongAgo: incoming.isLastSeenLongAgo,
             };
             changed =
               changed ||

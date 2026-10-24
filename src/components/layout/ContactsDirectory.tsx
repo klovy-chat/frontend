@@ -25,7 +25,12 @@ function Row({ contact, onSelect }: { contact: Contact; onSelect: (contact: Cont
         <div className="contacts-directory__name-line">
           <span>{contact.username ? `@${contact.username}` : ""}</span>
           <span className={online ? "contacts-directory__presence contacts-directory__presence--online" : "contacts-directory__presence"}>
-            {formatLastSeen(presence?.lastSeen ?? contact.lastSeen, { isOnline: online, blocked: contact.isBlockedByMe })}
+            {formatLastSeen(presence?.lastSeen ?? contact.lastSeen, {
+              isOnline: online,
+              blocked: contact.isBlockedByMe,
+              hidden: presence?.isPresenceHidden ?? contact.isPresenceHidden,
+              longAgo: presence?.isLastSeenLongAgo ?? contact.isLastSeenLongAgo,
+            })}
           </span>
         </div>
       </div>

@@ -1,13 +1,14 @@
 // routes.ts
 // Mapa sekcji PL → slug URL EN.
 // Zakres:
-//  - parse i budowa ścieżki /settings/...
+//  - parse i budowa ścieżek /settings/...
 //  - slug EN w URL ↔ nazwa sekcji PL
 // Bez wpisu tu Panel nie otworzy zakładki z linku.
 // Przy zmianach: Settings.tsx, Panel.tsx.
 
 export type SettingsSection =
   | "profil"
+  | "status"
   | "konto"
   | "sesje"
   | "wyglad"
@@ -17,6 +18,7 @@ export type SettingsSection =
 
 export const SECTION_SLUGS: Record<SettingsSection, string> = {
   profil: "profile",
+  status: "status",
   konto: "account",
   sesje: "sessions",
   wyglad: "appearance",

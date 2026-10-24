@@ -1964,7 +1964,12 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
     e.preventDefault(); e.stopPropagation();
     const live = { ...contact, ...(getPresenceSnapshot(contact._id) ?? {}) };
     const status = getEffectiveStatus(live);
-    const statusLabel = formatLastSeen(live.lastSeen, { isOnline: status === "online", blocked: contact.isBlockedByMe });
+    const statusLabel = formatLastSeen(live.lastSeen, {
+      isOnline: status === "online",
+      blocked: contact.isBlockedByMe,
+      hidden: live.isPresenceHidden,
+      longAgo: live.isLastSeenLongAgo,
+    });
     setContextMenu({
       kind: "dm",
       id: contact._id,

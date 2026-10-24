@@ -2066,6 +2066,8 @@ export function ChatWindow({
               {formatLastSeen(dmContact?.lastSeen ?? target.contact.lastSeen, {
                 isOnline: dmContact?.isOnline ?? target.contact.isOnline,
                 blocked: Boolean(target.contact.isBlockedByMe),
+                hidden: dmContact?.isPresenceHidden ?? target.contact.isPresenceHidden,
+                longAgo: dmContact?.isLastSeenLongAgo ?? target.contact.isLastSeenLongAgo,
               })}
             </span>
           ) : target.channel.description ? (

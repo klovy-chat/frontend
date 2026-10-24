@@ -67,6 +67,8 @@ function FriendPresenceRow({
             {formatLastSeen(live?.lastSeen ?? friend.lastSeen, {
               isOnline: status === "online",
               blocked: friend.isBlockedByMe,
+              hidden: live?.isPresenceHidden ?? friend.isPresenceHidden,
+              longAgo: live?.isLastSeenLongAgo ?? friend.isLastSeenLongAgo,
             })}
           </span>
         </div>

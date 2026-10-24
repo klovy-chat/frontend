@@ -47,7 +47,11 @@ export function MyProfile({
     ? {
         ...baseUser,
         isOnline: live?.isOnline ?? baseUser.isOnline,
-        lastSeen: live?.lastSeen ?? baseUser.lastSeen,
+        lastSeen: live?.isPresenceHidden || live?.isLastSeenLongAgo
+          ? null
+          : live?.lastSeen ?? baseUser.lastSeen,
+        isPresenceHidden: live?.isPresenceHidden ?? baseUser.isPresenceHidden,
+        isLastSeenLongAgo: live?.isLastSeenLongAgo ?? baseUser.isLastSeenLongAgo,
       }
     : null;
 
@@ -83,7 +87,11 @@ export function MyProfile({
         <div className="contact-sheet__identity contact-sheet__identity--banner">
           <Avatar displayName={user.displayName} username={user.username} image={user.image} color={user.color} size={96} />
           <h2>{name}</h2><span>@{user.username}</span>
-          <span className={user.isOnline ? "contact-sheet__online" : ""}>{formatLastSeen(user.lastSeen, { isOnline: user.isOnline })}</span>
+          <span className={user.isOnline ? "contact-sheet__online" : ""}>{formatLastSeen(user.lastSeen, {
+            isOnline: user.isOnline,
+            hidden: user.isPresenceHidden,
+            longAgo: user.isLastSeenLongAgo,
+          })}</span>
           {bioText && <p>{renderFormattedText(bioText)}</p>}
         </div>
         <section className="contact-sheet__facts">
@@ -148,7 +156,11 @@ export function MyProfile({
             <h2 className="up-display-name">{name}</h2>
             <p className="up-profile-handle">@{user.username}</p>
             <p className="up-profile-status">
-              {formatLastSeen(user.lastSeen, { isOnline: user.isOnline })}
+              {formatLastSeen(user.lastSeen, {
+                isOnline: user.isOnline,
+                hidden: user.isPresenceHidden,
+                longAgo: user.isLastSeenLongAgo,
+              })}
             </p>
           </div>
 

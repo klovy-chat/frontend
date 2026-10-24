@@ -533,7 +533,29 @@
       "bannerRemoveFailed": "Could not remove banner"
     },
     "status": {
-      "subtitle": "Choose how others see you.",
+      "subtitle": "Choose who can see your online presence and when you were last active.",
+      "whoCanSee": "Who can see my presence?",
+      "visibility": {
+        "everyone": "Everybody",
+        "friends": "Friends only",
+        "nobody": "Nobody"
+      },
+      "audienceHint": "When your presence is hidden, others won't see your online dot or exact last-seen time.",
+      "exceptionsTitle": "Always share with these friends",
+      "exceptionsHint": "Selected friends can see your presence regardless of the main setting. Temporary hiding applies to everyone.",
+      "exceptionsLimit": "You can select up to 500 friends.",
+      "noFriends": "You don't have any friends to share your presence with yet.",
+      "temporaryTitle": "Hide presence temporarily",
+      "temporaryHint": "Temporary hiding stops sharing with everyone until the selected time.",
+      "temporaryActive": "Your presence is hidden until {{date}}.",
+      "hideOneHour": "Hide for 1 hour",
+      "hideEightHours": "Hide for 8 hours",
+      "hideUntilEndOfDay": "Hide until end of day",
+      "stopTemporaryHide": "Turn off temporary hiding",
+      "previewTitle": "Preview for others",
+      "previewHint": "Friends on your exception list can still see your status unless temporary hiding is active.",
+      "loadFailed": "Could not load presence privacy settings.",
+      "saved": "Presence settings saved.",
       "updateFailed": "Could not update status."
     },
     "account": {
@@ -1152,6 +1174,7 @@
     },
     "lastSeen": {
       "longAgo": "Last seen a long time ago",
+      "recently": "Last seen recently",
       "today": "Last seen today at {{time}}",
       "yesterday": "Last seen yesterday at {{time}}",
       "date": "Last seen {{date}} at {{time}}"

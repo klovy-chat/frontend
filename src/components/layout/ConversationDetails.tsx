@@ -27,7 +27,11 @@ function ChannelMember({ member, isAdmin, onOpen }: { member: Contact; isAdmin: 
   const online = presence?.isOnline ?? member.isOnline;
   return <button type="button" className="conversation-details__member" onClick={onOpen}>
     <Avatar displayName={member.displayName} username={member.username} image={member.image} color={member.color} size={36} />
-    <span><strong>{userLabel(member)}</strong><small className={online ? "conversation-details__online" : ""}>{formatLastSeen(presence?.lastSeen ?? member.lastSeen, { isOnline: online })}</small></span>
+    <span><strong>{userLabel(member)}</strong><small className={online ? "conversation-details__online" : ""}>{formatLastSeen(presence?.lastSeen ?? member.lastSeen, {
+      isOnline: online,
+      hidden: presence?.isPresenceHidden ?? member.isPresenceHidden,
+      longAgo: presence?.isLastSeenLongAgo ?? member.isLastSeenLongAgo,
+    })}</small></span>
     {isAdmin && <em>{t("chat.details.admin")}</em>}
   </button>;
 }
@@ -129,7 +133,11 @@ export function ConversationDetails({ target, onClose, onOpenChannelInfo }: Conv
             <span>{t("chat.details.type")}</span>
             <strong>{isDm ? t("chat.details.direct") : t("chat.details.channel")}</strong>
           </div>
-          {isDm && <div><span>{t("chat.details.lastActivity", { defaultValue: "Last activity" })}</span><strong>{formatLastSeen(presence?.lastSeen ?? target.contact.lastSeen, { isOnline: !!online })}</strong></div>}
+          {isDm && <div><span>{t("chat.details.lastActivity", { defaultValue: "Last activity" })}</span><strong>{formatLastSeen(presence?.lastSeen ?? target.contact.lastSeen, {
+            isOnline: !!online,
+            hidden: presence?.isPresenceHidden ?? target.contact.isPresenceHidden,
+            longAgo: presence?.isLastSeenLongAgo ?? target.contact.isLastSeenLongAgo,
+          })}</strong></div>}
           <div><span>{t("chat.details.notifications", { defaultValue: "Notifications" })}</span><strong>{t(muted ? "chat.notifications.mute" : "chat.details.enabled", { defaultValue: muted ? "Muted" : "Enabled" })}</strong></div>
           {isDm && target.contact.username && <div><span>{t("chat.details.username", { defaultValue: "User" })}</span><strong>@{target.contact.username}</strong></div>}
           {!isDm && (

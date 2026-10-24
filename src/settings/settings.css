@@ -779,3 +779,21 @@
 }
 .settings-mobile-hub__profile-button { padding: 0; border: 0; background-color: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
 .settings-mobile-hub__profile-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+
+.presence-settings { max-width: 760px; }
+.presence-settings__card { margin: 18px 0 !important; }
+.presence-settings__card h3 { margin: 0 0 12px; font-size: 14px; font-weight: 600; }
+.presence-settings__choice { display: flex; align-items: center; gap: 10px; min-height: 38px; color: var(--text); cursor: pointer; }
+.presence-settings__choice input { accent-color: var(--accent); }
+.presence-settings__hint { margin: 8px 0 0; color: var(--text-dim); font-size: 12px; line-height: 1.5; }
+.presence-settings__friends { max-height: 240px; overflow-y: auto; }
+.presence-settings__temporary { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.presence-settings__preview { display: flex; flex-direction: column; gap: 8px; margin: 18px 0; padding: 18px 20px; }
+.presence-settings__preview span { color: var(--text); font-weight: 600; }
+.presence-settings__preview small { color: var(--text-dim); line-height: 1.5; }
+.presence-settings__save { margin-top: 2px; }
+
+@media (max-width: 768px) {
+  .presence-settings__card { padding: 16px !important; }
+  .presence-settings__temporary > button { min-height: 44px; }
+}

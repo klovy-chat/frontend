@@ -126,16 +126,26 @@ export function getUserId(user: { _id?: string; id?: string } | string): string 
 
 export function formatLastSeen(
   lastSeen?: string | null,
-  options: { isOnline?: boolean; blocked?: boolean } = {},
+  options: {
+    isOnline?: boolean;
+    blocked?: boolean;
+    hidden?: boolean;
+    longAgo?: boolean;
+  } = {},
 ): string {
   if (options.blocked) return i18n.t("user.lastSeen.longAgo");
+  if (options.longAgo) return i18n.t("user.lastSeen.longAgo");
   if (options.isOnline) return i18n.t("user.presence.online");
+  if (options.hidden) return i18n.t("user.lastSeen.recently");
   if (!lastSeen) return i18n.t("user.presence.offline");
 
   const date = new Date(lastSeen);
   if (Number.isNaN(date.getTime())) return i18n.t("user.presence.offline");
 
   const now = new Date();
+  if (now.getTime() - date.getTime() >= 30 * 24 * 60 * 60 * 1000) {
+    return i18n.t("user.lastSeen.longAgo");
+  }
   const time = formatClockTime(date);
   if (isSameLocalDay(date, now)) return i18n.t("user.lastSeen.today", { time });
 
