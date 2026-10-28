@@ -339,7 +339,6 @@
     },
     "fields": {
       "username": "Имя пользователя",
-      "usernamePlaceholder": "например, john_doe",
       "password": "Пароль",
       "showPassword": "Показать пароль",
       "hidePassword": "Скрыть пароль",
@@ -350,35 +349,12 @@
       "confirmPassword": "Подтвердите новый пароль",
       "twoFactorCode": "Код 2FA"
     },
-    "promo": {
-      "ariaLabel": "О Klovy Chat",
-      "login": {
-        "badge": "🔒 Сквозное шифрование",
-        "titleLine1": "Разговоры, которые остаются",
-        "titleLine2": "между вами.",
-        "body": "Войдите, чтобы вернуться к защищённым перепискам, звонкам и файлам — без рекламы и отслеживания.",
-        "footer": "Ваши данные — наш главный приоритет. Команда Klovy"
-      },
-      "register": {
-        "badge": "✨ Присоединяйтесь за 30 секунд",
-        "titleLine1": "Мессенджер, в котором",
-        "titleLine2": "конфиденциальность на первом месте.",
-        "features": {
-          "encryption": "Сквозное шифрование сообщений, звонков и файлов",
-          "noAds": "Без рекламы и продажи ваших данных",
-          "rust": "Сервер на Rust — высокая скорость работы",
-          "openSource": "Проект с открытым исходным кодом (скоро)"
-        },
-        "footer": "Присоединяйтесь к растущему сообществу Klovy"
-      }
-    },
     "login": {
       "title": "Войти",
       "submit": "Войти",
       "submitting": "Вход…",
       "subtitle": "Рады снова видеть вас в Klovy Chat",
       "identity": "Имя пользователя",
-      "identityPlaceholder": "например, ivan",
       "rememberMe": "Запомнить меня",
       "forgotPassword": "Забыли пароль?",
       "secureSubmit": "Безопасный вход",
@@ -395,16 +371,12 @@
       "title": "Создать аккаунт",
       "subtitle": "Это займёт меньше минуты",
       "email": "Электронная почта",
-      "emailPlaceholder": "you@klovy.chat",
-      "usernamePlaceholder": "например, john_doe",
       "usernameAvailable": "Имя пользователя свободно",
       "usernameUnavailable": "Имя пользователя занято",
       "submit": "Зарегистрироваться",
       "submitting": "Создание аккаунта…",
-      "passwordPlaceholder": "Придумайте надёжный пароль",
       "passwordHint": "Не менее 8 символов: строчная и заглавная буквы, цифра и специальный символ (@$!%*?&).",
       "confirmPassword": "Подтвердите пароль",
-      "confirmPasswordPlaceholder": "Повторите пароль",
       "termsPrefix": "Я ознакомился(-ась) с",
       "termsLink": "условиями использования",
       "privacyLink": "политикой конфиденциальности",

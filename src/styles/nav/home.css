@@ -143,10 +143,8 @@
   letter-spacing: normal;
 }
 .app-shell--chat .chat-header__name,
-.app-shell--chat .chat-header__desc,
-.app-shell--chat .conversation-details__identity h2,
-.app-shell--chat .conversation-details__identity > span {
-  font-family: "Space Grotesk", system-ui, sans-serif;
+.app-shell--chat .conversation-details__identity h2 {
+  font-family: var(--font-display);
 }
 .app-shell--chat .conversation-details__avatar-button,
 .app-shell--chat .conversation-details__name-button { padding: 0; border: 0; background: transparent; color: inherit; }

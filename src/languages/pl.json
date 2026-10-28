@@ -339,7 +339,6 @@
     },
     "fields": {
       "username": "Nazwa użytkownika",
-      "usernamePlaceholder": "np. Jan Kowalski",
       "password": "Hasło",
       "showPassword": "Pokaż hasło",
       "hidePassword": "Ukryj hasło",
@@ -350,28 +349,6 @@
       "confirmPassword": "Potwierdź nowe hasło",
       "twoFactorCode": "Kod 2FA"
     },
-    "promo": {
-      "ariaLabel": "Informacje o Klovy Chat",
-      "login": {
-        "badge": "🔒 Szyfrowanie end-to-end",
-        "titleLine1": "Rozmowy, które zostają",
-        "titleLine2": "tylko między Wami.",
-        "body": "Zaloguj się i wróć do bezpiecznych rozmów, połączeń i plików - bez reklam i bez śledzenia.",
-        "footer": "Twoje dane są dla nas najważniejsze - zespół Klovy"
-      },
-      "register": {
-        "badge": "✨ Dołącz w 30 sekund",
-        "titleLine1": "Komunikator zbudowany",
-        "titleLine2": "wokół prywatności.",
-        "features": {
-          "encryption": "Szyfrowanie end-to-end wiadomości, połączeń i plików",
-          "noAds": "Zero reklam i zero sprzedaży danych",
-          "rust": "Backend na Ruście - błyskawiczne działanie",
-          "openSource": "Projekt open-source (wkrótce)"
-        },
-        "footer": "Dołącz do rosnącej społeczności Klovy"
-      }
-    },
     "login": {
       "title": "Zaloguj się",
       "submit": "Zaloguj się",
@@ -380,7 +357,6 @@
       "signupLink": "Zarejestruj się",
       "subtitle": "Miło Cię widzieć ponownie w Klovy Chat",
       "identity": "Nazwa użytkownika",
-      "identityPlaceholder": "np. jan_kowalski",
       "rememberMe": "Zapamiętaj mnie",
       "forgotPassword": "Nie pamiętasz hasła?",
       "secureSubmit": "Zaloguj się bezpiecznie",
@@ -396,10 +372,8 @@
       "subtitle": "Zajmie to mniej niż minutę",
       "submit": "Zarejestruj się",
       "submitting": "Tworzenie konta…",
-      "passwordPlaceholder": "Utwórz silne hasło",
       "passwordHint": "Min. 8 znaków, wielka i mała litera, cyfra i znak specjalny (@$!%*?&).",
       "confirmPassword": "Potwierdź hasło",
-      "confirmPasswordPlaceholder": "Powtórz hasło",
       "termsPrefix": "Oświadczam, że zapoznałem/am się z",
       "termsLink": "Regulaminem",
       "privacyLink": "Polityką prywatności",
@@ -409,8 +383,6 @@
       "success": "Konto utworzone. Możesz się zalogować.",
       "closed": "Rejestracja nowych kont jest obecnie wyłączona.",
       "email": "E-mail",
-      "emailPlaceholder": "ty@klovy.chat",
-      "usernamePlaceholder": "np. Jan Kowalski",
       "usernameAvailable": "Nazwa dostępna",
       "usernameUnavailable": "Nazwa niedostępna",
       "validation": {

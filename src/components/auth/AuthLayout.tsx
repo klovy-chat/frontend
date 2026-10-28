@@ -10,21 +10,17 @@ import type { ReactNode } from "react";
 import { Moon, Sun } from "lucide-react";
 import { LanguageSwitcher } from "../common/LanguageSwitcher";
 import { useTheme } from "../../context/ThemeContext";
-import { AuthPromoPanel, type AuthPromoVariant } from "./AuthPromoPanel";
 import "../../styles/auth/auth.css";
 
 interface AuthLayoutProps {
   children: ReactNode;
-  promo?: AuthPromoVariant;
 }
 
-export function AuthLayout({ children, promo = "login" }: AuthLayoutProps) {
+export function AuthLayout({ children }: AuthLayoutProps) {
   const { theme, toggleTheme } = useTheme();
 
   return (
     <div className="al-page">
-      <AuthPromoPanel variant={promo} />
-
       <div className="al-auth-form-col">
         <div className="al-page-actions">
           <button

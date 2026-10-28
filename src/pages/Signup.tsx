@@ -186,7 +186,7 @@ export function Signup() {
     return strength;
   })();
   return (
-    <AuthLayout promo="register">
+    <AuthLayout>
       <div className="al-card">
         <div className="al-left">
           <form
@@ -241,7 +241,6 @@ export function Signup() {
                       )
                     }
                     onBlur={() => blurField("username")}
-                    placeholder={t("auth.signup.usernamePlaceholder")}
                     required
                     minLength={3}
                     maxLength={32}
@@ -301,9 +300,6 @@ export function Signup() {
                         setPassword(e.target.value)
                       }
                       onBlur={() => blurField("password")}
-                      placeholder={t(
-                        "auth.signup.passwordPlaceholder",
-                      )}
                       required
                       minLength={8}
                       autoComplete="new-password"
@@ -427,9 +423,6 @@ export function Signup() {
                     onChange={(e) =>
                       setConfirmPassword(e.target.value)
                     }
-                    placeholder={t(
-                      "auth.signup.confirmPasswordPlaceholder",
-                    )}
                     required
                     minLength={8}
                     autoComplete="new-password"

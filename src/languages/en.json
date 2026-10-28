@@ -339,7 +339,6 @@
     },
     "fields": {
       "username": "Username",
-      "usernamePlaceholder": "e.g. john_doe",
       "password": "Password",
       "showPassword": "Show password",
       "hidePassword": "Hide password",
@@ -350,35 +349,12 @@
       "confirmPassword": "Confirm new password",
       "twoFactorCode": "2FA code"
     },
-    "promo": {
-      "ariaLabel": "About Klovy Chat",
-      "login": {
-        "badge": "🔒 End-to-end encryption",
-        "titleLine1": "Conversations that stay",
-        "titleLine2": "between you.",
-        "body": "Sign in and return to secure conversations, calls and files - without ads or tracking.",
-        "footer": "Your data matters most to us - the Klovy team"
-      },
-      "register": {
-        "badge": "✨ Join in 30 seconds",
-        "titleLine1": "A messenger built",
-        "titleLine2": "around privacy.",
-        "features": {
-          "encryption": "End-to-end encryption for messages, calls and files",
-          "noAds": "No ads and no selling your data",
-          "rust": "Rust backend - blazing-fast performance",
-          "openSource": "Open-source project (coming soon)"
-        },
-        "footer": "Join the growing Klovy community"
-      }
-    },
     "login": {
       "title": "Sign in",
       "submit": "Sign in",
       "submitting": "Signing in…",
       "subtitle": "Nice to see you again in Klovy Chat",
       "identity": "Username",
-      "identityPlaceholder": "e.g. john_doe",
       "rememberMe": "Remember me",
       "forgotPassword": "Forgot your password?",
       "secureSubmit": "Sign in securely",
@@ -395,16 +371,12 @@
       "title": "Create account",
       "subtitle": "It takes less than a minute",
       "email": "E-mail",
-      "emailPlaceholder": "you@klovy.chat",
-      "usernamePlaceholder": "e.g. john_doe",
       "usernameAvailable": "Username available",
       "usernameUnavailable": "Username unavailable",
       "submit": "Sign up",
       "submitting": "Creating account…",
-      "passwordPlaceholder": "Create a strong password",
       "passwordHint": "Min. 8 characters, upper and lowercase letter, digit and special character (@$!%*?&).",
       "confirmPassword": "Confirm password",
-      "confirmPasswordPlaceholder": "Repeat password",
       "termsPrefix": "I confirm that I have read the",
       "termsLink": "Terms of Service",
       "privacyLink": "Privacy Policy",

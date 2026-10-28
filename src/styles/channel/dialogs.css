@@ -1,5 +1,5 @@
 .channel-dialog {
-  font-family: "Space Grotesk", system-ui, sans-serif;
+  font-family: var(--font-sans);
   font-size: 13px;
   line-height: 1.5;
   color: var(--text);
@@ -8,7 +8,7 @@
 }
 
 .channel-dialog__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 20px 20px 0; }
-.channel-dialog__title { margin: 0 0 8px; font: inherit; font-size: 18px; line-height: 24px; font-weight: 700; letter-spacing: -.02em; }
+.channel-dialog__title { margin: 0 0 8px; font: 700 18px var(--font-display); line-height: 24px; letter-spacing: -.02em; }
 .channel-dialog__subtitle { margin: 4px 0 0; color: var(--text-muted); font-size: 12px; line-height: 18px; }
 .channel-dialog__body { padding: 20px; }
 .channel-dialog__scroll { overflow-y: auto; flex: 1; min-height: 0; }

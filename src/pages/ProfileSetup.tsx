@@ -55,7 +55,7 @@ export function ProfileSetup() {
   };
 
   return (
-    <AuthLayout promo="register">
+    <AuthLayout>
       <div className="al-card al-card--solo profile-setup">
         <div className="al-left">
           <h1 className="al-title">{t("auth.setup.title")}</h1>

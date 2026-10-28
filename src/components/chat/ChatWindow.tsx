@@ -2060,7 +2060,7 @@ export function ChatWindow({
 
         <button type="button" className="chat-header__avatar-button" onClick={() => target.type === "channel" ? onOpenDetails?.() : setProfileOpen(true)} aria-label={t(target.type === "channel" ? "chat.details.quickInfo" : "chat.window.contactProfile")}><Avatar {...avatarProps} size={40} /></button>
         <button type="button" className="chat-header__info" onClick={() => target.type === "channel" ? onOpenDetails?.() : setProfileOpen(true)}>
-          <h3 className="chat-header__name" style={{ fontFamily: '"Space Grotesk", system-ui, sans-serif' }}>{title}</h3>
+          <h3 className="chat-header__name" style={{ fontFamily: "var(--font-display)" }}>{title}</h3>
           {target.type === "dm" ? (
             <span className={`chat-header__desc${(dmContact?.isOnline ?? target.contact.isOnline) ? " chat-header__desc--online" : ""}`}>
               {formatLastSeen(dmContact?.lastSeen ?? target.contact.lastSeen, {

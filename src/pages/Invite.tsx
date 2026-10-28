@@ -98,7 +98,7 @@ export function Invite() {
 
   if (authLoading) {
     return (
-      <AuthLayout promo="login">
+      <AuthLayout>
         <div className="al-card al-card--solo al-card--invite al-card--invite-loading">
           <div className="spinner" />
         </div>
@@ -107,7 +107,7 @@ export function Invite() {
   }
 
   return (
-    <AuthLayout promo="login">
+    <AuthLayout>
       <div className="al-card al-card--solo al-card--invite">
         {status === "loading" ? (
           <div className="iv-loading">

@@ -361,7 +361,7 @@
   }
 }
 
-.nav-rail { font-family: "Space Grotesk", system-ui, sans-serif; letter-spacing: normal; }
+.nav-rail { font-family: var(--font-sans); letter-spacing: normal; }
 .nav-rail__title { font-size: 15px; font-weight: 700; letter-spacing: normal; }
 .nav-rail__subtitle { font-size: 11px; font-weight: 400; }
 .nav-rail__brand { border-bottom: 0; margin-bottom: 4px; }
@@ -393,6 +393,6 @@
 
 .app-shell .nav-rail,
 .app-shell .nav-rail button {
-  font-family: "Space Grotesk", system-ui, sans-serif;
+  font-family: var(--font-sans);
 }
 .nav-rail__profile-status::before { content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 5px; border-radius: 50%; background: currentColor; }

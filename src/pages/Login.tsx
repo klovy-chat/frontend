@@ -179,7 +179,7 @@ export function Login() {
     setError("");
   };
   return (
-    <AuthLayout promo="login">
+    <AuthLayout>
       <div className="al-card">
         <div className="al-left">
           {step === "credentials" ? (
@@ -205,7 +205,6 @@ export function Login() {
                         setUsername(sanitizeUsernameInput(e.target.value))
                       }
                       onBlur={() => blurField("identity")}
-                      placeholder={t("auth.login.identityPlaceholder")}
                       required
                       minLength={3}
                       maxLength={32}
@@ -229,7 +228,6 @@ export function Login() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       onBlur={() => blurField("password")}
-                      placeholder="••••••••"
                       required
                       minLength={8}
                       autoComplete="current-password"
