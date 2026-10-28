@@ -974,6 +974,15 @@
   caret-color: var(--al-auth-text);
 }
 
+.al-page .al-login-title,
+.al-page .al-register-title,
+.al-page .al-title,
+.al-page .tf-title,
+.al-page .iv-channel,
+.tf-modal .tf-title {
+  font-family: var(--font-display);
+}
+
 @media (max-width: 768px) {
   .al-page { height: auto; min-height: 100dvh; overflow-y: auto; }
   .al-auth-form-col {
