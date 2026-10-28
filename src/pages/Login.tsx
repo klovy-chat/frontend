@@ -278,9 +278,6 @@ export function Login() {
                   </span>
                   <span>{t("auth.login.rememberMe")}</span>
                 </label>
-                <button type="button" className="al-login-forgot">
-                  {t("auth.login.forgotPassword")}
-                </button>
               </div>
               <Captcha
                 ref={turnstileRef}

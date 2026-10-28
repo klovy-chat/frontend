@@ -158,8 +158,8 @@ export function ConversationDetails({ target, onClose, onOpenChannelInfo }: Conv
         </>}
       </div>}
       <ConversationMedia key={mutedKey} target={target} />
-      {!isDm && selectedMember && <OtherProfile variant="sheet" isOpen={true} onClose={() => setSelectedMember(null)} user={selectedMember} isFriend={false} />}
-      {isDm && <OtherProfile variant="sheet" isOpen={profileOpen} onClose={() => setProfileOpen(false)} user={target.contact} isFriend={false} canCall={callState === "idle"} onCall={kind => { if (callState === "idle") startCall({ _id: target.contact._id, username: target.contact.username, displayName: target.contact.displayName, image: target.contact.image, color: target.contact.color }, kind); }} />}
+      {!isDm && selectedMember && <OtherProfile isOpen={true} onClose={() => setSelectedMember(null)} user={selectedMember} isFriend={false} />}
+      {isDm && <OtherProfile isOpen={profileOpen} onClose={() => setProfileOpen(false)} user={target.contact} isFriend={false} canCall={callState === "idle"} onCall={kind => { if (callState === "idle") startCall({ _id: target.contact._id, username: target.contact.username, displayName: target.contact.displayName, image: target.contact.image, color: target.contact.color }, kind); }} />}
     </aside>
   );
 }

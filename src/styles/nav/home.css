@@ -80,7 +80,7 @@
 .workspace-home__row-copy strong, .workspace-home__row-copy span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .workspace-home__row time { flex-shrink: 0; color: var(--text-muted); font-size: 12px; }
 .workspace-home__empty { color: var(--text-muted); font-size: 13px; }
-.workspace-home__stats > button { cursor: var(--cursor-pointer); color: var(--text); font: inherit; } .workspace-home__stats > button:hover { border-color: var(--accent); } .workspace-home__stats > button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.workspace-home__stats > button { cursor: pointer; color: var(--text); font: inherit; } .workspace-home__stats > button:hover { border-color: var(--accent); } .workspace-home__stats > button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .calls-view__header { justify-content: space-between; align-items: center; margin-bottom: 16px; }
 .calls-view__refresh, .calls-view__more { display: inline-flex; align-items: center; justify-content: center; padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px; color: var(--text-muted); background: var(--bg-panel); }
 .calls-view__status { display: inline-flex; align-items: center; gap: 6px; }

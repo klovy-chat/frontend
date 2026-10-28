@@ -6,7 +6,7 @@
   --bg-elevated: #131316;
   --bg-card: #131316;
   --bg-hover: #1A1A20;
-  --bg-active: rgba(124, 92, 255, 0.12);
+  --bg-active: rgba(122, 90, 245, 0.12);
 
   --border: #1C1C22;
   --border-light: #18181C;
@@ -16,10 +16,10 @@
   --text-muted: #8E8E93;
   --text-dim: #50505A;
 
-  --accent: #7C5CFF;
-  --accent-hover: #6E52EE;
-  --accent-dim: rgba(124, 92, 255, 0.14);
-  --accent-border: rgba(124, 92, 255, 0.32);
+  --accent: #7A5AF5;
+  --accent-hover: #6941C6;
+  --accent-dim: rgba(122, 90, 245, 0.14);
+  --accent-border: rgba(122, 90, 245, 0.32);
 
   --danger: #FF3B30;
   --danger-dim: rgba(255, 59, 48, 0.08);

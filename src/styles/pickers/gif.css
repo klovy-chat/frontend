@@ -93,7 +93,7 @@
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 8px;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   transition: all 0.15s;
   padding: 0;
   overflow: hidden;

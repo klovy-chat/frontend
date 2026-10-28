@@ -72,7 +72,7 @@
   color: var(--text-muted);
   font-size: 1.25rem;
   line-height: 1;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   transition:
     background 0.15s,
     color 0.15s;
@@ -135,7 +135,7 @@
 }
 
 .tf-open-app:hover {
-  background: rgba(124, 92, 255, 0.18);
+  background: rgba(122, 90, 245, 0.18);
 }
 
 .tf-copy-btn {
@@ -146,7 +146,7 @@
   border-radius: var(--radius-sm);
   background: var(--bg-card);
   color: var(--text);
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   font-size: 0.82rem;
   transition: background 0.15s;
 }
@@ -225,7 +225,7 @@
   border-radius: var(--radius-sm);
   padding: 0.65rem 1rem;
   font-weight: 600;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   transition:
     background 0.15s,
     opacity 0.15s;

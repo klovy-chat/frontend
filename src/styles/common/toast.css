@@ -110,7 +110,7 @@
 
 .toast__close:disabled {
   opacity: 0.45;
-  cursor: var(--cursor-auto);
+  cursor: auto;
 }
 
 .toast--success {

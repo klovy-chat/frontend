@@ -94,7 +94,7 @@
 
 .appearance-theme-preview--dark
 .appearance-theme-preview-message {
-  background: #7b5cfa;
+  background: #7a5af5;
 }
 
 /* LIGHT PREVIEW */
@@ -110,7 +110,7 @@
 
 .appearance-theme-preview--light
 .appearance-theme-preview-message {
-  background: #7b5cfa;
+  background: #7a5af5;
 }
 
 /* BLACK PREVIEW */
@@ -125,7 +125,7 @@
 
 .appearance-theme-preview--black
 .appearance-theme-preview-message {
-  background: #7C5CFF;
+  background: #7a5af5;
 }
 
 /* DESERT PREVIEW */

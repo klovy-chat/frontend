@@ -17,9 +17,9 @@
   --text: #f4f0f8;
   --text-muted: #ada6b8;
   --text-dim: #817a8a;
-  --accent: #ceb2ff;
-  --accent-hover: #dcc8ff;
-  --accent-dim: rgba(206, 178, 255, 0.12);
+  --accent: #7a5af5;
+  --accent-hover: #6941c6;
+  --accent-dim: rgba(122, 90, 245, 0.14);
 }
 :root[data-theme="light"] .al-page {
   --al-auth-bg: #f7f5f9;
@@ -40,9 +40,9 @@
   --text: #241f2b;
   --text-muted: #625a6c;
   --text-dim: #8a8294;
-  --accent: #6d4da3;
-  --accent-hover: #5d408d;
-  --accent-dim: rgba(109, 77, 163, 0.1);
+  --accent: #7a5af5;
+  --accent-hover: #6941c6;
+  --accent-dim: rgba(122, 90, 245, 0.12);
 }
 .al-page,
 .al-page *,
@@ -74,14 +74,14 @@
 }
 .al-theme-toggle {
   display: grid;
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   place-items: center;
   border: 1px solid var(--al-auth-border);
   border-radius: 10px;
   background: var(--al-auth-field);
   color: var(--al-auth-text-soft);
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
 }
 .al-theme-toggle:hover {
@@ -96,17 +96,17 @@
 .al-lang-switch-select {
   appearance: none;
   -webkit-appearance: none;
-  height: 40px;
-  min-width: 112px;
-  padding: 0 34px 0 16px;
+  height: 36px;
+  min-width: 104px;
+  padding: 0 30px 0 12px;
   border: 1px solid var(--al-auth-border);
   border-radius: 10px;
   background-color: var(--al-auth-field);
   color: var(--al-auth-text-soft);
   font: inherit;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   outline: none;
   transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
 }
@@ -121,7 +121,7 @@
 }
 .al-lang-switch-arrow {
   position: absolute;
-  right: 14px;
+  right: 11px;
   top: 50%;
   transform: translateY(-50%);
   color: var(--al-auth-text-muted);
@@ -246,7 +246,7 @@
   font-size: 0.9rem;
   font-weight: 700;
   color: #22182f;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   transition: background 0.15s, transform 0.15s, opacity 0.15s;
   margin-top: 0.25rem;
 }
@@ -269,7 +269,7 @@
   background: transparent;
   color: inherit;
   font-weight: 600;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   transition: background 0.15s;
 }
 .al-btn-secondary:hover:not(:disabled) {
@@ -291,7 +291,7 @@
   padding: 0;
   border: none;
   background: none;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   font-size: 0.875rem;
   color: var(--accent);
 }
@@ -441,7 +441,7 @@
   color: var(--text-muted);
   font-size: 0.84rem;
   font-weight: 500;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   transition: color 0.15s;
 }
 .iv-btn-dismiss:hover:not(:disabled) {
@@ -552,7 +552,7 @@
   border: none;
   background: none;
   color: var(--al-auth-text-muted);
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
 }
 .al-login-password-toggle:hover {
   color: var(--al-auth-text-soft);
@@ -570,7 +570,7 @@
   gap: 9px;
   font-size: 13px;
   color: var(--al-auth-text-soft);
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   user-select: none;
 }
 .al-login-remember input {
@@ -579,7 +579,7 @@
   height: 18px;
   margin: 0;
   opacity: 0;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
 }
 .al-login-input--error {
   border-color: var(--danger);
@@ -633,19 +633,6 @@
 .al-login-remember input:focus-visible + .al-login-checkbox-box {
   box-shadow: 0 0 0 3px var(--accent-dim);
 }
-.al-login-forgot {
-  flex: 0 0 auto;
-  padding: 0;
-  border: none;
-  background: none;
-  color: var(--accent);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: var(--cursor-pointer);
-}
-.al-login-forgot:hover {
-  text-decoration: underline;
-}
 .al-login-submit {
   position: relative;
   display: inline-flex;
@@ -662,7 +649,7 @@
   color: #22182f;
   font-size: 14px;
   font-weight: 700;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   transition: background 140ms ease, border-color 140ms ease, transform 140ms ease;
 }
 .al-login-submit:hover:not(:disabled) {
@@ -810,7 +797,7 @@
   border: 0;
   background: none;
   color: var(--al-auth-text-muted);
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
 }
 .al-register-password-toggle:hover {
   color: var(--al-auth-text-soft);
@@ -825,7 +812,7 @@
   display: flex;
   align-items: flex-start;
   gap: 9px;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
 }
 .al-register-checkbox input {
   position: absolute;
@@ -833,7 +820,7 @@
   height: 18px;
   margin: 0;
   opacity: 0;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
 }
 .al-register-checkbox-box {
   display: inline-flex;
@@ -881,7 +868,7 @@
   color: #22182f;
   font-size: 14px;
   font-weight: 600;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   box-shadow: none;
   transition: filter 140ms ease, transform 140ms ease;
 }
@@ -958,10 +945,10 @@
   }
   .al-theme-toggle,
   .al-lang-switch-select {
-    min-height: 44px;
+    min-height: 40px;
   }
   .al-theme-toggle {
-    width: 44px;
+    width: 40px;
   }
   .al-auth-form-wrap > .al-card {
     max-height: none;

@@ -124,7 +124,7 @@
   height: 104px;
   flex: 0 0 104px;
   background:
-    linear-gradient(135deg, rgba(123, 92, 250, 0.78), rgba(52, 44, 105, 0.8)),
+    linear-gradient(135deg, rgba(122, 90, 245, 0.78), rgba(52, 44, 105, 0.8)),
     var(--bg-elevated);
 }
 
@@ -644,7 +644,7 @@
 
 .error-boundary-reload {
   border: none;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   padding: 10px 22px;
   border-radius: 10px;
   font-size: 0.9rem;

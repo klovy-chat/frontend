@@ -1,8 +1,8 @@
 /* global.css
-   Reset, zmienne kolorów, typografia, scrollbar, cursor.
+   Reset, zmienne kolorów, typografia, scrollbar.
    Zakres:
     - tokeny --bg-*, --border, font
-    - reset, scrollbar, kursor; nowy kolor = zmienna, nie hex w JSX
+    - reset, scrollbar; nowy kolor = zmienna, nie hex w JSX
    Nowy kolor motywu: zmienna tutaj, nie hex w komponencie.
    Przy zmianach: layout.css, całe UI.
  */
@@ -44,23 +44,11 @@
   --font-display: "Manrope", "DM Sans", system-ui, sans-serif;
   --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 
-  --cursor-auto: url("/assets/cursor.png") 0 0, auto;
-  --cursor-pointer: url("/assets/cursor.png") 0 0, pointer;
-  --cursor-text: url("/assets/cursor.png") 0 0, text;
-
   font-family: var(--font-sans);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   letter-spacing: -0.01em;
-}
-
-@media (hover: none) and (pointer: coarse) {
-  :root {
-    --cursor-auto: auto;
-    --cursor-pointer: pointer;
-    --cursor-text: text;
-  }
 }
 
 *,
@@ -88,7 +76,7 @@ body {
   line-height: 1.45;
   font-family: var(--font-sans);
   letter-spacing: -0.01em;
-  cursor: var(--cursor-auto);
+  cursor: auto;
 }
 
 h1,
@@ -116,7 +104,7 @@ summary,
 [type="button"],
 [type="submit"],
 [type="reset"] {
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
 }
 
 button {
@@ -138,7 +126,7 @@ input,
 textarea,
 select,
 [contenteditable="true"] {
-  cursor: var(--cursor-text);
+  cursor: text;
   background: var(--bg-deep);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);

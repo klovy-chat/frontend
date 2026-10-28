@@ -51,7 +51,7 @@
 
 .message-link-embed--card:hover {
   background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(124, 92, 255, 0.35);
+  border-color: rgba(122, 90, 245, 0.35);
   text-decoration: none;
 }
 
@@ -261,7 +261,7 @@
   color: #fff;
   font-size: 13px;
   font-weight: 600;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   transition: background 0.15s ease, opacity 0.15s ease;
 }
 

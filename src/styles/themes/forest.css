@@ -56,14 +56,6 @@
   background: transparent;
 }
 
-@media (hover: hover) and (pointer: fine) {
-  :root[data-theme="forest"] {
-    --cursor-auto: url("/assets/green_cursor.png") 0 0, auto;
-    --cursor-pointer: url("/assets/green_cursor.png") 0 0, pointer;
-    --cursor-text: url("/assets/green_cursor.png") 0 0, text;
-  }
-}
-
 :root[data-theme="forest"] .mi-edit-banner {
   background: var(--bg-card);
   border-color: var(--accent-border);

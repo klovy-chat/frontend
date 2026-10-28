@@ -104,7 +104,7 @@
   gap: 9px;
   margin: 0 0 20px;
   color: var(--text);
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   font-size: 0.82rem;
   line-height: 1.5;
 }
@@ -121,7 +121,7 @@
   border: 1px solid var(--text-muted);
   border-radius: 50%;
   background: var(--bg-panel);
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
 }
 

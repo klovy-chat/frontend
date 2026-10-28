@@ -779,7 +779,7 @@ export function ChannelSettings({
             padding: 0,
             margin: 0,
             textAlign: "left",
-            cursor: openProfile ? "var(--cursor-pointer)" : "default",
+            cursor: openProfile ? "pointer" : "default",
             font: "inherit",
             color: "inherit",
           }}
@@ -846,7 +846,7 @@ export function ChannelSettings({
           background: "transparent",
           padding: 0,
           margin: 0,
-          cursor: avatarLoading ? "wait" : "var(--cursor-pointer)",
+          cursor: avatarLoading ? "wait" : "pointer",
           display: "inline-flex",
           alignItems: "center",
           justifyContent: "center",
@@ -893,7 +893,7 @@ export function ChannelSettings({
               alignItems: "center",
               justifyContent: "center",
               color: C.text,
-              cursor: avatarLoading ? "wait" : "var(--cursor-pointer)",
+              cursor: avatarLoading ? "wait" : "pointer",
             }}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -1120,7 +1120,7 @@ export function ChannelSettings({
                 fontWeight: 700,
                 letterSpacing: "0.1em",
                 color: C.textMuted,
-                cursor: leaveBusy ? "wait" : "var(--cursor-pointer)",
+                cursor: leaveBusy ? "wait" : "pointer",
                 fontFamily: "var(--font-sans)",
               }}
               hoverStyle={{ background: C.bgHover, color: C.text }}
@@ -1266,7 +1266,7 @@ export function ChannelSettings({
             </p>
 
             <div className="channel-dialog__card channel-dialog__create">
-              <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "var(--cursor-pointer)", color: C.text, fontSize: "0.85rem", fontWeight: 600 }}>
+              <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", color: C.text, fontSize: "0.85rem", fontWeight: 600 }}>
                 <input
                   type="checkbox"
                   checked={inviteLimitEnabled}
@@ -1535,25 +1535,25 @@ export function ChannelSettings({
 const closeBtnStyle: React.CSSProperties = {
   width: 32, height: 32,
   display: "flex", alignItems: "center", justifyContent: "center",
-  background: "transparent", border: "none", cursor: "var(--cursor-pointer)",
+  background: "transparent", border: "none", cursor: "pointer",
   color: C.textMuted, fontSize: "1.3rem", borderRadius: 8,
 };
 
 const btnPrimary: React.CSSProperties = {
   padding: "10px 22px",
   background: C.accent, border: "none", borderRadius: 8,
-  fontSize: "0.85rem", fontWeight: 700, color: "#fff", cursor: "var(--cursor-pointer)",
+  fontSize: "0.85rem", fontWeight: 700, color: "#fff", cursor: "pointer",
 };
 
 const btnSecondary: React.CSSProperties = {
   padding: "10px 18px",
   background: "transparent", border: `1px solid ${C.border}`,
   borderRadius: 8, fontSize: "0.85rem", fontWeight: 600,
-  color: C.textMuted, cursor: "var(--cursor-pointer)",
+  color: C.textMuted, cursor: "pointer",
 };
 
 const btnDanger: React.CSSProperties = {
   padding: "10px 22px",
   background: C.danger, border: "none", borderRadius: 8,
-  fontSize: "0.85rem", fontWeight: 700, color: "#fff", cursor: "var(--cursor-pointer)",
+  fontSize: "0.85rem", fontWeight: 700, color: "#fff", cursor: "pointer",
 };

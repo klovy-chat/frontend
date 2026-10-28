@@ -97,7 +97,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
   flex-shrink: 0;
 }
@@ -147,7 +147,7 @@
   color: var(--text-muted);
   background: transparent;
   border: none;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   border-radius: 6px;
   display: flex;
   align-items: center;
@@ -348,7 +348,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   color: var(--text-muted);
   transition: background 0.15s, color 0.15s, border-color 0.15s;
   padding: 0;
@@ -380,7 +380,7 @@
   border: 1px solid var(--border);
   background: var(--bg-elevated);
   color: var(--text-muted);
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   transition: color 0.15s, border-color 0.15s, background 0.15s;
 }
 
@@ -488,7 +488,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   color: #fff;
   transition: background 0.15s, transform 0.15s;
   padding: 0;

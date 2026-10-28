@@ -38,6 +38,9 @@ export function ExternalLinkWarning() {
       if (event.defaultPrevented) return;
       if (event.type === "click" && event.button !== 0) return;
 
+      const pathname = window.location.pathname.replace(/\/+$/, "");
+      if (pathname === "/login" || pathname === "/signup") return;
+
       const target = event.target;
       if (!(target instanceof Element)) return;
       const anchor = target.closest<HTMLAnchorElement>("a[href]");
@@ -57,6 +60,9 @@ export function ExternalLinkWarning() {
         return;
       }
 
+      const hostname = destination.hostname.toLowerCase();
+      if (hostname === "klovy.chat") return;
+
       let trustedHosts: Set<string>;
       try {
         trustedHosts = readTrustedHosts();
@@ -64,7 +70,6 @@ export function ExternalLinkWarning() {
         toast.error(t("modals.externalLinkWarning.storageFailed"));
         trustedHosts = new Set();
       }
-      const hostname = destination.hostname.toLowerCase();
       if (trustedHosts.has(hostname)) return;
 
       event.preventDefault();

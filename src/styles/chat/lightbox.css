@@ -65,7 +65,7 @@
   border-radius: 8px;
   background: transparent;
   color: #e8e8ec;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
 
@@ -149,7 +149,7 @@
   border-radius: 50%;
   background: rgba(20, 20, 24, 0.72);
   color: var(--text);
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   z-index: 2;
   transition: background 0.15s, transform 0.15s;
 }

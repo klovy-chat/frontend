@@ -86,7 +86,7 @@
   background: transparent;
   border: 1px solid transparent;
   border-radius: 8px;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   padding: 0;
   line-height: 1;
   transition: background 0.12s, border-color 0.12s;

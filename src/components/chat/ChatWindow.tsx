@@ -2415,7 +2415,6 @@ export function ChatWindow({
 
       {target.type === "dm" && (
         <OtherProfile
-          variant="sheet"
           canCall={!friendshipLoading && canSendDm && callState === "idle"}
           onCall={kind => { if (callState === "idle" && canSendDm) startCall(toCallPeer(target.contact), kind); }}
           isOpen={profileOpen}
@@ -2446,7 +2445,6 @@ export function ChatWindow({
       )}
 
       {target.type === "channel" && channelUserProfile && <OtherProfile
-        variant="sheet"
         isOpen={true}
         onClose={() => setChannelUserProfile(null)}
         user={channelUserProfile}

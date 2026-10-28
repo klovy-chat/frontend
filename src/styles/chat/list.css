@@ -183,7 +183,7 @@
   width: 100%;
   padding: 11px 12px;
   border-radius: 10px;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   transition: background 0.15s;
   text-align: left;
   position: relative;

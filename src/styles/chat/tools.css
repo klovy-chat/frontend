@@ -13,7 +13,7 @@
   z-index: 20;
   background: transparent;
   border: none;
-  cursor: var(--cursor-auto);
+  cursor: auto;
 }
 
 .chat-tools-panel {
@@ -60,7 +60,7 @@
 }
 
 .chat-tools-search-wrap:focus-within {
-  border-color: rgba(124, 92, 255, 0.5);
+  border-color: rgba(122, 90, 245, 0.5);
 }
 
 .chat-tools-search-icon {
@@ -156,7 +156,7 @@
   padding: 10px 6px;
   background: none;
   border: none;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   text-align: left;
   min-width: 0;
 }
@@ -208,7 +208,7 @@
   border: none;
   border-radius: 6px;
   color: var(--text-muted);
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
 
@@ -224,7 +224,7 @@
 @keyframes message-highlight {
   0%,
   30% {
-    background: rgba(124, 92, 255, 0.18);
+    background: rgba(122, 90, 245, 0.18);
   }
   100% {
     background: transparent;

@@ -58,7 +58,7 @@
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(124, 92, 255, 0.45), transparent);
+  background: linear-gradient(90deg, transparent, rgba(122, 90, 245, 0.45), transparent);
   opacity: 0.6;
   pointer-events: none;
   z-index: 1;
@@ -178,7 +178,7 @@
   font-family: inherit;
   font-size: 0.875rem;
   font-weight: 500;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   text-align: left;
   transition: background 0.15s, color 0.15s;
 }
@@ -255,7 +255,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
   z-index: 10;
 }
@@ -316,7 +316,7 @@
   flex-shrink: 0;
   border: 5px solid var(--bg-deep);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   padding: 0;
   transition: transform 0.12s, box-shadow 0.15s;
 }
@@ -413,7 +413,7 @@
 }
 
 .as-select {
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   background-image:
     linear-gradient(45deg, transparent 50%, var(--text-muted) 50%),
     linear-gradient(135deg, var(--text-muted) 50%, transparent 50%);
@@ -457,7 +457,7 @@
   font-family: inherit;
   font-size: 0.875rem;
   font-weight: 600;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   transition: filter 0.15s, transform 0.12s, opacity 0.15s;
 }
 
@@ -483,7 +483,7 @@
   font-family: inherit;
   font-size: 0.875rem;
   font-weight: 500;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 
@@ -510,7 +510,7 @@
   font-family: inherit;
   font-size: 0.875rem;
   font-weight: 600;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
 }
 
@@ -717,7 +717,7 @@
   border-radius: 8px;
   background: transparent;
   color: #ff5c5c;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   flex-shrink: 0;
   transition: background 0.15s ease, color 0.15s ease;
 }
@@ -737,7 +737,7 @@
   font-family: inherit;
   font-size: 0.78rem;
   font-weight: 600;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   flex-shrink: 0;
   align-self: center;
   transition: background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
@@ -1166,7 +1166,7 @@
   background: var(--bg-card);
   color: var(--text);
   text-align: left;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
 }
 
@@ -1258,7 +1258,7 @@
   border-radius: 12px;
   border: 1px solid var(--border);
   overflow: hidden;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   padding: 0;
   background-size: cover;
   background-position: center;
@@ -1339,7 +1339,7 @@
   color: var(--danger);
   font-size: 13px;
   font-weight: 600;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
 }
 
 .as-deletion-pending-banner {
@@ -1395,7 +1395,7 @@
   background: var(--bg-card);
   color: var(--text);
   text-align: left;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
 }
 
@@ -1482,7 +1482,7 @@
   color: var(--text-muted);
   font-size: 13px;
   font-weight: 600;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
 }
 
 .as-btn-ghost:hover:not(:disabled) {
@@ -1589,7 +1589,7 @@
   font-size: 11px;
   font-weight: 700;
   border: none;
-  cursor: var(--cursor-auto);
+  cursor: auto;
   flex-shrink: 0;
 }
 
@@ -1603,7 +1603,7 @@
   background: rgba(255, 149, 0, 0.12);
   color: var(--warning);
   border: 1px solid rgba(255, 149, 0, 0.25);
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   transition: opacity 0.15s;
 }
 
@@ -1699,7 +1699,7 @@
   border-radius: 10px;
   border: 1px solid var(--border);
   background: var(--bg-card);
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   text-align: left;
   font: inherit;
   color: var(--text);

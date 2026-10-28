@@ -140,7 +140,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
 }
 
@@ -154,7 +154,7 @@
   width: 100%;
   height: 150px;
   background:
-    radial-gradient(circle at top, rgba(124, 92, 255, 0.16), transparent 55%),
+    radial-gradient(circle at top, rgba(122, 90, 245, 0.16), transparent 55%),
     var(--bg-deep);
   display: flex;
   align-items: center;
@@ -289,7 +289,7 @@
   border: none;
   background: rgba(255, 255, 255, 0.06);
   color: #fff;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;

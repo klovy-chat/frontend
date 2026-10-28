@@ -21,8 +21,8 @@
   align-items: center;
   gap: 6px;
   align-self: flex-start;
-  background: rgba(124, 92, 255, 0.1);
-  border: 1px solid rgba(124, 92, 255, 0.25);
+  background: rgba(122, 90, 245, 0.1);
+  border: 1px solid rgba(122, 90, 245, 0.25);
   border-radius: 20px;
   padding: 3px 8px 3px 10px;
   font-size: 11.5px;
@@ -63,12 +63,12 @@
   height: 16px;
   border-radius: 50%;
   border: none;
-  background: rgba(124, 92, 255, 0.18);
+  background: rgba(122, 90, 245, 0.18);
   color: var(--accent);
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   padding: 0;
   transition: background 0.15s, color 0.15s;
 }
@@ -91,7 +91,7 @@
 }
 
 .mi-bar--focused .mi-row {
-  border-color: rgba(124, 92, 255, 0.45);
+  border-color: rgba(122, 90, 245, 0.45);
   box-shadow:
     0 0 0 3px var(--accent-dim),
     inset 0 1px 0 rgba(255, 255, 255, 0.04);
@@ -158,7 +158,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.12s;
   padding: 0;
 }
@@ -235,14 +235,14 @@
   border: none;
   border-radius: 8px;
   background: transparent;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   text-align: left;
   transition: background 0.12s;
 }
 
 .mi-mention-item--active,
 .mi-mention-item:hover {
-  background: rgba(124, 92, 255, 0.16);
+  background: rgba(122, 90, 245, 0.16);
 }
 
 .mi-mention-special-icon {
@@ -253,7 +253,7 @@
   height: 26px;
   flex-shrink: 0;
   border-radius: 50%;
-  background: rgba(124, 92, 255, 0.18);
+  background: rgba(122, 90, 245, 0.18);
   color: var(--accent);
   font-weight: 800;
   font-size: 14px;
@@ -335,7 +335,7 @@
   border: none;
   background: transparent;
   color: #c4c4ce;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   padding: 0;
   font-family: inherit;
   font-size: 14px;
@@ -344,7 +344,7 @@
 }
 
 .mi-fmt-btn:hover {
-  background: rgba(124, 92, 255, 0.16);
+  background: rgba(122, 90, 245, 0.16);
   color: var(--accent);
 }
 
@@ -398,8 +398,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  background: rgba(124, 92, 255, 0.1);
-  border: 1px solid rgba(124, 92, 255, 0.25);
+  background: rgba(122, 90, 245, 0.1);
+  border: 1px solid rgba(122, 90, 245, 0.25);
   border-radius: 10px;
   padding: 8px 12px;
   font-size: 13px;
@@ -411,7 +411,7 @@
   background: transparent;
   border: none;
   color: var(--accent);
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   font-size: 12px;
   padding: 4px 8px;
   border-radius: 6px;
@@ -420,7 +420,7 @@
 }
 
 .mi-edit-cancel:hover {
-  background: rgba(124, 92, 255, 0.15);
+  background: rgba(122, 90, 245, 0.15);
   color: var(--accent);
 }
 
@@ -462,7 +462,7 @@
   background: transparent;
   border: none;
   color: #60a5fa;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   font-size: 12px;
   padding: 4px 8px;
   border-radius: 6px;
@@ -532,7 +532,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
 

@@ -173,7 +173,7 @@
   background: transparent;
   border: none;
   padding: 0;
-  cursor: var(--cursor-pointer);
+  cursor: pointer;
   color: inherit;
   min-width: 0;
 }
