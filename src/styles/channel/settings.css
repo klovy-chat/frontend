@@ -436,7 +436,7 @@
   padding: 6px 10px;
   font-size: 0.68rem;
 }
-.cs-modal { --font-sans: var(--font-display); border-radius: 16px; background: var(--bg-panel); font-family: var(--font-sans); }
+.cs-modal { border-radius: 16px; background: var(--bg-panel); font-family: var(--font-sans); }
 .cs-header { display: flex; align-items: center; gap: 12px; padding: 18px 20px; border-bottom: 1px solid var(--border); background: var(--bg-panel); flex-shrink: 0; }
 .cs-header h2 { font-family: var(--font-display) !important; font-size: 18px !important; line-height: 24px; }
 .cs-header p { font-family: inherit !important; font-size: 12px !important; }
@@ -444,7 +444,7 @@
 .cs-nav-item { min-height: 40px; font-family: inherit; font-size: 13px; border-radius: 10px; }
 .cs-nav-item.active { background: var(--accent-dim); }
 .cs-content-scroll { padding: 20px; }
-.cs-section-title { font-family: inherit; font-size: 18px; line-height: 24px; }
+.cs-section-title { font-family: var(--font-display); font-size: 18px; line-height: 24px; }
 .cs-section-subtitle { font-family: inherit; font-size: 13px; line-height: 20px; margin-bottom: 16px; }
 .cs-card { padding: 14px; border-radius: 12px; background: var(--bg-card); border-color: var(--border); }
 .cs-card-label { font-family: inherit; font-size: 14px; }

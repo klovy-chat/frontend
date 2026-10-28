@@ -8,8 +8,6 @@
  */
 
 .contacts-modal.klovy-shell {
-  --font-sans: var(--font-display);
-  font-family: var(--font-sans);
   width: min(680px, calc(100vw - 48px));
   max-width: 680px;
   min-height: 0;
@@ -75,7 +73,7 @@
 
 .contacts-modal__header h2 {
   margin: 0;
-  font-family: var(--font-sans);
+  font-family: var(--font-display);
   font-size: 1.05rem;
   font-weight: 700;
   letter-spacing: -0.01em;

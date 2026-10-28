@@ -182,7 +182,7 @@ export function ChatList({
       <button
         key={ch._id}
         type="button"
-        className={`chat-list-item chat-list-item--channel${a ? " active" : ""}${!muted && unread > 0 ? " has-unread" : ""}${muted ? " is-muted" : ""}`}
+        className={`chat-list-item${a ? " active" : ""}${!muted && unread > 0 ? " has-unread" : ""}${muted ? " is-muted" : ""}`}
         onClick={() => onSelectChannel(ch)}
         onContextMenu={(e) => onChannelContextMenu(e, ch)}
       >

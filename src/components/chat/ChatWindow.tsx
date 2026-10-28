@@ -2043,7 +2043,7 @@ export function ChatWindow({
       : { displayName: target.channel.name, image: target.channel.image, placeholder: "#" };
 
   return (
-    <div className={`chat-window${target.type === "channel" ? " chat-window--channel" : ""}`}>
+    <div className="chat-window">
       <header className="chat-header">
         {showBack && onClose && (
           <button

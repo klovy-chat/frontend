@@ -913,7 +913,7 @@ export function ChannelSettings({
         onChange={onAvatarInputChange}
       />
       <div style={{ flex: 1, minWidth: 0 }}>
-        <h2 style={{ margin: "0 0 4px", fontSize: "1.1rem", fontWeight: 700, color: C.text, fontFamily: "var(--font-sans)" }}>
+        <h2 style={{ margin: "0 0 4px", fontSize: "1.1rem", fontWeight: 700, color: C.text, fontFamily: "var(--font-display)" }}>
           {ch.name}
         </h2>
         <p style={{ margin: 0, fontSize: "0.82rem", color: C.textMuted, fontFamily: "var(--font-sans)" }}>
