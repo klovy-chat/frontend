@@ -1,10 +1,9 @@
 // isDesktop.ts
 // Czy to oficjalny Tauri (nie zwykła przeglądarka).
 // Zakres:
-//  - badge IPC, update notice, ominięcie mobile gate
-//  - oficjalny Tauri: badge, update, ominięcie mobile gate
+//  - ominięcie mobile gate dla oficjalnego Tauri
 // Detekcja musi zostać wąska — fałszywy positive otworzy web na telefonie.
-// Przy zmianach: appBadge.ts.
+// Przy zmianach: desktopVersion.ts.
 
 declare global {
   interface Window {

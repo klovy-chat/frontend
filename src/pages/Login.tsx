@@ -6,6 +6,7 @@ import { useAuth } from "../context/AuthContext";
 import { ApiError } from "../api/client";
 import { getRegistrationStatus } from "../api/auth";
 import { normalizeAuthError } from "../utils/auth/errors";
+import { DESKTOP_DOWNLOAD_URL } from "../utils/device/desktopVersion";
 import { Captcha, type CaptchaHandle } from "../components/auth/Captcha";
 import { AuthLayout } from "../components/auth/AuthLayout";
 import { normalizeUsernameInput, sanitizeUsernameInput } from "../utils/auth/username";
@@ -43,6 +44,7 @@ export function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState("");
   const [error, setError] = useState("");
+  const [desktopUpdateRequired, setDesktopUpdateRequired] = useState(false);
   const [loading, setLoading] = useState(false);
   const [registrationOpen, setRegistrationOpen] = useState(true);
   const [remember, setRemember] = useState(true);
@@ -67,6 +69,7 @@ export function Login() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
+    setDesktopUpdateRequired(false);
     const nextErrors = validate(username, password, t);
     setTouched({ identity: true, password: true });
     setErrors(nextErrors);
@@ -98,14 +101,24 @@ export function Login() {
     } catch (err) {
       setTurnstileToken("");
       turnstileRef.current?.reset();
-      setError(
-        normalizeAuthError(
-          err instanceof ApiError
-            ? err.message
-            : t("auth.errors.loginFailed"),
-          "login",
-        ),
-      );
+      const updateRequired =
+        err instanceof ApiError && err.code === "DESKTOP_UPDATE_REQUIRED";
+      const versionCheckUnavailable =
+        err instanceof ApiError &&
+        err.code === "DESKTOP_VERSION_CHECK_UNAVAILABLE";
+      setDesktopUpdateRequired(updateRequired);
+      setError(
+        updateRequired
+          ? t("desktopUpdate.required")
+          : versionCheckUnavailable
+            ? t("desktopUpdate.checkUnavailable")
+            : normalizeAuthError(
+                err instanceof ApiError
+                  ? err.message
+                  : t("auth.errors.loginFailed"),
+                "login",
+              ),
+      );
     } finally {
       setLoading(false);
     }
@@ -113,6 +126,7 @@ export function Login() {
   const handleTwoFactorSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
+    setDesktopUpdateRequired(false);
     const code = twoFactorCode.trim();
     if (!code) {
       setError(
@@ -137,11 +151,21 @@ export function Login() {
     } catch (err) {
       setTwoFactorTurnstileToken("");
       twoFactorTurnstileRef.current?.reset();
-      setError(
-        err instanceof ApiError
-          ? err.message
-          : t("validation.twoFactor.invalidCode"),
-      );
+      const updateRequired =
+        err instanceof ApiError && err.code === "DESKTOP_UPDATE_REQUIRED";
+      const versionCheckUnavailable =
+        err instanceof ApiError &&
+        err.code === "DESKTOP_VERSION_CHECK_UNAVAILABLE";
+      setDesktopUpdateRequired(updateRequired);
+      setError(
+        updateRequired
+          ? t("desktopUpdate.required")
+          : versionCheckUnavailable
+            ? t("desktopUpdate.checkUnavailable")
+            : err instanceof ApiError
+              ? err.message
+              : t("validation.twoFactor.invalidCode"),
+      );
     } finally {
       setLoading(false);
     }
@@ -269,7 +293,19 @@ export function Login() {
               {error && (
                 <div className="al-error" role="alert">
                   {error}
-                </div>
+                  {desktopUpdateRequired && (
+                    <>
+                      {" "}
+                      <a
+                        href={DESKTOP_DOWNLOAD_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {t("desktopUpdate.download")}
+                      </a>
+                    </>
+                  )}
+                </div>
               )}
               <button
                 type="submit"
@@ -341,7 +377,19 @@ export function Login() {
                 {error && (
                   <div className="al-error" role="alert">
                     {error}
-                  </div>
+                    {desktopUpdateRequired && (
+                      <>
+                        {" "}
+                        <a
+                          href={DESKTOP_DOWNLOAD_URL}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {t("desktopUpdate.download")}
+                        </a>
+                      </>
+                    )}
+                  </div>
                 )}
                 <button
                   type="submit"

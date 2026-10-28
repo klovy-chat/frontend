@@ -24,8 +24,6 @@ import { ProfileSetup } from "./pages/ProfileSetup";
 import { Chat } from "./pages/Chat";
 import { Invite } from "./pages/Invite";
 import { Settings } from "./settings/Settings";
-import { setAppBadge } from "./utils/device/appBadge";
-import { UpdateNotice } from "./components/common/UpdateNotice";
 import { ExternalLinkWarning } from "./components/common/ExternalLinkWarning";
 import { ToastProvider } from "./context/ToastContext";
 
@@ -138,7 +136,6 @@ export default function App() {
       const mod = await import("./utils/sync/unread");
       unsub = mod.default.onChange((n: number) => {
         document.title = n > 0 ? `(${n}) ${baseTitle}` : baseTitle;
-        setAppBadge(n);
       });
     })();
     return () => { if (unsub) unsub(); };
@@ -146,7 +143,6 @@ export default function App() {
   return (
     <ToastProvider>
       <AppRoutes />
-      <UpdateNotice />
       <ExternalLinkWarning />
     </ToastProvider>
   );

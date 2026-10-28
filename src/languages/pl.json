@@ -1156,10 +1156,9 @@
     "dismissFailed": "Nie udało się zamknąć ogłoszenia. Spróbuj ponownie."
   },
   "desktopUpdate": {
-    "title": "Nowa wersja aplikacji",
-    "body": "Korzystasz ze starej wersji desktop, która nie aktualizuje się sama. Pobierz najnowszą z GitHub — kolejne aktualizacje będą już automatyczne.",
-    "download": "Pobierz",
-    "later": "Później"
+    "required": "Wymagana jest nowsza wersja aplikacji desktopowej.",
+    "checkUnavailable": "Nie można sprawdzić najnowszej wersji aplikacji. Spróbuj ponownie później.",
+    "download": "Pobierz najnowszą wersję"
   },
   "api": {
     "networkError": "Brak połączenia z serwerem.",

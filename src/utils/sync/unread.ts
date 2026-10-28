@@ -4,7 +4,7 @@
 //  - fullCount vs localTitleExclude (otwarty czat tylko w tej karcie)
 //  - title i app badge
 // Nie zapisuj exclude do BC — inne karty mają własne otwarte czaty.
-// Przy zmianach: UnreadSync.tsx, Sidebar.tsx, AuthContext.tsx, appBadge.ts.
+// Przy zmianach: UnreadSync.tsx, Sidebar.tsx, AuthContext.tsx.
 
 type Listener = (count: number) => void;
 

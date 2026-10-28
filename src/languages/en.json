@@ -1152,10 +1152,9 @@
     "dismissFailed": "Could not dismiss announcement. Try again."
   },
   "desktopUpdate": {
-    "title": "New desktop app",
-    "body": "You’re on an older desktop build that cannot auto-update. Download the latest from GitHub — later updates will install themselves.",
-    "download": "Download",
-    "later": "Later"
+    "required": "A newer desktop version is required.",
+    "checkUnavailable": "The latest desktop version could not be verified. Try again later.",
+    "download": "Download the latest version"
   },
   "api": {
     "networkError": "No connection to the server.",

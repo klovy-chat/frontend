@@ -13,6 +13,7 @@ import {
   applyClientUserAgentHeader,
   ensureClientInfo,
 } from "../utils/device/clientInfo";
+import { applyDesktopVersionHeaders } from "../utils/device/desktopVersion";
 import {
   absorbCsrfToken,
   clearCsrfToken,
@@ -125,6 +126,7 @@ async function tryRefreshSession(): Promise<boolean> {
         [CLIENT_HEADER_NAME]: CLIENT_IDENTIFIER,
       });
       applyClientUserAgentHeader(refreshHeaders);
+      await applyDesktopVersionHeaders(refreshHeaders);
 
       const response = await fetch(url, {
         method: "POST",
@@ -161,6 +163,7 @@ export async function apiRequest<T>(
 
   headers.set(CLIENT_HEADER_NAME, CLIENT_IDENTIFIER);
   applyClientUserAgentHeader(headers);
+  await applyDesktopVersionHeaders(headers);
 
   if (
     options.body &&
