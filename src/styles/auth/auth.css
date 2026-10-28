@@ -48,10 +48,10 @@
 .al-page *,
 .al-page *::before,
 .al-page *::after {
-  font-family: var(--font-sans);
   box-sizing: border-box;
 }
 .al-page {
+  font-family: var(--font-sans);
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   width: 100%;
