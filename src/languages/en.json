@@ -669,7 +669,7 @@
       "about": "About",
       "description": "Description",
       "quickInfo": "Quick info",
-      "hidePanel": "Hide information panel",
+      "profileFriendsOnly": "This member's profile is available to friends only. Add them as a friend to view their profile.",
       "showMoreMembers": "Show more members",
       "type": "Type",
       "direct": "Direct message",

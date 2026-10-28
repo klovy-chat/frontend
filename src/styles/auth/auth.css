@@ -141,8 +141,54 @@
   overflow: visible;
 }
 .al-auth-form-wrap {
+  position: relative;
   width: 100%;
   max-width: 480px;
+  animation: al-auth-enter 360ms cubic-bezier(0.2, 0.75, 0.25, 1) both;
+}
+.al-auth-form-wrap::before {
+  position: absolute;
+  z-index: 1;
+  top: 1px;
+  left: 36px;
+  right: 36px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  content: "";
+  transform: scaleX(0);
+  transform-origin: left center;
+  animation: al-loading-line 620ms cubic-bezier(0.2, 0.75, 0.25, 1) both;
+  pointer-events: none;
+}
+@keyframes al-auth-enter {
+  from { opacity: 0; transform: translateY(10px) scale(0.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes al-loading-line {
+  0% { opacity: 0; transform: scaleX(0); }
+  24% { opacity: 1; }
+  72% { opacity: 0.9; transform: scaleX(1); }
+  100% { opacity: 0; transform: scaleX(1); }
+}
+.al-animated-title__caret {
+  display: inline-block;
+  width: 2px;
+  height: 0.9em;
+  margin-left: 3px;
+  vertical-align: -0.06em;
+  border-radius: 2px;
+  background: var(--accent);
+  animation: al-title-caret 650ms steps(2, jump-none) infinite;
+}
+@keyframes al-title-caret {
+  50% { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .al-auth-form-wrap,
+  .al-auth-form-wrap::before { animation: none; }
+  .al-auth-form-wrap::before { display: none; }
+  .al-animated-title__caret { animation: none; }
 }
 .al-auth-form-wrap > .al-card {
   display: block;
@@ -245,7 +291,7 @@
   border-radius: 12px;
   font-size: 0.9rem;
   font-weight: 700;
-  color: #22182f;
+  color: #fff;
   cursor: pointer;
   transition: background 0.15s, transform 0.15s, opacity 0.15s;
   margin-top: 0.25rem;
@@ -621,7 +667,7 @@
 .al-login-remember input:checked + .al-login-checkbox-box {
   background: var(--accent);
   border-color: var(--accent);
-  color: #22182f;
+  color: #fff;
 }
 .al-login-checkbox-box svg {
   opacity: 0;
@@ -646,7 +692,7 @@
   border: 1px solid transparent;
   border-radius: 12px;
   background: var(--accent);
-  color: #22182f;
+  color: #fff;
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
@@ -654,7 +700,7 @@
 }
 .al-login-submit:hover:not(:disabled) {
   background: var(--accent-hover);
-  color: #22182f;
+  color: #fff;
 }
 .al-login-submit:active:not(:disabled) {
   transform: translateY(1px);
@@ -865,7 +911,7 @@
   border: 1px solid transparent;
   border-radius: 12px;
   background: var(--accent);
-  color: #22182f;
+  color: #fff;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;

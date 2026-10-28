@@ -37,4 +37,5 @@
   .channel-dialog__button { min-height: 44px; }
   .channel-dialog__input { font-size: 16px; }
   .channel-dialog__header > button { min-width: 44px; min-height: 44px; }
+  .channel-dialog__footer { padding-bottom: max(20px, var(--safe-bottom)); }
 }

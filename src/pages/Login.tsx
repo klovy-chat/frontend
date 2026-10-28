@@ -9,6 +9,7 @@ import { normalizeAuthError } from "../utils/auth/errors";
 import { DESKTOP_DOWNLOAD_URL } from "../utils/device/desktopVersion";
 import { Captcha, type CaptchaHandle } from "../components/auth/Captcha";
 import { AuthLayout } from "../components/auth/AuthLayout";
+import { AnimatedAuthTitle } from "../components/auth/AnimatedAuthTitle";
 import { normalizeUsernameInput, sanitizeUsernameInput } from "../utils/auth/username";
 import { isDevelopment } from "../utils/env/appEnv";
 import "../styles/auth/auth.css";
@@ -185,7 +186,7 @@ export function Login() {
           {step === "credentials" ? (
             <form className="al-login-form" onSubmit={handleSubmit} noValidate>
               <header className="al-login-head">
-                <h1 className="al-login-title">{t("auth.login.title")}</h1>
+                <AnimatedAuthTitle className="al-login-title" text={t("auth.login.title")} />
                 <p className="al-login-subtitle">
                   {t("auth.login.subtitle")}
                 </p>

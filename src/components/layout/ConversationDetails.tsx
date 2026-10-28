@@ -1,5 +1,4 @@
 import { useCall } from "../../context/CallContext";
-import { ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { OtherProfile } from "../profile/OtherProfile";
 import { useTranslation } from "react-i18next";
@@ -14,18 +13,25 @@ import { ConversationMedia } from "./ConversationMedia";
 import { useProfileBannerStyle } from "../../hooks/useMediaCache";
 import { LoadingSkeleton } from "../common/LoadingSkeleton";
 import { mapChannelUser, mapChannelUserList } from "../../utils/chat/member";
+import { checkFriendship } from "../../api/friends";
+import {
+  getCachedFriendship,
+  getFriendshipEpoch,
+  setCachedFriendship,
+  subscribeFriendshipInvalidation,
+} from "../../utils/chat/friendsCache";
+import { useToast } from "../../context/ToastContext";
 
 interface ConversationDetailsProps {
   target: ChatTarget | null;
-  onClose?: () => void;
   onOpenChannelInfo?: () => void;
 }
 
-function ChannelMember({ member, isAdmin, onOpen }: { member: Contact; isAdmin: boolean; onOpen: () => void }) {
+function ChannelMember({ member, isAdmin, isLoading, onOpen }: { member: Contact; isAdmin: boolean; isLoading: boolean; onOpen: () => void }) {
   const { t } = useTranslation();
   const presence = useUserPresence(member._id);
   const online = presence?.isOnline ?? member.isOnline;
-  return <button type="button" className="conversation-details__member" onClick={onOpen}>
+  return <button type="button" className="conversation-details__member" disabled={isLoading} aria-busy={isLoading} onClick={onOpen}>
     <Avatar displayName={member.displayName} username={member.username} image={member.image} color={member.color} size={36} />
     <span><strong>{userLabel(member)}</strong><small className={online ? "conversation-details__online" : ""}>{formatLastSeen(presence?.lastSeen ?? member.lastSeen, {
       isOnline: online,
@@ -36,16 +42,60 @@ function ChannelMember({ member, isAdmin, onOpen }: { member: Contact; isAdmin: 
   </button>;
 }
 
-export function ConversationDetails({ target, onClose, onOpenChannelInfo }: ConversationDetailsProps) {
+export function ConversationDetails({ target, onOpenChannelInfo }: ConversationDetailsProps) {
   const { t } = useTranslation();
+  const toast = useToast();
   const [profileOpen, setProfileOpen] = useState(false);
+  const [dmFriendship, setDmFriendship] = useState<{ contactId: string; isFriend: boolean } | null>(null);
+  const [dmFriendshipLoading, setDmFriendshipLoading] = useState(false);
   const [selectedMember, setSelectedMember] = useState<Contact | null>(null);
+  const [checkingMemberId, setCheckingMemberId] = useState<string | null>(null);
   const [channelDetails, setChannelDetails] = useState<ChannelDetails | null>(null);
   const [membersLoading, setMembersLoading] = useState(false);
   const [membersError, setMembersError] = useState(false);
   const [visibleMembers, setVisibleMembers] = useState(5);
   const seedPresence = usePresenceSeed();
   const channelId = target?.type === "channel" ? target.channel._id : null;
+  const dmContactId = target?.type === "dm" ? target.contact._id : null;
+  const friendshipEpoch = useSyncExternalStore(
+    subscribeFriendshipInvalidation,
+    getFriendshipEpoch,
+    getFriendshipEpoch,
+  );
+  useEffect(() => {
+    if (!dmContactId) {
+      setDmFriendship(null);
+      setDmFriendshipLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    const cached = getCachedFriendship(dmContactId);
+    setDmFriendship(cached ? { contactId: dmContactId, isFriend: cached.isFriend } : null);
+    setDmFriendshipLoading(true);
+    void checkFriendship(dmContactId)
+      .then((result) => {
+        if (cancelled) return;
+        const status = {
+          isFriend: result.isFriend,
+          isBlockedByMe: Boolean(result.isBlockedByMe),
+          isBlockedByOther: Boolean(result.isBlockedByOther),
+        };
+        setCachedFriendship(dmContactId, status);
+        setDmFriendship({ contactId: dmContactId, isFriend: result.isFriend });
+      })
+      .catch(() => {
+        if (cancelled) return;
+        if (!cached) toast.error(t("errors.generic"));
+      })
+      .finally(() => {
+        if (!cancelled) setDmFriendshipLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [dmContactId, friendshipEpoch, t, toast]);
   useEffect(() => {
     setChannelDetails(null);
     setMembersError(false);
@@ -77,6 +127,28 @@ export function ConversationDetails({ target, onClose, onOpenChannelInfo }: Conv
   const mutedKey = target ? `${target.type}:${target.type === "dm" ? target.contact._id : target.channel._id}` : "";
   const muted = useSyncExternalStore(subscribeMutedConversations, () => getMutedConversationKeys().includes(mutedKey));
 
+  const openMemberProfile = async (member: Contact) => {
+    if (checkingMemberId) return;
+    setCheckingMemberId(member._id);
+    try {
+      const result = await checkFriendship(member._id);
+      setCachedFriendship(member._id, {
+        isFriend: result.isFriend,
+        isBlockedByMe: Boolean(result.isBlockedByMe),
+        isBlockedByOther: Boolean(result.isBlockedByOther),
+      });
+      if (!result.isFriend) {
+        toast.warning(t("chat.details.profileFriendsOnly"));
+        return;
+      }
+      setSelectedMember(member);
+    } catch {
+      toast.error(t("errors.generic"));
+    } finally {
+      setCheckingMemberId(null);
+    }
+  };
+
   if (!target) {
     return (
       <aside className="conversation-details conversation-details--empty">
@@ -99,7 +171,6 @@ export function ConversationDetails({ target, onClose, onOpenChannelInfo }: Conv
 
   return (
     <aside className={`conversation-details${!isDm ? " conversation-details--channel" : ""}`}>
-      {onClose && <button type="button" className="conversation-details__collapse" onClick={onClose} aria-label={t("chat.details.hidePanel")} title={t("chat.details.hidePanel")}><ChevronRight size={20} /></button>}
       {isDm && <div className="conversation-details__cover" style={bannerStyle} aria-hidden="true" />}
       <div className="conversation-details__identity">
         <button type="button" className="conversation-details__avatar-button" disabled={!isDm && !onOpenChannelInfo} onClick={openIdentity} aria-label={t(isDm ? "chat.window.contactProfile" : "chat.details.quickInfo")}>
@@ -153,13 +224,13 @@ export function ConversationDetails({ target, onClose, onOpenChannelInfo }: Conv
         {membersLoading && <LoadingSkeleton label={t("common.loading")} />}
         {membersError && <p role="alert">{t("errors.generic")}</p>}
         {!membersLoading && <>
-          <div className="conversation-details__members">{members.slice(0, visibleMembers).map(member => <ChannelMember key={member._id} member={member} isAdmin={member._id === channel?.admin._id} onOpen={() => setSelectedMember(member)} />)}</div>
+          <div className="conversation-details__members">{members.slice(0, visibleMembers).map(member => <ChannelMember key={member._id} member={member} isAdmin={member._id === channel?.admin._id} isLoading={checkingMemberId === member._id} onOpen={() => void openMemberProfile(member)} />)}</div>
           {members.length > visibleMembers && <button type="button" className="conversation-details__show-more" onClick={() => setVisibleMembers(count => count + 5)}>{t("chat.details.showMoreMembers")}</button>}
         </>}
       </div>}
       <ConversationMedia key={mutedKey} target={target} />
       {!isDm && selectedMember && <OtherProfile isOpen={true} onClose={() => setSelectedMember(null)} user={selectedMember} isFriend={false} />}
-      {isDm && <OtherProfile isOpen={profileOpen} onClose={() => setProfileOpen(false)} user={target.contact} isFriend={false} canCall={callState === "idle"} onCall={kind => { if (callState === "idle") startCall({ _id: target.contact._id, username: target.contact.username, displayName: target.contact.displayName, image: target.contact.image, color: target.contact.color }, kind); }} />}
+      {isDm && <OtherProfile isOpen={profileOpen} onClose={() => setProfileOpen(false)} user={target.contact} isFriend={dmFriendship?.contactId === target.contact._id && dmFriendship.isFriend} friendshipLoading={dmFriendshipLoading || dmFriendship?.contactId !== target.contact._id} canCall={callState === "idle"} onCall={kind => { if (callState === "idle") startCall({ _id: target.contact._id, username: target.contact.username, displayName: target.contact.displayName, image: target.contact.image, color: target.contact.color }, kind); }} />}
     </aside>
   );
 }

@@ -335,21 +335,20 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
   const initialWorkspaceTab = (location.state as { workspaceTab?: string; openContacts?: boolean } | null)?.workspaceTab ?? ((location.state as { openContacts?: boolean } | null)?.openContacts ? "contacts" : undefined);
   const isMobile = useIsMobile();
   const [chatListTab, setChatListTab] = useState<ChatListTab>("all");
-  const [homeOpen, setHomeOpen] = useState(!initialWorkspaceTab);
+  const [homeOpen, setHomeOpen] = useState(initialWorkspaceTab === "home" || (!isMobile && !initialWorkspaceTab));
   const [callsOpen, setCallsOpen] = useState(initialWorkspaceTab === "calls");
   const [contactsPageOpen, setContactsPageOpen] = useState(initialWorkspaceTab === "contacts");
   const [profilePageOpen, setProfilePageOpen] = useState(initialWorkspaceTab === "profile");
-  const [detailsOpen, setDetailsOpen] = useState(true);
-  const [mobileDetailsOpen, setMobileDetailsOpen] = useState(false);
+  const [conversationDetailsOpen, setConversationDetailsOpen] = useState(false);
   useEffect(() => {
-    if (!mobileDetailsOpen) return;
-    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") setMobileDetailsOpen(false); };
+    if (!conversationDetailsOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") setConversationDetailsOpen(false); };
     document.addEventListener("keydown", closeOnEscape);
     return () => document.removeEventListener("keydown", closeOnEscape);
-  }, [mobileDetailsOpen]);
+  }, [conversationDetailsOpen]);
   const lastConversation = useRef<ChatTarget | null>(null);
   useEffect(() => {
-    setMobileDetailsOpen(false);
+    setConversationDetailsOpen(false);
     if (active) { lastConversation.current = active; setHomeOpen(false); setCallsOpen(false); }
   }, [active]);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -2184,24 +2183,22 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
       return s + Math.max(0, ch.unreadCount ?? 0);
     }, 0);
 
-  const mobileTab: BottomNavTab = profilePageOpen ? "profile" : contactsPageOpen ? "contacts" : callsOpen ? "calls" : homeOpen ? "home" : "chats";
+  const mobileTab: BottomNavTab = contactsPageOpen ? "contacts" : callsOpen ? "calls" : "chats";
   const showMobileChat = isMobile && mobileTab === "chats" && active !== null;
   const showDesktopContacts = !isMobile && contactsModalOpen;
-  const openWorkspacePage = (page: "home" | "calls" | "contacts" | "profile") => {
+  const openWorkspacePage = (page: "calls" | "contacts") => {
     onSelect(null);
-    setHomeOpen(page === "home");
+    setHomeOpen(false);
     setCallsOpen(page === "calls");
     setContactsPageOpen(page === "contacts");
-    setProfilePageOpen(page === "profile");
+    setProfilePageOpen(false);
     setContactsModalOpen(false);
     setContactsModalClosing(false);
   };
   const shellClass = [
     "app-shell",
     "app-shell--chat",
-    active && !homeOpen && !callsOpen && detailsOpen && "app-shell--with-detail",
     (homeOpen || callsOpen || contactsPageOpen || profilePageOpen) && !isMobile && "app-shell--home",
-    !active && "app-shell--no-detail",
     showMobileChat && "app-shell--show-chat",
     isMobile && mobileTab !== "chats" && "app-shell--mobile-page",
   ]
@@ -2280,8 +2277,8 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
             />
           ) : isValidElement(children)
             ? cloneElement(children, {
-                onToggleDetails: () => isMobile ? setMobileDetailsOpen(open => !open) : setDetailsOpen(open => !open),
-                onOpenDetails: () => isMobile || active?.type === "channel" ? setMobileDetailsOpen(true) : setDetailsOpen(true),
+                onToggleDetails: () => setConversationDetailsOpen(open => !open),
+                onOpenDetails: () => setConversationDetailsOpen(true),
                 notificationsMuted: active ? isConversationMuted(active.type, active.type === "dm" ? active.contact._id : active.channel._id) : false,
                 onToggleNotifications: () => { if (active) void handleToggleMute({ kind: active.type, id: active.type === "dm" ? active.contact._id : active.channel._id }); },
                 onOpenChannelSettings: (channel: Channel) => {
@@ -2297,27 +2294,27 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
             : children}
         </div>
 
-        {active && !homeOpen && !callsOpen && detailsOpen && !isMobile && <div className="app-shell__detail"><ConversationDetails target={active} onClose={() => setDetailsOpen(false)} onOpenChannelInfo={() => setMobileDetailsOpen(true)} /></div>}
         {isMobile && !showMobileChat && (
           <BottomNav
             active={mobileTab}
             totalUnread={totalUnread}
             receivedFriendRequests={receivedFriendRequests}
-            onHome={() => openWorkspacePage("home")}
             onChats={openChats}
             onCalls={() => openWorkspacePage("calls")}
             onContacts={() => openWorkspacePage("contacts")}
-            onProfile={() => openWorkspacePage("profile")}
             onSettings={() => navigate(settingsPath())}
           />
         )}
       </div>
 
-      {(isMobile || active?.type === "channel") && mobileDetailsOpen && active && mobileTab === "chats" && (
-        <div className="klovy-backdrop" onClick={event => { if (event.target === event.currentTarget) setMobileDetailsOpen(false); }}>
-          <div className="klovy-shell mobile-conversation-details" role="dialog" aria-modal="true" aria-label={t("chat.details.quickInfo")}>
-            <button type="button" className="mobile-conversation-details__close" onClick={() => setMobileDetailsOpen(false)} aria-label={t("common.close")}><span aria-hidden="true">×</span></button>
-            <ConversationDetails target={active} />
+      {conversationDetailsOpen && active && !homeOpen && !callsOpen && mobileTab === "chats" && (
+        <div className="klovy-backdrop klovy-backdrop--conversation-details" onClick={event => { if (event.target === event.currentTarget) setConversationDetailsOpen(false); }}>
+          <div className="klovy-shell conversation-details-modal" role="dialog" aria-modal="true" aria-label={t("chat.details.quickInfo")}>
+            <header className="conversation-details-modal__header">
+              <strong>{t("chat.details.quickInfo")}</strong>
+              <button type="button" autoFocus onClick={() => setConversationDetailsOpen(false)} aria-label={t("common.close")}>×</button>
+            </header>
+            <ConversationDetails target={active} onOpenChannelInfo={() => setConversationDetailsOpen(true)} />
           </div>
         </div>
       )}

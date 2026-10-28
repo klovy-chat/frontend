@@ -807,6 +807,7 @@ export function Panel({
       <MyProfile variant="sheet" isOpen={quickProfileOpen} onClose={() => setQuickProfileOpen(false)} onOpenSettings={() => onSectionChange("profil")} />
 
       <nav className="settings-mobile-menu" aria-label={t("settings.nav.account")}>
+        <div className="settings-mobile-menu__group">
         <button
           type="button"
           className="settings-mobile-menu__row"
@@ -823,7 +824,9 @@ export function Panel({
             <polyline points="9 18 15 12 9 6" />
           </svg>
         </button>
+        </div>
 
+        <div className="settings-mobile-menu__group">
         {(
           [
             {
@@ -925,7 +928,9 @@ export function Panel({
             </svg>
           </button>
         ))}
+        </div>
 
+        <div className="settings-mobile-menu__group settings-mobile-menu__group--danger">
         <button type="button" className="settings-mobile-menu__row settings-mobile-menu__row--danger" onClick={() => void handleLogout()}>
           <span className="settings-mobile-menu__icon">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -936,6 +941,7 @@ export function Panel({
           </span>
           <span className="settings-mobile-menu__label">{t("settings.nav.logout")}</span>
         </button>
+        </div>
       </nav>
     </div>
   );

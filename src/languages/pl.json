@@ -669,7 +669,7 @@
       "about": "O osobie",
       "description": "Opis",
       "quickInfo": "Szybkie informacje",
-      "hidePanel": "Ukryj panel informacji",
+      "profileFriendsOnly": "Profil tego członka jest dostępny wyłącznie dla znajomych. Dodaj go do znajomych, aby wyświetlić jego profil.",
       "showMoreMembers": "Pokaż więcej członków",
       "type": "Typ",
       "direct": "Wiadomość prywatna",

@@ -19,6 +19,7 @@ import {
   type CaptchaHandle,
 } from "../components/auth/Captcha";
 import { AuthLayout } from "../components/auth/AuthLayout";
+import { AnimatedAuthTitle } from "../components/auth/AnimatedAuthTitle";
 import {
   normalizeUsernameInput,
   sanitizeUsernameInput,
@@ -195,9 +196,7 @@ export function Signup() {
             noValidate
           >
             <header className="al-register-head">
-              <h1 className="al-register-title">
-                {t("auth.signup.title")}
-              </h1>
+              <AnimatedAuthTitle className="al-register-title" text={t("auth.signup.title")} />
               <p className="al-register-subtitle">
                 {t("auth.signup.subtitle")}
               </p>

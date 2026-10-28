@@ -2421,6 +2421,7 @@ export function ChatWindow({
           onClose={() => setProfileOpen(false)}
           user={target.contact}
           isFriend={isFriend}
+          friendshipLoading={friendshipLoading}
           isBlockedByMe={isBlockedByMe}
           onToggleBlock={
             isFriend
