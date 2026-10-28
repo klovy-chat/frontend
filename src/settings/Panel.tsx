@@ -1668,12 +1668,6 @@ export function Panel({
             </div>
           )}
 
-          {isMobile && section === "konto" && mobileKontoView === "hub" && (
-            <div className="settings-mobile-bar settings-mobile-bar--hub">
-              <h1 className="settings-mobile-bar__title">{t("nav.items.settings")}</h1>
-            </div>
-          )}
-
           {isMobile && section === "konto" && mobileKontoView === "account" && (
             <div className="settings-mobile-bar">
               <button

@@ -1,4 +1,5 @@
 .channel-dialog {
+  --font-sans: var(--font-display);
   font-family: var(--font-sans);
   font-size: 13px;
   line-height: 1.5;

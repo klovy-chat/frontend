@@ -1,4 +1,4 @@
-.contacts-directory { padding: 22px 24px 28px; height: 100%; overflow-y: auto; color: var(--text); }
+.contacts-directory { --font-sans: var(--font-display); font-family: var(--font-sans); padding: 22px 24px 28px; height: 100%; overflow-y: auto; color: var(--text); }
 .contacts-directory header { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 12px; }
 .contacts-directory h1 { font-size: 22px; font-weight: 700; margin: 0 0 6px; }
 .contacts-directory p { font-size: 13px; color: var(--text-muted); margin: 0; }

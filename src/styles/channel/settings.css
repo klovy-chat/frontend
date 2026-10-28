@@ -436,7 +436,7 @@
   padding: 6px 10px;
   font-size: 0.68rem;
 }
-.cs-modal { border-radius: 16px; background: var(--bg-panel); font-family: var(--font-sans); }
+.cs-modal { --font-sans: var(--font-display); border-radius: 16px; background: var(--bg-panel); font-family: var(--font-sans); }
 .cs-header { display: flex; align-items: center; gap: 12px; padding: 18px 20px; border-bottom: 1px solid var(--border); background: var(--bg-panel); flex-shrink: 0; }
 .cs-header h2 { font-family: var(--font-display) !important; font-size: 18px !important; line-height: 24px; }
 .cs-header p { font-family: inherit !important; font-size: 12px !important; }
@@ -460,21 +460,120 @@
 @media (max-width: 768px) {
   .klovy-backdrop:has(.cs-modal) {
     padding: 0;
-    align-items: flex-end;
+    align-items: stretch;
+    justify-content: center;
   }
   .klovy-backdrop:has(.cs-modal) .cs-modal {
+    display: flex;
+    flex-direction: column;
     width: 100%;
     max-width: 100%;
-    height: calc(94dvh - var(--safe-top));
+    height: 100dvh;
     min-height: 0;
-    max-height: calc(94dvh - var(--safe-top));
-    padding-bottom: var(--safe-bottom);
-    border-radius: 18px 18px 0 0;
+    max-height: 100dvh;
+    padding-bottom: 0;
+    border-radius: 0 !important;
   }
-  .cs-header { padding: 14px 16px; gap: 10px; }
+  .cs-content {
+    display: contents;
+  }
+  .cs-header {
+    order: 1;
+    position: relative;
+    flex-direction: column;
+    gap: 12px;
+    padding: calc(28px + var(--safe-top)) 20px 20px;
+    text-align: center;
+  }
+  .cs-header > [role="button"] {
+    width: 96px !important;
+    height: 96px !important;
+    margin: 0 auto !important;
+  }
+  .cs-header > [role="button"] > * {
+    width: 96px !important;
+    height: 96px !important;
+  }
+  .cs-header > div:not([role="button"]) {
+    width: 100%;
+    flex: none !important;
+  }
+  .cs-header > button {
+    position: absolute !important;
+    top: calc(12px + var(--safe-top));
+    right: 12px;
+  }
+  .cs-nav {
+    order: 2;
+    flex: 0 0 auto;
+    flex-direction: row;
+    gap: 6px;
+    min-width: 0;
+    padding: 8px 12px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+    scrollbar-width: none;
+  }
+  .cs-nav::-webkit-scrollbar {
+    display: none;
+  }
+  .cs-nav-item {
+    flex: 0 0 auto;
+    justify-content: center;
+    min-height: 44px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .cs-content-scroll {
+    order: 3;
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 20px 16px max(20px, var(--safe-bottom));
+  }
+  .cs-general-intro {
+    margin: 0 4px 16px;
+  }
+  .cs-toolbar-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: var(--bg-card);
+  }
+  .cs-toolbar-row > .cs-toolbar-button {
+    flex: 0 0 auto;
+    justify-content: flex-start;
+    min-height: 60px;
+    padding: 12px 16px;
+    border: 0;
+    border-bottom: 1px solid var(--border);
+    border-radius: 0;
+    background: transparent;
+    font: 500 15px var(--font-sans);
+    text-align: left;
+  }
+  .cs-toolbar-row > .cs-toolbar-button:last-child {
+    border-bottom: 0;
+  }
+  .cs-toolbar-row > .cs-toolbar-button--danger {
+    color: var(--danger);
+    background: transparent;
+  }
+  .cs-content-scroll > .cs-list-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 58px;
+    margin-top: 16px;
+    border-radius: 16px;
+    font-size: 15px;
+  }
   .cs-header h2 { font-size: 16px !important; }
-  .cs-header > button { width: 44px !important; height: 44px !important; flex: 0 0 44px; }
-  .cs-content-scroll { min-height: 0; padding: 16px; }
   .cs-select { font-size: 16px; min-height: 44px; }
   .cs-nav-item, .cs-lock-btn, .cs-show-more, .conversation-details__show-more { min-height: 44px; }
   .cs-footer { padding: 12px 16px max(14px, var(--safe-bottom)); }

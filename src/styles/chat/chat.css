@@ -153,6 +153,11 @@
   background: var(--bg-shell);
 }
 
+.chat-window--channel {
+  --font-sans: var(--font-display);
+  font-family: var(--font-sans);
+}
+
 .chat-window.chat-window--empty {
   align-items: center;
   justify-content: center;

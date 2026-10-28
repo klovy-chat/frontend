@@ -365,10 +365,6 @@
     background: var(--bg-settings-nav, var(--bg-panel));
   }
 
-  .settings-mobile-bar--hub {
-    padding-left: 16px;
-  }
-
   .settings-mobile-bar__back {
     display: flex;
     align-items: center;
@@ -426,7 +422,7 @@
     height: 96px;
     border-radius: 50%;
     font-size: 2rem;
-    box-shadow: 0 8px 28px color-mix(in srgb, var(--accent) 20%, transparent);
+    box-shadow: none;
   }
 
   .settings-mobile-hub__hero .as-account-hero-copy strong {

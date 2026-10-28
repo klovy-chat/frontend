@@ -189,6 +189,17 @@
   position: relative;
 }
 
+.chat-list-item--channel {
+  --font-sans: var(--font-display);
+  font-family: var(--font-sans);
+}
+
+.chat-list-item--channel .chat-list-item__name,
+.chat-list-item--channel .chat-list-item__preview,
+.chat-list-item--channel .chat-list-item__time {
+  font-family: var(--font-sans);
+}
+
 .chat-list-item:hover {
   background: var(--bg-hover);
 }

@@ -20,7 +20,7 @@ export function AnimatedAuthTitle({ text, className }: AnimatedAuthTitleProps) {
       index += 1;
       setVisibleText(text.slice(0, index));
       if (index >= text.length) window.clearInterval(timer);
-    }, 40);
+    }, 65);
 
     return () => window.clearInterval(timer);
   }, [text]);

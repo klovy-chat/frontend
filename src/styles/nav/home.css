@@ -28,6 +28,8 @@
 .app-shell--chat .nav-rail__item.active .nav-rail__icon::after { display: none; }
 
 .workspace-home {
+  --font-sans: var(--font-display);
+  font-family: var(--font-sans);
   width: 100%;
   height: 100%;
   min-height: 0;
