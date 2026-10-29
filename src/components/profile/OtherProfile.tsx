@@ -29,6 +29,7 @@ interface OtherProfileProps {
   isFriend: boolean;
 
   friendshipLoading?: boolean;
+  conversationMuted?: boolean;
   isBlockedByMe?: boolean;
   onRemove?: () => void;
   onToggleBlock?: () => void | Promise<void>;
@@ -44,6 +45,7 @@ export function OtherProfile({
   user,
   isFriend,
   friendshipLoading = false,
+  conversationMuted,
   isBlockedByMe = false,
   onRemove,
   onToggleBlock,
@@ -226,6 +228,35 @@ export function OtherProfile({
               <span className="up-section-label">{t("modals.otherUserProfile.about")}</span>
               <p className="up-bio-text">{renderFormattedText(bioText)}</p>
             </section>
+          ) : null}
+
+          {conversationMuted !== undefined ? (
+            <dl className="up-conversation-facts">
+              <div>
+                <dt>{t("chat.details.type")}</dt>
+                <dd>{t("chat.details.direct")}</dd>
+              </div>
+              {displayedUser.username ? (
+                <div>
+                  <dt>{t("chat.details.username")}</dt>
+                  <dd>@{displayedUser.username}</dd>
+                </div>
+              ) : null}
+              <div>
+                <dt>{t("chat.details.lastActivity", { defaultValue: "Last activity" })}</dt>
+                <dd>{formatLastSeen(displayedUser.lastSeen, {
+                  isOnline: displayedUser.isOnline,
+                  hidden: displayedUser.isPresenceHidden,
+                  longAgo: displayedUser.isLastSeenLongAgo,
+                })}</dd>
+              </div>
+              <div>
+                <dt>{t("chat.details.notifications", { defaultValue: "Notifications" })}</dt>
+                <dd>{t(conversationMuted ? "chat.notifications.mute" : "chat.details.enabled", {
+                  defaultValue: conversationMuted ? "Muted" : "Enabled",
+                })}</dd>
+              </div>
+            </dl>
           ) : null}
 
           <div className="up-divider" />

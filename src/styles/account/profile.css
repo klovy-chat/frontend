@@ -295,6 +295,37 @@
   margin-top: 2px;
 }
 
+.up-conversation-facts {
+  display: grid;
+  gap: 12px;
+  margin: 0 0 18px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-card);
+}
+
+.up-conversation-facts > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.up-conversation-facts dt {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.up-conversation-facts dd {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 500;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
 .up-edit-profile-btn {
   width: 100%;
   margin-bottom: 16px;
@@ -408,39 +439,11 @@
 }
 
 
-.contact-sheet-backdrop { position: fixed; inset: 0; z-index: 1600; background: rgba(0,0,0,.55); }
-.contact-sheet { position: absolute; right: 0; top: 0; bottom: 0; width: min(380px, 100%); overflow-y: auto; background: var(--bg-panel); color: var(--text); border-left: 1px solid var(--border); font-family: var(--font-sans); }
-.contact-sheet header { height: 65px; padding: 0 18px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); font-size: 16px; }
-.contact-sheet header button { color: var(--text-muted); padding: 8px; }
-.contact-sheet__identity { padding: 28px 20px 24px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
-.contact-sheet__identity h2 { margin: 10px 0 0; font-size: 20px; font-weight: 700; }
-.contact-sheet__identity span, .contact-sheet__identity p { color: var(--text-muted); font-size: 13px; }
-.contact-sheet__identity p { margin: 10px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
-.contact-sheet__identity .contact-sheet__online { color: var(--success); }
-.contact-sheet__online::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: currentColor; margin-right: 6px; }
-.contact-sheet__actions { padding: 0 20px 24px; display: flex; flex-direction: column; gap: 8px; }
-.contact-sheet__actions button { min-height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 6px; color: var(--text); background: var(--accent-dim); font: 600 14px var(--font-sans); }
-.contact-sheet__actions .contact-sheet__write { background: linear-gradient(90deg, #957cfd, var(--accent)); color: white; }
-.contact-sheet__actions button:disabled { opacity: .4; }
-.contact-sheet button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.contact-sheet__identity h2 { font-family: var(--font-display); }
-.contact-sheet,
-.contact-sheet button,
-.contact-sheet__actions button { font-family: var(--font-sans); }
-.contact-sheet button:not(:disabled), .contact-sheet button:not(:disabled) * { cursor: pointer; }
-.contact-sheet__identity { gap: 0; }
-.contact-sheet__identity h2 { margin: 18px 0 0; line-height: 24px; }
-.contact-sheet__identity h2 + span { margin: 0; line-height: 18px; }
-.contact-sheet__identity h2 + span + span { margin-top: 10px; }
-.contact-sheet__identity p { margin: 0; }
-.contact-sheet__banner { height: 128px; flex-shrink: 0; background-size: cover; background-position: center; }
-.contact-sheet .contact-sheet__identity--banner { margin-top: -48px; padding-top: 0; position: relative; }
-.contact-sheet__identity--banner > .avatar { border: 4px solid var(--bg-panel); box-sizing: content-box; }
-.contact-sheet__identity h2 { max-width: 100%; overflow-wrap: anywhere; }
-.contact-sheet__facts { margin: 0 20px 24px; padding-top: 18px; border-top: 1px solid var(--border); }
-.contact-sheet__facts h3 { margin: 0 0 16px; font-size: 11px; color: var(--text-muted); font-weight: 600; }
-.contact-sheet__facts > span { color: var(--text-muted); font-size: 12px; }
-.contact-sheet__facts p { margin: 4px 0 0; font-size: 13px; }
+.al-auth-form-wrap > .al-card.profile-setup {
+  width: min(448px, 100%);
+  max-width: 448px;
+  padding: 30px;
+}
 .profile-setup .al-title { margin-bottom: 22px; }
 .profile-setup .al-form { gap: 14px; }
 .profile-setup .al-field { gap: 6px; }
@@ -451,9 +454,7 @@
 .profile-setup .al-btn-submit { margin-top: 4px; }
 
 @media (max-width: 768px) {
-  .contact-sheet { width: 100%; border-left: 0; padding-top: var(--safe-top); padding-bottom: var(--safe-bottom); }
-  .contact-sheet header { min-height: 56px; }
-  .contact-sheet__identity { padding: 20px 20px 16px; }
-  .contact-sheet__actions { padding: 0 20px 24px; }
-  .contact-sheet header button { min-width: 44px; min-height: 44px; }
+  .al-auth-form-wrap > .al-card.profile-setup {
+    padding: 24px 20px;
+  }
 }

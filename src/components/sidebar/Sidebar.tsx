@@ -2277,7 +2277,6 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
             />
           ) : isValidElement(children)
             ? cloneElement(children, {
-                onToggleDetails: () => setConversationDetailsOpen(open => !open),
                 onOpenDetails: () => setConversationDetailsOpen(true),
                 notificationsMuted: active ? isConversationMuted(active.type, active.type === "dm" ? active.contact._id : active.channel._id) : false,
                 onToggleNotifications: () => { if (active) void handleToggleMute({ kind: active.type, id: active.type === "dm" ? active.contact._id : active.channel._id }); },
@@ -2307,11 +2306,11 @@ export function Sidebar({ active, onSelect, children }: SidebarProps) {
         )}
       </div>
 
-      {conversationDetailsOpen && active && !homeOpen && !callsOpen && mobileTab === "chats" && (
+      {conversationDetailsOpen && active?.type === "channel" && !homeOpen && !callsOpen && mobileTab === "chats" && (
         <div className="klovy-backdrop klovy-backdrop--conversation-details" onClick={event => { if (event.target === event.currentTarget) setConversationDetailsOpen(false); }}>
-          <div className="klovy-shell conversation-details-modal" role="dialog" aria-modal="true" aria-label={t("chat.details.quickInfo")}>
+          <div className="klovy-shell conversation-details-modal" role="dialog" aria-modal="true" aria-label={active.channel.name}>
             <header className="conversation-details-modal__header">
-              <strong>{t("chat.details.quickInfo")}</strong>
+              <strong>{active.channel.name}</strong>
               <button type="button" autoFocus onClick={() => setConversationDetailsOpen(false)} aria-label={t("common.close")}>×</button>
             </header>
             <ConversationDetails target={active} onOpenChannelInfo={() => setConversationDetailsOpen(true)} />

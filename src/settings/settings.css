@@ -799,9 +799,6 @@
   .settings-page .as-lang-row { min-height: 56px; gap: 10px; padding: 12px; }
   .settings-page .as-lang-legend-row { align-items: flex-start; }
 }
-.settings-mobile-hub__profile-button { padding: 0; border: 0; background-color: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
-.settings-mobile-hub__profile-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
-
 .presence-settings { max-width: 760px; }
 .presence-settings__card { margin: 18px 0 !important; }
 .presence-settings__card h3 { margin: 0 0 12px; font-size: 14px; font-weight: 600; }

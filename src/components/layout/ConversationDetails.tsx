@@ -173,7 +173,7 @@ export function ConversationDetails({ target, onOpenChannelInfo }: ConversationD
     <aside className={`conversation-details${!isDm ? " conversation-details--channel" : ""}`}>
       {isDm && <div className="conversation-details__cover" style={bannerStyle} aria-hidden="true" />}
       <div className="conversation-details__identity">
-        <button type="button" className="conversation-details__avatar-button" disabled={!isDm && !onOpenChannelInfo} onClick={openIdentity} aria-label={t(isDm ? "chat.window.contactProfile" : "chat.details.quickInfo")}>
+        <button type="button" className="conversation-details__avatar-button" disabled={!isDm && !onOpenChannelInfo} onClick={openIdentity} aria-label={t(isDm ? "chat.window.contactProfile" : "modals.channelSettings.title")}>
         <Avatar
           displayName={isDm ? target.contact.displayName : target.channel.name}
           username={isDm ? target.contact.username : undefined}
@@ -197,28 +197,19 @@ export function ConversationDetails({ target, onOpenChannelInfo }: ConversationD
         <p>{description}</p>
       </div>}
 
-      <div className="conversation-details__section">
-        <h3>{t("chat.details.quickInfo")}</h3>
+      {!isDm && <div className="conversation-details__section">
         <div className="conversation-details__facts">
           <div>
             <span>{t("chat.details.type")}</span>
-            <strong>{isDm ? t("chat.details.direct") : t("chat.details.channel")}</strong>
+            <strong>{t("chat.details.channel")}</strong>
           </div>
-          {isDm && <div><span>{t("chat.details.lastActivity", { defaultValue: "Last activity" })}</span><strong>{formatLastSeen(presence?.lastSeen ?? target.contact.lastSeen, {
-            isOnline: !!online,
-            hidden: presence?.isPresenceHidden ?? target.contact.isPresenceHidden,
-            longAgo: presence?.isLastSeenLongAgo ?? target.contact.isLastSeenLongAgo,
-          })}</strong></div>}
           <div><span>{t("chat.details.notifications", { defaultValue: "Notifications" })}</span><strong>{t(muted ? "chat.notifications.mute" : "chat.details.enabled", { defaultValue: muted ? "Muted" : "Enabled" })}</strong></div>
-          {isDm && target.contact.username && <div><span>{t("chat.details.username", { defaultValue: "User" })}</span><strong>@{target.contact.username}</strong></div>}
-          {!isDm && (
-            <div>
-              <span>{t("chat.details.admin")}</span>
-              <strong>{userLabel(target.channel.admin)}</strong>
-            </div>
-          )}
+          <div>
+            <span>{t("chat.details.admin")}</span>
+            <strong>{userLabel(target.channel.admin)}</strong>
+          </div>
         </div>
-      </div>
+      </div>}
       {!isDm && <div className="conversation-details__section">
         <h3>{t("modals.channelSettings.membersTitle")}</h3>
         {membersLoading && <LoadingSkeleton label={t("common.loading")} />}
@@ -230,7 +221,7 @@ export function ConversationDetails({ target, onOpenChannelInfo }: ConversationD
       </div>}
       <ConversationMedia key={mutedKey} target={target} />
       {!isDm && selectedMember && <OtherProfile isOpen={true} onClose={() => setSelectedMember(null)} user={selectedMember} isFriend={false} />}
-      {isDm && <OtherProfile isOpen={profileOpen} onClose={() => setProfileOpen(false)} user={target.contact} isFriend={dmFriendship?.contactId === target.contact._id && dmFriendship.isFriend} friendshipLoading={dmFriendshipLoading || dmFriendship?.contactId !== target.contact._id} canCall={callState === "idle"} onCall={kind => { if (callState === "idle") startCall({ _id: target.contact._id, username: target.contact.username, displayName: target.contact.displayName, image: target.contact.image, color: target.contact.color }, kind); }} />}
+      {isDm && <OtherProfile isOpen={profileOpen} onClose={() => setProfileOpen(false)} user={target.contact} isFriend={dmFriendship?.contactId === target.contact._id && dmFriendship.isFriend} friendshipLoading={dmFriendshipLoading || dmFriendship?.contactId !== target.contact._id} conversationMuted={muted} canCall={callState === "idle"} onCall={kind => { if (callState === "idle") startCall({ _id: target.contact._id, username: target.contact.username, displayName: target.contact.displayName, image: target.contact.image, color: target.contact.color }, kind); }} />}
     </aside>
   );
 }

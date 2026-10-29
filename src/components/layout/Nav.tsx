@@ -53,7 +53,7 @@ export function Nav({
   const { theme } = useTheme();
 
   const [now, setNow] = useState(() => new Date());
-  const [quickProfileOpen, setQuickProfileOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   useEffect(() => {
     const id = window.setInterval(() => setNow(new Date()), 60000);
@@ -144,7 +144,7 @@ export function Nav({
             className="nav-rail__profile-avatar-btn"
             title={t("nav.items.viewProfile")}
             aria-label={t("nav.items.viewProfile")}
-            onClick={() => setQuickProfileOpen(true)}
+            onClick={() => setProfileOpen(true)}
           >
             <Avatar
               displayName={user?.displayName}
@@ -153,7 +153,7 @@ export function Nav({
               color={user?.color}
             />
           </button>
-          <button type="button" className="nav-rail__profile-status-btn" onClick={() => setQuickProfileOpen(true)} aria-label={t("nav.items.viewProfile")}>
+          <button type="button" className="nav-rail__profile-status-btn" onClick={() => setProfileOpen(true)} aria-label={t("nav.items.viewProfile")}>
             <div className="nav-rail__profile-info">
               <div className="nav-rail__profile-name">{userLabel(user)}</div>
               <div className="nav-rail__profile-status">{t("user.presence.online")}</div>
@@ -164,6 +164,6 @@ export function Nav({
           </button>
         </div>
       </div>
-    </nav><MyProfile variant="sheet" isOpen={quickProfileOpen} onClose={() => setQuickProfileOpen(false)} onOpenSettings={onOpenProfile} /></>
+    </nav><MyProfile isOpen={profileOpen} onClose={() => setProfileOpen(false)} onOpenSettings={onOpenProfile} /></>
   );
 }

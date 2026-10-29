@@ -668,7 +668,6 @@
       "members": "members",
       "about": "About",
       "description": "Description",
-      "quickInfo": "Quick info",
       "profileFriendsOnly": "This member's profile is available to friends only. Add them as a friend to view their profile.",
       "showMoreMembers": "Show more members",
       "type": "Type",

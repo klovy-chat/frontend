@@ -218,7 +218,6 @@ function toCallPeer(contact: Contact): CallPeer {
 }
 
 interface ChatWindowProps {
-  onToggleDetails?: () => void;
   onOpenDetails?: () => void;
   onToggleNotifications?: () => void;
   notificationsMuted?: boolean;
@@ -275,7 +274,6 @@ export function ChatWindow({
   showBack = false,
   onOpenChannelSettings,
   onRemoveContact,
-  onToggleDetails,
   onOpenDetails,
   onToggleNotifications,
   notificationsMuted = false,
@@ -2058,7 +2056,7 @@ export function ChatWindow({
           </button>
         )}
 
-        <button type="button" className="chat-header__avatar-button" onClick={() => target.type === "channel" ? onOpenDetails?.() : setProfileOpen(true)} aria-label={t(target.type === "channel" ? "chat.details.quickInfo" : "chat.window.contactProfile")}><Avatar {...avatarProps} size={40} /></button>
+        <button type="button" className="chat-header__avatar-button" onClick={() => target.type === "channel" ? onOpenDetails?.() : setProfileOpen(true)} aria-label={t(target.type === "channel" ? "modals.channelSettings.title" : "chat.window.contactProfile")}><Avatar {...avatarProps} size={40} /></button>
         <button type="button" className="chat-header__info" onClick={() => target.type === "channel" ? onOpenDetails?.() : setProfileOpen(true)}>
           <h3 className="chat-header__name" style={{ fontFamily: "var(--font-display)" }}>{title}</h3>
           {target.type === "dm" ? (
@@ -2079,7 +2077,6 @@ export function ChatWindow({
 
           <div className="chat-header__toolbar">
             <ActionMenu iconOnly label={t("chat.details.more", { defaultValue: "More" })} items={[
-              { key: "info", label: t("chat.details.quickInfo"), icon: null, onClick: () => onToggleDetails?.() },
               { key: "mute", label: t(notificationsMuted ? "chat.notifications.unmute" : "chat.notifications.mute"), icon: null, onClick: () => onToggleNotifications?.() },
               { key: "search", label: t("chat.tools.search"), icon: null, onClick: () => setToolsPanel("search") },
               ...(onClose ? [{ key: "close", label: t("chat.window.closeChat"), icon: null, onClick: onClose }] : []),
@@ -2422,6 +2419,7 @@ export function ChatWindow({
           user={target.contact}
           isFriend={isFriend}
           friendshipLoading={friendshipLoading}
+          conversationMuted={notificationsMuted}
           isBlockedByMe={isBlockedByMe}
           onToggleBlock={
             isFriend
