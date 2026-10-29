@@ -31,13 +31,36 @@
 
 .up-card {
   position: relative;
-  width: min(440px, 92vw);
+  width: min(480px, 92vw);
+  max-height: min(90dvh, 760px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
   border-radius: 16px;
-  overflow: visible;
   background: var(--bg-panel);
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
   animation: cardIn 0.25s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.up-card::-webkit-scrollbar {
+  width: 8px;
+}
+
+.up-card::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.up-card::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: var(--border) padding-box;
+}
+
+.up-card::-webkit-scrollbar-thumb:hover {
+  background: var(--text-dim) padding-box;
 }
 
 .up-card.closing {
@@ -417,12 +440,12 @@
   }
 
   .up-card {
-    width: min(440px, calc(100vw - 32px));
+    width: min(480px, calc(100vw - 32px));
     max-width: calc(100vw - 32px);
-    max-height: min(88dvh, 720px);
+    max-height: calc(100dvh - var(--safe-top) - var(--safe-bottom) - 32px);
     border-radius: 16px;
     animation: cardIn 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
-    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .up-card.closing {
